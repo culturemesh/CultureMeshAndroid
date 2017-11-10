@@ -3,6 +3,7 @@ package org.codethechange.culturemesh;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -69,8 +70,9 @@ public class FindNetworkActivity extends AppCompatActivity {
         mSearchManager = (SearchManager)
                 getSystemService(Context.SEARCH_SERVICE);
 
-
-
+        // Give the TabLayout the ViewPager
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.find_network_tab_layout);
+        tabLayout.setupWithViewPager(mViewPager);
     }
 
 
@@ -97,9 +99,10 @@ public class FindNetworkActivity extends AppCompatActivity {
     }
 
     /**
-     * A placeholder fragment containing a simple view.
+     * The fragment for finding the from location.
      */
-    public static class FindLocationFragment extends Fragment implements SearchView.OnQueryTextListener {
+    public static class FindLocationFragment extends Fragment implements
+            SearchView.OnQueryTextListener {
 
 
         private ListView searchList;
@@ -167,6 +170,50 @@ public class FindNetworkActivity extends AppCompatActivity {
         }
     }
 
+
+    /**
+     * The fragment for finding language networks.
+     */
+    public static class FindLanguageFragment extends Fragment {
+
+
+        private ListView searchList;
+        private ArrayAdapter<String> adapter;
+
+        /**
+         * The fragment argument representing the section number for this
+         * fragment.
+         */
+        private static final String ARG_SECTION_NUMBER = "section_number";
+
+        public FindLanguageFragment() {
+        }
+
+        /**
+         * Returns a new instance of this fragment for the given section
+         * number.
+         */
+        public static FindLanguageFragment newInstance(int sectionNumber) {
+            FindLanguageFragment fragment = new FindLanguageFragment();
+            Bundle args = new Bundle();
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            // Get the intent, verify the action and get the query
+            View rootView = inflater.inflate(R.layout.fragment_find_language, container,
+                    false);
+            return rootView;
+
+        }
+
+    }
+
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -181,24 +228,26 @@ public class FindNetworkActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return FindLocationFragment.newInstance(position + 1);
+            switch (position) {
+                case 0:
+                    return FindLocationFragment.newInstance(0);
+            }
+            return FindLanguageFragment.newInstance(1);
         }
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
-            return 3;
+            // Show 2 total pages.
+            return 2;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "SECTION 1";
+                    return getResources().getString(R.string.tab_item_from);
                 case 1:
-                    return "SECTION 2";
-                case 2:
-                    return "SECTION 3";
+                    return getResources().getString(R.string.tab_item_speaks);
             }
             return null;
         }

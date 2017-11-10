@@ -27,6 +27,7 @@
         </android.support.v7.widget.Toolbar>
 
         <android.support.design.widget.TabLayout
+            android:id="@+id/find_network_tab_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -60,8 +61,30 @@
         android:layout_height="70dp"
         android:layout_gravity="bottom"
         android:background="@color/colorPrimary"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         app:layout_anchorGravity="bottom"
-        tools:layout_editor_absoluteY="397dp"></LinearLayout>
+        tools:layout_editor_absoluteY="397dp">
+
+        <TextView
+            android:id="@+id/near_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="15dp"
+            android:layout_weight="1"
+            android:text="@string/near_location_text"
+            android:textSize="30sp"
+            android:theme="@android:style/TextAppearance.DeviceDefault.Inverse" />
+
+        <Button
+            android:id="@+id/near_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:text="Stanford" />
+    </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

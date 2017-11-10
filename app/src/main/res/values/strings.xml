@@ -10,4 +10,5 @@
     <string name="tab_item_from">From</string>
     <string name="tab_item_speaks">Speaks</string>
     <string name="from_location_search_hint">Search From Locations</string>
+    <string name="near_location_text">Near:</string>
 </resources>
