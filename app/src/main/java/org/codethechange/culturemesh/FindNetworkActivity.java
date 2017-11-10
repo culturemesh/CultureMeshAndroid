@@ -1,7 +1,8 @@
 package org.codethechange.culturemesh;
 
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -10,15 +11,26 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.Toast;
 
-import android.widget.TextView;
+import java.util.ArrayList;
+
+import static android.view.View.GONE;
+
 
 public class FindNetworkActivity extends AppCompatActivity {
+
+    //TODO: Replace dummy data with real data
+    private static ArrayList<String> dummy = new ArrayList<String>();
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -35,6 +47,11 @@ public class FindNetworkActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
 
+    /*
+     * The {@link SearchManager} that will associate the SearchView with our search config.
+     */
+    private static SearchManager mSearchManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,16 +66,10 @@ public class FindNetworkActivity extends AppCompatActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        mSearchManager = (SearchManager)
+                getSystemService(Context.SEARCH_SERVICE);
 
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
     }
 
@@ -88,22 +99,27 @@ public class FindNetworkActivity extends AppCompatActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class FindLocationFragment extends Fragment implements SearchView.OnQueryTextListener {
+
+
+        private ListView searchList;
+        private ArrayAdapter<String> adapter;
+
         /**
          * The fragment argument representing the section number for this
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
-        public PlaceholderFragment() {
+        public FindLocationFragment() {
         }
 
         /**
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
+        public static FindLocationFragment newInstance(int sectionNumber) {
+            FindLocationFragment fragment = new FindLocationFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
@@ -113,10 +129,41 @@ public class FindNetworkActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_find_network, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+            // Get the intent, verify the action and get the query
+            View rootView = inflater.inflate(R.layout.fragment_find_location, container,
+                    false);
+            SearchView searchView = rootView.findViewById(R.id.from_location_search_view);
+            searchView.setOnQueryTextListener(this);
+            searchView.setSearchableInfo(mSearchManager.
+                    getSearchableInfo(getActivity().getComponentName()));
+            searchList = rootView.findViewById(R.id.search_suggestions_list_view);
+            //TODO: Remove dummy data
+            dummy.add("New York, New York, United States");
+            dummy.add("Singapore");
+            dummy.add("London, United Kingdom");
+            dummy.add("Stanford, California, United States");
+            adapter = new LocationSearchAdapter(getActivity(),
+                    android.R.layout.simple_list_item_1, dummy);
+            searchList.setTextFilterEnabled(true);
+            searchList.setAdapter(adapter);
             return rootView;
+
+        }
+
+        @Override
+        public boolean onQueryTextSubmit(String query) {
+            return false;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String newText) {
+            Toast.makeText(getActivity(), "Changing text", Toast.LENGTH_LONG).show();
+            adapter.getFilter().filter(newText);
+            if (searchList.getVisibility() == GONE) {
+                searchList.setVisibility(View.VISIBLE);
+            }
+            searchList.setAdapter(adapter);
+            return true;
         }
     }
 
@@ -134,7 +181,7 @@ public class FindNetworkActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+            return FindLocationFragment.newInstance(position + 1);
         }
 
         @Override
