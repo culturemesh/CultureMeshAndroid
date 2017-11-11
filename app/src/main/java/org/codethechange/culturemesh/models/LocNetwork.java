@@ -5,5 +5,18 @@ package org.codethechange.culturemesh.models;
  */
 
 public class LocNetwork extends Network {
-    public Location fromLocation;
+    private Location fromLocation;
+
+    public LocNetwork(Post[] posts, Event[] events, Location nearLocation, Location fromLocation) {
+        super(posts, events, nearLocation);
+        this.fromLocation = fromLocation;
+    }
+
+    public Location getFromLocation() {
+        return fromLocation;
+    }
+
+    public void setFromLocation(Location fromLocation) {
+        this.fromLocation = fromLocation;
+    }
 }

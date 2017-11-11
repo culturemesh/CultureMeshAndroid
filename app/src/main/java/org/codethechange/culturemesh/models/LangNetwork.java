@@ -5,5 +5,18 @@ package org.codethechange.culturemesh.models;
  */
 
 public class LangNetwork extends Network {
-    public Language lang;
+    private Language lang;
+
+    public LangNetwork(Post[] posts, Event[] events, Location nearLocation, Language lang) {
+        super(posts, events, nearLocation);
+        this.lang = lang;
+    }
+
+    public Language getLang() {
+        return lang;
+    }
+
+    public void setLang(Language lang) {
+        this.lang = lang;
+    }
 }
