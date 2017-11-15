@@ -3,6 +3,8 @@ package org.codethechange.culturemesh;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.media.Image;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -18,11 +20,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -32,8 +39,8 @@ import static android.view.View.GONE;
 public class FindNetworkActivity extends AppCompatActivity {
 
     //TODO: Replace these with Location Objects.
-    private String nearLocation;
-    private String fromLocation;
+    static String nearLocation;
+    static String fromLocation;
 
     public final int REQUEST_NEW_NEAR_LOCATION = 1;
 
@@ -102,7 +109,8 @@ public class FindNetworkActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //TODO: Implement how I receive data. Replace dummy stuff with legit stuff.
-        nearButton.setText(data.getStringExtra(ChooseNearLocationActivity.CHOSEN_LOCATION));
+        nearLocation = data.getStringExtra(ChooseNearLocationActivity.CHOSEN_LOCATION);
+        nearButton.setText(nearLocation);
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -186,6 +194,30 @@ public class FindNetworkActivity extends AppCompatActivity {
                     android.R.layout.simple_list_item_1, dummy);
             searchList.setTextFilterEnabled(true);
             searchList.setAdapter(adapter);
+            searchList.setOnItemClickListener(new ListView.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    final ConstraintLayout promptView = (ConstraintLayout)
+                            getActivity().findViewById(R.id.prompt_join_network_view);
+                    fromLocation = (String) parent.getItemAtPosition(position);
+                    TextView fromTV = (TextView)
+                            promptView.findViewById(R.id.prompt_from_location_text_view);
+                    fromTV.setText(fromLocation.split(",")[0]);
+                    TextView nearTV = (TextView)
+                            promptView.findViewById(R.id.prompt_near_location_text_view);
+                    nearTV.setText(nearLocation.split(",")[0]);
+                    promptView.setVisibility(View.VISIBLE);
+                    ImageButton cancel = (ImageButton)
+                            promptView.findViewById(R.id.cancel_prompt_button);
+                    cancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            promptView.setVisibility(GONE);
+                        }
+                    });
+                }
+            });
             return rootView;
 
         }
@@ -257,7 +289,7 @@ public class FindNetworkActivity extends AppCompatActivity {
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 

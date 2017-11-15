@@ -12,4 +12,5 @@
     <string name="from_location_search_hint">Search From Locations</string>
     <string name="near_location_text">Near:</string>
     <string name="title_activity_choose_near_location">Choose Near Location</string>
+    <string name="join_prompt">JOIN</string>
 </resources>
