@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -13,6 +15,7 @@ import android.widget.Filterable;
 
 import java.util.ArrayList;
 import android.widget.Filter;
+import android.widget.TextView;
 
 import java.util.List;
 import java.util.logging.LogRecord;
@@ -26,7 +29,7 @@ public class LocationSearchAdapter extends ArrayAdapter<String> implements Filte
     private ArrayList<String> locations;
     private ArrayList<String> filteredLocations;
     private LocationFilter filter;
-
+    private Context context;
 
 
     /**
@@ -35,11 +38,12 @@ public class LocationSearchAdapter extends ArrayAdapter<String> implements Filte
      * @param resource int resource layout id
      * @param locations string list of locations
      */
-    public LocationSearchAdapter(@NonNull Context context, @LayoutRes int resource,
+    LocationSearchAdapter(@NonNull Context context, @LayoutRes int resource,
                                  @NonNull List<String> locations) {
         //TODO: Use Set instead of ArrayList for total list.
         //TODO: Ignore case for filter.
         super(context, resource, locations);
+        this.context = context;
         this.locations = new ArrayList<String>(locations);
         filteredLocations = (ArrayList<String>) locations;
         getFilter();
@@ -69,6 +73,20 @@ public class LocationSearchAdapter extends ArrayAdapter<String> implements Filte
         return filteredLocations.size();
     }
 
+
+    @NonNull
+    @Override
+    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+        if (convertView == null) {
+            convertView = LayoutInflater.from(context).inflate(R.layout.network_list_item, parent,
+                    false);
+        }
+        TextView locationName = convertView.findViewById(R.id.location_language_name_list_view);
+        locationName.setText(filteredLocations.get(position));
+        //TODO: Set number of people.
+        return convertView;
+    }
+
     private class LocationFilter extends Filter {
 
         @Override
@@ -77,7 +95,8 @@ public class LocationSearchAdapter extends ArrayAdapter<String> implements Filte
             ArrayList<String> tempList = new ArrayList<String>();
             if (constraint!=null && constraint.length()>0) {
                 for (String location : locations) {
-                    if (location.toLowerCase().contains(constraint)) {
+                    if (location.toLowerCase().contains(constraint.toString().toLowerCase())) {
+                        //Log.i("Comparison", location + " contains? " + constraint );
                         tempList.add(location);
                     }
                 }
@@ -91,6 +110,7 @@ public class LocationSearchAdapter extends ArrayAdapter<String> implements Filte
         @SuppressWarnings("unchecked")
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
+            Log.i("Results" , results.values.toString());
             filteredLocations = (ArrayList<String>) results.values;
             notifyDataSetChanged();
         }

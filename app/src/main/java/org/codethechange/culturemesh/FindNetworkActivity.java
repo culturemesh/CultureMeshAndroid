@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
@@ -29,6 +30,12 @@ import static android.view.View.GONE;
 
 
 public class FindNetworkActivity extends AppCompatActivity {
+
+    //TODO: Replace these with Location Objects.
+    private String nearLocation;
+    private String fromLocation;
+
+    public final int REQUEST_NEW_NEAR_LOCATION = 1;
 
     //TODO: Replace dummy data with real data
     private static ArrayList<String> dummy = new ArrayList<String>();
@@ -53,6 +60,8 @@ public class FindNetworkActivity extends AppCompatActivity {
      */
     private static SearchManager mSearchManager;
 
+    private Button nearButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,14 +76,41 @@ public class FindNetworkActivity extends AppCompatActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        mSearchManager = (SearchManager)
-                getSystemService(Context.SEARCH_SERVICE);
 
         // Give the TabLayout the ViewPager
         TabLayout tabLayout = (TabLayout) findViewById(R.id.find_network_tab_layout);
         tabLayout.setupWithViewPager(mViewPager);
+
+        //Set up search manager
+        mSearchManager = (SearchManager)
+                getSystemService(Context.SEARCH_SERVICE);
+
+        //Set near location button click listener
+        nearButton = (Button) findViewById(R.id.near_button);
+        nearButton.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Open near activity to choose new near location.
+                Intent chooseNewNear = new Intent(FindNetworkActivity.this,
+                        ChooseNearLocationActivity.class);
+                startActivityForResult(chooseNewNear, REQUEST_NEW_NEAR_LOCATION);
+            }
+        });
+
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //TODO: Implement how I receive data. Replace dummy stuff with legit stuff.
+        nearButton.setText(data.getStringExtra(ChooseNearLocationActivity.CHOSEN_LOCATION));
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onResume() {
+        //TODO: Implement when change nearby location: also consider onResumeFragments()
+        super.onResume();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -141,6 +177,7 @@ public class FindNetworkActivity extends AppCompatActivity {
                     getSearchableInfo(getActivity().getComponentName()));
             searchList = rootView.findViewById(R.id.search_suggestions_list_view);
             //TODO: Remove dummy data
+            //TODO: Use abstracted API interface.
             dummy.add("New York, New York, United States");
             dummy.add("Singapore");
             dummy.add("London, United Kingdom");
@@ -165,7 +202,7 @@ public class FindNetworkActivity extends AppCompatActivity {
             if (searchList.getVisibility() == GONE) {
                 searchList.setVisibility(View.VISIBLE);
             }
-            searchList.setAdapter(adapter);
+            //searchList.setAdapter(adapter);
             return true;
         }
     }
