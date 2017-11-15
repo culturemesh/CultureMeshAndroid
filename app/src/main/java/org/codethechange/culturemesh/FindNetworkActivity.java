@@ -18,6 +18,10 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 
+import org.codethechange.culturemesh.models.User;
+
+import java.util.ArrayList;
+
 public class FindNetworkActivity extends AppCompatActivity {
 
     /**
@@ -59,6 +63,7 @@ public class FindNetworkActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
 
     }
 
