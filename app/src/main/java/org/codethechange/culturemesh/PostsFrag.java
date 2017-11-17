@@ -10,10 +10,17 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
+
+import org.codethechange.culturemesh.models.Network;
+import org.codethechange.culturemesh.models.Post;
+import org.codethechange.culturemesh.models.User;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class PostsFrag extends Fragment {
     private String basePath = "www.culturemesh.com/api/v1";
@@ -41,7 +48,7 @@ public class PostsFrag extends Fragment {
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         View rootView = inflater.inflate(R.layout.fragment_posts, container, false);
 
-        RecyclerView rv = rootView.findViewById(R.id.postsRV);
+        final RecyclerView rv = rootView.findViewById(R.id.postsRV);
 
         mRecyclerView = (RecyclerView) activity.findViewById(R.id.postsRV);
 
@@ -55,8 +62,18 @@ public class PostsFrag extends Fragment {
 
 
         // specify an adapter (see also next example)
+        /*
         final RVAdapter adapter = new RVAdapter(persons);
-        rv.setAdapter(adapter);
+        rv.setAdapter(adapter); */
+
+        //get User info
+        String fn = null;
+        String ln = null;
+        String email = null;
+        String un = null;
+        Network[] networks = null;
+
+        final User user = new User(fn, ln, email, un, networks);
 
         String network = ""; //to draw from explore/saved Instances
         String networkId = "";
@@ -67,7 +84,7 @@ public class PostsFrag extends Fragment {
                 .asString()
                 .setCallback(new FutureCallback<String>() {
                     public void onCompleted(Exception e, String result) {
-                        loadPosts(result, postPath, rv);
+                        loadPosts(result, postPath, rv, user);
                     }
                 });
         Ion.with(this)
@@ -75,7 +92,7 @@ public class PostsFrag extends Fragment {
                 .asString()
                 .setCallback(new FutureCallback<String>() {
                     public void onCompleted(Exception e, String result) {
-                        loadPosts(result, eventPath, rv);
+                        loadPosts(result, eventPath, rv, user);
                     }
                 });
 
@@ -83,12 +100,15 @@ public class PostsFrag extends Fragment {
         return inflater.inflate(R.layout.fragment_posts, container, false);
     }
 
-    private void loadPosts(String RESTresult, String path, RecyclerView rv) {
-        //discuss parsing REST data
+    private void loadPosts(String RESTresult, String path, RecyclerView rv, User user) {
+        //discuss parsing REST data using path
         String[] postData = RESTresult.split("," /*determine this*/);
-        List<Post> posts;
+        ArrayList<Post> posts = new ArrayList<Post>();
         for(String p : postData) {
-            Post post = new Post();
+            String content = null;
+            String title = null;
+            Date datePosted = new Date(); /* initialize with string version of date */
+            Post post = new Post(user, content, title, datePosted);
             //instantiate post with the REST data, to discuss
             posts.add(post);
         }

@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.codethechange.culturemesh.models.Post;
+
+import java.util.List;
 
 
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {

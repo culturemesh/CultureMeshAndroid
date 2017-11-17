@@ -3,6 +3,7 @@ package org.codethechange.culturemesh;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -12,10 +13,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.GridLayout;
+import android.widget.LinearLayout;
+
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
 
 public class TimelineActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
+private String basePath = "www.culturemesh.com/api/v1";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +46,46 @@ public class TimelineActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    @Override
+    protected void onStart() {
+        //Discuss how to pull from server, add in Ion functionality
+        super.onStart();
+        String network = ""; //to draw from explore/saved Instances
+        String networkId = "";
+        final String postPath = basePath + network + networkId + "/posts";
+        final String eventPath = basePath + network + networkId + "/events";
+        Ion.with(this)
+                .load(postPath)
+                .asString()
+                .setCallback(new FutureCallback<String>() {
+                    public void onCompleted(Exception e, String result) {
+                        loadPosts(result, postPath);
+                    }
+                });
+        Ion.with(this)
+                .load(eventPath)
+                .asString()
+                .setCallback(new FutureCallback<String>() {
+                    public void onCompleted(Exception e, String result) {
+                        loadPosts(result, eventPath);
+                    }
+                });
+    }
+
+    public void loadPosts(String result, String netPath) {
+        int loadSize = 0; //how many posts we load at once
+        RecyclerView postRV = null;//(RecyclerView) findViewbyId
+        if(/* filter includes posts */ true) {
+            //build array out of post structs
+            LinearLayout layout = null;//(GridLayout) getView().findViewById(R.id.LLayout); //makes sense with fragments
+            for(int i = 0; i < loadSize; i++) {
+                //create a cardview, build post information into it.
+                //separately, create card_view.xml file
+                layout.addView(null /*postCardView*/);
+            }
+        }
     }
 
     @Override
