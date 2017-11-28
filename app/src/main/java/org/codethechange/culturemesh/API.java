@@ -60,7 +60,7 @@ public class API {
 
 
     static class Get {
-        static  ArrayList<User> users() {
+        static ArrayList<User> users() {
             return genUsers();
         }
 
