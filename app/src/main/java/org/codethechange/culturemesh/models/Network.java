@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh.models;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 /**
@@ -7,6 +8,40 @@ import java.util.ArrayList;
  */
 
 public class Network {
+    private BigInteger id;
+
+    public BigInteger getId() {
+        return id;
+    }
+
+    public void setId(BigInteger id) {
+        this.id = id;
+    }
+
+    public boolean isClassification() {
+        return classification;
+    }
+
+    public void setClassification(boolean classification) {
+        this.classification = classification;
+    }
+
+    public Language getLang() {
+        return lang;
+    }
+
+    public void setLang(Language lang) {
+        this.lang = lang;
+    }
+
+    public Location getFromLocation() {
+        return fromLocation;
+    }
+
+    public void setFromLocation(Location fromLocation) {
+        this.fromLocation = fromLocation;
+    }
+
     private ArrayList<Post> posts;
     private ArrayList<Event> events;
     private Location nearLocation;

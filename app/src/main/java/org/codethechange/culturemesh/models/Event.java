@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh.models;
 
+import java.math.BigInteger;
 import java.util.Date;
 
 /**
@@ -7,7 +8,17 @@ import java.util.Date;
  */
 
 public class Event {
+    private BigInteger id;
     private String title;
+
+    public BigInteger getId() {
+        return id;
+    }
+
+    public void setId(BigInteger id) {
+        this.id = id;
+    }
+
     private String description;
     private Date timeOfEvent;
     private User author;

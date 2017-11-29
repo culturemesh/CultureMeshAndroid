@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh.models;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 /**
@@ -7,6 +8,16 @@ import java.util.ArrayList;
  */
 
 public class User {
+    private BigInteger id;
+
+    public BigInteger getId() {
+        return id;
+    }
+
+    public void setId(BigInteger id) {
+        this.id = id;
+    }
+
     private String firstName;
     private String lastName;
     private String email;
