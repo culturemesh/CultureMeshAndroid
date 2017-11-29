@@ -186,10 +186,12 @@ public class FindNetworkActivity extends AppCompatActivity {
             searchList = rootView.findViewById(R.id.search_suggestions_list_view);
             //TODO: Remove dummy data
             //TODO: Use abstracted API interface.
+
             dummy.add("New York, New York, United States");
             dummy.add("Singapore");
             dummy.add("London, United Kingdom");
             dummy.add("Stanford, California, United States");
+
             adapter = new LocationSearchAdapter(getActivity(),
                     android.R.layout.simple_list_item_1, dummy);
             searchList.setTextFilterEnabled(true);
@@ -243,7 +245,8 @@ public class FindNetworkActivity extends AppCompatActivity {
     /**
      * The fragment for finding language networks.
      */
-    public static class FindLanguageFragment extends Fragment {
+    public static class FindLanguageFragment extends Fragment implements
+            SearchView.OnQueryTextListener {
 
 
         private ListView searchList;
@@ -276,8 +279,66 @@ public class FindNetworkActivity extends AppCompatActivity {
             // Get the intent, verify the action and get the query
             View rootView = inflater.inflate(R.layout.fragment_find_language, container,
                     false);
+            ArrayList<String> dummyLanguages = new ArrayList<String>();
+            SearchView searchView = rootView.findViewById(R.id.from_language_search_view);
+            searchView.setOnQueryTextListener(this);
+            searchView.setSearchableInfo(mSearchManager.
+                    getSearchableInfo(getActivity().getComponentName()));
+            searchList = rootView.findViewById(R.id.search_suggestions_list_view);
+            //TODO: Remove dummy data
+            //TODO: Use abstracted API interface.
+
+            dummyLanguages.add("French");
+            dummyLanguages.add("German");
+            dummyLanguages.add("English");
+            dummyLanguages.add("Cantonese");
+
+            adapter = new LocationSearchAdapter(getActivity(),
+                    android.R.layout.simple_list_item_1, dummyLanguages);
+            searchList.setTextFilterEnabled(true);
+            searchList.setAdapter(adapter);
+            searchList.setOnItemClickListener(new ListView.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    final ConstraintLayout promptView = (ConstraintLayout)
+                            getActivity().findViewById(R.id.prompt_join_language_network_view);
+                    String fromLanguage = (String) parent.getItemAtPosition(position);
+                    TextView fromTV = (TextView)
+                            promptView.findViewById(R.id.prompt_from_language_text_view);
+                    fromTV.setText(fromLanguage.split(",")[0]);
+                    TextView nearTV = (TextView)
+                            promptView.findViewById(R.id.prompt_language_near_location_text_view);
+                    nearTV.setText(nearLocation.split(",")[0]);
+                    promptView.setVisibility(View.VISIBLE);
+                    ImageButton cancel = (ImageButton)
+                            promptView.findViewById(R.id.cancel_prompt_button);
+                    cancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            promptView.setVisibility(GONE);
+                        }
+                    });
+                }
+            });
             return rootView;
 
+        }
+
+        @Override
+        public boolean onQueryTextSubmit(String query) {
+            return false;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String newText) {
+            Toast.makeText(getActivity(), "Changing text", Toast.LENGTH_LONG).show();
+            adapter.getFilter().filter(newText);
+            if (searchList.getVisibility() == GONE) {
+                searchList.setVisibility(View.VISIBLE);
+            }
+            //searchList.setAdapter(adapter);
+            return true;
         }
 
     }
