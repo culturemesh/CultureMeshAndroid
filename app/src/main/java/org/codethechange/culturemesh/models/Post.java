@@ -1,5 +1,7 @@
 package org.codethechange.culturemesh.models;
 
+import java.math.BigInteger;
+
 import java.util.Date;
 
 /**
@@ -7,8 +9,20 @@ import java.util.Date;
  */
 
 public class Post {
+
+    private BigInteger id;
     private User author;
     private String content;
+
+    public BigInteger getId() {
+        return id;
+    }
+
+    public void setId(BigInteger id) {
+        this.id = id;
+    }
+
+
     private String title;
     private Date datePosted;
 
