@@ -10,6 +10,7 @@ public class User {
     private String email;
     private String username;
     private Network[] enrolledNetworks;
+    private String imgURL;
 
     public User(String firstName, String lastName, String email, String username, Network[] enrolledNetworks) {
         this.firstName = firstName;
@@ -17,6 +18,7 @@ public class User {
         this.email = email;
         this.username = username;
         this.enrolledNetworks = enrolledNetworks;
+        this.imgURL = imgURL;
     }
 
     public String getFirstName() {
@@ -33,6 +35,10 @@ public class User {
 
     public String getUsername() {
         return username;
+    }
+
+    public String getImgURL() {
+        return imgURL;
     }
 
     public Network[] getEnrolledNetworks() {
@@ -58,4 +64,6 @@ public class User {
     public void setEnrolledNetworks(Network[] enrolledNetworks) {
         this.enrolledNetworks = enrolledNetworks;
     }
+
+    public void setImgURL() { this.imgURL = imgURL; }
 }

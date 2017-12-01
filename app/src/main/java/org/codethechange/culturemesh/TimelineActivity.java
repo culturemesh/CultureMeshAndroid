@@ -75,7 +75,7 @@ private String basePath = "www.culturemesh.com/api/v1";
     }
 
     public void loadPosts(String result, String netPath) {
-        int loadSize = 0; //how many posts we load at once
+        int loadSize = 10; //how many posts we load at once
         RecyclerView postRV = null;//(RecyclerView) findViewbyId
         if(/* filter includes posts */ true) {
             //build array out of post structs

@@ -17,6 +17,8 @@ import com.koushikdutta.ion.Ion;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.User;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -102,6 +104,11 @@ public class PostsFrag extends Fragment {
 
     private void loadPosts(String RESTresult, String path, RecyclerView rv, User user) {
         //discuss parsing REST data using path
+        try {
+            JSONObject postJSON = new JSONObject(RESTresult);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         String[] postData = RESTresult.split("," /*determine this*/);
         ArrayList<Post> posts = new ArrayList<Post>();
         for(String p : postData) {

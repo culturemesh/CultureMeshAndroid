@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import org.codethechange.culturemesh.models.Post;
 
 import java.util.List;
@@ -44,16 +46,21 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
 
     @Override
     public PostViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_posts, parent, false);
         PostViewHolder pvh = new PostViewHolder(v);
         return pvh;
     }
 
     @Override
     public void onBindViewHolder(PostViewHolder pvh, int i) {
-        pvh.personName.setText(netPosts.get(i).name);
-        pvh.content.setText(netPosts.get(i).age);
-        pvh.personPhoto.setImageResource(netPosts.get(i).photoId);
+        Post post = netPosts.get(i);
+        pvh.personName.setText(post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName());
+        pvh.content.setText(post.getContent());
+        pvh.postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
+        pvh.timestamp.setText(post.getDatePosted().toString());
+        pvh.username.setText(post.getAuthor().getUsername());
+        Picasso.with(pvh.personPhoto.getContext()).load(post.getAuthor().getImgURL()).into(pvh.personPhoto);
+        pvh.personPhoto.setImageResource(netPosts.get(i).getAuthor().); //user doesn't have image?
     }
 
     @Override
