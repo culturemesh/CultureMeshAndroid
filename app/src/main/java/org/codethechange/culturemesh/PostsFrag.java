@@ -98,26 +98,26 @@ public class PostsFrag extends Fragment {
                     }
                 });
 
-        //TextView tx = rootView.findViewById();
         return inflater.inflate(R.layout.fragment_posts, container, false);
     }
 
     private void loadPosts(String RESTresult, String path, RecyclerView rv, User user) {
         //discuss parsing REST data using path
+        ArrayList<Post> posts = new ArrayList<Post>();
         try {
             JSONObject postJSON = new JSONObject(RESTresult);
+            String[] postData = RESTresult.split("," /*determine this*/);
+            for(String p : postData) {
+                String content = postJSON.getString("post_text");
+                String title = "";
+                String strDate = postJSON.getString("post_date");
+                Date datePosted = new Date(); /* initialize with string version of date */
+                Post post = new Post(user, content, title, datePosted);
+                //instantiate post with the REST data, to discuss
+                posts.add(post);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
-        }
-        String[] postData = RESTresult.split("," /*determine this*/);
-        ArrayList<Post> posts = new ArrayList<Post>();
-        for(String p : postData) {
-            String content = null;
-            String title = null;
-            Date datePosted = new Date(); /* initialize with string version of date */
-            Post post = new Post(user, content, title, datePosted);
-            //instantiate post with the REST data, to discuss
-            posts.add(post);
         }
         RVAdapter adapter = new RVAdapter(posts);
         rv.setAdapter(adapter);

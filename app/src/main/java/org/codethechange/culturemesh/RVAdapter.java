@@ -59,8 +59,8 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
         pvh.postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
         pvh.timestamp.setText(post.getDatePosted().toString());
         pvh.username.setText(post.getAuthor().getUsername());
-        Picasso.with(pvh.personPhoto.getContext()).load(post.getAuthor().getImgURL()).into(pvh.personPhoto);
-        pvh.personPhoto.setImageResource(netPosts.get(i).getAuthor().); //user doesn't have image?
+        Picasso.with(pvh.personPhoto.getContext()).load(post.getAuthor().getImgURL()).into(pvh.personPhoto); //special case for when user doesn't have image?
+  //      pvh.personPhoto.setImageResource(netPosts.get(i).getAuthor().get);
     }
 
     @Override
