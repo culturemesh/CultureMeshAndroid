@@ -30,13 +30,13 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
 
         PostViewHolder(View itemView) {
             super(itemView);
-            cv = (CardView) itemView.findViewById(R.id.cv);
-            personName = (TextView) itemView.findViewById(R.id.person_name);
-            username = (TextView) itemView.findViewById(R.id.username);
-            content = (TextView) itemView.findViewById(R.id.content);
-            timestamp = (TextView) itemView.findViewById(R.id.timestamp);
-            personPhoto = (ImageView) itemView.findViewById(R.id.person_photo);
-            postTypePhoto = (ImageView) itemView.findViewById(R.id.post_type_photo);
+            cv = itemView.findViewById(R.id.cv);
+            personName = itemView.findViewById(R.id.person_name);
+            username = itemView.findViewById(R.id.username);
+            content = itemView.findViewById(R.id.content);
+            timestamp = itemView.findViewById(R.id.timestamp);
+            personPhoto = itemView.findViewById(R.id.person_photo);
+            postTypePhoto = itemView.findViewById(R.id.post_type_photo);
         }
     }
 
@@ -47,20 +47,19 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
     @Override
     public PostViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_posts, parent, false);
-        PostViewHolder pvh = new PostViewHolder(v);
-        return pvh;
+        return new PostViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(PostViewHolder pvh, int i) {
         Post post = netPosts.get(i);
-        pvh.personName.setText(post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName());
+        String name = post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName();
+        pvh.personName.setText(name);
         pvh.content.setText(post.getContent());
         pvh.postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
         pvh.timestamp.setText(post.getDatePosted().toString());
         pvh.username.setText(post.getAuthor().getUsername());
-        Picasso.with(pvh.personPhoto.getContext()).load(post.getAuthor().getImgURL()).into(pvh.personPhoto);
-        pvh.personPhoto.setImageResource(netPosts.get(i).getAuthor().); //user doesn't have image?
+        Picasso.with(pvh.personPhoto.getContext()).load(post.getAuthor().getImgURL()).into(pvh.personPhoto); //set logic for if no img, or is this built-in?
     }
 
     @Override

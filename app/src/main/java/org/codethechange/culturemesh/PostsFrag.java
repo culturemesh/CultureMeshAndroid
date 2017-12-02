@@ -62,13 +62,7 @@ public class PostsFrag extends Fragment {
         mLayoutManager = new LinearLayoutManager(activity);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-
-        // specify an adapter (see also next example)
-        /*
-        final RVAdapter adapter = new RVAdapter(persons);
-        rv.setAdapter(adapter); */
-
-        //get User info
+        //get User info, this will be from SavedInstances from login or account
         String fn = null;
         String ln = null;
         String email = null;
