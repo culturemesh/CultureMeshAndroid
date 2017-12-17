@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -20,7 +21,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
 public class TimelineActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, PostsFrag.OnFragmentInteractionListener {
 private String basePath = "www.culturemesh.com/api/v1";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,5 +144,10 @@ private String basePath = "www.culturemesh.com/api/v1";
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 }

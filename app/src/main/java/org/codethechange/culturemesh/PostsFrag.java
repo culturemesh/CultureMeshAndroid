@@ -52,7 +52,8 @@ public class PostsFrag extends Fragment {
 
         final RecyclerView rv = rootView.findViewById(R.id.postsRV);
 
-        mRecyclerView = (RecyclerView) activity.findViewById(R.id.postsRV);
+        //mRecyclerView = (RecyclerView) activity.findViewById(R.id.postsRV);
+        mRecyclerView = rv;
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
