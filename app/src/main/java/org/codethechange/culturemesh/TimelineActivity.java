@@ -57,7 +57,7 @@ private String basePath = "www.culturemesh.com/api/v1";
         String networkId = "";
         final String postPath = basePath + network + networkId + "/posts";
         final String eventPath = basePath + network + networkId + "/events";
-        Ion.with(this)
+        /*Ion.with(this)
                 .load(postPath)
                 .asString()
                 .setCallback(new FutureCallback<String>() {
@@ -72,7 +72,7 @@ private String basePath = "www.culturemesh.com/api/v1";
                     public void onCompleted(Exception e, String result) {
                         loadPosts(result, eventPath);
                     }
-                });
+                });*/
     }
 
     public void loadPosts(String result, String netPath) {

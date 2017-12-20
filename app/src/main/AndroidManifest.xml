@@ -22,6 +22,10 @@
         <activity
             android:name=".FindNetworkActivity"
             android:label="@string/title_activity_find_network"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ExploreListActivity"
+            android:label="@string/title_activity_explore_list"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

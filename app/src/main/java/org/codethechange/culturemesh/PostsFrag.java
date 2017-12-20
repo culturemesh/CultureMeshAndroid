@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import org.codethechange.culturemesh.models.User;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -54,6 +56,7 @@ public class PostsFrag extends Fragment {
 
         //mRecyclerView = (RecyclerView) activity.findViewById(R.id.postsRV);
         mRecyclerView = rv;
+        Log.i("Recycler View Null?", ""+(rv == null));
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -70,9 +73,13 @@ public class PostsFrag extends Fragment {
         String un = null;
         Network[] networks = null;
 
-        final User user = new User(fn, ln, email, un, networks);
-
-        String network = ""; //to draw from explore/saved Instances
+        //final User user = new User(fn, ln, email, un, networks);
+        User user = API.Get.user(new BigInteger("23")); //Replace with actual user id.
+        Network network = API.Get.network(new BigInteger("33"));
+        ArrayList<Post> posts = API.Get.networkPosts(network.getId());
+        mAdapter = new RVAdapter(posts);
+        mRecyclerView.setAdapter(mAdapter);
+        /*String network = ""; //to draw from explore/saved Instances
         String networkId = "";
         final String postPath = basePath + network + networkId + "/posts";
         final String eventPath = basePath + network + networkId + "/events";
@@ -93,8 +100,8 @@ public class PostsFrag extends Fragment {
                     }
                 });
 
-        //TextView tx = rootView.findViewById();
-        return inflater.inflate(R.layout.fragment_posts, container, false);
+        //TextView tx = rootView.findViewById();*/
+        return rootView;
     }
 
     private void loadPosts(String RESTresult, String path, RecyclerView rv, User user) {

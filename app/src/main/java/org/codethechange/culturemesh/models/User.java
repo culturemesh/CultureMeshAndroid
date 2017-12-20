@@ -1,18 +1,40 @@
 package org.codethechange.culturemesh.models;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+
 /**
  * Created by nathaniel on 11/10/17.
  */
 
 public class User {
+
+    private BigInteger id;
+
+    public BigInteger getId() {
+        return id;
+    }
+
+    public void setId(BigInteger id) {
+        this.id = id;
+    }
+
     private String firstName;
     private String lastName;
     private String email;
     private String username;
-    private Network[] enrolledNetworks;
+    private ArrayList<Network> enrolledNetworks;
     private String imgURL;
 
-    public User(String firstName, String lastName, String email, String username, Network[] enrolledNetworks) {
+    public String getImgURL() {
+        return imgURL;
+    }
+
+    public void setImgURL(String imgURL) {
+        this.imgURL = imgURL;
+    }
+
+    public User(String firstName, String lastName, String email, String username, ArrayList<Network> enrolledNetworks, String imgURL) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -37,11 +59,7 @@ public class User {
         return username;
     }
 
-    public String getImgURL() {
-        return imgURL;
-    }
-
-    public Network[] getEnrolledNetworks() {
+    public ArrayList<Network> getEnrolledNetworks() {
         return enrolledNetworks;
     }
 
@@ -61,9 +79,7 @@ public class User {
         this.username = username;
     }
 
-    public void setEnrolledNetworks(Network[] enrolledNetworks) {
+    public void setEnrolledNetworks(ArrayList<Network> enrolledNetworks) {
         this.enrolledNetworks = enrolledNetworks;
     }
-
-    public void setImgURL() { this.imgURL = imgURL; }
 }
