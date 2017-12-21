@@ -14,21 +14,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <fragment
-            android:id="@+id/PostsFrag"
-            android:name="org.codethechange.culturemesh.PostsFrag"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout="@layout/fragment_posts"
-            tools:layout="@layout/fragment_posts"
-            tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="50dp" />
-
         <android.support.constraint.ConstraintLayout
+            android:id="@+id/constraintLayout"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:background="@color/colorAccent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/fromLocation"
@@ -50,22 +42,34 @@
                 android:layout_marginBottom="13dp"
                 android:layout_marginTop="13dp"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_arrow_forward_white_24px"
-                tools:layout_editor_absoluteX="168dp"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"/>
+                tools:layout_editor_absoluteX="168dp" />
 
             <TextView
-                android:id="@+id/textView3"
+                android:id="@+id/nearLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="16dp"
-                android:text="TextView"
+                android:text="Location B"
+                android:textColor="#FFFFFF"
                 app:layout_constraintStart_toEndOf="@+id/Arrow"
                 app:layout_constraintTop_toTopOf="parent" />
         </android.support.constraint.ConstraintLayout>
+
+        <fragment
+            android:id="@+id/PostsFrag"
+            android:name="org.codethechange.culturemesh.PostsFrag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout="@layout/fragment_posts"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+            tools:layout="@layout/fragment_posts" />
+
     </android.support.constraint.ConstraintLayout>
 
 
