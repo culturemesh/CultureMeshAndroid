@@ -12,9 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.ion.Ion;
-
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.User;
@@ -99,7 +96,6 @@ public class PostsFrag extends Fragment {
                         loadPosts(result, eventPath, rv, user);
                     }
                 });
-
         //TextView tx = rootView.findViewById();*/
         return rootView;
     }
