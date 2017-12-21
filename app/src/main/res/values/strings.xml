@@ -24,4 +24,11 @@
     <string name="near_location_text">Near:</string>
     <string name="title_activity_choose_near_location">Choose Near Location</string>
     <string name="join_prompt">JOIN</string>
+    <string name="filter_posts">Filter Posts</string>
+    <string-array name="filter_choices">
+        <item>Native Posts</item>
+        <item>Twitter Posts</item>
+    </string-array>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
 </resources>

@@ -17,6 +17,8 @@ import java.util.Date;
  */
 
 public class API {
+    public static final String SETTINGS_IDENTIFIER = "acmsi";
+
 
     //TODO: REMOVE DUMMY GENERATORS
     static ArrayList<User> genUsers() {

@@ -1,5 +1,10 @@
 package org.codethechange.culturemesh;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -15,6 +20,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.GridLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.koushikdutta.async.future.FutureCallback;
@@ -23,6 +29,10 @@ import com.koushikdutta.ion.Ion;
 public class TimelineActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, PostsFrag.OnFragmentInteractionListener {
 private String basePath = "www.culturemesh.com/api/v1";
+    final String FILTER_LABEL = "fl";
+    final static String FILTER_CHOICE_NATIVE = "fcn";
+    final static String FILTER_CHOICE_TWITTER = "fct";
+    static SharedPreferences settings;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,6 +40,15 @@ private String basePath = "www.culturemesh.com/api/v1";
         //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         //setSupportActionBar(toolbar);
 
+        settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+        //TODO: Apply filter settings.
+        ImageButton postsFilter = (ImageButton) findViewById(R.id.filter_feed);
+        postsFilter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new FilterDialogFragment().show(getFragmentManager(), FILTER_LABEL);
+            }
+        });
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -143,4 +162,43 @@ private String basePath = "www.culturemesh.com/api/v1";
     public void onFragmentInteraction(Uri uri) {
 
     }
+
+    public static class FilterDialogFragment extends DialogFragment {
+        //TODO: Get SharedPrefs for saved settings
+        boolean[] filterSettings = {true, true};
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            filterSettings[0] = settings.getBoolean(FILTER_CHOICE_NATIVE, true);
+            filterSettings[1] = settings.getBoolean(FILTER_CHOICE_TWITTER, true);
+            builder.setTitle(getResources().getString(R.string.filter_posts))
+                .setMultiChoiceItems(R.array.filter_choices, filterSettings,
+                        new DialogInterface.OnMultiChoiceClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                               filterSettings[which] = isChecked;
+                            }
+                })
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        //TODO: Save settings to sharedPrefs.
+                        // User clicked OK, so save the results somewhere
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putBoolean(FILTER_CHOICE_NATIVE, filterSettings[0]);
+                        editor.putBoolean(FILTER_CHOICE_TWITTER, filterSettings[1]);
+                        editor.apply();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //Do nothing.
+                    }
+                });
+            return builder.create();
+        }
+    }
+
 }
