@@ -18,7 +18,8 @@ public class Network {
         this.id = id;
     }
 
-    public boolean isClassification() {
+
+    public boolean isLocationNetwork() {
         return classification;
     }
 
@@ -49,11 +50,24 @@ public class Network {
     private Language lang;
     private Location fromLocation;
 
-    public Network(ArrayList<Post> posts, ArrayList<Event> events, Location nearLocation) {
+    public Network(ArrayList<Post> posts, ArrayList<Event> events, Location nearLocation,
+                   Location fromLocation) {
         this.posts = posts;
         this.events = events;
+        this.fromLocation = fromLocation;
         this.nearLocation = nearLocation;
+        classification = true;
     }
+
+    public Network(ArrayList<Post> posts, ArrayList<Event> events, Location nearLocation,
+                   Language lang) {
+        this.posts = posts;
+        this.events = events;
+        this.lang = lang;
+        this.nearLocation = nearLocation;
+        classification = false;
+    }
+
 
 
     public ArrayList<Post> getPosts() {

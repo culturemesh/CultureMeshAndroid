@@ -60,5 +60,29 @@ public class Location {
     public void setPoints(Point[] points) {
         this.points = points;
     }
+
+    public String toString() {
+        String string = "";
+        string += getCountry();
+        String region  = getRegion();
+        if (region != null) {
+            string += ", " + region;
+        }
+        if (city != null) {
+            string += ", " + city;
+        }
+        return string;
+    }
+
+    public String shortName() {
+        //We'll return the lowest level location.
+        String city = getCity();
+        if (city != null) return city;
+        String region = getRegion();
+        if (region != null) return region;
+        return getCountry();
+
+
+    }
 }
 

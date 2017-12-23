@@ -14,7 +14,6 @@ public class Post {
     private User author;
     private String content;
 
-
     public BigInteger getId() {
         return id;
     }
@@ -25,9 +24,9 @@ public class Post {
 
 
     private String title;
-    private Date datePosted;
+    private String datePosted;
 
-    public Post(User author, String content, String title, Date datePosted) {
+    public Post(User author, String content, String title, String datePosted) {
         this.author = author;
         this.content = content;
         this.title = title;
@@ -46,7 +45,7 @@ public class Post {
         return title;
     }
 
-    public Date getDatePosted() {
+    public String getDatePosted() {
         return datePosted;
     }
 
@@ -62,7 +61,7 @@ public class Post {
         this.title = title;
     }
 
-    public void setDatePosted(Date datePosted) {
+    public void setDatePosted(String datePosted) {
         this.datePosted = datePosted;
     }
 }

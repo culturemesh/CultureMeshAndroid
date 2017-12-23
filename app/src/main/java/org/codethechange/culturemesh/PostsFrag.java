@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -53,8 +54,6 @@ public class PostsFrag extends Fragment {
 
         //mRecyclerView = (RecyclerView) activity.findViewById(R.id.postsRV);
         mRecyclerView = rv;
-        Log.i("Recycler View Null?", ""+(rv == null));
-
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
@@ -70,10 +69,12 @@ public class PostsFrag extends Fragment {
         String un = null;
         Network[] networks = null;
 
-        //final User user = new User(fn, ln, email, un, networks);
-        User user = API.Get.user(new BigInteger("23")); //Replace with actual user id.
-        Network network = API.Get.network(new BigInteger("33"));
-        ArrayList<Post> posts = API.Get.networkPosts(network.getId());
+        SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
+                Context.MODE_PRIVATE);
+        BigInteger networkId = new BigInteger(settings.getString(API.SELECTED_NETWORK,
+                "123456"));
+        ArrayList<Post> posts = API.Get.networkPosts(networkId);
+
         mAdapter = new RVAdapter(posts);
         mRecyclerView.setAdapter(mAdapter);
         /*String network = ""; //to draw from explore/saved Instances
@@ -113,7 +114,7 @@ public class PostsFrag extends Fragment {
             String content = null;
             String title = null;
             Date datePosted = new Date(); /* initialize with string version of date */
-            Post post = new Post(user, content, title, datePosted);
+            Post post = new Post(user, content, title, datePosted.toString());
             //instantiate post with the REST data, to discuss
             posts.add(post);
         }

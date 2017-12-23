@@ -7,24 +7,25 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
-import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.ion.Ion;
+import org.codethechange.culturemesh.models.Network;
+import org.codethechange.culturemesh.models.Post;
+import org.codethechange.culturemesh.models.User;
+import org.w3c.dom.Text;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
 
 public class TimelineActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, PostsFrag.OnFragmentInteractionListener {
@@ -33,6 +34,9 @@ private String basePath = "www.culturemesh.com/api/v1";
     final static String FILTER_CHOICE_NATIVE = "fcn";
     final static String FILTER_CHOICE_TWITTER = "fct";
     static SharedPreferences settings;
+
+    private Network network;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +45,29 @@ private String basePath = "www.culturemesh.com/api/v1";
         //setSupportActionBar(toolbar);
 
         settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+        //Choose selected network.
+        //TODO: Create better default behavior for no selected networks.
+        String selectedNetwork = settings.getString(API.SELECTED_NETWORK, "123456");
+        BigInteger id = new BigInteger(selectedNetwork);
+        network = API.Get.network(id);
+
+        ArrayList<User> users = API.Get.networkUsers(id);
+
+        //Update number of people.
+        //TODO: Find string manipulation of number that adds magnitude suffix (K,M,etc.)
+        //Update population number
+        TextView population = findViewById(R.id.network_population);
+        population.setText(String.format("%d",users.size()));
+        //Update from location/language
+        TextView fromLocation = findViewById(R.id.fromLocation);
+        if (network.isLocationNetwork()) {
+            fromLocation.setText(network.getFromLocation().shortName());
+        } else {
+            fromLocation.setText(network.getLang().getName());
+        }
+        //Update near location
+        TextView nearLocation = findViewById(R.id.nearLocation);
+        nearLocation.setText(network.getNearLocation().shortName());
         //TODO: Apply filter settings.
         ImageButton postsFilter = (ImageButton) findViewById(R.id.filter_feed);
         postsFilter.setOnClickListener(new View.OnClickListener() {
@@ -201,4 +228,10 @@ private String basePath = "www.culturemesh.com/api/v1";
         }
     }
 
+    public ArrayList<Post> getPosts() {
+        if (network == null) {
+            return null;
+        }
+        return network.getPosts();
+    }
 }
