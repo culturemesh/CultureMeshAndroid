@@ -1,12 +1,18 @@
 package org.codethechange.culturemesh;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -15,14 +21,15 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.codethechange.culturemesh.models.Network;
-import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.User;
-import org.w3c.dom.Text;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -34,6 +41,10 @@ private String basePath = "www.culturemesh.com/api/v1";
     final static String FILTER_CHOICE_NATIVE = "fcn";
     final static String FILTER_CHOICE_TWITTER = "fct";
     static SharedPreferences settings;
+    
+    private FloatingActionButton create, createPost, createEvent;
+    private Animation open, close, backward, forward;
+    private boolean isFABOpen;
 
     private Network network;
 
@@ -86,6 +97,40 @@ private String basePath = "www.culturemesh.com/api/v1";
 
         //NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         //navigationView.setNavigationItemSelectedListener(this);
+
+        //Load Animations for Floating Action Buttons
+        open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
+        close = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_close);
+        forward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_forward);
+        backward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_backward);
+
+        //Setup FloatingActionButton Listeners
+        create = findViewById(R.id.create);
+        createPost = findViewById(R.id.create_post);
+        createEvent = findViewById(R.id.create_event);
+
+        create.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateFAB();
+            }
+        });
+        createPost.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent cPA = new Intent(getApplicationContext(), CreatePostActivity.class);
+                startActivity(cPA);
+                //TODO: Have fragment loading stuff be in start() method so feed updates.
+            }
+        });
+        createEvent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent cEA = new Intent(getApplicationContext(), CreateEventActivity.class);
+                startActivity(cEA);
+            }
+        });
+        
     }
 
     @Override
@@ -228,10 +273,52 @@ private String basePath = "www.culturemesh.com/api/v1";
         }
     }
 
-    public ArrayList<Post> getPosts() {
-        if (network == null) {
-            return null;
+    void animateFAB() {
+        int colorAccent = getResources().getColor(R.color.colorAccent);
+        int primaryDark = getResources().getColor(R.color.colorPrimaryDark);
+        if (isFABOpen) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+
+                ObjectAnimator changeColor = ObjectAnimator.ofInt(create, "backgroundTint", primaryDark, colorAccent);
+                changeColor.setDuration(300);
+                changeColor.setEvaluator(new ArgbEvaluator());
+                changeColor.setInterpolator(new DecelerateInterpolator(2));
+                changeColor.addUpdateListener(new ObjectAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        int animatedValue = (int) animation.getAnimatedValue();
+                        create.setBackgroundTintList(ColorStateList.valueOf(animatedValue));
+                    }
+                });
+                changeColor.start();
+            }
+
+            createPost.startAnimation(close);
+            createEvent.startAnimation(close);
+            create.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_24px));
+        } else {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+
+                ObjectAnimator changeColor = ObjectAnimator.ofInt(create, "backgroundTint", colorAccent, primaryDark);
+                changeColor.setDuration(300);
+                changeColor.setEvaluator(new ArgbEvaluator());
+                changeColor.setInterpolator(new DecelerateInterpolator(2));
+                changeColor.addUpdateListener(new ObjectAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        int animatedValue = (int) animation.getAnimatedValue();
+                        create.setBackgroundTintList(ColorStateList.valueOf(animatedValue));
+                    }
+                });
+                changeColor.start();
+            }
+            //create.startAnimation(forward);
+            createPost.startAnimation(open);
+            createEvent.startAnimation(open);
+            create.setImageDrawable(getResources().getDrawable(R.drawable.ic_cancel_white_24px));
         }
-        return network.getPosts();
+        isFABOpen = !isFABOpen;
     }
+
+
 }

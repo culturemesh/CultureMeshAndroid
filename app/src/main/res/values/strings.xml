@@ -31,4 +31,8 @@
     </string-array>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="create">Create</string>
+    <string name="title_activity_create">Create</string>
+    <string name="title_activity_create_post">Create Post</string>
+    <string name="title_activity_create_event">Create Event</string>
 </resources>

@@ -38,6 +38,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
+
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.codethechange.culturemesh.FindNetworkActivity" />
@@ -45,7 +46,25 @@
         <activity
             android:name=".ExploreListActivity"
             android:label="@string/title_activity_explore_list"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".CreatePostActivity"
+            android:label="@string/title_activity_create_post"
+            android:parentActivityName=".TimelineActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.codethechange.culturemesh.TimelineActivity" />
+        </activity>
+        <activity
+            android:name=".CreateEventActivity"
+            android:label="@string/title_activity_create_event"
+            android:parentActivityName=".TimelineActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.codethechange.culturemesh.TimelineActivity" />
+        </activity>
     </application>
 
 </manifest>
