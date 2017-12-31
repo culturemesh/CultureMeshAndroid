@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh.models;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
 import java.util.Date;
@@ -8,11 +9,13 @@ import java.util.Date;
  * Created by nathaniel on 11/10/17.
  */
 
-public class Post {
+public class Post implements Serializable{
 
     private BigInteger id;
     private User author;
     private String content;
+    private String imgLink;
+    private String vidLink;
 
     public BigInteger getId() {
         return id;
@@ -22,14 +25,19 @@ public class Post {
         this.id = id;
     }
 
-
-    private String title;
     private String datePosted;
 
-    public Post(User author, String content, String title, String datePosted) {
+    public Post(User author, String content, String imgLink, String vidLink, String datePosted) {
         this.author = author;
         this.content = content;
-        this.title = title;
+        this.imgLink = imgLink;
+        this.vidLink = vidLink;
+        this.datePosted = datePosted;
+    }
+
+    public Post(User author, String content, String datePosted) {
+        this.author = author;
+        this.content = content;
         this.datePosted = datePosted;
     }
 
@@ -39,10 +47,6 @@ public class Post {
 
     public String getContent() {
         return content;
-    }
-
-    public String getTitle() {
-        return title;
     }
 
     public String getDatePosted() {
@@ -55,10 +59,6 @@ public class Post {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public void setDatePosted(String datePosted) {

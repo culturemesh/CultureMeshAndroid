@@ -1,12 +1,13 @@
 package org.codethechange.culturemesh.models;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
  * Created by nathaniel on 11/10/17.
  */
 
-public class Location {
+public class Location implements Serializable{
     private BigInteger id;
     private String country;
     private String region;

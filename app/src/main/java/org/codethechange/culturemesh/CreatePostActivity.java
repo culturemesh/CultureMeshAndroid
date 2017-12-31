@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -16,20 +17,39 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
+import org.codethechange.culturemesh.models.Network;
+import org.codethechange.culturemesh.models.Post;
+import org.codethechange.culturemesh.models.User;
+
+import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.math.BigInteger;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
-public class CreatePostActivity extends AppCompatActivity implements View.OnFocusChangeListener {
+public class CreatePostActivity extends AppCompatActivity implements
+        ListenableEditText.onSelectionChangedListener {
     SparseBooleanArray formTogState;
-    EditText content;
+    ListenableEditText content;
+    SparseArray<int[]> toggleIcons;
+    SparseArray<MenuItem> menuItems;
+    Network network;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,8 +59,46 @@ public class CreatePostActivity extends AppCompatActivity implements View.OnFocu
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         formTogState = new SparseBooleanArray();
         content = findViewById(R.id.postContent);
-        content.setOnFocusChangeListener(this);
+        content.setOnSelectionChangedListener(this);
         content.setMovementMethod(LinkMovementMethod.getInstance());
+        int[] boldIcons = {R.drawable.ic_format_bold_white_24px,
+                R.drawable.ic_format_bold_black_24px};
+        toggleIcons = new SparseArray<int[]>();
+        toggleIcons.put(R.id.bold, boldIcons);
+        int[] italicIcons = {R.drawable.ic_format_italic_white_24px,
+                R.drawable.ic_format_italic_black_24px};
+        toggleIcons.put(R.id.italic, italicIcons);
+        int[] linkIcons= {R.drawable.ic_insert_link_white_24px,
+                R.drawable.ic_insert_link_black_24px};
+        toggleIcons.put(R.id.insert_link, linkIcons);
+        menuItems = new SparseArray<MenuItem>();
+        //TODO: Random website says parcelable is better than serializable
+        //http://www.techjini.com/blog/passing-objects-via-intent-in-android/
+        network = (Network) getIntent().getSerializableExtra(TimelineActivity.BUNDLE_NETWORK);
+        TextView networkLabel = findViewById(R.id.network_label);
+        if (network.isLocationNetwork()) {
+            networkLabel.setText(getResources().getString(R.string.from) + " " +
+                    network.getFromLocation().shortName() + " " +
+                    getResources().getString(R.string.near) + " " +
+                    network.getNearLocation().shortName());
+        } else {
+            networkLabel.setText(network.getLang().toString() + " " +
+                    getResources().getString(R.string.speakers_in).toString() + " " +
+                    network.getNearLocation().shortName());
+        }
+        Button postButton = findViewById(R.id.create_post_button);
+        postButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: Replace user with logged in user
+                //TODO: Why do we have a title field??
+                User user = API.Get.user(new BigInteger("11"));
+                String contentHTML = Html.toHtml(content.getText());
+                String datePosted = new Date().toString();
+                API.Post.post(new Post(user, contentHTML, "",datePosted));
+                finish();
+            }
+        });
     }
 
 
@@ -48,6 +106,9 @@ public class CreatePostActivity extends AppCompatActivity implements View.OnFocu
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.create_post, menu);
+        menuItems.put(R.id.bold,menu.findItem(R.id.bold));
+        menuItems.put(R.id.italic,menu.findItem(R.id.italic));
+        menuItems.put(R.id.insert_link,menu.findItem(R.id.insert_link));
         return true;
     }
 
@@ -107,18 +168,24 @@ public class CreatePostActivity extends AppCompatActivity implements View.OnFocu
                     }
                     break;
             }
-            //Strange phenomenon where random underline spans are created. Let's remove them.
+            //Strange phenomenon where underline spans from keyboard focus are created.
+            //Let's remove them.
             UnderlineSpan[] spans = sSB.getSpans(0, sSB.length(), UnderlineSpan.class);
             for (UnderlineSpan span : spans) {
                 sSB.removeSpan(span);
             }
+            //Remove the keyboard cursor so we avoid that pesky underline bug.
+            InputMethodManager inputManager =
+                    (InputMethodManager) getApplicationContext().
+                            getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (inputManager != null && this.getCurrentFocus() != null) {
+                inputManager.hideSoftInputFromWindow( this.getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+
+
             content.setText(sSB);
         }
-
-
-
-        //TODO: Actually save/update edittext formatting with toggles.
-
         //TODO: Allow attach image functionality.
 
         formTogState.put(id, !prevToggle);
@@ -127,13 +194,45 @@ public class CreatePostActivity extends AppCompatActivity implements View.OnFocu
         return super.onOptionsItemSelected(item);
     }
 
+
+
     @Override
-    public void onFocusChange(View v, boolean hasFocus) {
-        Log.i("Focus","Focused changed to " + hasFocus);
+    public void onSelectionChanged(int selStart, int selEnd) {
+        //Update the state of the format buttons by checking what spans are inside the new selection
+        SpannableStringBuilder sSB = new SpannableStringBuilder(content.getText());
+        formTogState.clear();
+        StyleSpan[] styleSpans = sSB.getSpans(selStart, selEnd, StyleSpan.class);
+        for(StyleSpan span : styleSpans){
+            if (!formTogState.get(R.id.bold, false) && span.getStyle() ==
+                    Typeface.BOLD) {
+                formTogState.put(R.id.bold, true);
+            } else if (!formTogState.get(R.id.italic, false) && span.getStyle() ==
+                    Typeface.ITALIC) {
+                formTogState.put(R.id.italic, true);
+            }
+            if (formTogState.get(R.id.bold, false) && formTogState.get(R.id.italic,
+                    false)) {
+                break;
+            }
+        }
+        URLSpan[] linkSpans = sSB.getSpans(selStart, selEnd, URLSpan.class);
+        if (linkSpans.length > 0) {
+            formTogState.put(R.id.insert_link, true);
+        }
+        updateIconToggles();
     }
 
-
-
-
-
+    void updateIconToggles() {
+        //toggleIcons -- Key is menuItem Id, value is array of drawable ids.
+        // 0 index is untoggled (white), 1 index is toggled (black)
+        //Use fancy conversion from boolean to int to make code more concise.
+        for (int keyIndex = 0; keyIndex < toggleIcons.size(); keyIndex++) {
+            int id = toggleIcons.keyAt(keyIndex);
+            MenuItem item = menuItems.get(id);
+            if (item != null) {
+                int iconIndex = (formTogState.get(id, false)) ? 1 : 0;
+                item.setIcon(toggleIcons.get(id)[iconIndex]);
+            }
+        }
+    }
 }

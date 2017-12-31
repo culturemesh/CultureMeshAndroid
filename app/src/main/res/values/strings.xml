@@ -35,4 +35,12 @@
     <string name="title_activity_create">Create</string>
     <string name="title_activity_create_post">Create Post</string>
     <string name="title_activity_create_event">Create Event</string>
+    <string name="bold">Bold</string>
+    <string name="italic">Italic</string>
+    <string name="insert_link">Insert Link</string>
+    <string name="attach_image">Attach Image</string>
+    <string name="from">From</string>
+    <string name="in">In</string>
+    <string name="near">Near</string>
+    <string name="speakers_in">Speakers In</string>
 </resources>

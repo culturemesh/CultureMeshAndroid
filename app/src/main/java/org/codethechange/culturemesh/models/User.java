@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh.models;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
@@ -7,7 +8,7 @@ import java.util.ArrayList;
  * Created by nathaniel on 11/10/17.
  */
 
-public class User {
+public class User implements Serializable{
 
     private BigInteger id;
 

@@ -4,4 +4,5 @@
     <color name="colorPrimaryDark">#4F8511</color>
     <color name="colorAccent">#E23824</color>
     <color name="darkBackground">#424242</color>
+    <color name="black">#000000</color>
 </resources>

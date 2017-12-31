@@ -40,6 +40,7 @@ private String basePath = "www.culturemesh.com/api/v1";
     final String FILTER_LABEL = "fl";
     final static String FILTER_CHOICE_NATIVE = "fcn";
     final static String FILTER_CHOICE_TWITTER = "fct";
+    final static String BUNDLE_NETWORK = "bunnet";
     static SharedPreferences settings;
     
     private FloatingActionButton create, createPost, createEvent;
@@ -119,6 +120,9 @@ private String basePath = "www.culturemesh.com/api/v1";
             @Override
             public void onClick(View v) {
                 Intent cPA = new Intent(getApplicationContext(), CreatePostActivity.class);
+                //Bundle bundle = new Bundle();
+                //bundle.putSerializable(BUNDLE_NETWORK, network);
+                cPA.putExtra(BUNDLE_NETWORK, network);
                 startActivity(cPA);
                 //TODO: Have fragment loading stuff be in start() method so feed updates.
             }
@@ -292,7 +296,8 @@ private String basePath = "www.culturemesh.com/api/v1";
                 });
                 changeColor.start();
             }
-
+            createPost.setClickable(false);
+            createEvent.setClickable(false);
             createPost.startAnimation(close);
             createEvent.startAnimation(close);
             create.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_24px));
@@ -313,6 +318,8 @@ private String basePath = "www.culturemesh.com/api/v1";
                 changeColor.start();
             }
             //create.startAnimation(forward);
+            createPost.setClickable(true);
+            createEvent.setClickable(true);
             createPost.startAnimation(open);
             createEvent.startAnimation(open);
             create.setImageDrawable(getResources().getDrawable(R.drawable.ic_cancel_white_24px));
