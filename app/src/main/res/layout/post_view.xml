@@ -18,6 +18,16 @@
         android:padding="16dp">
 
         <ImageView
+            android:id="@+id/attachedImage3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            card_view:layout_constraintStart_toEndOf="@+id/attachedImage2"
+            card_view:layout_constraintTop_toBottomOf="@+id/content"
+            card_view:srcCompat="@color/colorAccent" />
+
+        <ImageView
             android:id="@+id/person_photo"
             android:layout_width="40dp"
             android:layout_height="40dp"
@@ -81,11 +91,30 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
             android:text="some time"
             android:textStyle="italic"
             card_view:layout_constraintStart_toStartOf="parent"
-            card_view:layout_constraintTop_toBottomOf="@+id/content" />
+            card_view:layout_constraintTop_toBottomOf="@+id/attachedImage2" />
+
+        <ImageView
+            android:id="@+id/attachedImage2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            card_view:layout_constraintStart_toEndOf="@+id/attachedImage1"
+            card_view:layout_constraintTop_toBottomOf="@+id/content"
+            card_view:srcCompat="@color/colorAccent" />
+
+        <ImageView
+            android:id="@+id/attachedImage1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toBottomOf="@+id/content"
+            card_view:srcCompat="@color/colorAccent" />
 
     </android.support.constraint.ConstraintLayout>
 </android.support.v7.widget.CardView>

@@ -53,8 +53,7 @@ private String basePath = "www.culturemesh.com/api/v1";
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timeline);
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
+
 
         settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         //Choose selected network.
@@ -66,7 +65,7 @@ private String basePath = "www.culturemesh.com/api/v1";
         ArrayList<User> users = API.Get.networkUsers(id);
 
         //Update number of people.
-        //TODO: Find string manipulation of number that adds magnitude suffix (K,M,etc.)
+        //TODO: Manipulate string of number to have magnitude suffix (K,M,etc.)
         //Update population number
         TextView population = findViewById(R.id.network_population);
         population.setText(String.format("%d",users.size()));
@@ -89,16 +88,6 @@ private String basePath = "www.culturemesh.com/api/v1";
             }
         });
 
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        //ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                //this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        //drawer.setDrawerListener(toggle);
-        //toggle.syncState();
-
-        //NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        //navigationView.setNavigationItemSelectedListener(this);
-
         //Load Animations for Floating Action Buttons
         open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
         close = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_close);
@@ -120,8 +109,6 @@ private String basePath = "www.culturemesh.com/api/v1";
             @Override
             public void onClick(View v) {
                 Intent cPA = new Intent(getApplicationContext(), CreatePostActivity.class);
-                //Bundle bundle = new Bundle();
-                //bundle.putSerializable(BUNDLE_NETWORK, network);
                 cPA.putExtra(BUNDLE_NETWORK, network);
                 startActivity(cPA);
                 //TODO: Have fragment loading stuff be in start() method so feed updates.
@@ -239,8 +226,11 @@ private String basePath = "www.culturemesh.com/api/v1";
 
     }
 
+    /**
+     * This dialog allows us to filter out native/twitter posts from the feed.
+     * TODO: Add feature to filter out events.
+     */
     public static class FilterDialogFragment extends DialogFragment {
-        //TODO: Get SharedPrefs for saved settings
         boolean[] filterSettings = {true, true};
 
         @Override
@@ -259,7 +249,6 @@ private String basePath = "www.culturemesh.com/api/v1";
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        //TODO: Save settings to sharedPrefs.
                         // User clicked OK, so save the results somewhere
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putBoolean(FILTER_CHOICE_NATIVE, filterSettings[0]);
@@ -277,13 +266,19 @@ private String basePath = "www.culturemesh.com/api/v1";
         }
     }
 
+    /**
+     * This function controls the animation for the FloatingActionButtons.
+     * When the user taps the pencil icon, two other floating action buttons rise into view - create
+     * post and create event. The
+     */
     void animateFAB() {
         int colorAccent = getResources().getColor(R.color.colorAccent);
         int primaryDark = getResources().getColor(R.color.colorPrimaryDark);
         if (isFABOpen) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
 
-                ObjectAnimator changeColor = ObjectAnimator.ofInt(create, "backgroundTint", primaryDark, colorAccent);
+                ObjectAnimator changeColor = ObjectAnimator.ofInt(create,
+                        "backgroundTint", primaryDark, colorAccent);
                 changeColor.setDuration(300);
                 changeColor.setEvaluator(new ArgbEvaluator());
                 changeColor.setInterpolator(new DecelerateInterpolator(2));
@@ -304,7 +299,8 @@ private String basePath = "www.culturemesh.com/api/v1";
         } else {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
 
-                ObjectAnimator changeColor = ObjectAnimator.ofInt(create, "backgroundTint", colorAccent, primaryDark);
+                ObjectAnimator changeColor = ObjectAnimator.ofInt(create,
+                        "backgroundTint", colorAccent, primaryDark);
                 changeColor.setDuration(300);
                 changeColor.setEvaluator(new ArgbEvaluator());
                 changeColor.setInterpolator(new DecelerateInterpolator(2));

@@ -13,7 +13,9 @@ import android.view.View;
 import android.widget.EditText;
 
 /**
- * TODO: document your custom view class.
+ * This is a custom EditText that allows us to listen for changes in cursor position.
+ * CreatePostActivity uses this view so that the format toggle buttons can update their settings
+ * when a new region in the edit text is selected.
  */
 public class ListenableEditText extends EditText {
 
@@ -34,7 +36,8 @@ public class ListenableEditText extends EditText {
 
     @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
-        if (selStart - 1 != selStart && mListener != null) { //That is just a shift when the user types a character
+        if (selStart - 1 != selStart && mListener != null) {
+            //That is just a shift when the user types a character
             mListener.onSelectionChanged(selStart, selEnd);
         }
         super.onSelectionChanged(selStart, selEnd);

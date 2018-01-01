@@ -50,10 +50,8 @@ public class PostsFrag extends Fragment {
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         View rootView = inflater.inflate(R.layout.fragment_posts, container, false);
 
-        final RecyclerView rv = rootView.findViewById(R.id.postsRV);
+        mRecyclerView = rootView.findViewById(R.id.postsRV);
 
-        //mRecyclerView = (RecyclerView) activity.findViewById(R.id.postsRV);
-        mRecyclerView = rv;
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
@@ -114,12 +112,12 @@ public class PostsFrag extends Fragment {
             String content = null;
             String title = null;
             Date datePosted = new Date(); /* initialize with string version of date */
-            Post post = new Post(user, content, title, datePosted.toString());
+            Post post = new Post(user, content, datePosted.toString());
             //instantiate post with the REST data, to discuss
             posts.add(post);
         }
         RVAdapter adapter = new RVAdapter(posts);
-        rv.setAdapter(adapter);
+        mRecyclerView.setAdapter(adapter);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

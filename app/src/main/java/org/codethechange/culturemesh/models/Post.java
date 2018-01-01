@@ -35,10 +35,28 @@ public class Post implements Serializable{
         this.datePosted = datePosted;
     }
 
+    public String getImageLink() {
+        return imgLink;
+    }
+
+    public void setImageLink(String imgLink) {
+        this.imgLink = imgLink;
+    }
+
+    public String getVideoLink() {
+        return vidLink;
+    }
+
+    public void setVideoLink(String vidLink) {
+        this.vidLink = vidLink;
+    }
+
     public Post(User author, String content, String datePosted) {
         this.author = author;
         this.content = content;
         this.datePosted = datePosted;
+        this.imgLink = null;
+        this.vidLink = null;
     }
 
     public User getAuthor() {
