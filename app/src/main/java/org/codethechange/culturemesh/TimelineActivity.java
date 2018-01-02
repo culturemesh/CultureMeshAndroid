@@ -3,6 +3,7 @@ package org.codethechange.culturemesh;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -13,7 +14,10 @@ import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -42,8 +46,10 @@ private String basePath = "www.culturemesh.com/api/v1";
     final static String FILTER_CHOICE_TWITTER = "fct";
     final static String BUNDLE_NETWORK = "bunnet";
     static SharedPreferences settings;
-    
+
     private FloatingActionButton create, createPost, createEvent;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private RecyclerView postsRV;
     private Animation open, close, backward, forward;
     private boolean isFABOpen;
 
@@ -121,8 +127,72 @@ private String basePath = "www.culturemesh.com/api/v1";
                 startActivity(cEA);
             }
         });
-        
+
+        swipeRefreshLayout = findViewById(R.id.postsRefresh);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                onSwipeRefresh();
+            }
+        });
+
+        //set up postsRV
+        postsRV = findViewById(R.id.postsRV);
     }
+
+    /* Can control refresh aesthetic (i.e. strength of swipe to trigger, direction, etc.) with this
+    class GestureDetector extends android.view.GestureDetector.SimpleOnGestureListener {
+        private static final int SWIPE_MIN_DISTANCE = 120;
+        private static final int SWIPE_MAX_OFF_PATH = 250;
+        private static final int SWIPE_THRESHOLD_VELOCITY = 50;
+
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                               float velocityY) {
+            try {
+                if (Math.abs(e1.getX() - e2.getX()) > SWIPE_MAX_OFF_PATH){
+                    return false;
+                }
+                // down swipe
+                else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE
+                        && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                    RecyclerView postsRV = getActivity().findViewById(R.id.postsRV);
+                    LinearLayoutManager linearLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
+                    if(linearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0) animateRefresh();
+                }
+            } catch (Exception e) {
+                Log.d("gErr", "Gesture error");
+            }
+            return false;
+        }
+    }
+*/
+
+    //Or rather, use built-in SwipeRefreshLayout; commented out portions were to be used with inner gesture class
+    public void onSwipeRefresh() {
+        //RecyclerView postsRV = getActivity().findViewById(R.id.postsRV);
+        //LinearLayoutManager linearLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
+        swipeRefreshLayout.setRefreshing(true);
+        //if(linearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0)
+        if(!refreshPosts()) Log.d("sErr", "Server/Connection error");
+    }
+    //Returns true upon successful retrieval, returns false if issue/no connection
+    public boolean refreshPosts() { //probably public? if we want to refresh from outside, if that's possible/needed
+        boolean success = true;
+        //test
+        TextView tv = findViewById(R.id.fromLocation);
+        String tvTxt = (String) tv.getText();
+        String newTxt = tvTxt + "!";
+
+        //re-call loading posts. this must be done asynchronously.
+
+        swipeRefreshLayout.setRefreshing(false);
+        //if server/connection error, success = false;
+
+        // animate post-refresh
+        // when done, animate old posts fading away and new posts then fading in
+        return success;
+    }
+
 
     @Override
     protected void onStart() {
@@ -167,9 +237,14 @@ private String basePath = "www.culturemesh.com/api/v1";
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        LinearLayoutManager linearLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
+
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        } else if(linearLayoutManager.findFirstCompletelyVisibleItemPosition() > 0) {
+            postsRV.smoothScrollToPosition(0);
+            onSwipeRefresh(); //can choose whether or not to refresh later
+        } else { //nothing to "undo", go back an activity
             super.onBackPressed();
         }
     }
@@ -277,7 +352,7 @@ private String basePath = "www.culturemesh.com/api/v1";
         if (isFABOpen) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
 
-                ObjectAnimator changeColor = ObjectAnimator.ofInt(create,
+                @SuppressLint("ObjectAnimatorBinding") ObjectAnimator changeColor = ObjectAnimator.ofInt(create,
                         "backgroundTint", primaryDark, colorAccent);
                 changeColor.setDuration(300);
                 changeColor.setEvaluator(new ArgbEvaluator());
@@ -299,7 +374,7 @@ private String basePath = "www.culturemesh.com/api/v1";
         } else {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
 
-                ObjectAnimator changeColor = ObjectAnimator.ofInt(create,
+                @SuppressLint("ObjectAnimatorBinding") ObjectAnimator changeColor = ObjectAnimator.ofInt(create,
                         "backgroundTint", colorAccent, primaryDark);
                 changeColor.setDuration(300);
                 changeColor.setEvaluator(new ArgbEvaluator());
@@ -322,6 +397,4 @@ private String basePath = "www.culturemesh.com/api/v1";
         }
         isFABOpen = !isFABOpen;
     }
-
-
 }

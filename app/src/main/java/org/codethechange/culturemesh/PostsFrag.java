@@ -4,14 +4,18 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
@@ -20,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,6 +36,7 @@ public class PostsFrag extends Fragment {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     //To figure out params that would be passed in
+
 
     private OnFragmentInteractionListener mListener;
 
@@ -75,6 +81,8 @@ public class PostsFrag extends Fragment {
 
         mAdapter = new RVAdapter(posts);
         mRecyclerView.setAdapter(mAdapter);
+
+        //REDACTED AND MOVED/CHANGED IN loadPosts
         /*String network = ""; //to draw from explore/saved Instances
         String networkId = "";
         final String postPath = basePath + network + networkId + "/posts";
@@ -96,6 +104,7 @@ public class PostsFrag extends Fragment {
                     }
                 });
         //TextView tx = rootView.findViewById();*/
+
         return rootView;
     }
 

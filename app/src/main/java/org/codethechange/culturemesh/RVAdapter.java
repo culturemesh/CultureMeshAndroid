@@ -15,6 +15,9 @@ import org.codethechange.culturemesh.models.Post;
 
 import java.util.List;
 
+//progress circle
+//refresh posts
+
 
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
     private List<Post> netPosts;
