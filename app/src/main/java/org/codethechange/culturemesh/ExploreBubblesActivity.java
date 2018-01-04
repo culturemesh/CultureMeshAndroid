@@ -39,6 +39,7 @@ public class ExploreBubblesActivity extends AppCompatActivity {
         toolbar.inflateMenu(R.menu.menu_find_network);
         physicsLayout.getPhysics().enablePhysics();
         physicsLayout.getPhysics().enableFling();
+        physicsLayout.getPhysics().setGravityY(Physics.JUPITER_GRAVITY);
 
         final View circleView = findViewById(R.id.circle);
         addViewButton.setOnClickListener(new View.OnClickListener() {
