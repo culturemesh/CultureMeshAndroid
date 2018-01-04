@@ -1,13 +1,29 @@
 package org.codethechange.culturemesh.models;
 
+
+import java.io.Serializable;
+import java.math.BigInteger;
+
 import java.util.Date;
 
 /**
  * Created by nathaniel on 11/10/17.
  */
 
-public class Event {
+public class Event implements Serializable{
+
+    private BigInteger id;
     private String title;
+
+    public BigInteger getId() {
+        return id;
+    }
+
+    public void setId(BigInteger id) {
+        this.id = id;
+    }
+
+
     private String description;
     private Date timeOfEvent;
     private User author;
