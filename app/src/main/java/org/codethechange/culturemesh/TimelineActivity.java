@@ -366,8 +366,10 @@ private String basePath = "www.culturemesh.com/api/v1";
                 });
                 changeColor.start();
             }
+            //We don't want the hidden buttons to be clickable - that would be weird.
             createPost.setClickable(false);
             createEvent.setClickable(false);
+            //Hide the buttons!
             createPost.startAnimation(close);
             createEvent.startAnimation(close);
             create.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_24px));
@@ -388,9 +390,10 @@ private String basePath = "www.culturemesh.com/api/v1";
                 });
                 changeColor.start();
             }
-            //create.startAnimation(forward);
+            //Activate their onclick listeners!
             createPost.setClickable(true);
             createEvent.setClickable(true);
+            //Show the buttons!
             createPost.startAnimation(open);
             createEvent.startAnimation(open);
             create.setImageDrawable(getResources().getDrawable(R.drawable.ic_cancel_white_24px));
