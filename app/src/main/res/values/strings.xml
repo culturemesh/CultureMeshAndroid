@@ -43,4 +43,6 @@
     <string name="in">In</string>
     <string name="near">Near</string>
     <string name="speakers_in">Speakers In</string>
+    <string name="help">Help</string>
+    <string name="your_networks">Your Networks</string>
 </resources>

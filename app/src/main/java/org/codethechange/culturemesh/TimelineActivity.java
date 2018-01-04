@@ -17,6 +17,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -52,6 +53,7 @@ private String basePath = "www.culturemesh.com/api/v1";
     private RecyclerView postsRV;
     private Animation open, close, backward, forward;
     private boolean isFABOpen;
+    private Toolbar mToolbar;
 
     private Network network;
 
@@ -60,6 +62,13 @@ private String basePath = "www.culturemesh.com/api/v1";
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timeline);
 
+        //Set up Toolbar
+        mToolbar = (Toolbar) findViewById(R.id.action_bar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setLogo(R.drawable.logo_header);
+
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         //Choose selected network.
@@ -117,7 +126,8 @@ private String basePath = "www.culturemesh.com/api/v1";
                 Intent cPA = new Intent(getApplicationContext(), CreatePostActivity.class);
                 cPA.putExtra(BUNDLE_NETWORK, network);
                 startActivity(cPA);
-                //TODO: Have fragment loading stuff be in start() method so feed updates.
+                //TODO: Have fragment post feed loading stuff be in start() method so feed updates
+                //when createPostActivity finishes.
             }
         });
         createEvent.setOnClickListener(new View.OnClickListener() {
@@ -138,6 +148,8 @@ private String basePath = "www.culturemesh.com/api/v1";
 
         //set up postsRV
         postsRV = findViewById(R.id.postsRV);
+
+        //TODO: Inflate menu of subscribed networks in nav drawer.
     }
 
     /* Can control refresh aesthetic (i.e. strength of swipe to trigger, direction, etc.) with this
@@ -280,8 +292,6 @@ private String basePath = "www.culturemesh.com/api/v1";
         if (id == R.id.nav_camera) {
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
 
