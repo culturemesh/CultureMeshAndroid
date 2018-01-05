@@ -11,10 +11,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -51,9 +53,11 @@ private String basePath = "www.culturemesh.com/api/v1";
     private FloatingActionButton create, createPost, createEvent;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView postsRV;
-    private Animation open, close, backward, forward;
+    private Animation open, close;
     private boolean isFABOpen;
     private Toolbar mToolbar;
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mDrawerToggle;
 
     private Network network;
 
@@ -66,9 +70,50 @@ private String basePath = "www.culturemesh.com/api/v1";
         mToolbar = (Toolbar) findViewById(R.id.action_bar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setLogo(R.drawable.logo_header);
-
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+
+        //Set Up Navigation Drawer
+        // Setup Navigation Drawer Layout
+        mDrawerLayout= findViewById(R.id.drawer_layout);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar,
+                R.string.app_name, R.string.app_name) {
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                invalidateOptionsMenu();
+            }
+        };
+
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+        mDrawerLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mDrawerToggle.syncState();
+            }
+        });
+        mDrawerToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
+                    mDrawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    mDrawerLayout.openDrawer(GravityCompat.START);
+                }
+            }
+        });
+
 
         settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         //Choose selected network.
@@ -106,8 +151,6 @@ private String basePath = "www.culturemesh.com/api/v1";
         //Load Animations for Floating Action Buttons
         open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
         close = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_close);
-        forward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_forward);
-        backward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_backward);
 
         //Setup FloatingActionButton Listeners
         create = findViewById(R.id.create);
@@ -148,7 +191,6 @@ private String basePath = "www.culturemesh.com/api/v1";
 
         //set up postsRV
         postsRV = findViewById(R.id.postsRV);
-
         //TODO: Inflate menu of subscribed networks in nav drawer.
     }
 
@@ -275,12 +317,29 @@ private String basePath = "www.culturemesh.com/api/v1";
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            Log.i("Toggle","Toggle selected!");
+            return true;
+        }
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -301,8 +360,7 @@ private String basePath = "www.culturemesh.com/api/v1";
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 

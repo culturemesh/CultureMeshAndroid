@@ -177,7 +177,6 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        android:visibility="gone"
         app:headerLayout="@layout/nav_header_timeline"
         app:menu="@menu/activity_timeline_drawer">
 
