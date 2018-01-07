@@ -7,6 +7,7 @@ import android.view.View
 import org.codethechange.bubblepicker.*
 import org.codethechange.bubblepicker.model.Color
 import org.codethechange.bubblepicker.model.PickerItem
+import org.codethechange.bubblepicker.model.PickerItemSize
 import org.codethechange.bubblepicker.physics.Engine
 import org.codethechange.bubblepicker.rendering.BubbleShader.A_POSITION
 import org.codethechange.bubblepicker.rendering.BubbleShader.A_UV
@@ -80,6 +81,28 @@ class PickerRenderer(val glView: View) : GLSurfaceView.Renderer {
             circles.add(Item(items[index], body))
         }
         items.forEach { if (it.isSelected) Engine.resize(circles.first { circle -> circle.pickerItem == it }) }
+
+        items.forEach {
+            if (it.size == PickerItemSize.LARGE) {
+                val circleBody = (circles.first { circle -> circle.pickerItem == it }).circleBody;
+                circleBody.increase(0.05f)
+                circleBody.increased = false;
+                circleBody.decreasedRadius = circleBody.radius;
+                circleBody.increasedRadius = circleBody.radius * 1.3f;
+            }
+        }
+
+        items.forEach {
+            if (it.size == PickerItemSize.SMALL) {
+                val circleBody = (circles.first { circle -> circle.pickerItem == it }).circleBody;
+                circleBody.decrease(0.05f)
+                circleBody.increased = false;
+                circleBody.decreasedRadius = circleBody.radius;
+                circleBody.increasedRadius = circleBody.radius * 1.3f;
+            }
+        }
+        //items.forEach { if (it.size == PickerItemSize.LARGE) (circles.first { circle -> circle.pickerItem == it }).circleBody.increase(0.05f) }
+
         if (textureIds == null) textureIds = IntArray(circles.size * 2)
         initializeArrays()
     }

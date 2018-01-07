@@ -10,21 +10,25 @@ import org.codethechange.bubblepicker.BubblePickerListener;
 import org.codethechange.bubblepicker.adapter.BubblePickerAdapter;
 import org.codethechange.bubblepicker.model.BubbleGradient;
 import org.codethechange.bubblepicker.model.PickerItem;
+import org.codethechange.bubblepicker.model.PickerItemSize;
 import org.codethechange.bubblepicker.rendering.BubblePicker;
 import org.jetbrains.annotations.NotNull;
-
-import butterknife.BindView;
 
 /**
  * Created by nathaniel on 12/27/18.
  */
 
 public class ExploreBubblesOpenGLActivity extends AppCompatActivity {
-    @BindView(R.id.picker) BubblePicker picker;
+    BubblePicker picker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_explore_bubbles_open_gl);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        picker = findViewById(R.id.picker);
 
         final String[] titles = getResources().getStringArray(R.array.countries);
         final TypedArray colors = getResources().obtainTypedArray(R.array.colors);
@@ -45,14 +49,21 @@ public class ExploreBubblesOpenGLActivity extends AppCompatActivity {
                         colors.getColor((position * 2) % 8 + 1, 0), BubbleGradient.VERTICAL));
                 item.setTextColor(ContextCompat.getColor(ExploreBubblesOpenGLActivity.this, android.R.color.white));
                 item.setBackgroundImage(ContextCompat.getDrawable(ExploreBubblesOpenGLActivity.this, images.getResourceId(position, 0)));
+                if (((position * 2) % 8) > 3) {
+                    item.setSize(PickerItemSize.LARGE);
+                }
+
+                if (((position * 2) % 8) < 2) {
+                    item.setSize(PickerItemSize.SMALL);
+                }
                 return item;
             }
         });
         colors.recycle();
         images.recycle();
 
-        picker.setBubbleSize(20);
-
+        picker.setBubbleSize(70);
+        picker.setBackground(0x000000);
         picker.setListener(new BubblePickerListener() {
             @Override
             public void onBubbleSelected(@NotNull PickerItem item) {

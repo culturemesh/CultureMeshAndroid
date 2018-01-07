@@ -9,7 +9,7 @@ import org.jbox2d.dynamics.*
  */
 class CircleBody(val world: World, var position: Vec2, var radius: Float, var increasedRadius: Float, var density: Float) {
 
-    val decreasedRadius: Float = radius
+    var decreasedRadius: Float = radius
 
     var isIncreasing = false
 

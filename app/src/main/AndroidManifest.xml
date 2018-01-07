@@ -12,16 +12,11 @@
         <activity
             android:name=".TimelineActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".FindNetworkActivity"
             android:label="@string/title_activity_find_network"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ExploreBubblesActivity"
-            android:label="@string/title_activity_explore_bubbles"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
         <activity
             android:name=".ExploreBubblesOpenGLActivity"
             android:label="@string/title_activity_explore_bubbles_open_gl"

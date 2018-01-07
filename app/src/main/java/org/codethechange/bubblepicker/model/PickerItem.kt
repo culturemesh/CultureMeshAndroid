@@ -17,4 +17,9 @@ data class PickerItem @JvmOverloads constructor(var title: String? = null,
                                                 @ColorInt var textColor: Int? = null,
                                                 var textSize: Float = 40f,
                                                 var backgroundImage: Drawable? = null,
-                                                var isSelected: Boolean = false)
+                                                var isSelected: Boolean = false,
+                                                var size: PickerItemSize = PickerItemSize.MEDIUM)
+
+enum class PickerItemSize {
+    SMALL, MEDIUM, LARGE
+}
