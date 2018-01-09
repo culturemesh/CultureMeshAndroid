@@ -13,6 +13,32 @@ public class Post implements Serializable{
 
     private BigInteger id;
     private User author;
+
+    public BigInteger getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(BigInteger authorId) {
+        this.authorId = authorId;
+    }
+
+    public String getImgLink() {
+        return imgLink;
+    }
+
+    public void setImgLink(String imgLink) {
+        this.imgLink = imgLink;
+    }
+
+    public String getVidLink() {
+        return vidLink;
+    }
+
+    public void setVidLink(String vidLink) {
+        this.vidLink = vidLink;
+    }
+
+    private BigInteger authorId;
     private String content;
     private String imgLink;
     private String vidLink;
@@ -29,6 +55,14 @@ public class Post implements Serializable{
 
     public Post(User author, String content, String imgLink, String vidLink, String datePosted) {
         this.author = author;
+        this.content = content;
+        this.imgLink = imgLink;
+        this.vidLink = vidLink;
+        this.datePosted = datePosted;
+    }
+
+    public Post(BigInteger authorId, String content, String imgLink, String vidLink, String datePosted) {
+        this.authorId= authorId;
         this.content = content;
         this.imgLink = imgLink;
         this.vidLink = vidLink;

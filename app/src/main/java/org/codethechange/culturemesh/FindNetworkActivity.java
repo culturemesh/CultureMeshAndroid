@@ -40,7 +40,7 @@ import org.codethechange.culturemesh.models.User;
 
 import java.util.ArrayList;
 
-public class FindNetworkActivity extends AppCompatActivity {
+public class FindNetworkActivity extends DrawerActivity {
 
     //TODO: Replace these with Location Objects.
     static String nearLocation;
@@ -78,8 +78,6 @@ public class FindNetworkActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_network);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());

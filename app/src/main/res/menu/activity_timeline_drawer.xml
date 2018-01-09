@@ -3,26 +3,18 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
+            android:id="@+id/nav_explore"
             android:icon="@drawable/ic_explore_black_24px"
             android:title="@string/explore" />
         <item
-            android:id="@+id/nav_gallery"
+            android:id="@+id/nav_join_network"
             android:icon="@drawable/ic_search_black_24px"
             android:title="@string/join_network" />
 
     </group>
 
     <item android:title="@string/your_networks">
-        <menu >
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+        <menu>
         </menu>
     </item>
     <item android:title="">

@@ -20,7 +20,10 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableStringBuilder;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
+import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -40,14 +43,17 @@ import org.codethechange.culturemesh.models.User;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
-public class TimelineActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, PostsFrag.OnFragmentInteractionListener {
+public class TimelineActivity extends DrawerActivity
+        implements PostsFrag.OnFragmentInteractionListener {
 private String basePath = "www.culturemesh.com/api/v1";
     final String FILTER_LABEL = "fl";
     final static String FILTER_CHOICE_NATIVE = "fcn";
     final static String FILTER_CHOICE_TWITTER = "fct";
     final static String BUNDLE_NETWORK = "bunnet";
+    final static String SUBSCRIBED_NETWORKS = "subscrinets";
     static SharedPreferences settings;
 
     private FloatingActionButton create, createPost, createEvent;
@@ -55,9 +61,7 @@ private String basePath = "www.culturemesh.com/api/v1";
     private RecyclerView postsRV;
     private Animation open, close;
     private boolean isFABOpen;
-    private Toolbar mToolbar;
-    private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
+
 
     private Network network;
 
@@ -66,56 +70,25 @@ private String basePath = "www.culturemesh.com/api/v1";
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timeline);
 
-        //Set up Toolbar
-        mToolbar = (Toolbar) findViewById(R.id.action_bar);
+        settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+
+        /* //Set up Toolbar
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.action_bar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setLogo(R.drawable.logo_header);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+        */
+
+        getSupportActionBar().setLogo(R.drawable.logo_header);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
 
-        //Set Up Navigation Drawer
-        // Setup Navigation Drawer Layout
-        mDrawerLayout= findViewById(R.id.drawer_layout);
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar,
-                R.string.app_name, R.string.app_name) {
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                invalidateOptionsMenu();
-            }
-
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
-                invalidateOptionsMenu();
-            }
-        };
-
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-
-        mDrawerLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mDrawerToggle.syncState();
-            }
-        });
-        mDrawerToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
-                    mDrawerLayout.closeDrawer(GravityCompat.START);
-                } else {
-                    mDrawerLayout.openDrawer(GravityCompat.START);
-                }
-            }
-        });
 
 
-        settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+
         //Choose selected network.
         //TODO: Create better default behavior for no selected networks.
         String selectedNetwork = settings.getString(API.SELECTED_NETWORK, "123456");
@@ -191,7 +164,7 @@ private String basePath = "www.culturemesh.com/api/v1";
 
         //set up postsRV
         postsRV = findViewById(R.id.postsRV);
-        //TODO: Inflate menu of subscribed networks in nav drawer.
+
     }
 
     /* Can control refresh aesthetic (i.e. strength of swipe to trigger, direction, etc.) with this
@@ -317,7 +290,7 @@ private String basePath = "www.culturemesh.com/api/v1";
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
+        if (super.mDrawerToggle.onOptionsItemSelected(item)) {
             Log.i("Toggle","Toggle selected!");
             return true;
         }
@@ -329,40 +302,7 @@ private String basePath = "www.culturemesh.com/api/v1";
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        // Sync the toggle state after onRestoreInstanceState has occurred.
-        mDrawerToggle.syncState();
-    }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
-        mDrawerLayout.closeDrawer(GravityCompat.START);
-        return true;
-    }
 
     @Override
     public void onFragmentInteraction(Uri uri) {

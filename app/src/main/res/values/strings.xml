@@ -45,4 +45,5 @@
     <string name="speakers_in">Speakers In</string>
     <string name="help">Help</string>
     <string name="your_networks">Your Networks</string>
+    <string name="title_activity_drawer">DrawerActivity</string>
 </resources>

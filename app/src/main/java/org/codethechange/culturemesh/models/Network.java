@@ -44,6 +44,7 @@ public class Network implements Serializable{
         this.fromLocation = fromLocation;
     }
 
+    //TODO: Possibly remove this field -- network object doesn't have posts field
     private ArrayList<Post> posts;
     private ArrayList<Event> events;
     private Location nearLocation;
@@ -95,4 +96,8 @@ public class Network implements Serializable{
         this.nearLocation = nearLocation;
     }
 
+    //No override of toString() because getResources() requires an activity
+    //We want to use string xml resources for localization.
+    //For more info, check out
+    //https://developer.android.com/guide/topics/resources/providing-resources.html
 }

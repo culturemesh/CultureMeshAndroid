@@ -32,7 +32,7 @@ public class ChooseNearLocationActivity extends AppCompatActivity implements Sea
         setContentView(R.layout.activity_choose_near_location);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         //Set up Search functionality.
         SearchManager mSearchManager = (SearchManager)
                 getSystemService(Context.SEARCH_SERVICE);
