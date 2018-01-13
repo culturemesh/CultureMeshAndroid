@@ -106,6 +106,7 @@ public class FindNetworkActivity extends DrawerActivity {
             }
         });
 
+
     }
 
     @Override

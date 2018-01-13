@@ -41,11 +41,20 @@ class API {
 
     static ArrayList<Network> genNetworks() {
         ArrayList<Network> networks = new ArrayList<Network>();
+        Location[] possibleLocations = {new Location("United States",
+                "California", "Stanford", new Point[0]),
+                new Location("United States","New York","New York City", new Point[0]),
+                new Location("United States", "California", "Stanford", new Point[0]),
+                new Location("United States","New York","White Plains", new Point[0]),
+                new Location("United States", "California", "San Francisco", new Point[0]),
+                new Location("United States","New York","Albany", new Point[0]),
+                new Location("United States", "California", "Sacramento", new Point[0]),
+                new Location("United States","New York","New York City", new Point[0]),
+                new Location("United States","Maryland","Baltimore", new Point[0]),
+                new Location("France","Provence","Aix-en-Provence", new Point[0])};
         for (int i = 0; i < 10; i++) {
 
-            networks.add(new Network(genPosts(), genEvents(), new Location("United States",
-                    "California", "Stanford", new Point[0]), new Location(
-                    "United States","New York","New York City", new Point[0])));
+            networks.add(new Network(genPosts(), genEvents(), possibleLocations[i++], possibleLocations[i]));
         }
         return networks;
     }

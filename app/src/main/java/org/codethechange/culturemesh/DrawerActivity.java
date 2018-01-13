@@ -14,6 +14,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -22,6 +24,7 @@ import android.widget.FrameLayout;
 
 import org.codethechange.culturemesh.models.Network;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,6 +34,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
     protected FrameLayout frameLayout;
     protected DrawerLayout mDrawerLayout;
     protected ActionBarDrawerToggle mDrawerToggle;
+    protected SparseArray<Network> subscribedNetworks;
 
     @Override
     public void setContentView(int layoutResID) {
@@ -86,31 +90,28 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         MenuItem item = navMenu.getItem(2); //Your Networks subItem
         Log.i("netMenu", item.getTitle().toString());
         SubMenu netMenu = item.getSubMenu();
-        Set<String> dummySubNets = new HashSet<>();
-        for (Network net : API.genNetworks()) {
+        //Instantiate map with key -> menu view id, value -> network.
+        subscribedNetworks = new SparseArray<Network>();
+        //TODO: Replace dummy networks with real stuff.
+        ArrayList<Network> networks = API.genNetworks();
+        for (Network net : networks) {
             String name = "";
             if (net.isLocationNetwork()) {
                 name = getResources().getString(R.string.from) + " " +
-                        network.getFromLocation().shortName() + " " +
+                        net.getFromLocation().shortName() + " " +
                         getResources().getString(R.string.near) + " " +
-                        network.getNearLocation().shortName();
+                        net.getNearLocation().shortName();
             } else {
-                name = network.getLang().toString() + " " +
+                name = net.getLang().toString() + " " +
                         getResources().getString(R.string.speakers_in) + " " +
-                        network.getNearLocation().shortName();
+                        net.getNearLocation().shortName();
             }
-            dummySubNets.add(name);
-            dummySubNets.add("From Indonesia Near San Francisco");
-            dummySubNets.add("From New York City Near Stanford");
-        }
-        Set<String> subNets = dummySubNets;
-        //TODO: Replace Dummy Set of Strings with real subscribed networks.
-        for (String name : subNets) {
+            int viewId = View.generateViewId();
+            subscribedNetworks.put(viewId, net);
             SpannableStringBuilder sb = new SpannableStringBuilder(name);
             sb.setSpan(new RelativeSizeSpan(.8f), 0, sb.length(), 0);
-            netMenu.add(sb);
+            netMenu.add(Menu.NONE, viewId, 0, sb);
         }
-
         navView.setNavigationItemSelectedListener(this);
     }
 
@@ -133,7 +134,14 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
     public boolean onNavigationItemSelected(MenuItem item) {
         //TODO: Handle navigation view item clicks here.
         int id = item.getItemId();
-        Log.i("Menu Item", "Menu Item Clicked");
+        Network subNet  = subscribedNetworks.get(id, null);
+        if (subNet != null) {
+            //The user tapped a subscribed network. We will now restart TimeLineActivity for that
+            //network.
+            //TODO: Set up way to pass network as data point for timelineactivity.
+            Intent toTimeline = new Intent(getApplicationContext(), TimelineActivity.class);
+            startActivity(toTimeline);
+        }
         if (id == R.id.nav_explore) {
             Intent startExplore = new Intent(getApplicationContext(), ExploreListActivity.class);
             startActivity(startExplore);
