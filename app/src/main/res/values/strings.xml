@@ -43,4 +43,13 @@
     <string name="in">In</string>
     <string name="near">Near</string>
     <string name="speakers_in">Speakers In</string>
+
+    <!-- Strings for Event Information; Currently matches Website mostly -->
+    <!-- TODO: Decide whether to change these labels or continue matching website -->
+    <string name="eventProperty_name">Name of Event</string>
+    <string name="eventProperty_date">Event Date</string>
+    <!-- Address handles the following website fields: Address 1, Address 2, City, Region -->
+    <string name="eventProperty_address">Address</string>
+    <string name="eventProperty_description">What\'s Happening</string>
+    <string name="eventProperty_time">Event Start Time</string>
 </resources>

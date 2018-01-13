@@ -8,4 +8,77 @@
     tools:context="org.codethechange.culturemesh.CreateEventActivity"
     tools:showIn="@layout/activity_create_event">
 
+    <EditText
+        android:id="@+id/eventName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginTop="@dimen/ui_element_vertical_spacing"
+        android:ems="10"
+        android:hint="@string/eventProperty_name"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- TODO: Provide calendar for date selection -->
+    <EditText
+        android:id="@+id/eventDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginTop="@dimen/ui_element_vertical_spacing"
+        android:ems="10"
+        android:hint="@string/eventProperty_date"
+        android:inputType="datetime"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/eventName" />
+
+    <EditText
+        android:id="@+id/eventAddress"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginTop="@dimen/ui_element_vertical_spacing"
+        android:ems="10"
+        android:hint="@string/eventProperty_address"
+        android:inputType="textPostalAddress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/eventTime" />
+
+    <EditText
+        android:id="@+id/eventDescription"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginTop="@dimen/ui_element_vertical_spacing"
+        android:ems="10"
+        android:hint="@string/eventProperty_description"
+        android:inputType="textMultiLine"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/eventAddress" />
+
+    <!-- TODO: Provide options (clock? scrolling options?) for time selection -->
+    <EditText
+        android:id="@+id/eventTime"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginTop="@dimen/ui_element_vertical_spacing"
+        android:ems="10"
+        android:hint="@string/eventProperty_time"
+        android:inputType="time"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/eventDate" />
+
 </android.support.constraint.ConstraintLayout>
