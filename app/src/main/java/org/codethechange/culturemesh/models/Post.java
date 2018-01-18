@@ -9,7 +9,7 @@ import java.util.Date;
  * Created by nathaniel on 11/10/17.
  */
 
-public class Post implements Serializable{
+public class Post extends FeedItem implements Serializable{
 
     private BigInteger id;
     private User author;

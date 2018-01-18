@@ -10,7 +10,7 @@ import java.util.Date;
  * Created by nathaniel on 11/10/17.
  */
 
-public class Event implements Serializable{
+public class Event extends FeedItem implements Serializable{
 
     private BigInteger id;
     private String title;

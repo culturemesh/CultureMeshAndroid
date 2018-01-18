@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.User;
@@ -77,9 +78,13 @@ public class PostsFrag extends Fragment {
                 Context.MODE_PRIVATE);
         BigInteger networkId = new BigInteger(settings.getString(API.SELECTED_NETWORK,
                 "123456"));
-        ArrayList<Post> posts = API.Get.networkPosts(networkId);
+        ArrayList<FeedItem> posts = new ArrayList<FeedItem>();
+        for (Post post : API.genPosts()) {
+            posts.add(post);
+        }
+        posts.add(API.genEvents().get(2));
 
-        mAdapter = new RVAdapter(posts);
+        mAdapter = new RVAdapter(posts, getActivity().getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);
 
         //REDACTED AND MOVED/CHANGED IN loadPosts
@@ -125,8 +130,8 @@ public class PostsFrag extends Fragment {
             //instantiate post with the REST data, to discuss
             posts.add(post);
         }
-        RVAdapter adapter = new RVAdapter(posts);
-        mRecyclerView.setAdapter(adapter);
+        //RVAdapter adapter = new RVAdapter(posts);
+        //mRecyclerView.setAdapter(adapter);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
