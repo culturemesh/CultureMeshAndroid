@@ -132,6 +132,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="60dp"
             android:layout_marginTop="16dp"
+            android:textSize="20sp"
             android:text="Title of Event"
             android:textColor="@android:color/white"
             card_view:layout_constraintStart_toStartOf="parent"
