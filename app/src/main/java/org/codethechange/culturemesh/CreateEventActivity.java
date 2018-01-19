@@ -17,7 +17,10 @@ import java.util.Calendar;
 
 public class CreateEventActivity extends AppCompatActivity {
 
-    // TODO: Add comment to explain CreateEventActivity onCreate method
+    /**
+     * Initialize activity with saved state
+     * @param savedInstanceState State to use for initialization
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,7 +34,7 @@ public class CreateEventActivity extends AppCompatActivity {
     /**
      * Show the clock dialog to let the user select the event start time
      * Intended to be called when user presses button to set time
-     * @param v TODO: Add comment to explain CreateEventActivity.showTimePickerDialog's parameter
+     * @param v The button that was clicked to show the time picker
      */
     public void showTimePickerDialog(View v) {
         DialogFragment newFragment = new TimePickerFragment();
@@ -41,7 +44,7 @@ public class CreateEventActivity extends AppCompatActivity {
     /**
      * Show the calendar dialog to let the user select the event date
      * Intended to be called when the user presses button to set date
-     * @param v TODO: Add comment to explain CreateEventActivity.showDatePickerDialog's parameter
+     * @param v The button that was clicked to show the date picker
      */
     public void showDatePickerDialog(View v) {
         DialogFragment newFragment = new DatePickerFragment();
@@ -58,7 +61,7 @@ public class CreateEventActivity extends AppCompatActivity {
          * Called when the fragment is created
          * Sets the initial state of the clock to the current time and returns the resulting
          * TimePickerDialog to display
-         * @param savedInstanceState TODO: Comment to explain CreateEventActivity.TimePickerFragment.onCreateDialog's parameter
+         * @param savedInstanceState Last saved state of fragment
          * @return TimePickerDialog to display
          */
         @Override
@@ -75,13 +78,23 @@ public class CreateEventActivity extends AppCompatActivity {
 
         /**
          * When user sets the time, show their choice in the eventTime textView
-         * @param view TODO: Comment to explain view parameter to CreateEventActivity.TimePickerFragment.onTimeSet
+         * @param view The time picker shown via the fragment
          * @param hourOfDay Hour the user set
          * @param minute Minute the user set
          */
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            // TODO: Locale adjustments for time (e.g. AM/PM vs 24-hr)
-            String time = hourOfDay + ":" + minute;
+            // Checks what time format user has requested in their settings and follows that
+            boolean is24Hr = DateFormat.is24HourFormat(getActivity());
+            String amPm = "";
+            if (!is24Hr) {
+                if (hourOfDay > 12) {
+                    amPm = " PM";
+                    hourOfDay -= 12;
+                } else {
+                    amPm = " AM";
+                }
+            }
+            String time = hourOfDay + ":" + minute + amPm;
             // SOURCE: https://stackoverflow.com/questions/26917564/set-textview-to-time-from-timepicker-android?rq=1
             // Get eventTime from the activity
             TextView textView = getActivity().findViewById(R.id.eventTime);
@@ -100,7 +113,7 @@ public class CreateEventActivity extends AppCompatActivity {
          * Called when the fragment is created
          * Sets the initial state of the calendar to the current date and returns the resulting
          * DatePickerDialog to display
-         * @param savedInstanceState TODO: Comment to explain CreateEventActivity.TimePickerFragment.onCreateDialog's parameter
+         * @param savedInstanceState Last saved state of fragment
          * @return DatePickerDialog to display to the user
          */
         @Override
@@ -117,20 +130,24 @@ public class CreateEventActivity extends AppCompatActivity {
 
         /**
          * When user sets the date, show their choice in the eventDate textView
-         * @param view TODO: Comment to explain view parameter to CreateEventActivity.DatePickerFragment.onDateSet
+         * @param view The date picker shown via the fragment
          * @param year Year the user chose
          * @param month Month the user chose
          * @param day Day the user chose
          */
         public void onDateSet(DatePicker view, int year, int month, int day) {
-            // TODO: Locale adjustments for date
-            month ++;   // It seems months start at 0
-            String date = month + "/" + day + "/" + year;
+            // Create calendar from provided ints
+            Calendar c = Calendar.getInstance();
+            c.set(year, month, day);
+            // Create a DateFormat object that is locale-adjusted based on the current context
+            java.text.DateFormat df = DateFormat.getDateFormat(getContext());
+            // Use the DateFormat object to create a localized date from the calendar
+            String localizedDate = df.format(c.getTime());
             // SOURCE: https://stackoverflow.com/questions/26917564/set-textview-to-time-from-timepicker-android?rq=1
             // Get eventDate textView from activity
             TextView textView = getActivity().findViewById(R.id.eventDate);
             // Set eventDate to show the selected date
-            textView.setText(date);
+            textView.setText(localizedDate);
         }
     }
 
