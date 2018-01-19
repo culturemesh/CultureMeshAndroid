@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -55,6 +56,7 @@ public class PostsFrag extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         AppCompatActivity activity = (AppCompatActivity) getActivity();
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         View rootView = inflater.inflate(R.layout.fragment_posts, container, false);
 
         mRecyclerView = rootView.findViewById(R.id.postsRV);

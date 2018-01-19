@@ -2,6 +2,7 @@ package org.codethechange.culturemesh;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -157,7 +158,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                 pvh.hidePostViews();
                 pvh.cv.setCardBackgroundColor(context.getResources().
                         getColor(R.color.colorAccent));
-                pvh.personPhoto.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_event_white_24px));
+       //         pvh.personPhoto.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_event_white_24px));
             }
             pvh.eventTitle.setText(event.getTitle());
             pvh.eventLocation.setText(event.getAddress());
