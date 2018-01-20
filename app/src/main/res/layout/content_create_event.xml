@@ -93,4 +93,16 @@
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
         app:layout_constraintBottom_toBottomOf="@+id/timeButton"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginTop="@dimen/ui_element_vertical_spacing"
+        android:text="@string/create"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/eventDescription" />
 </android.support.constraint.ConstraintLayout>
