@@ -46,4 +46,7 @@
     <string name="help">Help</string>
     <string name="your_networks">Your Networks</string>
     <string name="title_activity_drawer">DrawerActivity</string>
+    <string name="title_activity_explore_bubbles">ExploreBubblesActivity</string>
+    <string name="title_activity_explore_bubbles_open_gl">ExploreBubblesOpenGLActivity</string>
+    <string name="title_activity_main">MainActivity</string>
 </resources>
