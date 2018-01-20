@@ -11,13 +11,19 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.text.SpannableStringBuilder;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
+import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -37,21 +43,25 @@ import org.codethechange.culturemesh.models.User;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
-public class TimelineActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, PostsFrag.OnFragmentInteractionListener {
+public class TimelineActivity extends DrawerActivity
+        implements PostsFrag.OnFragmentInteractionListener {
 private String basePath = "www.culturemesh.com/api/v1";
     final String FILTER_LABEL = "fl";
     final static String FILTER_CHOICE_NATIVE = "fcn";
     final static String FILTER_CHOICE_TWITTER = "fct";
     final static String BUNDLE_NETWORK = "bunnet";
+    final static String SUBSCRIBED_NETWORKS = "subscrinets";
     static SharedPreferences settings;
 
     private FloatingActionButton create, createPost, createEvent;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView postsRV;
-    private Animation open, close, backward, forward;
+    private Animation open, close;
     private boolean isFABOpen;
+
 
     private Network network;
 
@@ -60,8 +70,25 @@ private String basePath = "www.culturemesh.com/api/v1";
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timeline);
 
-
         settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+
+        /* //Set up Toolbar
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.action_bar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setLogo(R.drawable.logo_header);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        */
+
+        getSupportActionBar().setLogo(R.drawable.logo_header);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+
+
+
+
         //Choose selected network.
         //TODO: Create better default behavior for no selected networks.
         String selectedNetwork = settings.getString(API.SELECTED_NETWORK, "123456");
@@ -97,8 +124,6 @@ private String basePath = "www.culturemesh.com/api/v1";
         //Load Animations for Floating Action Buttons
         open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
         close = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_close);
-        forward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_forward);
-        backward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_backward);
 
         //Setup FloatingActionButton Listeners
         create = findViewById(R.id.create);
@@ -117,7 +142,8 @@ private String basePath = "www.culturemesh.com/api/v1";
                 Intent cPA = new Intent(getApplicationContext(), CreatePostActivity.class);
                 cPA.putExtra(BUNDLE_NETWORK, network);
                 startActivity(cPA);
-                //TODO: Have fragment loading stuff be in start() method so feed updates.
+                //TODO: Have fragment post feed loading stuff be in start() method so feed updates
+                //when createPostActivity finishes.
             }
         });
         createEvent.setOnClickListener(new View.OnClickListener() {
@@ -138,6 +164,7 @@ private String basePath = "www.culturemesh.com/api/v1";
 
         //set up postsRV
         postsRV = findViewById(R.id.postsRV);
+
     }
 
     /* Can control refresh aesthetic (i.e. strength of swipe to trigger, direction, etc.) with this
@@ -263,6 +290,10 @@ private String basePath = "www.culturemesh.com/api/v1";
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        if (super.mDrawerToggle.onOptionsItemSelected(item)) {
+            Log.i("Toggle","Toggle selected!");
+            return true;
+        }
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
@@ -271,30 +302,7 @@ private String basePath = "www.culturemesh.com/api/v1";
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
 
     @Override
     public void onFragmentInteraction(Uri uri) {
@@ -366,8 +374,10 @@ private String basePath = "www.culturemesh.com/api/v1";
                 });
                 changeColor.start();
             }
+            //We don't want the hidden buttons to be clickable - that would be weird.
             createPost.setClickable(false);
             createEvent.setClickable(false);
+            //Hide the buttons!
             createPost.startAnimation(close);
             createEvent.startAnimation(close);
             create.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_24px));
@@ -388,9 +398,10 @@ private String basePath = "www.culturemesh.com/api/v1";
                 });
                 changeColor.start();
             }
-            //create.startAnimation(forward);
+            //Activate their onclick listeners!
             createPost.setClickable(true);
             createEvent.setClickable(true);
+            //Show the buttons!
             createPost.startAnimation(open);
             createEvent.startAnimation(open);
             create.setImageDrawable(getResources().getDrawable(R.drawable.ic_cancel_white_24px));

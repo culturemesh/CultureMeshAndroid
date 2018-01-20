@@ -43,6 +43,12 @@
     <string name="in">In</string>
     <string name="near">Near</string>
     <string name="speakers_in">Speakers In</string>
+    <string name="help">Help</string>
+    <string name="your_networks">Your Networks</string>
+    <string name="title_activity_drawer">DrawerActivity</string>
+    <string name="title_activity_explore_bubbles">ExploreBubblesActivity</string>
+    <string name="title_activity_explore_bubbles_open_gl">ExploreBubblesOpenGLActivity</string>
+    <string name="title_activity_main">MainActivity</string>
 
     <!-- Strings for Event Information; Currently matches Website mostly -->
     <!-- TODO: Decide whether to change these labels or continue matching website -->
@@ -54,4 +60,5 @@
     <string name="eventProperty_time">Event Start Time</string>
     <string name="createEvent_setTime">Set Start Time</string>
     <string name="createEvent_setDate">Set Event Date</string>
+
 </resources>

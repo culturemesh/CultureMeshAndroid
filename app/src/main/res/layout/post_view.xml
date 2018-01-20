@@ -9,13 +9,16 @@
     android:id="@+id/cv"
     android:layout_marginTop="@dimen/activity_vertical_margin"
     card_view:cardElevation="8dp"
-    card_view:cardCornerRadius="12dp">
+    card_view:cardCornerRadius="12dp"
+    card_view:cardBackgroundColor="@color/colorPrimaryDark"
+    >
 
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="16dp"
+        >
 
         <ImageView
             android:id="@+id/attachedImage3"
@@ -25,7 +28,8 @@
             android:layout_marginTop="8dp"
             card_view:layout_constraintStart_toEndOf="@+id/attachedImage2"
             card_view:layout_constraintTop_toBottomOf="@+id/content"
-            card_view:srcCompat="@color/colorAccent" />
+            card_view:srcCompat="@color/colorAccent"
+            />
 
         <ImageView
             android:id="@+id/person_photo"
@@ -50,7 +54,8 @@
             android:text="asdfasdf"
             android:textSize="18sp"
             card_view:layout_constraintStart_toEndOf="@+id/person_photo"
-            card_view:layout_constraintTop_toTopOf="parent" />
+            card_view:layout_constraintTop_toTopOf="parent"
+            android:textColor="@android:color/white"/>
 
         <TextView
             android:id="@+id/username"
@@ -63,7 +68,8 @@
             android:text="isermae"
             android:textSize="18sp"
             card_view:layout_constraintStart_toEndOf="@+id/person_name"
-            card_view:layout_constraintTop_toTopOf="parent" />
+            card_view:layout_constraintTop_toTopOf="parent"
+            android:textColor="@android:color/white"/>
 
         <ImageView
             android:id="@+id/post_type_photo"
@@ -71,7 +77,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/person_photo"
-            android:layout_marginRight="16dp" />
+            android:layout_marginRight="16dp"
+            />
 
         <TextView
             android:id="@+id/content"
@@ -83,7 +90,8 @@
             android:layout_toRightOf="@+id/post_type_photo"
             android:text="lorem ipsum"
             card_view:layout_constraintStart_toEndOf="@+id/person_photo"
-            card_view:layout_constraintTop_toBottomOf="@+id/person_photo" />
+            card_view:layout_constraintTop_toBottomOf="@+id/person_photo"
+            android:textColor="@android:color/white"/>
 
         <TextView
             android:id="@+id/timestamp"
@@ -94,7 +102,9 @@
             android:text="some time"
             android:textStyle="italic"
             card_view:layout_constraintStart_toStartOf="parent"
-            card_view:layout_constraintTop_toBottomOf="@+id/attachedImage2" />
+            card_view:layout_constraintTop_toBottomOf="@+id/attachedImage2"
+            android:textColor="@android:color/white"/>
+
 
         <ImageView
             android:id="@+id/attachedImage2"
@@ -115,6 +125,104 @@
             card_view:layout_constraintStart_toStartOf="parent"
             card_view:layout_constraintTop_toBottomOf="@+id/content"
             card_view:srcCompat="@color/colorAccent" />
+
+        <TextView
+            android:id="@+id/event_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="60dp"
+            android:layout_marginTop="16dp"
+            android:textSize="20sp"
+            android:text="Title of Event"
+            android:textColor="@android:color/white"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/event_details_linear_layout"
+            android:layout_width="395dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="50dp"
+            android:orientation="vertical"
+            card_view:layout_constraintEnd_toEndOf="parent"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone">
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/event_time_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    card_view:layout_constraintBottom_toBottomOf="parent"
+                    card_view:layout_constraintStart_toStartOf="parent"
+                    card_view:layout_constraintTop_toTopOf="parent"
+                    card_view:srcCompat="@drawable/ic_access_time_white_24px" />
+
+                <TextView
+                    android:id="@+id/event_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Event Time"
+                    android:textColor="@android:color/white"
+                    card_view:layout_constraintStart_toEndOf="@+id/event_time_icon"
+                    card_view:layout_constraintTop_toTopOf="parent" />
+            </android.support.constraint.ConstraintLayout>
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/event_location_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    card_view:layout_constraintBottom_toBottomOf="parent"
+                    card_view:layout_constraintStart_toStartOf="parent"
+                    card_view:layout_constraintTop_toTopOf="parent"
+                    card_view:srcCompat="@drawable/ic_place_white_24px" />
+
+                <TextView
+                    android:id="@+id/event_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Event Location"
+                    android:textColor="@android:color/white"
+                    card_view:layout_constraintStart_toEndOf="@+id/event_location_icon"
+                    card_view:layout_constraintTop_toTopOf="parent" />
+
+
+            </android.support.constraint.ConstraintLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/event_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="lorem ipsum description lorem ipsum"
+            android:textColor="@android:color/white"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toBottomOf="@+id/event_details_linear_layout"
+            android:visibility="gone"/>/>
 
     </android.support.constraint.ConstraintLayout>
 </android.support.v7.widget.CardView>
