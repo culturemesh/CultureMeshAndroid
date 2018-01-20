@@ -1,13 +1,25 @@
 package org.codethechange.culturemesh.models;
 
+import java.math.BigInteger;
+
 /**
  * Created by nathaniel on 11/10/17.
  */
 
 public class Location {
+    private BigInteger id;
     private String country;
     private String region;
     private String city;
+
+    public BigInteger getId() {
+        return id;
+    }
+
+    public void setId(BigInteger id) {
+        this.id = id;
+    }
+
     private Point[] points;
 
     public Location(String country, String region, String city, Point[] points) {
