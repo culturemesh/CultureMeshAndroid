@@ -143,7 +143,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
             startActivity(toTimeline);
         }
         if (id == R.id.nav_explore) {
-            Intent startExplore = new Intent(getApplicationContext(), ExploreListActivity.class);
+            Intent startExplore = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
             startActivity(startExplore);
         } else if (id == R.id.nav_join_network) {
             Intent startFindNet = new Intent(getApplicationContext(), FindNetworkActivity.class);

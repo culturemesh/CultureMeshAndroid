@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
  * Created by nathaniel on 12/27/18.
  */
 
-public class ExploreBubblesOpenGLActivity extends AppCompatActivity {
+public class ExploreBubblesOpenGLActivity extends DrawerActivity {
     BubblePicker picker;
 
     @Override
