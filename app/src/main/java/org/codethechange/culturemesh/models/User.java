@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh.models;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
@@ -7,7 +8,7 @@ import java.util.ArrayList;
  * Created by nathaniel on 11/10/17.
  */
 
-public class User {
+public class User implements Serializable{
 
     private BigInteger id;
 
@@ -24,13 +25,43 @@ public class User {
     private String email;
     private String username;
     private ArrayList<Network> enrolledNetworks;
+    private ArrayList<BigInteger> enrolledNetworkIds;
+    private String imgURL;
 
-    public User(String firstName, String lastName, String email, String username, ArrayList<Network> enrolledNetworks) {
+    public ArrayList<BigInteger> getEnrolledNetworkIds() {
+        return enrolledNetworkIds;
+    }
+
+    public void setEnrolledNetworkIds(ArrayList<BigInteger> enrolledNetworkIds) {
+        this.enrolledNetworkIds = enrolledNetworkIds;
+    }
+
+    public String getImgURL() {
+        return imgURL;
+    }
+
+    public void setImgURL(String imgURL) {
+        this.imgURL = imgURL;
+    }
+
+    public User(String firstName, String lastName, String email, String username,
+                ArrayList<Network> enrolledNetworks, String imgURL) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.username = username;
         this.enrolledNetworks = enrolledNetworks;
+        this.imgURL = imgURL;
+    }
+
+    public User(String firstName, String lastName, String email, String username,
+                 String imgURL, ArrayList<BigInteger> enrolledNetworks) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.username = username;
+        this.enrolledNetworkIds = enrolledNetworks;
+        this.imgURL = imgURL;
     }
 
     public String getFirstName() {

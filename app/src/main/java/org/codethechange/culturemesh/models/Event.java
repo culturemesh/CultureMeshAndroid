@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh.models;
 
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
 import java.util.Date;
@@ -9,8 +10,7 @@ import java.util.Date;
  * Created by nathaniel on 11/10/17.
  */
 
-public class Event {
-    private String title;
+public class Event extends FeedItem implements Serializable{
 
     private BigInteger id;
     private String title;
