@@ -16,28 +16,45 @@ import java.util.Date;
  * Created by Drew Gregory on 11/14/17.
  */
 
-public class API {
+class API {
+    static final String SETTINGS_IDENTIFIER = "acmsi";
+    static final String PERSONAL_NETWORKS = "pernet";
+    static final String SELECTED_NETWORK = "selnet";
+
 
     //TODO: REMOVE DUMMY GENERATORS
     static ArrayList<User> genUsers() {
         ArrayList<User> users = new ArrayList<User>();
         User user = new User("Bob","Smith","crazyskater@hotmail.com",
-                "bobbysmithery", new ArrayList<Network>());
+                "bobbysmithery", new ArrayList<Network>(), "http://lorempixel.com/400/400/");
         users.add(user);
         User user2 = new User("Olivia","Brown","cter@hotmail.com",
-                "obrown", new ArrayList<Network>());
+                "obrown", new ArrayList<Network>(), "http://lorempixel.com/400/200/");
         users.add(user2);
         User user3 = new User("Nate", "Lee", "nlee@yahoo.com",
-                "nlee", new ArrayList<Network>());
+                "nlee", new ArrayList<Network>(), "http://lorempixel.com/200/200/");
         users.add(user3);
+        User user4 = new User("Dylan","Grosz","something@gmail.com",
+                "dgrosz", new ArrayList<Network>(), "http://lorempixel.com/200/200/");
         return users;
     }
 
     static ArrayList<Network> genNetworks() {
         ArrayList<Network> networks = new ArrayList<Network>();
+        Location[] possibleLocations = {new Location("United States",
+                "California", "Stanford", new Point[0]),
+                new Location("United States","New York","New York City", new Point[0]),
+                new Location("United States", "California", "Stanford", new Point[0]),
+                new Location("United States","New York","White Plains", new Point[0]),
+                new Location("United States", "California", "San Francisco", new Point[0]),
+                new Location("United States","New York","Albany", new Point[0]),
+                new Location("United States", "California", "Sacramento", new Point[0]),
+                new Location("United States","New York","New York City", new Point[0]),
+                new Location("United States","Maryland","Baltimore", new Point[0]),
+                new Location("France","Provence","Aix-en-Provence", new Point[0])};
         for (int i = 0; i < 10; i++) {
 
-            networks.add(new Network(genPosts(), genEvents(), new Location("United States", "California", "Stanford", new Point[0])));
+            networks.add(new Network(genPosts(), genEvents(), possibleLocations[i++], possibleLocations[i]));
         }
         return networks;
     }
@@ -45,7 +62,7 @@ public class API {
     static ArrayList<org.codethechange.culturemesh.models.Post> genPosts() {
         ArrayList<org.codethechange.culturemesh.models.Post> posts = new ArrayList<org.codethechange.culturemesh.models.Post>();
         for (int i = 0; i < 10; i++) {
-            posts.add(new org.codethechange.culturemesh.models.Post(genUsers().get(0), "lorem ipsum " + i, "Post " + i, new Date()));
+            posts.add(new org.codethechange.culturemesh.models.Post(genUsers().get(i%3), "lorem ipsum " + i,  new Date().toString()));
         }
         return posts;
     }

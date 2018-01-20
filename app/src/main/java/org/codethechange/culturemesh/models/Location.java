@@ -1,12 +1,13 @@
 package org.codethechange.culturemesh.models;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
  * Created by nathaniel on 11/10/17.
  */
 
-public class Location {
+public class Location implements Serializable{
     private BigInteger id;
     private String country;
     private String region;
@@ -59,6 +60,30 @@ public class Location {
 
     public void setPoints(Point[] points) {
         this.points = points;
+    }
+
+    public String toString() {
+        String string = "";
+        string += getCountry();
+        String region  = getRegion();
+        if (region != null) {
+            string += ", " + region;
+        }
+        if (city != null) {
+            string += ", " + city;
+        }
+        return string;
+    }
+
+    public String shortName() {
+        //We'll return the lowest level location.
+        String city = getCity();
+        if (city != null) return city;
+        String region = getRegion();
+        if (region != null) return region;
+        return getCountry();
+
+
     }
 }
 

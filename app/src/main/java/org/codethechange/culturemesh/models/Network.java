@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh.models;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
@@ -7,7 +8,7 @@ import java.util.ArrayList;
  * Created by nathaniel on 11/10/17.
  */
 
-public class Network {
+public class Network implements Serializable{
     private BigInteger id;
 
     public BigInteger getId() {
@@ -18,7 +19,8 @@ public class Network {
         this.id = id;
     }
 
-    public boolean isClassification() {
+
+    public boolean isLocationNetwork() {
         return classification;
     }
 
@@ -42,6 +44,7 @@ public class Network {
         this.fromLocation = fromLocation;
     }
 
+    //TODO: Possibly remove this field -- network object doesn't have posts field
     private ArrayList<Post> posts;
     private ArrayList<Event> events;
     private Location nearLocation;
@@ -49,11 +52,24 @@ public class Network {
     private Language lang;
     private Location fromLocation;
 
-    public Network(ArrayList<Post> posts, ArrayList<Event> events, Location nearLocation) {
+    public Network(ArrayList<Post> posts, ArrayList<Event> events, Location nearLocation,
+                   Location fromLocation) {
         this.posts = posts;
         this.events = events;
+        this.fromLocation = fromLocation;
         this.nearLocation = nearLocation;
+        classification = true;
     }
+
+    public Network(ArrayList<Post> posts, ArrayList<Event> events, Location nearLocation,
+                   Language lang) {
+        this.posts = posts;
+        this.events = events;
+        this.lang = lang;
+        this.nearLocation = nearLocation;
+        classification = false;
+    }
+
 
 
     public ArrayList<Post> getPosts() {
@@ -79,4 +95,9 @@ public class Network {
     public void setNearLocation(Location nearLocation) {
         this.nearLocation = nearLocation;
     }
+
+    //No override of toString() because getResources() requires an activity
+    //We want to use string xml resources for localization.
+    //For more info, check out
+    //https://developer.android.com/guide/topics/resources/providing-resources.html
 }
