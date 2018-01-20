@@ -29,6 +29,12 @@ public class Location {
         this.points = points;
     }
 
+    public Location() {
+        this.country = "";
+        this.region = "";
+        this.city = "";
+    }
+
     public String getCountry() {
         return country;
     }
