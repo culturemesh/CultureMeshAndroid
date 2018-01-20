@@ -16,7 +16,7 @@ import android.widget.TimePicker;
 import java.util.Calendar;
 
 public class CreateEventActivity extends AppCompatActivity {
-
+// TODO: Have address search in google maps
     /**
      * Initialize activity with saved state
      * @param savedInstanceState State to use for initialization
