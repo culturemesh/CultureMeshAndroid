@@ -92,7 +92,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         SharedPreferences userPrefs = getSharedPreferences(USER_PREFS, MODE_PRIVATE);
         if (userPrefs.getString(USER_NAME, null) == null) {
             //User is not signed in. Replace user info with sign in button
-            Button button = findViewById(R.id.nav_user_sign_in_button);
+            Button button = navView.getHeaderView(0).findViewById(R.id.nav_user_sign_in_button);
 
             button.setVisibility(View.VISIBLE);
             button.setOnClickListener(new View.OnClickListener() {

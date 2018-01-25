@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -150,5 +151,9 @@ public class CreateEventActivity extends AppCompatActivity {
             textView.setText(localizedDate);
         }
     }
+
+    EditText firstNameText;
+    EditText lastNameText;
+    EditText confirmPassword;
 
 }
