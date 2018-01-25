@@ -59,5 +59,10 @@
     <string name="eventProperty_time">Event Start Time</string>
     <string name="createEvent_setTime">Set Start Time</string>
     <string name="createEvent_setDate">Set Event Date</string>
-
+    <string name="title_activity_login">Sign In</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="need_account">Need Account?</string>
+    <string name="sign_up">Sign Up</string>
 </resources>
