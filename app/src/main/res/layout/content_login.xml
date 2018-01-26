@@ -7,7 +7,8 @@
     android:background="@color/darkBackground"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="org.codethechange.culturemesh.LoginActivity"
-    tools:showIn="@layout/activity_login">
+    tools:showIn="@layout/activity_login"
+    android:id="@+id/login_layout">
 
     <ImageView
         android:id="@+id/imageView"
@@ -48,7 +49,7 @@
         android:background="@color/white"
         android:ems="10"
         android:hint="@string/password"
-        android:inputType="textEmailAddress"
+        android:inputType="textPassword"
         android:paddingEnd="5dp"
         android:paddingStart="10dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -61,11 +62,11 @@
         android:layout_height="45dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="1000dp"
         android:background="@color/white"
         android:ems="10"
-        android:hint="@string/password"
-        android:inputType="textEmailAddress"
+        android:hint="@string/first_name"
+        android:inputType="textPersonName"
         android:paddingEnd="5dp"
         android:paddingStart="10dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -81,16 +82,16 @@
         android:layout_marginTop="8dp"
         android:background="@color/white"
         android:ems="10"
-        android:hint="@string/password"
-        android:inputType="textEmailAddress"
+        android:hint="@string/last_name"
+        android:inputType="textPersonName"
         android:paddingEnd="5dp"
         android:paddingStart="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_name_field" />
+        app:layout_constraintTop_toBottomOf="@+id/first_name_field" />
 
     <EditText
-        android:id="@+id/confirmPassword"
+        android:id="@+id/confirm_password_field"
         android:layout_width="0dp"
         android:layout_height="45dp"
         android:layout_marginEnd="8dp"
@@ -98,8 +99,8 @@
         android:layout_marginTop="8dp"
         android:background="@color/white"
         android:ems="10"
-        android:hint="@string/password"
-        android:inputType="textEmailAddress"
+        android:hint="@string/confirm_password"
+        android:inputType="textPassword"
         android:paddingEnd="5dp"
         android:paddingStart="10dp"
         app:layout_constraintEnd_toEndOf="parent"

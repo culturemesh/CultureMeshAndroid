@@ -152,8 +152,4 @@ public class CreateEventActivity extends AppCompatActivity {
         }
     }
 
-    EditText firstNameText;
-    EditText lastNameText;
-    EditText confirmPassword;
-
 }

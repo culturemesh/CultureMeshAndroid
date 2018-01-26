@@ -384,7 +384,6 @@ private String basePath = "www.culturemesh.com/api/v1";
             create.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_24px));
         } else {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-
                 @SuppressLint("ObjectAnimatorBinding") ObjectAnimator changeColor = ObjectAnimator.ofInt(create,
                         "backgroundTint", colorAccent, primaryDark);
                 changeColor.setDuration(300);

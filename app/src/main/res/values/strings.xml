@@ -60,9 +60,13 @@
     <string name="createEvent_setTime">Set Start Time</string>
     <string name="createEvent_setDate">Set Event Date</string>
     <string name="title_activity_login">Sign In</string>
-    <string name="username">Username</string>
+    <string name="username">Email</string>
     <string name="password">Password</string>
     <string name="sign_in">Sign In</string>
     <string name="need_account">Need Account?</string>
+    <string name="already_have_account">Already Have Account?</string>
     <string name="sign_up">Sign Up</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="confirm_password">Confirm Password</string>
 </resources>
