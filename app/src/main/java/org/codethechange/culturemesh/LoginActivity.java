@@ -6,8 +6,6 @@ import android.support.constraint.ConstraintSet;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -30,10 +28,9 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         final Button signInButton = findViewById(R.id.sign_in_button);
-
         signInButton.setOnClickListener(new View.OnClickListener(){
-
             @Override
             public void onClick(View v) {
                 //TODO: Handle sign in.
@@ -49,7 +46,6 @@ public class LoginActivity extends AppCompatActivity {
         //Get number of pixels for 8dp
         DisplayMetrics displaymetrics = new DisplayMetrics();
         final int eightDp = (int) getResources().getDimensionPixelSize(R.dimen.edit_text_spacing);
-        Log.i("eightDp", eightDp + "");
         signToggleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -99,6 +95,7 @@ public class LoginActivity extends AppCompatActivity {
                     ConstraintSet constraints = new ConstraintSet();
                     ConstraintLayout layout = findViewById(R.id.login_layout);
                     constraints.clone(layout);
+                    //Have sign up button be under confirm password field
                     constraints.connect(R.id.sign_in_button, ConstraintSet.TOP,
                             R.id.confirm_password_field, ConstraintSet.BOTTOM);
                     constraints.applyTo(layout);
@@ -153,6 +150,7 @@ public class LoginActivity extends AppCompatActivity {
                     ConstraintSet constraints = new ConstraintSet();
                     ConstraintLayout layout = findViewById(R.id.login_layout);
                     constraints.clone(layout);
+                    //Have sign in button be just under password field
                     constraints.connect(R.id.sign_in_button, ConstraintSet.TOP,
                             R.id.password_field, ConstraintSet.BOTTOM);
                     constraints.applyTo(layout);
