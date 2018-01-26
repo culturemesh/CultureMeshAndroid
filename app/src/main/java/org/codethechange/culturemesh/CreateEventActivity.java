@@ -71,7 +71,6 @@ public class CreateEventActivity extends AppCompatActivity {
     public void showDatePickerDialog(View v) {
         dateFrag = new DatePickerFragment();
         dateFrag.show(getSupportFragmentManager(), "datePicker");
-
     }
 
     /**
@@ -388,7 +387,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
         /**
          * Closes the activity and returns the user to the previous screen
-         * @param aBoolean
+         * @param aBoolean Status of doInBackground method that represents whether POSTing succeeded
          */
         @Override
         protected void onPostExecute(Boolean aBoolean) {
