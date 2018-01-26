@@ -377,7 +377,7 @@ public class CreateEventActivity extends AppCompatActivity {
         }
 
         /**
-         * Makes the progress bar indeterminite
+         * Makes the progress bar indeterminate
          */
         @Override
         protected void onPreExecute() {
