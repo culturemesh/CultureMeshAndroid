@@ -59,5 +59,12 @@
     <string name="eventProperty_time">Event Start Time</string>
     <string name="createEvent_setTime">Set Start Time</string>
     <string name="createEvent_setDate">Set Event Date</string>
+    <!-- Error messages for missing or invalid fields -->
+    <string name="createEvent_missingDate">Please set a date for your event.</string>
+    <string name="createEvent_missingTime">Please set a time for your event.</string>
+    <string name="createEvent_missingName">Please choose a name for your event.</string>
+    <string name="createEvent_missingDescription">Please describe what\'s happening at your event.</string>
+    <string name="createEvent_missingAddress">Please choose a location for your event.</string>
+    <string name="noErrors">noerr</string>
 
 </resources>

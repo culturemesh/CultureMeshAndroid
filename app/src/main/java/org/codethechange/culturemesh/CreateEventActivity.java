@@ -2,6 +2,7 @@ package org.codethechange.culturemesh;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.os.AsyncTask;
 import android.support.v4.app.DialogFragment;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -22,9 +24,11 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class CreateEventActivity extends AppCompatActivity {
-// TODO: Have address search in google maps
+// TODO: Have address search in google maps (Requires API Key?)
     private DatePickerFragment dateFrag;
     private TimePickerFragment timeFrag;
+    private TextView dateRef;
+    private TextView timeRef;
     private EditText nameRef;
     private EditText addressRef;
     private EditText descriptionRef;
@@ -45,6 +49,8 @@ public class CreateEventActivity extends AppCompatActivity {
         nameRef = findViewById(R.id.eventName);
         addressRef = findViewById(R.id.eventAddress);
         descriptionRef = findViewById(R.id.eventDescription);
+        dateRef = findViewById(R.id.eventDate);
+        timeRef = findViewById(R.id.eventTime);
     }
 
     /**
@@ -68,25 +74,72 @@ public class CreateEventActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Create an event based on the entered data after validating it
+     * @param v The button that was clicked to create the event
+     */
     public void createEvent(View v) {
-        Calendar c = Calendar.getInstance();
-        int year = dateFrag.getYear();
-        int month = dateFrag.getMonth();
-        int day = dateFrag.getDay();
-        int hour = timeFrag.getHour();
-        int minute = timeFrag.getMinute();
-        c.set(year, month, day, hour, minute);
+        if (isValid()) {
+            // Get date and time settings
+            Calendar c = Calendar.getInstance();
+            int year = dateFrag.getYear();
+            int month = dateFrag.getMonth();
+            int day = dateFrag.getDay();
+            int hour = timeFrag.getHour();
+            int minute = timeFrag.getMinute();
+            c.set(year, month, day, hour, minute);
 
-        Date date = c.getTime();
-        String name = nameRef.getText().toString();
-        String address = addressRef.getText().toString();
-        String description = descriptionRef.getText().toString();
-        // TODO: Let the user select a language (from a menu? arbitrarily?)
-        Language lang = new Language("TempLanguage");
-        // TODO: Get the User object for the current user
-        User author = null;
-        Event event = new Event(name, description, date, author, address, lang);
-        API.Post.event(event);
+            // Declare variables for Event() arguments
+            Date date = c.getTime();
+            String name = nameRef.getText().toString();
+            String address = addressRef.getText().toString();
+            String description = descriptionRef.getText().toString();
+            // TODO: Let the user select a language (from a menu? arbitrarily?)
+            Language lang = new Language("TempLanguage");
+            // TODO: Get the User object for the current user
+            User author = null;
+
+            // Create Event
+            Event event = new Event(name, description, date, author, address, lang);
+            // POST Event with AsyncTask
+            new PostEvent().execute(event);
+        }
+    }
+
+    /**
+     * Check whether the data entered by the user (if any) is valid and complete
+     * @return true if the entered data is valid and complete, false otherwise
+     */
+    public boolean isValid() {
+        // SOURCE: https://stackoverflow.com/questions/18225365/show-error-on-the-tip-of-the-edit-text-android
+        if (dateFrag == null || !dateFrag.isSet()) {
+            dateRef.requestFocus();
+            dateRef.setError(getString(R.string.createEvent_missingDate));
+            return false;
+        } else {
+            // SOURCE: https://stackoverflow.com/questions/10206799/remove-error-from-edittext
+            dateRef.setError(null);
+        }
+
+        if (timeFrag == null || !timeFrag.isSet()) {
+            timeRef.requestFocus();
+            timeRef.setError(getString(R.string.createEvent_missingTime));
+            return false;
+        } else {
+            timeRef.setError(null);
+        }
+
+        if (nameRef.getText().toString().isEmpty()) {
+            nameRef.setError(getString(R.string.createEvent_missingName));
+            return false;
+        } else if (descriptionRef.getText().toString().isEmpty()) {
+            descriptionRef.setError(getString(R.string.createEvent_missingDescription));
+            return false;
+        } else if (addressRef.getText().toString().isEmpty()) {
+            addressRef.setError(getString(R.string.createEvent_missingAddress));
+            return false;
+        } else
+            return true;
     }
 
     /**
@@ -151,20 +204,38 @@ public class CreateEventActivity extends AppCompatActivity {
             // Set eventTime to show the selected time
             textView.setText(time);
             timePicker = view;
+
+            isSet = true;
         }
 
+        /**
+         * Return the TimePicker
+         * @return the TimePicker
+         */
         public TimePicker getTimePicker() {
             return timePicker;
         }
 
+        /**
+         * Return the selected hour
+         * @return The selected hour
+         */
         public int getHour() {
             return hour;
         }
 
+        /**
+         * Return the selected minute
+         * @return The selected minute
+         */
         public int getMinute() {
             return minute;
         }
 
+        /**
+         * Check whether the user has set a time yet
+         * @return true if the user has set the time, false otherwise
+         */
         public boolean isSet() {
             return isSet;
         }
@@ -226,28 +297,104 @@ public class CreateEventActivity extends AppCompatActivity {
             // Set eventDate to show the selected date
             textView.setText(localizedDate);
 
+            isSet = true;
+
             datePicker = view;
         }
 
         // SOURCE: https://stackoverflow.com/questions/27039393/android-dialogfragment-get-reference-to-date-picker
+
+        /**
+         * Get the DatePicker
+         * @return The DatePicker
+         */
         public DatePicker getDatePicker() {
             return datePicker;
         }
 
+        /**
+         * Get the selected year
+         * @return The selected year (e.g. 2004 returns the integer 2004)
+         */
         public int getYear() {
             return year;
         }
 
+        /**
+         * Get the selected month
+         * @return The selected month as an integer with January as 0 and December as 11
+         */
         public int getMonth() {
             return month;
         }
 
+        /**
+         * Get the selected day
+         * @return The selected day of the month with the first day represented by 1
+         */
         public int getDay() {
             return day;
         }
 
+        /**
+         * Check whether the user has set a date
+         * @return true if the user has set a date, false otherwise
+         */
         public boolean isSet() {
             return isSet;
+        }
+    }
+
+    /**
+     * AsyncTask class to handle network latency when POSTing event
+     */
+    private class PostEvent extends AsyncTask<Event, Integer, Boolean> {
+
+        ProgressBar progressBar;
+
+        /**
+         * In the background, POST an event
+         * @param events Arbitrary number of events, the first of which will be POSTed
+         * @return true if the POSTing succeeds (which is always right now)
+         */
+        @Override
+        protected Boolean doInBackground(Event... events) {
+            API.Post.event(events[0]);
+            // TODO: Return false if POSTing fails
+            // TODO: Have some way to check progress of API (.status() method returns float 0 to 1?)
+            return true;
+        }
+
+        /**
+         * Over the course of the POST operation, provided progress updates (nonfunctional)
+         * @param values Values indicating progress
+         */
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            // Uncomment when getting status of API
+            // progressBar.setProgress(values[0]);
+        }
+
+        /**
+         * Makes the progress bar indeterminite
+         */
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressBar = findViewById(R.id.eventPostProgressBar);
+            progressBar.setIndeterminate(true); // Only because cannot get status from API
+        }
+
+        /**
+         * Closes the activity and returns the user to the previous screen
+         * @param aBoolean
+         */
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            // SOURCE: https://stackoverflow.com/questions/4038479/android-go-back-to-previous-activity
+            finish();
         }
     }
 
