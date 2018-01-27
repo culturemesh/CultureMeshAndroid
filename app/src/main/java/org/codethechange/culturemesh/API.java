@@ -25,7 +25,7 @@ class API {
     //TODO: REMOVE DUMMY GENERATORS
     static ArrayList<User> genUsers() {
         ArrayList<User> users = new ArrayList<User>();
-        User user = new User("Bob","Smith","crazyskater@hotmail.com",
+        User user = new User("Bob","Smith", "crazyskater@hotmail.com",
                 "bobbysmithery", new ArrayList<Network>(), "http://lorempixel.com/400/400/");
         users.add(user);
         User user2 = new User("Olivia","Brown","cter@hotmail.com",

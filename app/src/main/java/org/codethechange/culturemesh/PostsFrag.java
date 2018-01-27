@@ -31,6 +31,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
+ */
 public class PostsFrag extends Fragment {
     private String basePath = "www.culturemesh.com/api/v1";
 

@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.CardView;
@@ -20,17 +21,17 @@ import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Post;
 
+import java.io.Serializable;
 import java.util.List;
 
-//progress circle
-//refresh posts
-
-
+/**
+ * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
+ */
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
     private List<FeedItem> netPosts;
     private Context context;
 
-    static class PostViewHolder extends RecyclerView.ViewHolder implements org.codethechange.culturemesh.PostViewHolder {
+    static class PostViewHolder extends RecyclerView.ViewHolder implements org.codethechange.culturemesh.PostViewHolder, Serializable {
         boolean post = true;
 
         public boolean isPost() {
@@ -49,6 +50,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
         TextView eventTime;
         TextView eventLocation;
         TextView eventDescription;
+
         //TODO: Add support for onClick by adding viewholder ConstraintLayout items for
         //TODO: event time and event place.
         ImageView[] images;
@@ -73,6 +75,8 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             eventDescription = itemView.findViewById(R.id.event_description);
 
         }
+
+
 
         void hidePostViews() {
             post = false;

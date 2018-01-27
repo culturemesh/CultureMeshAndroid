@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,6 +28,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -45,11 +48,15 @@ import android.widget.TextView;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/8/17.
+ */
 public class TimelineActivity extends DrawerActivity
         implements PostsFrag.OnFragmentInteractionListener {
 private String basePath = "www.culturemesh.com/api/v1";
@@ -197,6 +204,65 @@ private String basePath = "www.culturemesh.com/api/v1";
                 }
             }
         });
+
+        postsRV.addOnItemTouchListener(new RecyclerTouchListener(this,
+                postsRV, new ClickListener() {
+            public void onClick(View view, final int position) {
+                PostViewHolder clickedPost = (PostViewHolder) postsRV.getLayoutManager().findViewByPosition(position);
+                Intent intent = new Intent();
+                intent.putExtra("post", /* check if this is allowed */ (Serializable) clickedPost);
+
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+                //To ignore for now, but can also implement a new function for this later if we want
+            }
+        }));
+    }
+
+    public static interface ClickListener{
+        public void onClick(View view,int position);
+        public void onLongClick(View view,int position);
+    }
+
+    class RecyclerTouchListener implements RecyclerView.OnItemTouchListener{
+
+        private ClickListener clicklistener;
+        private GestureDetector gestureDetector;
+
+        public RecyclerTouchListener(Context context, final RecyclerView recycleView, final ClickListener clicklistener){
+
+            this.clicklistener=clicklistener;
+            gestureDetector=new GestureDetector(context,new GestureDetector.SimpleOnGestureListener(){
+                @Override
+                public boolean onSingleTapUp(MotionEvent e) {
+                    return true;
+                }
+
+                @Override
+                public void onLongPress(MotionEvent e) {
+                    View child=recycleView.findChildViewUnder(e.getX(),e.getY());
+                    if(child!=null && clicklistener!=null){
+                        clicklistener.onLongClick(child,recycleView.getChildAdapterPosition(child));
+                    }
+                }
+            });
+        }
+        @Override
+        public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+            return false;
+        }
+
+        @Override
+        public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+
+        }
+
+        @Override
+        public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+        }
     }
 
     public void fetchPostsAtEnd(int currItem) {
@@ -259,7 +325,7 @@ private String basePath = "www.culturemesh.com/api/v1";
         swipeRefreshLayout.setRefreshing(false);
         //TODO: if server/connection error, success = false;
 
-        //TODO: when done, animate old posts fading away and new posts then fading in
+        //TODO:     when done, animate old posts fading away and new posts then fading in
         return success;
     }
 
