@@ -13,6 +13,7 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -383,7 +384,6 @@ private String basePath = "www.culturemesh.com/api/v1";
             create.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_24px));
         } else {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-
                 @SuppressLint("ObjectAnimatorBinding") ObjectAnimator changeColor = ObjectAnimator.ofInt(create,
                         "backgroundTint", colorAccent, primaryDark);
                 changeColor.setDuration(300);
@@ -408,4 +408,5 @@ private String basePath = "www.culturemesh.com/api/v1";
         }
         isFABOpen = !isFABOpen;
     }
+
 }

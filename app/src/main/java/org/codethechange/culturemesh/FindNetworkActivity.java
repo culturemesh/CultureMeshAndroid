@@ -43,7 +43,7 @@ import java.util.ArrayList;
 public class FindNetworkActivity extends DrawerActivity {
 
     //TODO: Replace these with Location Objects.
-    static String nearLocation;
+    static String nearLocation = "Stanford";
     static String fromLocation;
 
     public final int REQUEST_NEW_NEAR_LOCATION = 1;

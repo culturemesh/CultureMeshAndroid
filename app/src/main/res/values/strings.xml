@@ -66,5 +66,15 @@
     <string name="createEvent_missingDescription">Please describe what\'s happening at your event.</string>
     <string name="createEvent_missingAddress">Please choose a location for your event.</string>
     <string name="noErrors">noerr</string>
-
+    <!-- Strings for Login and New Account UI -->
+    <string name="title_activity_login">Sign In</string>
+    <string name="username">Email</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="need_account">Need Account?</string>
+    <string name="already_have_account">Already Have Account?</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="confirm_password">Confirm Password</string>
 </resources>
