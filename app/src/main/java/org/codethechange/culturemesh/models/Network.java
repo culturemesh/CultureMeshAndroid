@@ -1,33 +1,90 @@
 package org.codethechange.culturemesh.models;
 
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.util.ArrayList;
+
 /**
  * Created by nathaniel on 11/10/17.
  */
 
-public class Network {
-    private Post[] posts;
-    private Event[] events;
-    private Location nearLocation;
+public class Network implements Serializable{
+    private BigInteger id;
 
-    public Network(Post[] posts, Event[] events, Location nearLocation) {
-        this.posts = posts;
-        this.events = events;
-        this.nearLocation = nearLocation;
+    public BigInteger getId() {
+        return id;
     }
 
-    public Post[] getPosts() {
+    public void setId(BigInteger id) {
+        this.id = id;
+    }
+
+
+    public boolean isLocationNetwork() {
+        return classification;
+    }
+
+    public void setClassification(boolean classification) {
+        this.classification = classification;
+    }
+
+    public Language getLang() {
+        return lang;
+    }
+
+    public void setLang(Language lang) {
+        this.lang = lang;
+    }
+
+    public Location getFromLocation() {
+        return fromLocation;
+    }
+
+    public void setFromLocation(Location fromLocation) {
+        this.fromLocation = fromLocation;
+    }
+
+    //TODO: Possibly remove this field -- network object doesn't have posts field
+    private ArrayList<Post> posts;
+    private ArrayList<Event> events;
+    private Location nearLocation;
+    private boolean classification;
+    private Language lang;
+    private Location fromLocation;
+
+    public Network(ArrayList<Post> posts, ArrayList<Event> events, Location nearLocation,
+                   Location fromLocation) {
+        this.posts = posts;
+        this.events = events;
+        this.fromLocation = fromLocation;
+        this.nearLocation = nearLocation;
+        classification = true;
+    }
+
+    public Network(ArrayList<Post> posts, ArrayList<Event> events, Location nearLocation,
+                   Language lang) {
+        this.posts = posts;
+        this.events = events;
+        this.lang = lang;
+        this.nearLocation = nearLocation;
+        classification = false;
+    }
+
+
+
+    public ArrayList<Post> getPosts() {
         return posts;
     }
 
-    public void setPosts(Post[] posts) {
+    public void setPosts(ArrayList<Post> posts) {
         this.posts = posts;
     }
 
-    public Event[] getEvents() {
+    public ArrayList<Event> getEvents() {
         return events;
     }
 
-    public void setEvents(Event[] events) {
+    public void setEvents(ArrayList<Event> events) {
         this.events = events;
     }
 
@@ -38,4 +95,9 @@ public class Network {
     public void setNearLocation(Location nearLocation) {
         this.nearLocation = nearLocation;
     }
+
+    //No override of toString() because getResources() requires an activity
+    //We want to use string xml resources for localization.
+    //For more info, check out
+    //https://developer.android.com/guide/topics/resources/providing-resources.html
 }
