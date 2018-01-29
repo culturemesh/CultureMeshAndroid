@@ -48,7 +48,7 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
                 item.setGradient(new BubbleGradient(colors.getColor((position * 2) % 8, 0),
                         colors.getColor((position * 2) % 8 + 1, 0), BubbleGradient.VERTICAL));
                 item.setTextColor(ContextCompat.getColor(ExploreBubblesOpenGLActivity.this, android.R.color.white));
-                item.setBackgroundImage(ContextCompat.getDrawable(ExploreBubblesOpenGLActivity.this, images.getResourceId(position, 0)));
+                //item.setBackgroundImage(ContextCompat.getDrawable(ExploreBubblesOpenGLActivity.this, images.getResourceId(position, 0)));
                 if (((position * 2) % 8) > 3) {
                     item.setSize(PickerItemSize.LARGE);
                 }
