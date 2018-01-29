@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -20,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 
 import org.codethechange.culturemesh.models.Network;
@@ -35,6 +37,8 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
     protected DrawerLayout mDrawerLayout;
     protected ActionBarDrawerToggle mDrawerToggle;
     protected SparseArray<Network> subscribedNetworks;
+    final static String USER_PREFS = "userprefs";
+    final static String USER_NAME = "username";
 
     @Override
     public void setContentView(int layoutResID) {
@@ -85,6 +89,23 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         });
 
         NavigationView navView = findViewById(R.id.nav_view);
+        SharedPreferences userPrefs = getSharedPreferences(USER_PREFS, MODE_PRIVATE);
+        if (userPrefs.getString(USER_NAME, null) == null) {
+            //User is not signed in. Replace user info with sign in button
+            Button button = navView.getHeaderView(0).findViewById(R.id.nav_user_sign_in_button);
+            button.setVisibility(View.VISIBLE);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Open LogInActivity
+                    Intent logInIntent = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(logInIntent);
+                }
+            });
+
+        }
+
+
         Network network = API.genNetworks().get(0);
         Menu navMenu = navView.getMenu();
         MenuItem item = navMenu.getItem(2); //Your Networks subItem
