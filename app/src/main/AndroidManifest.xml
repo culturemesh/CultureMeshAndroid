@@ -20,8 +20,60 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ExploreBubblesOpenGLActivity"
+            android:label="@string/title_activity_explore_bubbles_open_gl"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
             android:name=".FindNetworkActivity"
             android:label="@string/title_activity_find_network"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+        <activity
+            android:name=".ChooseNearLocationActivity"
+            android:label="@string/title_activity_choose_near_location"
+            android:parentActivityName=".FindNetworkActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.codethechange.culturemesh.FindNetworkActivity" />
+        </activity>
+        <activity
+            android:name=".CreatePostActivity"
+            android:label="@string/title_activity_create_post"
+            android:parentActivityName=".TimelineActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.codethechange.culturemesh.TimelineActivity" />
+        </activity>
+        <activity
+            android:name=".CreateEventActivity"
+            android:label="@string/title_activity_create_event"
+            android:parentActivityName=".TimelineActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.codethechange.culturemesh.TimelineActivity" />
+        </activity>
+        <activity
+            android:name=".DrawerActivity"
+            android:label="@string/title_activity_drawer"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/title_activity_login"
+            android:parentActivityName=".TimelineActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
