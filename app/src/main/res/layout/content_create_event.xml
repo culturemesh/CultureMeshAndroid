@@ -14,13 +14,14 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
         android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
-        android:layout_marginTop="@dimen/ui_element_vertical_spacing"
+        android:layout_marginTop="8dp"
         android:ems="10"
         android:hint="@string/eventProperty_name"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/eventPostProgressBar" />
 
     <EditText
         android:id="@+id/eventAddress"
@@ -78,16 +79,21 @@
         android:id="@+id/eventDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
         android:text="@string/eventProperty_date"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
         app:layout_constraintBottom_toBottomOf="@+id/dateButton"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- SOURCE: https://stackoverflow.com/questions/13508270/android-seterrorerror-not-working-in-textview -->
     <TextView
         android:id="@+id/eventTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
         android:text="@string/eventProperty_time"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
@@ -95,7 +101,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/createEvent"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
@@ -104,5 +110,17 @@
         android:text="@string/create"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/eventDescription" />
+        app:layout_constraintTop_toBottomOf="@+id/eventDescription"
+        android:onClick="createEvent"/>
+
+    <ProgressBar
+        android:id="@+id/eventPostProgressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </android.support.constraint.ConstraintLayout>
