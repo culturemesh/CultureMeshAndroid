@@ -3,6 +3,7 @@ package org.codethechange.culturemesh;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -29,8 +30,10 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.User;
@@ -109,8 +112,9 @@ public class CreatePostActivity extends AppCompatActivity implements
                 User user = API.Get.user(new BigInteger("11"));
                 String contentHTML = Html.toHtml(content.getText());
                 String datePosted = new Date().toString();
-                API.Post.post(new Post(user, contentHTML, datePosted));
-                finish();
+
+                Post newPost = new Post(user, contentHTML, datePosted);
+                new PostPost().execute(newPost);
             }
         });
     }
@@ -280,6 +284,46 @@ public class CreatePostActivity extends AppCompatActivity implements
                 //Update icon!
                 item.setIcon(toggleIcons.get(id)[iconIndex]);
             }
+        }
+    }
+
+    /**
+     * AsyncTask class to handle network latency when POSTing post
+     */
+    private class PostPost extends AsyncTask<Post, Integer, Boolean> {
+
+        ProgressBar progressBar;
+
+        /**
+         * In the background, POST the provided post
+         * @param posts List of posts, the first of which will be POSTed
+         * @return true if POSTing succeeded, false otherwise
+         */
+        @Override
+        protected Boolean doInBackground(Post... posts) {
+            API.Post.post(posts[0]);
+            // TODO: Return false if POSTing fails
+            return true;
+        }
+
+        /**
+         * Makes the progress bar indeterminate
+         */
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressBar = findViewById(R.id.postPostProgressBar);
+            progressBar.setIndeterminate(true); // Only because cannot get status from API
+        }
+
+        /**
+         * Closes the activity and returns the user to the previous screen
+         * @param aBoolean Status of doInBackground method that represents whether POSTing succeeded
+         */
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            finish();
         }
     }
 }
