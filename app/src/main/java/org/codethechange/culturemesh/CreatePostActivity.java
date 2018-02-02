@@ -1,6 +1,10 @@
 package org.codethechange.culturemesh;
 
+import android.app.Activity;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -8,6 +12,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -45,6 +51,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
+import static android.support.v4.os.LocaleListCompat.create;
+
 public class CreatePostActivity extends AppCompatActivity implements
         ListenableEditText.onSelectionChangedListener {
     SparseBooleanArray formTogState;
@@ -52,6 +60,7 @@ public class CreatePostActivity extends AppCompatActivity implements
     SparseArray<int[]> toggleIcons;
     SparseArray<MenuItem> menuItems;
     Network network;
+    private Activity myActivity = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -290,20 +299,18 @@ public class CreatePostActivity extends AppCompatActivity implements
     /**
      * AsyncTask class to handle network latency when POSTing post
      */
-    private class PostPost extends AsyncTask<Post, Integer, Boolean> {
+    private class PostPost extends AsyncTask<Post, Integer, NetworkResponse> {
 
-        ProgressBar progressBar;
+        private ProgressBar progressBar;
 
         /**
          * In the background, POST the provided post
          * @param posts List of posts, the first of which will be POSTed
-         * @return true if POSTing succeeded, false otherwise
+         * @return Result from network operation
          */
         @Override
-        protected Boolean doInBackground(Post... posts) {
-            API.Post.post(posts[0]);
-            // TODO: Return false if POSTing fails
-            return true;
+        protected NetworkResponse doInBackground(Post... posts) {
+            return API.Post.post(posts[0]);
         }
 
         /**
@@ -317,13 +324,19 @@ public class CreatePostActivity extends AppCompatActivity implements
         }
 
         /**
-         * Closes the activity and returns the user to the previous screen
-         * @param aBoolean Status of doInBackground method that represents whether POSTing succeeded
+         * If POSTing succeeded: Closes the activity and returns the user to the previous screen
+         * If POSTing failed: Displays error message and returns uer to composition screen
+         * @param response Status of doInBackground method that represents whether POSTing succeeded
          */
         @Override
-        protected void onPostExecute(Boolean aBoolean) {
-            super.onPostExecute(aBoolean);
-            finish();
+        protected void onPostExecute(NetworkResponse response) {
+            super.onPostExecute(response);
+            if (response.fail()) {
+                response.showErrorDialog(myActivity);
+                progressBar.setIndeterminate(false);
+            } else {
+                finish();
+            }
         }
     }
 }
