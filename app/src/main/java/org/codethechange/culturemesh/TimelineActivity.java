@@ -69,10 +69,26 @@ private String basePath = "www.culturemesh.com/api/v1";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_timeline);
 
+        setContentView(R.layout.activity_timeline);
         settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
 
+        getSupportActionBar().setLogo(R.drawable.logo_header);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        if (API.NO_JOINED_NETWORKS) {
+            createNoNetwork();
+        } else {
+            createDefaultNetwork();
+        }
+    }
+
+    protected void createNoNetwork() {
+        Intent startExplore = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
+        startActivity(startExplore);
+    }
+
+    protected void createDefaultNetwork() {
         /* //Set up Toolbar
         Toolbar mToolbar = (Toolbar) findViewById(R.id.action_bar);
         setSupportActionBar(mToolbar);
@@ -91,7 +107,6 @@ private String basePath = "www.culturemesh.com/api/v1";
 
 
         //Choose selected network.
-        //TODO: Create better default behavior for no selected networks.
         String selectedNetwork = settings.getString(API.SELECTED_NETWORK, "123456");
         BigInteger id = new BigInteger(selectedNetwork);
         network = API.Get.network(id);

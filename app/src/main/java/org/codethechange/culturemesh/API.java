@@ -20,6 +20,7 @@ class API {
     static final String SETTINGS_IDENTIFIER = "acmsi";
     static final String PERSONAL_NETWORKS = "pernet";
     static final String SELECTED_NETWORK = "selnet";
+    static final boolean NO_JOINED_NETWORKS = true;
 
 
     //TODO: REMOVE DUMMY GENERATORS
