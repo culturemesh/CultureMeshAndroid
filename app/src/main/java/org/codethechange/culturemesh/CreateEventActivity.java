@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.os.AsyncTask;
@@ -32,6 +33,8 @@ public class CreateEventActivity extends AppCompatActivity {
     private EditText nameRef;
     private EditText addressRef;
     private EditText descriptionRef;
+
+    private Activity myActivity = this;
 
     /**
      * Initialize activity with saved state
@@ -347,21 +350,18 @@ public class CreateEventActivity extends AppCompatActivity {
     /**
      * AsyncTask class to handle network latency when POSTing event
      */
-    private class PostEvent extends AsyncTask<Event, Integer, Boolean> {
+    private class PostEvent extends AsyncTask<Event, Integer, NetworkResponse> {
 
         ProgressBar progressBar;
 
         /**
          * In the background, POST an event
          * @param events Arbitrary number of events, the first of which will be POSTed
-         * @return true if the POSTing succeeds (which is always right now)
+         * @return NetworkResponse containing the results of the network operation
          */
         @Override
-        protected Boolean doInBackground(Event... events) {
-            API.Post.event(events[0]);
-            // TODO: Return false if POSTing fails
-            // TODO: Have some way to check progress of API (.status() method returns float 0 to 1?)
-            return true;
+        protected NetworkResponse doInBackground(Event... events) {
+            return API.Post.event(events[0]);
         }
 
         /**
@@ -386,15 +386,20 @@ public class CreateEventActivity extends AppCompatActivity {
         }
 
         /**
-         * Closes the activity and returns the user to the previous screen
-         * @param aBoolean Status of doInBackground method that represents whether POSTing succeeded
+         * If POSTing succeeded: Closes the activity and returns the user to the previous screen
+         * If POSTing failed: Displays error dialog and returns user to composing screen
+         * @param response Status of doInBackground method that represents whether POSTing succeeded
          */
         @Override
-        protected void onPostExecute(Boolean aBoolean) {
-            super.onPostExecute(aBoolean);
+        protected void onPostExecute(NetworkResponse response) {
+            super.onPostExecute(response);
             // SOURCE: https://stackoverflow.com/questions/4038479/android-go-back-to-previous-activity
-            finish();
+            if (response.fail()) {
+                response.showErrorDialog(myActivity);
+                progressBar.setIndeterminate(false);
+            } else {
+                finish();
+            }
         }
     }
-
 }

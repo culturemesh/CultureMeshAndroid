@@ -134,38 +134,38 @@ class API {
     }
 
     static class Post {
-        static void addUserToEvent(BigInteger userId, BigInteger eventId) {
-
+        static NetworkResponse addUserToEvent(BigInteger userId, BigInteger eventId) {
+            return new NetworkResponse();
         }
 
-        static void addUserToNetwork(BigInteger userId, BigInteger networkId) {
-
+        static NetworkResponse addUserToNetwork(BigInteger userId, BigInteger networkId) {
+            return new NetworkResponse();
         }
 
-        static void user(User user) {
-
+        static NetworkResponse user(User user) {
+            return new NetworkResponse();
         }
 
-        static void network(Network network) {
-
+        static NetworkResponse network(Network network) {
+            return new NetworkResponse();
         }
 
-        static void post(org.codethechange.culturemesh.models.Post post) {
-
+        static NetworkResponse post(org.codethechange.culturemesh.models.Post post) {
+            return new NetworkResponse();
         }
 
-        static void event(Event event) {
-
+        static NetworkResponse event(Event event) {
+            return new NetworkResponse();
         }
     }
 
     static class Put {
-        static void user(User user) {
-
+        static NetworkResponse user(User user) {
+            return new NetworkResponse();
         }
 
-        static void event(Event event) {
-
+        static NetworkResponse event(Event event) {
+            return new NetworkResponse();
         }
 
     }

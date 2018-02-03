@@ -77,4 +77,8 @@
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
     <string name="confirm_password">Confirm Password</string>
+
+    <string name="error">Error</string>
+    <string name="genericFail">Oops, something went wrong.</string>
+    <string name="genericSuccess">Operation Succeeded!</string>
 </resources>
