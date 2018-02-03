@@ -44,6 +44,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
@@ -181,6 +182,22 @@ private String basePath = "www.culturemesh.com/api/v1";
         postsRV = findViewById(R.id.postsRV);
         mLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
 
+        postsRV.addOnItemTouchListener(new RecyclerTouchListener(this,
+                postsRV, new ClickListener() {
+            public void onClick(View view, final int position) {
+                PostViewHolder clickedPost = (PostViewHolder) postsRV.getLayoutManager().findViewByPosition(position);
+                Toast.makeText(TimelineActivity.this, "clicked at: " + position, Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent();
+             //   intent.putExtra("post", /* check if this is allowed */ (Serializable) clickedPost);
+              //  startActivity(intent);
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+                //To ignore for now, but can also implement a new function for this later if we want
+            }
+        }));
+
         //check if at end of posts
         postsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
             private boolean loading = true;
@@ -205,20 +222,7 @@ private String basePath = "www.culturemesh.com/api/v1";
             }
         });
 
-        postsRV.addOnItemTouchListener(new RecyclerTouchListener(this,
-                postsRV, new ClickListener() {
-            public void onClick(View view, final int position) {
-                PostViewHolder clickedPost = (PostViewHolder) postsRV.getLayoutManager().findViewByPosition(position);
-                Intent intent = new Intent();
-                intent.putExtra("post", /* check if this is allowed */ (Serializable) clickedPost);
 
-            }
-
-            @Override
-            public void onLongClick(View view, int position) {
-                //To ignore for now, but can also implement a new function for this later if we want
-            }
-        }));
     }
 
     public static interface ClickListener{

@@ -31,7 +31,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
     private List<FeedItem> netPosts;
     private Context context;
 
-    static class PostViewHolder extends RecyclerView.ViewHolder implements org.codethechange.culturemesh.PostViewHolder, Serializable {
+    static class PostViewHolder extends RecyclerView.ViewHolder implements org.codethechange.culturemesh.PostViewHolder/*, Serializable */{
         boolean post = true;
 
         public boolean isPost() {
