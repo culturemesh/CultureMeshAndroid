@@ -9,10 +9,10 @@ import java.util.Random;
 /**
  * Class to store responses after attempting networking tasks
  */
-public class NetworkResponse {
+public class NetworkResponse<E> {
     private boolean fail;
     private int messageID;
-    private Object payload;
+    private E payload;
 
     // TODO: Remove this testing-only constructor
     /**
@@ -53,7 +53,7 @@ public class NetworkResponse {
      * Constructor that stores a payload and sets the failure state to false
      * @param inPayload Payload returned by networking request
      */
-    public NetworkResponse(Object inPayload) {
+    public NetworkResponse(E inPayload) {
         payload = inPayload;
         fail = false;
     }
@@ -63,7 +63,7 @@ public class NetworkResponse {
      * @param inFail Whether or not the network operation failed
      * @param inPayload Payload returned by networking request
      */
-    public NetworkResponse(boolean inFail, Object inPayload) {
+    public NetworkResponse(boolean inFail, E inPayload) {
         payload = inPayload;
         fail = inFail;
     }
@@ -116,7 +116,7 @@ public class NetworkResponse {
      * Get the payload returned by the network operation
      * @return Payload returned by network operation
      */
-    public Object getPayload() {
+    public E getPayload() {
         // TODO: This should throw an exception if payload is undefined
         return payload;
     }

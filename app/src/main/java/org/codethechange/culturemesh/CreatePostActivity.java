@@ -118,7 +118,8 @@ public class CreatePostActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 //TODO: Replace user with logged in user
                 //TODO: Why do we have a title field??
-                User user = API.Get.user(new BigInteger("11"));
+                NetworkResponse<User> response = API.Get.user(new BigInteger("11"));
+                User user = response.getPayload();
                 String contentHTML = Html.toHtml(content.getText());
                 String datePosted = new Date().toString();
 
