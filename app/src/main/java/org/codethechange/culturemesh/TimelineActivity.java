@@ -109,9 +109,11 @@ private String basePath = "www.culturemesh.com/api/v1";
         //Choose selected network.
         String selectedNetwork = settings.getString(API.SELECTED_NETWORK, "123456");
         BigInteger id = new BigInteger(selectedNetwork);
-        network = API.Get.network(id);
+        NetworkResponse<Network> responseNetwork = API.Get.network(id);
+        network = responseNetwork.getPayload();
 
-        ArrayList<User> users = API.Get.networkUsers(id);
+        NetworkResponse<ArrayList<User>> responseUsers = API.Get.networkUsers(id);
+        ArrayList<User> users = responseUsers.getPayload();
 
         //Update number of people.
         //TODO: Manipulate string of number to have magnitude suffix (K,M,etc.)
