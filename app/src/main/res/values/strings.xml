@@ -28,6 +28,7 @@
     <string-array name="filter_choices">
         <item>Native Posts</item>
         <item>Twitter Posts</item>
+        <item>Events</item>
     </string-array>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>

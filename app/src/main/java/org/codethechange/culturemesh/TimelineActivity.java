@@ -7,29 +7,22 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.support.v4.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.content.res.Configuration;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.text.SpannableStringBuilder;
-import android.text.style.RelativeSizeSpan;
 import android.util.Log;
-import android.view.SubMenu;
 import android.view.View;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.Animation;
@@ -39,20 +32,20 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
-public class TimelineActivity extends DrawerActivity
-        implements PostsFrag.OnFragmentInteractionListener {
+public class TimelineActivity extends DrawerActivity {
 private String basePath = "www.culturemesh.com/api/v1";
     final String FILTER_LABEL = "fl";
     final static String FILTER_CHOICE_NATIVE = "fcn";
     final static String FILTER_CHOICE_TWITTER = "fct";
+    final static String FILTER_CHOICE_EVENTS = "fce";
     final static String BUNDLE_NETWORK = "bunnet";
     final static String SUBSCRIBED_NETWORKS = "subscrinets";
     static SharedPreferences settings;
@@ -62,33 +55,21 @@ private String basePath = "www.culturemesh.com/api/v1";
     private RecyclerView postsRV;
     private Animation open, close;
     private boolean isFABOpen;
-
+    private static Fragment postsFrag;
+    private static FragmentManager fm;
 
     private Network network;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_timeline);
 
         settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
 
-        /* //Set up Toolbar
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.action_bar);
-        setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setLogo(R.drawable.logo_header);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        */
-
-        getSupportActionBar().setLogo(R.drawable.logo_header);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-
-
-
 
         //Choose selected network.
         //TODO: Create better default behavior for no selected networks.
@@ -113,7 +94,6 @@ private String basePath = "www.culturemesh.com/api/v1";
         //Update near location
         TextView nearLocation = findViewById(R.id.nearLocation);
         nearLocation.setText(network.getNearLocation().shortName());
-        //TODO: Apply filter settings.
         ImageButton postsFilter = (ImageButton) findViewById(R.id.filter_feed);
         postsFilter.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -165,6 +145,8 @@ private String basePath = "www.culturemesh.com/api/v1";
 
         //set up postsRV
         postsRV = findViewById(R.id.postsRV);
+        postsFrag = getSupportFragmentManager().findFragmentById(R.id.posts_fragment);
+        fm = getSupportFragmentManager();
 
     }
 
@@ -303,25 +285,18 @@ private String basePath = "www.culturemesh.com/api/v1";
         return super.onOptionsItemSelected(item);
     }
 
-
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
-
     /**
-     * This dialog allows us to filter out native/twitter posts from the feed.
-     * TODO: Add feature to filter out events.
+     * This dialog allows us to filter out native/twitter posts from the feed
      */
     public static class FilterDialogFragment extends DialogFragment {
-        boolean[] filterSettings = {true, true};
+        boolean[] filterSettings = {true, true, true};
 
         @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
+        public Dialog onCreateDialog(final Bundle savedInstanceState) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             filterSettings[0] = settings.getBoolean(FILTER_CHOICE_NATIVE, true);
             filterSettings[1] = settings.getBoolean(FILTER_CHOICE_TWITTER, true);
+            filterSettings[2] = settings.getBoolean(FILTER_CHOICE_EVENTS, true);
             builder.setTitle(getResources().getString(R.string.filter_posts))
                 .setMultiChoiceItems(R.array.filter_choices, filterSettings,
                         new DialogInterface.OnMultiChoiceClickListener() {
@@ -337,7 +312,12 @@ private String basePath = "www.culturemesh.com/api/v1";
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putBoolean(FILTER_CHOICE_NATIVE, filterSettings[0]);
                         editor.putBoolean(FILTER_CHOICE_TWITTER, filterSettings[1]);
+                        editor.putBoolean(FILTER_CHOICE_EVENTS, filterSettings[2]);
                         editor.apply();
+                        FragmentTransaction ft = fm.beginTransaction();
+                        ft.detach(postsFrag);
+                        ft.attach(postsFrag);
+                        ft.commit();
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

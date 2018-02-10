@@ -23,6 +23,8 @@ import android.view.SubMenu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 
 import org.codethechange.culturemesh.models.Network;
 
@@ -133,6 +135,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
             sb.setSpan(new RelativeSizeSpan(.8f), 0, sb.length(), 0);
             netMenu.add(Menu.NONE, viewId, 0, sb);
         }
+        Fabric.with(this, new Crashlytics());
         navView.setNavigationItemSelectedListener(this);
     }
 
