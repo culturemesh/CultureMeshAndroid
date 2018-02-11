@@ -314,10 +314,9 @@ private String basePath = "www.culturemesh.com/api/v1";
                         editor.putBoolean(FILTER_CHOICE_TWITTER, filterSettings[1]);
                         editor.putBoolean(FILTER_CHOICE_EVENTS, filterSettings[2]);
                         editor.apply();
-                        FragmentTransaction ft = fm.beginTransaction();
-                        ft.detach(postsFrag);
-                        ft.attach(postsFrag);
-                        ft.commit();
+                        //Refresh the fragment to apply new filter settings.
+                        getActivity().recreate();
+                        dismiss();
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
