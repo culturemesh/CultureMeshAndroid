@@ -20,6 +20,7 @@ class API {
     static final String SETTINGS_IDENTIFIER = "acmsi";
     static final String PERSONAL_NETWORKS = "pernet";
     static final String SELECTED_NETWORK = "selnet";
+    static final boolean NO_JOINED_NETWORKS = false;
 
 
     //TODO: REMOVE DUMMY GENERATORS
@@ -77,94 +78,94 @@ class API {
 
 
     static class Get {
-        static ArrayList<User> users() {
-            return genUsers();
+        static NetworkResponse<ArrayList<User>> users() {
+            return new NetworkResponse<>(genUsers());
         }
 
-        static User user(BigInteger id) {
-            return genUsers().get(0);
+        static NetworkResponse<User> user(BigInteger id) {
+            return new NetworkResponse<>(genUsers().get(0));
         }
 
-        static ArrayList<Network> userNetworks(BigInteger id) {
-            return genNetworks();
+        static NetworkResponse<ArrayList<Network>> userNetworks(BigInteger id) {
+            return new NetworkResponse<>(genNetworks());
         }
 
-        static ArrayList<org.codethechange.culturemesh.models.Post> userPosts(BigInteger id) {
-            return genPosts();
+        static NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Post>> userPosts(BigInteger id) {
+            return new NetworkResponse<>(genPosts());
         }
 
-        static ArrayList<Event> userEvents(BigInteger id) {
-            return genEvents();
+        static NetworkResponse<ArrayList<Event>> userEvents(BigInteger id) {
+            return new NetworkResponse<>( genEvents());
         }
 
-        static ArrayList<Network> networks() {
-            return genNetworks();
+        static NetworkResponse<ArrayList<Network>> networks() {
+            return new NetworkResponse<>(genNetworks());
         }
 
-        static Network network(BigInteger id) {
-            return genNetworks().get(0);
+        static NetworkResponse<Network> network(BigInteger id) {
+            return new NetworkResponse<>(genNetworks().get(0));
         }
 
-        static ArrayList<org.codethechange.culturemesh.models.Post> networkPosts(BigInteger id) {
-            return genPosts();
+        static NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Post>> networkPosts(BigInteger id) {
+            return new NetworkResponse<>(genPosts());
         }
 
-        static ArrayList<Event> networkEvents(BigInteger id) {
-            return genEvents();
+        static NetworkResponse<ArrayList<Event>> networkEvents(BigInteger id) {
+            return new NetworkResponse<>(genEvents());
         }
 
-        static ArrayList<User> networkUsers(BigInteger id) {
-            return genUsers();
+        static NetworkResponse<ArrayList<User>> networkUsers(BigInteger id) {
+            return new NetworkResponse<>(genUsers());
         }
 
-        static org.codethechange.culturemesh.models.Post post(BigInteger id) {
-            return genPosts().get(0);
+        static NetworkResponse<org.codethechange.culturemesh.models.Post> post(BigInteger id) {
+            return new NetworkResponse<>(genPosts().get(0));
         }
 
-        static Event event(BigInteger id) {
-            return genEvents().get(0);
+        static NetworkResponse<Event> event(BigInteger id) {
+            return new NetworkResponse<>(genEvents().get(0));
         }
 
-        static ArrayList<User> eventAttendance(BigInteger id) {
-            return genUsers();
+        static NetworkResponse<ArrayList<User>> eventAttendance(BigInteger id) {
+            return new NetworkResponse<>(genUsers());
         }
 
 
     }
 
     static class Post {
-        static void addUserToEvent(BigInteger userId, BigInteger eventId) {
-
+        static NetworkResponse addUserToEvent(BigInteger userId, BigInteger eventId) {
+            return new NetworkResponse();
         }
 
-        static void addUserToNetwork(BigInteger userId, BigInteger networkId) {
-
+        static NetworkResponse addUserToNetwork(BigInteger userId, BigInteger networkId) {
+            return new NetworkResponse();
         }
 
-        static void user(User user) {
-
+        static NetworkResponse user(User user) {
+            return new NetworkResponse();
         }
 
-        static void network(Network network) {
-
+        static NetworkResponse network(Network network) {
+            return new NetworkResponse();
         }
 
-        static void post(org.codethechange.culturemesh.models.Post post) {
-
+        static NetworkResponse post(org.codethechange.culturemesh.models.Post post) {
+            return new NetworkResponse();
         }
 
-        static void event(Event event) {
-
+        static NetworkResponse event(Event event) {
+            return new NetworkResponse();
         }
     }
 
     static class Put {
-        static void user(User user) {
-
+        static NetworkResponse user(User user) {
+            return new NetworkResponse();
         }
 
-        static void event(Event event) {
-
+        static NetworkResponse event(Event event) {
+            return new NetworkResponse();
         }
 
     }

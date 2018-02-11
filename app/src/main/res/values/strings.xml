@@ -60,6 +60,14 @@
     <string name="eventProperty_time">Event Start Time</string>
     <string name="createEvent_setTime">Set Start Time</string>
     <string name="createEvent_setDate">Set Event Date</string>
+    <!-- Error messages for missing or invalid fields -->
+    <string name="createEvent_missingDate">Please set a date for your event.</string>
+    <string name="createEvent_missingTime">Please set a time for your event.</string>
+    <string name="createEvent_missingName">Please choose a name for your event.</string>
+    <string name="createEvent_missingDescription">Please describe what\'s happening at your event.</string>
+    <string name="createEvent_missingAddress">Please choose a location for your event.</string>
+    <string name="noErrors">noerr</string>
+    <!-- Strings for Login and New Account UI -->
     <string name="title_activity_login">Sign In</string>
     <string name="username">Email</string>
     <string name="password">Password</string>
@@ -70,4 +78,8 @@
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
     <string name="confirm_password">Confirm Password</string>
+
+    <string name="error">Error</string>
+    <string name="genericFail">Oops, something went wrong.</string>
+    <string name="genericSuccess">Operation Succeeded!</string>
 </resources>

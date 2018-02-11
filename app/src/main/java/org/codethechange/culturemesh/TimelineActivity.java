@@ -7,7 +7,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.support.v4.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,6 +16,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -55,8 +55,7 @@ private String basePath = "www.culturemesh.com/api/v1";
     private RecyclerView postsRV;
     private Animation open, close;
     private boolean isFABOpen;
-    private static Fragment postsFrag;
-    private static FragmentManager fm;
+
 
     private Network network;
 
@@ -65,19 +64,41 @@ private String basePath = "www.culturemesh.com/api/v1";
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_timeline);
-
         settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
 
         getSupportActionBar().setLogo(R.drawable.logo_header);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        if (API.NO_JOINED_NETWORKS) {
+            createNoNetwork();
+        } else {
+            createDefaultNetwork();
+        }
+    }
+
+    protected void createNoNetwork() {
+        Intent startExplore = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
+        startActivity(startExplore);
+    }
+
+    protected void createDefaultNetwork() {
+        /* //Set up Toolbar
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.action_bar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setLogo(R.drawable.logo_header);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         //Choose selected network.
-        //TODO: Create better default behavior for no selected networks.
         String selectedNetwork = settings.getString(API.SELECTED_NETWORK, "123456");
         BigInteger id = new BigInteger(selectedNetwork);
-        network = API.Get.network(id);
+        NetworkResponse<Network> responseNetwork = API.Get.network(id);
+        network = responseNetwork.getPayload();
 
-        ArrayList<User> users = API.Get.networkUsers(id);
+        NetworkResponse<ArrayList<User>> responseUsers = API.Get.networkUsers(id);
+        ArrayList<User> users = responseUsers.getPayload();
 
         //Update number of people.
         //TODO: Manipulate string of number to have magnitude suffix (K,M,etc.)
@@ -145,8 +166,6 @@ private String basePath = "www.culturemesh.com/api/v1";
 
         //set up postsRV
         postsRV = findViewById(R.id.postsRV);
-        postsFrag = getSupportFragmentManager().findFragmentById(R.id.posts_fragment);
-        fm = getSupportFragmentManager();
 
     }
 
