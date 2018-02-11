@@ -89,7 +89,7 @@ private String basePath = "www.culturemesh.com/api/v1";
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setLogo(R.drawable.logo_header);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);*/
 
         //Choose selected network.
         String selectedNetwork = settings.getString(API.SELECTED_NETWORK, "123456");
@@ -204,6 +204,7 @@ private String basePath = "www.culturemesh.com/api/v1";
         //if(linearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0)
         if(!refreshPosts()) Log.d("sErr", "Server/Connection error");
     }
+
     //Returns true upon successful retrieval, returns false if issue/no connection
     public boolean refreshPosts() { //probably public? if we want to refresh from outside, if that's possible/needed
         boolean success = true;
