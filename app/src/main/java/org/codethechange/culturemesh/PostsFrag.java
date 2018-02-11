@@ -30,16 +30,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class PostsFrag extends Fragment {
     private String basePath = "www.culturemesh.com/api/v1";
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    SharedPreferences settings;
     //To figure out params that would be passed in
-
-
-    private OnFragmentInteractionListener mListener;
 
     public PostsFrag() {
         // Required empty public constructor
@@ -47,6 +47,7 @@ public class PostsFrag extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         super.onCreate(savedInstanceState);
 
     }
@@ -75,14 +76,20 @@ public class PostsFrag extends Fragment {
         Network[] networks = null;
 
         SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
-                Context.MODE_PRIVATE);
+                MODE_PRIVATE);
         BigInteger networkId = new BigInteger(settings.getString(API.SELECTED_NETWORK,
                 "123456"));
         ArrayList<FeedItem> posts = new ArrayList<FeedItem>();
-        for (Post post : API.genPosts()) {
-            posts.add(post);
+        if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_EVENTS, true)) {
+            posts.add(API.genEvents().get(2));
         }
-        posts.add(API.genEvents().get(2));
+        if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_NATIVE, true)) {
+            for (Post post : API.genPosts()) {
+                posts.add(post);
+
+            }
+        }
+
 
         mAdapter = new RVAdapter(posts, getActivity().getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);
@@ -130,32 +137,18 @@ public class PostsFrag extends Fragment {
             //instantiate post with the REST data, to discuss
             posts.add(post);
         }
-        //RVAdapter adapter = new RVAdapter(posts);
-        //mRecyclerView.setAdapter(adapter);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
+
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
 
     /**
