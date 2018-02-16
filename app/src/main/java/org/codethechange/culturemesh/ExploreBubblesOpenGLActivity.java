@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh;
 
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -12,7 +13,11 @@ import org.codethechange.bubblepicker.model.BubbleGradient;
 import org.codethechange.bubblepicker.model.PickerItem;
 import org.codethechange.bubblepicker.model.PickerItemSize;
 import org.codethechange.bubblepicker.rendering.BubblePicker;
+import org.codethechange.culturemesh.models.Network;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
 /**
  * Created by nathaniel on 12/27/18.
@@ -20,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ExploreBubblesOpenGLActivity extends DrawerActivity {
     BubblePicker picker;
+    ArrayList<Network> networks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,21 +36,22 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
 
         picker = findViewById(R.id.picker);
 
-        final String[] titles = getResources().getStringArray(R.array.countries);
+        networks = API.Get.networks().getPayload();
+
         final TypedArray colors = getResources().obtainTypedArray(R.array.colors);
         final TypedArray images = getResources().obtainTypedArray(R.array.images);
 
         picker.setAdapter(new BubblePickerAdapter() {
             @Override
             public int getTotalCount() {
-                return titles.length;
+                return networks.size();
             }
 
             @NotNull
             @Override
             public PickerItem getItem(int position) {
                 PickerItem item = new PickerItem();
-                item.setTitle(titles[position]);
+                item.setTitle(networks.get(position).getFromLocation().shortName());
                 item.setGradient(new BubbleGradient(colors.getColor((position * 2) % 8, 0),
                         colors.getColor((position * 2) % 8 + 1, 0), BubbleGradient.VERTICAL));
                 item.setTextColor(ContextCompat.getColor(ExploreBubblesOpenGLActivity.this, android.R.color.white));
@@ -67,7 +74,13 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
         picker.setListener(new BubblePickerListener() {
             @Override
             public void onBubbleSelected(@NotNull PickerItem item) {
-
+                for (int i = 0; i < networks.size(); i++) {
+                    if (networks.get(i).getFromLocation().shortName().equals(item.getTitle())) {
+                        transitionToNetwork(networks.get(i));
+                         return;
+                    }
+                }
+                throw new NoSuchElementException("network not found :O");
             }
 
             @Override
@@ -75,6 +88,12 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
 
             }
         });
+    }
+
+    private void transitionToNetwork(Network net) {
+        Intent i = new Intent(getBaseContext(), TimelineActivity.class);
+        i.putExtra("network", net);
+        startActivity(i);
     }
 
     @Override
