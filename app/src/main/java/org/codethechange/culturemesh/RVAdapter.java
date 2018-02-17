@@ -1,13 +1,8 @@
 package org.codethechange.culturemesh;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.graphics.Color;
-import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +16,6 @@ import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Post;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -114,11 +108,24 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
 
         }
 
+        public void bind(final FeedItem item, final OnItemClickListener listener) {
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onItemClick(item);
+                }
+            });
+        }
+
     }
 
-    RVAdapter(List<FeedItem> posts, Context context) {
-        netPosts = posts;
+    private final OnItemClickListener listener;
+
+    public RVAdapter(List<FeedItem> netPosts, OnItemClickListener listener, Context context) {
+        this.netPosts = netPosts;
         this.context = context;
+        this.listener = listener;
+
     }
 
     @Override
@@ -127,9 +134,10 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
         return new PostViewHolder(v);
     }
 
+
     @Override
     public void onBindViewHolder(PostViewHolder pvh, int i) {
-        FeedItem item = netPosts.get(i);
+        final FeedItem item = netPosts.get(i);
         //Check if post or event.
         try{
             Post post = (Post) item;
@@ -144,6 +152,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             pvh.postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
             pvh.timestamp.setText(post.getDatePosted().toString());
             pvh.username.setText(post.getAuthor().getUsername());
+            pvh.bind(item, listener);
             if (post.getImageLink() != null || post.getVideoLink() != null ) {
                 //TODO: Figure out how to display videos
                 //TODO: Figure out format for multiple pictures. Assuming separated by commas.
@@ -154,6 +163,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             }
             Picasso.with(pvh.personPhoto.getContext()).load(post.getAuthor().getImgURL()).
                     into(pvh.personPhoto);
+
         } catch(ClassCastException e) {
             //It's an event.
             Event event = (Event) item;
@@ -169,11 +179,18 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             pvh.eventDescription.setText(event.getDescription());
             //TODO: Format event time.
             pvh.eventTime.setText(event.getTimeOfEvent().toString());
+            pvh.bind(item, listener);
 
         }
+
     }
 
 
+
+    public interface OnItemClickListener {
+        void onItemClick(FeedItem item);
+        //add more custom click functions here e.g. long click
+    }
 
     @Override
     public int getItemCount() {

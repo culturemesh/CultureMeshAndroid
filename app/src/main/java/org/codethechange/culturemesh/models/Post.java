@@ -3,8 +3,6 @@ package org.codethechange.culturemesh.models;
 import java.io.Serializable;
 import java.math.BigInteger;
 
-import java.util.Date;
-
 /**
  * Created by nathaniel on 11/10/17.
  */

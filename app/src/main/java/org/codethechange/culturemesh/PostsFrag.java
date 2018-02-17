@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Network;
@@ -38,7 +40,7 @@ public class PostsFrag extends Fragment {
     private String basePath = "www.culturemesh.com/api/v1";
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private RVAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     //To figure out params that would be passed in
 
@@ -89,7 +91,16 @@ public class PostsFrag extends Fragment {
         }
         posts.add(API.genEvents().get(2));
 
-        mAdapter = new RVAdapter(posts, getActivity().getApplicationContext());
+        mAdapter = new RVAdapter(posts, new RVAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(FeedItem item) {
+                Intent intent = new Intent(getActivity(), SpecificPostActivity.class);
+                Post post = (Post) item;
+                Toast.makeText(getContext(), "Clicked" + post.getAuthor().getLastName(), Toast.LENGTH_LONG).show();
+                //intent.putExtra(item);
+                getActivity().startActivity(intent);
+            }
+        }, getActivity().getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);
 
         //REDACTED AND MOVED/CHANGED IN loadPosts

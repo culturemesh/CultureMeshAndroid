@@ -6,4 +6,7 @@ package org.codethechange.culturemesh.models;
  */
 
 public class FeedItem {
+    public FeedItem() {
+
+    }
 }
