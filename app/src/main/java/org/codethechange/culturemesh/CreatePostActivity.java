@@ -100,15 +100,15 @@ public class CreatePostActivity extends AppCompatActivity implements
 
         //Update text with network name.
         TextView networkLabel = findViewById(R.id.network_label);
-        if (network.isLocationNetwork()) {
+        if (network.networkClass) {
             networkLabel.setText(getResources().getString(R.string.from) + " " +
-                    network.getFromLocation().shortName() + " " +
+                    network.fromLocation.shortName() + " " +
                     getResources().getString(R.string.near) + " " +
-                    network.getNearLocation().shortName());
+                    network.nearLocation.shortName());
         } else {
-            networkLabel.setText(network.getLang().toString() + " " +
+            networkLabel.setText(network.language.toString() + " " +
                     getResources().getString(R.string.speakers_in).toString() + " " +
-                    network.getNearLocation().shortName());
+                    network.nearLocation.shortName());
         }
 
         //Set onClick for Post button.

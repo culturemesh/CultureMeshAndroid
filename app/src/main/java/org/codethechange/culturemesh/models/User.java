@@ -1,5 +1,7 @@
 package org.codethechange.culturemesh.models;
 
+import android.arch.persistence.room.Entity;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -7,34 +9,26 @@ import java.util.ArrayList;
 /**
  * Created by nathaniel on 11/10/17.
  */
-
+@Entity
 public class User implements Serializable{
 
-    private BigInteger id;
+    public long id;
 
-    public BigInteger getId() {
-        return id;
-    }
+    public String firstName;
 
-    public void setId(BigInteger id) {
-        this.id = id;
-    }
+    public String lastName;
 
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String username;
-    private ArrayList<Network> enrolledNetworks;
-    private ArrayList<BigInteger> enrolledNetworkIds;
-    private String imgURL;
+    public String email;
 
-    public ArrayList<BigInteger> getEnrolledNetworkIds() {
-        return enrolledNetworkIds;
-    }
+    public String username;
 
-    public void setEnrolledNetworkIds(ArrayList<BigInteger> enrolledNetworkIds) {
-        this.enrolledNetworkIds = enrolledNetworkIds;
-    }
+    public String aboutMe;
+
+    public int role;
+
+    public String imageLink;
+
+    public String imgURL;
 
     public String getImgURL() {
         return imgURL;
@@ -44,25 +38,14 @@ public class User implements Serializable{
         this.imgURL = imgURL;
     }
 
-    public User(String firstName, String lastName, String email, String username,
-                ArrayList<Network> enrolledNetworks, String imgURL) {
+    public User(String firstName, String lastName, String email, String username, String imgURL) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.username = username;
-        this.enrolledNetworks = enrolledNetworks;
         this.imgURL = imgURL;
     }
 
-    public User(String firstName, String lastName, String email, String username,
-                 String imgURL, ArrayList<BigInteger> enrolledNetworks) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.username = username;
-        this.enrolledNetworkIds = enrolledNetworks;
-        this.imgURL = imgURL;
-    }
 
     public String getFirstName() {
         return firstName;
@@ -78,10 +61,6 @@ public class User implements Serializable{
 
     public String getUsername() {
         return username;
-    }
-
-    public ArrayList<Network> getEnrolledNetworks() {
-        return enrolledNetworks;
     }
 
     public void setFirstName(String firstName) {
@@ -100,7 +79,4 @@ public class User implements Serializable{
         this.username = username;
     }
 
-    public void setEnrolledNetworks(ArrayList<Network> enrolledNetworks) {
-        this.enrolledNetworks = enrolledNetworks;
-    }
 }

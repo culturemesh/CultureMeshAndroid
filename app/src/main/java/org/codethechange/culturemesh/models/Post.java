@@ -1,5 +1,7 @@
 package org.codethechange.culturemesh.models;
 
+import android.arch.persistence.room.Entity;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 
@@ -8,19 +10,11 @@ import java.util.Date;
 /**
  * Created by nathaniel on 11/10/17.
  */
-
+@Entity
 public class Post extends FeedItem implements Serializable{
 
-    private BigInteger id;
-    private User author;
-
-    public BigInteger getAuthorId() {
-        return authorId;
-    }
-
-    public void setAuthorId(BigInteger authorId) {
-        this.authorId = authorId;
-    }
+    public long id;
+    public long author_id;
 
     public String getImgLink() {
         return imgLink;
@@ -38,31 +32,15 @@ public class Post extends FeedItem implements Serializable{
         this.vidLink = vidLink;
     }
 
-    private BigInteger authorId;
-    private String content;
-    private String imgLink;
-    private String vidLink;
+    public String content;
+    public String imgLink;
+    public String vidLink; //TODO: Handle multiple links?
 
-    public BigInteger getId() {
-        return id;
-    }
 
-    public void setId(BigInteger id) {
-        this.id = id;
-    }
+    public String datePosted;
 
-    private String datePosted;
-
-    public Post(User author, String content, String imgLink, String vidLink, String datePosted) {
-        this.author = author;
-        this.content = content;
-        this.imgLink = imgLink;
-        this.vidLink = vidLink;
-        this.datePosted = datePosted;
-    }
-
-    public Post(BigInteger authorId, String content, String imgLink, String vidLink, String datePosted) {
-        this.authorId= authorId;
+    public Post(long author, String content, String imgLink, String vidLink, String datePosted) {
+        this.author_id = author;
         this.content = content;
         this.imgLink = imgLink;
         this.vidLink = vidLink;
@@ -85,16 +63,12 @@ public class Post extends FeedItem implements Serializable{
         this.vidLink = vidLink;
     }
 
-    public Post(User author, String content, String datePosted) {
-        this.author = author;
+    public Post(long author, String content, String datePosted) {
+        this.author_id = author;
         this.content = content;
         this.datePosted = datePosted;
         this.imgLink = null;
         this.vidLink = null;
-    }
-
-    public User getAuthor() {
-        return author;
     }
 
     public String getContent() {
@@ -103,10 +77,6 @@ public class Post extends FeedItem implements Serializable{
 
     public String getDatePosted() {
         return datePosted;
-    }
-
-    public void setAuthor(User author) {
-        this.author = author;
     }
 
     public void setContent(String content) {

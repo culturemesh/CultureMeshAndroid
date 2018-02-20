@@ -119,15 +119,15 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         ArrayList<Network> networks = API.genNetworks();
         for (Network net : networks) {
             String name = "";
-            if (net.isLocationNetwork()) {
+            if (net.networkClass) {
                 name = getResources().getString(R.string.from) + " " +
-                        net.getFromLocation().shortName() + " " +
+                        net.fromLocation.shortName() + " " +
                         getResources().getString(R.string.near) + " " +
-                        net.getNearLocation().shortName();
+                        net.nearLocation.shortName();
             } else {
-                name = net.getLang().toString() + " " +
+                name = net.language.toString() + " " +
                         getResources().getString(R.string.speakers_in) + " " +
-                        net.getNearLocation().shortName();
+                        net.nearLocation.shortName();
             }
             int viewId = View.generateViewId();
             subscribedNetworks.put(viewId, net);

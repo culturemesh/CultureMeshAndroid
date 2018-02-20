@@ -65,7 +65,7 @@ private String basePath = "www.culturemesh.com/api/v1";
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_timeline);
         settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-
+        API.loadDatabases(getApplicationContext());
         getSupportActionBar().setLogo(R.drawable.logo_header);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
@@ -107,14 +107,14 @@ private String basePath = "www.culturemesh.com/api/v1";
         population.setText(String.format("%d",users.size()));
         //Update from location/language
         TextView fromLocation = findViewById(R.id.fromLocation);
-        if (network.isLocationNetwork()) {
-            fromLocation.setText(network.getFromLocation().shortName());
+        if (network.networkClass) {
+            fromLocation.setText(network.fromLocation.shortName());
         } else {
-            fromLocation.setText(network.getLang().getName());
+            fromLocation.setText(network.language.name);
         }
         //Update near location
         TextView nearLocation = findViewById(R.id.nearLocation);
-        nearLocation.setText(network.getNearLocation().shortName());
+        nearLocation.setText(network.nearLocation.shortName());
         ImageButton postsFilter = (ImageButton) findViewById(R.id.filter_feed);
         postsFilter.setOnClickListener(new View.OnClickListener() {
             @Override

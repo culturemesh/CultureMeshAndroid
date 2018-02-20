@@ -1,8 +1,12 @@
 package org.codethechange.culturemesh;
 
+import android.arch.persistence.db.SupportSQLiteDatabase;
+import android.arch.persistence.room.Room;
+import android.arch.persistence.room.migration.Migration;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -11,21 +15,25 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
-import org.codethechange.culturemesh.data.NetworkDbContract;
-import org.codethechange.culturemesh.data.NetworkDbHelper;
+import org.codethechange.culturemesh.data.CMDatabase;
+import org.codethechange.culturemesh.models.FromLocation;
+import org.codethechange.culturemesh.models.Location;
+import org.codethechange.culturemesh.models.NearLocation;
+import org.codethechange.culturemesh.models.Network;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public class DatabaseTest extends AppCompatActivity {
 
-    SQLiteDatabase mDb;
+    CMDatabase mDb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_database_test);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        NetworkDbHelper helper = new NetworkDbHelper(getApplicationContext(), null);
+        //NetworkDbHelper helper = new NetworkDbHelper(getApplicationContext(), null);
         /*mDb = helper.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(NetworkDbContract.NetworkDbEntry._ID, new Long(21342424));
@@ -38,7 +46,7 @@ public class DatabaseTest extends AppCompatActivity {
         long id = mDb.insert(NetworkDbContract.NetworkDbEntry.TABLE_NAME, null, cv);
         Log.i("DatabaseId", id + "");*/
 
-        mDb = helper.getReadableDatabase();
+        /*mDb = helper.getReadableDatabase();
 
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
@@ -74,7 +82,34 @@ public class DatabaseTest extends AppCompatActivity {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
-    }
+        });*/
+        /*API.loadDatabases(getApplicationContext());
+        API.Get.network(new BigInteger("122"));*/
 
+    }
+    static final Migration MIGRATION_1_2 = new Migration(1, 2) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE network (`id` INTEGER, "
+                    + "`name` TEXT, PRIMARY KEY(`id`))");
+        }
+    };
+
+/*    public class outThread extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            mDb = Room.databaseBuilder(getApplicationContext(), CMDatabase.class, "database").fallbackToDestructiveMigration()
+                    .build();
+            TestDao dao = mDb.testDao();
+
+            Network net = new Network(new NearLocation("United Sasdftates", "Nasdfew York", "Bedfasfdord", null),
+                    new FromLocation("United asdfStates", "New York", "Palo Alto",null),233);
+            dao.insertNetworks(net);
+            List<Network> shouldBeSame = dao.getNetworks();
+            Log.i("GetNEt", shouldBeSame.size() + shouldBeSame.get(shouldBeSame.size() - 1).nearLocation.near_city);
+            mDb.close();
+            return null;
+        }
+    }*/
 }

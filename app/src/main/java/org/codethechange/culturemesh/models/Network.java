@@ -1,99 +1,51 @@
 package org.codethechange.culturemesh.models;
 
+import android.arch.persistence.room.Embedded;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import java.io.Serializable;
-import java.math.BigInteger;
-import java.util.ArrayList;
 
 /**
  * Created by nathaniel on 11/10/17.
  */
 
+@Entity
 public class Network implements Serializable{
-    private BigInteger id;
+    //TODO: Figure out Room deals with bigints.
+    @PrimaryKey
+    public long id;
 
-    public BigInteger getId() {
-        return id;
+    @Embedded
+    public NearLocation nearLocation;
+
+    @Embedded
+    public FromLocation fromLocation;
+
+    @Embedded
+    public Language language;
+
+    public boolean networkClass;
+    //TODO: Possibly remove this field -- network object doesn't have posts field
+    //private ArrayList<Post> posts;
+    //private ArrayList<Event> events;
+
+    public Network() {
+
     }
-
-    public void setId(BigInteger id) {
+    public Network(NearLocation nearLocation,
+                   FromLocation fromLocation, long id) {
+        this.fromLocation = fromLocation;
+        this.nearLocation = nearLocation;
+        networkClass = true;
         this.id = id;
     }
 
-
-    public boolean isLocationNetwork() {
-        return classification;
-    }
-
-    public void setClassification(boolean classification) {
-        this.classification = classification;
-    }
-
-    public Language getLang() {
-        return lang;
-    }
-
-    public void setLang(Language lang) {
-        this.lang = lang;
-    }
-
-    public Location getFromLocation() {
-        return fromLocation;
-    }
-
-    public void setFromLocation(Location fromLocation) {
-        this.fromLocation = fromLocation;
-    }
-
-    //TODO: Possibly remove this field -- network object doesn't have posts field
-    private ArrayList<Post> posts;
-    private ArrayList<Event> events;
-    private Location nearLocation;
-    private boolean classification;
-    private Language lang;
-    private Location fromLocation;
-
-    public Network(ArrayList<Post> posts, ArrayList<Event> events, Location nearLocation,
-                   Location fromLocation) {
-        this.posts = posts;
-        this.events = events;
-        this.fromLocation = fromLocation;
+    public Network(NearLocation nearLocation,
+                   Language lang, long id) {
+        this.language = lang;
         this.nearLocation = nearLocation;
-        classification = true;
-    }
-
-    public Network(ArrayList<Post> posts, ArrayList<Event> events, Location nearLocation,
-                   Language lang) {
-        this.posts = posts;
-        this.events = events;
-        this.lang = lang;
-        this.nearLocation = nearLocation;
-        classification = false;
-    }
-
-
-
-    public ArrayList<Post> getPosts() {
-        return posts;
-    }
-
-    public void setPosts(ArrayList<Post> posts) {
-        this.posts = posts;
-    }
-
-    public ArrayList<Event> getEvents() {
-        return events;
-    }
-
-    public void setEvents(ArrayList<Event> events) {
-        this.events = events;
-    }
-
-    public Location getNearLocation() {
-        return nearLocation;
-    }
-
-    public void setNearLocation(Location nearLocation) {
-        this.nearLocation = nearLocation;
+        networkClass = false;
     }
 
     //No override of toString() because getResources() requires an activity

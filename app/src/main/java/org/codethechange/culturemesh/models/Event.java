@@ -1,6 +1,10 @@
 package org.codethechange.culturemesh.models;
 
 
+import android.arch.persistence.room.Embedded;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 
@@ -9,32 +13,31 @@ import java.util.Date;
 /**
  * Created by nathaniel on 11/10/17.
  */
-
+@Entity
 public class Event extends FeedItem implements Serializable{
 
-    private BigInteger id;
-    private String title;
+    public long id;
 
-    public BigInteger getId() {
-        return id;
-    }
+    public long networkId;
 
-    public void setId(BigInteger id) {
-        this.id = id;
-    }
+    public String title;
 
+    public String description;
 
-    private String description;
-    private Date timeOfEvent;
-    private User author;
-    private String address;
-    private Language lang;
+    public String timeOfEvent;
 
-    public Event(String title, String description, Date timeOfEvent, User author, String address, Language lang) {
+    public long authorId;
+
+    public String address;
+
+    @Embedded
+    public Language lang;
+
+    public Event(String title, String description, String timeOfEvent, User author, String address, Language lang) {
         this.title = title;
         this.description = description;
         this.timeOfEvent = timeOfEvent;
-        this.author = author;
+        this.authorId = author.id;
         this.address = address;
         this.lang = lang;
     }
@@ -55,20 +58,20 @@ public class Event extends FeedItem implements Serializable{
         this.description = description;
     }
 
-    public Date getTimeOfEvent() {
+    public String getTimeOfEvent() {
         return timeOfEvent;
     }
 
-    public void setTimeOfEvent(Date timeOfEvent) {
+    public void setTimeOfEvent(String timeOfEvent) {
         this.timeOfEvent = timeOfEvent;
     }
 
-    public User getAuthor() {
-        return author;
+    public long getAuthor() {
+        return authorId;
     }
 
     public void setAuthor(User author) {
-        this.author = author;
+        this.authorId = author.id;
     }
 
     public String getAddress() {
