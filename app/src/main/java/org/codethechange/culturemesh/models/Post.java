@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh.models;
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -12,9 +13,10 @@ import java.util.Date;
  */
 @Entity
 public class Post extends FeedItem implements Serializable{
-
+    @PrimaryKey
     public long id;
-    public long author_id;
+    public long userId;
+    public long networkId;
 
     public String getImgLink() {
         return imgLink;
@@ -39,12 +41,13 @@ public class Post extends FeedItem implements Serializable{
 
     public String datePosted;
 
-    public Post(long author, String content, String imgLink, String vidLink, String datePosted) {
-        this.author_id = author;
+    public Post(long id, long author, long networkId, String content, String imgLink, String vidLink, String datePosted) {
+        this.userId = author;
         this.content = content;
         this.imgLink = imgLink;
         this.vidLink = vidLink;
         this.datePosted = datePosted;
+        this.networkId = networkId;
     }
 
     public String getImageLink() {
@@ -64,7 +67,7 @@ public class Post extends FeedItem implements Serializable{
     }
 
     public Post(long author, String content, String datePosted) {
-        this.author_id = author;
+        this.userId = author;
         this.content = content;
         this.datePosted = datePosted;
         this.imgLink = null;
@@ -85,5 +88,9 @@ public class Post extends FeedItem implements Serializable{
 
     public void setDatePosted(String datePosted) {
         this.datePosted = datePosted;
+    }
+
+    public Post(){
+
     }
 }

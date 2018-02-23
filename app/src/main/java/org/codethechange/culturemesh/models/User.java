@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh.models;
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
  */
 @Entity
 public class User implements Serializable{
-
+    @PrimaryKey
     public long id;
 
     public String firstName;
@@ -47,6 +48,9 @@ public class User implements Serializable{
         this.imgURL = imgURL;
     }
 
+    public User(){
+
+    }
 
     public String getFirstName() {
         return firstName;

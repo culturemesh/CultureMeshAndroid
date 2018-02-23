@@ -26,6 +26,10 @@ public class FromLocation {
 
     //TODO: private Point[] points;
 
+    public FromLocation(){
+
+    }
+
     public FromLocation(String from_country, String from_region, String from_city, Point[] points) {
         this.from_country = from_country;
         this.from_region = from_region;

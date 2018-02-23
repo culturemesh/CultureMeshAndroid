@@ -1,7 +1,10 @@
 package org.codethechange.culturemesh.models;
 
+import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+
+import kotlin.internal.HidesMembers;
 
 /**
  * Created by Drew Gregory on 2/23/18.
@@ -13,6 +16,7 @@ public class Place {
     @PrimaryKey
     public long id;
     public String name;
+    @Embedded
     public Point latLng;
     public long population;
     public String featureCode;

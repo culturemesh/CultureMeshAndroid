@@ -80,15 +80,15 @@ public class PostsFrag extends Fragment {
         BigInteger networkId = new BigInteger(settings.getString(API.SELECTED_NETWORK,
                 "123456"));
         ArrayList<FeedItem> posts = new ArrayList<FeedItem>();
-        if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_EVENTS, true)) {
-            posts.add(API.genEvents().get(2));
-        }
-        if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_NATIVE, true)) {
-            for (Post post : API.genPosts()) {
+        /*if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_EVENTS, true)) {
+            posts.add(API.Get.networkEvents(21).getPayload().get(1));
+        }*/
+        /*if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_NATIVE, true)) {
+            for (Post post : API.Get.networkEvents(123)) {
                 posts.add(post);
 
             }
-        }
+        }*/
 
 
         mAdapter = new RVAdapter(posts, getActivity().getApplicationContext());
@@ -133,7 +133,7 @@ public class PostsFrag extends Fragment {
             String content = null;
             String title = null;
             Date datePosted = new Date(); /* initialize with string version of date */
-            Post post = new Post(user, content, datePosted.toString());
+            Post post = new Post(user.id, content, datePosted.toString());
             //instantiate post with the REST data, to discuss
             posts.add(post);
         }

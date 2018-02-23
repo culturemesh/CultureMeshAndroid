@@ -1,9 +1,11 @@
 package org.codethechange.culturemesh.models;
 
+import android.arch.persistence.room.Entity;
+
 /**
  * Created by Drew Gregory on 2/23/18.
  */
-
+@Entity
 public class Region extends Place{
     public long countryId;
     public String countryName;

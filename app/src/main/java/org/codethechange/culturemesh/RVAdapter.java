@@ -133,12 +133,12 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                 pvh.cv.setCardBackgroundColor(context.getResources().
                         getColor(R.color.colorPrimaryDark));
             }
-            String name = post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName();
-            pvh.personName.setText(name);
+            //String name = post.getFirstName() + " " + post.getAuthor().getLastName();
+            //pvh.personName.setText(name);
             pvh.content.setText(post.getContent());
             pvh.postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
             pvh.timestamp.setText(post.getDatePosted().toString());
-            pvh.username.setText(post.getAuthor().getUsername());
+            //pvh.username.setText(post.getAuthor().getUsername());
             if (post.getImageLink() != null || post.getVideoLink() != null ) {
                 //TODO: Figure out how to display videos
                 //TODO: Figure out format for multiple pictures. Assuming separated by commas.
@@ -147,8 +147,8 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                     Picasso.with(pvh.images[j].getContext()).load(links[j]).into(pvh.images[j]);
                 }
             }
-            Picasso.with(pvh.personPhoto.getContext()).load(post.getAuthor().getImgURL()).
-                    into(pvh.personPhoto);
+            //Picasso.with(pvh.personPhoto.getContext()).load(post.getAuthor().getImgURL()).
+              //      into(pvh.personPhoto);
         } catch(ClassCastException e) {
             //It's an event.
             Event event = (Event) item;

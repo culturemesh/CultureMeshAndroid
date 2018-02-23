@@ -26,6 +26,10 @@ public class NearLocation {
 
     //TODO: private Point[] points;
 
+    public NearLocation() {
+
+    }
+
     public NearLocation(String near_country, String near_region, String near_city, Point[] points) {
         this.near_country = near_country;
         this.near_region = near_region;

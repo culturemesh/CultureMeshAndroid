@@ -26,4 +26,8 @@ public class Language implements Serializable {
         this.numSpeakers = numSpeakers;
         this.language_id = id;
     }
+
+    public Language() {
+
+    }
 }

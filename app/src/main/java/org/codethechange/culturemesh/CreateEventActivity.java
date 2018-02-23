@@ -97,12 +97,12 @@ public class CreateEventActivity extends AppCompatActivity {
             String address = addressRef.getText().toString();
             String description = descriptionRef.getText().toString();
             // TODO: Let the user select a language (from a menu? arbitrarily?)
-            Language lang = new Language("TempLanguage");
+            Language lang = new Language(12, "TempLanguage", 21);
             // TODO: Get the User object for the current user
             User author = null;
 
             // Create Event
-            Event event = new Event(name, description, date, author, address, lang);
+            Event event = new Event(name, description, date.toString(), 1, address);
             // POST Event with AsyncTask
             new PostEvent().execute(event);
         }

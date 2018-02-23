@@ -4,6 +4,8 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 
 import org.codethechange.culturemesh.data.CMDatabase;
+import org.codethechange.culturemesh.data.CityDao;
+import org.codethechange.culturemesh.data.CountryDao;
 import org.codethechange.culturemesh.data.EventDao;
 import org.codethechange.culturemesh.data.EventSubscription;
 import org.codethechange.culturemesh.data.EventSubscriptionDao;
@@ -11,7 +13,10 @@ import org.codethechange.culturemesh.data.NetworkDao;
 import org.codethechange.culturemesh.data.NetworkSubscription;
 import org.codethechange.culturemesh.data.NetworkSubscriptionDao;
 import org.codethechange.culturemesh.data.PostDao;
+import org.codethechange.culturemesh.data.RegionDao;
 import org.codethechange.culturemesh.data.UserDao;
+import org.codethechange.culturemesh.models.City;
+import org.codethechange.culturemesh.models.Country;
 import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FromLocation;
 import org.codethechange.culturemesh.models.Language;
@@ -19,6 +24,7 @@ import org.codethechange.culturemesh.models.Location;
 import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Point;
+import org.codethechange.culturemesh.models.Region;
 import org.codethechange.culturemesh.models.User;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,7 +52,7 @@ class API {
      *This next section is code that parses JSON dummy data and adds it to the database. We can reuse
      * some of this code later.
      */
-    void addUsers(){
+    static void addUsers(){
         String rawDummy = "\n" +
                 "[\n" +
                 "  {\n" +
@@ -145,7 +151,7 @@ class API {
         }
     }
 
-    void addNetworks() {
+    static void addNetworks() {
         String rawDummy = "[\n" +
                 "    {\n" +
                 "      \"id\": 0,\n" +
@@ -221,6 +227,363 @@ class API {
         }
 
     }
+
+    static void addRegions(){
+        String rawDummy = "[\n" +
+                "  {\n" +
+                "    \"id\": 1,\n" +
+                "    \"name\": \"north\",\n" +
+                "    \"latitude\": 5000.4321,\n" +
+                "    \"longitude\": 1000.1234,\n" +
+                "    \"country_id\": 1,\n" +
+                "    \"country_name\": \"corneria\",\n" +
+                "    \"population\": 400000,\n" +
+                "    \"feature_code\": \"string\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 2,\n" +
+                "    \"name\": \"south\",\n" +
+                "    \"latitude\": 4000.4321,\n" +
+                "    \"longitude\": 1000.1234,\n" +
+                "    \"country_id\": 1,\n" +
+                "    \"country_name\": \"corneria\",\n" +
+                "    \"population\": 600000,\n" +
+                "    \"feature_code\": \"string\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 3,\n" +
+                "    \"name\": \"east\",\n" +
+                "    \"latitude\": 50.100,\n" +
+                "    \"longitude\": 250.200,\n" +
+                "    \"country_id\": 2,\n" +
+                "    \"country_name\": \"rohan\",\n" +
+                "    \"population\": 300,\n" +
+                "    \"feature_code\": \"idk\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 4,\n" +
+                "    \"name\": \"west\",\n" +
+                "    \"latitude\": 150.100,\n" +
+                "    \"longitude\": 150.200,\n" +
+                "    \"country_id\": 2,\n" +
+                "    \"country_name\": \"rohan\",\n" +
+                "    \"population\": 50,\n" +
+                "    \"feature_code\": \"idk\"\n" +
+                "  }\n" +
+                "]";
+        RegionDao rDao = mDb.regionDao();
+        try {
+            JSONArray regionsJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < regionsJSON.length(); i++) {
+                JSONObject regionJSON = regionsJSON.getJSONObject(i);
+                Point coords = new Point();
+                coords.latitude = regionJSON.getLong("latitude");
+                coords.longitude = regionJSON.getLong("longitude");
+                Region region = new Region(regionJSON.getLong("id"), regionJSON.getString("name"),
+                        coords, regionJSON.getLong("population"), regionJSON.getLong("country_id"),
+                        regionJSON.getString("country_name"));
+                rDao.insertRegions(region);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    static void addCities() {
+        String rawDummy = "[\n" +
+                "  {\n" +
+                "    \"id\": 1,\n" +
+                "    \"name\": \"City A\",\n" +
+                "    \"latitude\": 1.1,\n" +
+                "    \"longitude\": 2.2,\n" +
+                "    \"region_id\": 1,\n" +
+                "    \"region_name\": \"north\",\n" +
+                "    \"country_id\": 1,\n" +
+                "    \"country_name\": \"corneria\",\n" +
+                "    \"population\": 350000,\n" +
+                "    \"feature_code\": \"idk\",\n" +
+                "    \"tweet_terms\": \"idk\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 2,\n" +
+                "    \"name\": \"City B\",\n" +
+                "    \"latitude\": 3.3,\n" +
+                "    \"longitude\": 4.4,\n" +
+                "    \"region_id\": 1,\n" +
+                "    \"region_name\": \"north\",\n" +
+                "    \"country_id\": 1,\n" +
+                "    \"country_name\": \"corneria\",\n" +
+                "    \"population\": 100000,\n" +
+                "    \"feature_code\": \"idk\",\n" +
+                "    \"tweet_terms\": \"idk\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 3,\n" +
+                "    \"name\": \"City C\",\n" +
+                "    \"latitude\": 5.5,\n" +
+                "    \"longitude\": 6.6,\n" +
+                "    \"region_id\": 2,\n" +
+                "    \"region_name\": \"south\",\n" +
+                "    \"country_id\": 1,\n" +
+                "    \"country_name\": \"corneria\",\n" +
+                "    \"population\": 20000,\n" +
+                "    \"feature_code\": \"idk\",\n" +
+                "    \"tweet_terms\": \"idk\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 4,\n" +
+                "    \"name\": \"City D\",\n" +
+                "    \"latitude\": 7.7,\n" +
+                "    \"longitude\": 8.8,\n" +
+                "    \"region_id\": 3,\n" +
+                "    \"region_name\": \"east\",\n" +
+                "    \"country_id\": 2,\n" +
+                "    \"country_name\": \"rohan\",\n" +
+                "    \"population\": 280,\n" +
+                "    \"feature_code\": \"idk\",\n" +
+                "    \"tweet_terms\": \"idk\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 5,\n" +
+                "    \"name\": \"City E\",\n" +
+                "    \"latitude\": 9.9,\n" +
+                "    \"longitude\": 10.10,\n" +
+                "    \"region_id\": 4,\n" +
+                "    \"region_name\": \"west\",\n" +
+                "    \"country_id\": 2,\n" +
+                "    \"country_name\": \"rohan\",\n" +
+                "    \"population\": 20,\n" +
+                "    \"feature_code\": \"idk\",\n" +
+                "    \"tweet_terms\": \"idk\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 6,\n" +
+                "    \"name\": \"City F\",\n" +
+                "    \"latitude\": 11.11,\n" +
+                "    \"longitude\": 12.12,\n" +
+                "    \"region_id\": 4,\n" +
+                "    \"region_name\": \"west\",\n" +
+                "    \"country_id\": 2,\n" +
+                "    \"country_name\": \"rohan\",\n" +
+                "    \"population\": 25,\n" +
+                "    \"feature_code\": \"idk\",\n" +
+                "    \"tweet_terms\": \"idk\"\n" +
+                "  }\n" +
+                "]";
+        CityDao cDao = mDb.cityDao();
+        try {
+            JSONArray citiesJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < citiesJSON.length(); i++) {
+                JSONObject cityJSON = citiesJSON.getJSONObject(i);
+                Point coords = new Point();
+                coords.latitude = cityJSON.getLong("latitude");
+                coords.longitude = cityJSON.getLong("longitude");
+                City city = new City(cityJSON.getLong("id"), cityJSON.getString("name"),
+                        coords, cityJSON.getLong("population"), cityJSON.getLong("country_id"),
+                        cityJSON.getString("country_name"), cityJSON.getLong("region_id"),
+                        cityJSON.getString("region_name"));
+                cDao.insertCities(city);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void addCountries() {
+        String rawDummy = "[\n" +
+                "  {\n" +
+                "    \"id\": 1,\n" +
+                "    \"iso_a2\": 0,\n" +
+                "    \"name\": \"corneria\",\n" +
+                "    \"latitude\": 4321.4321,\n" +
+                "    \"longitude\": 1234.1234,\n" +
+                "    \"population\": 1000000,\n" +
+                "    \"feature_code\": \"idk\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 2,\n" +
+                "    \"iso_a2\": 0,\n" +
+                "    \"name\": \"rohan\",\n" +
+                "    \"latitude\": 100.100,\n" +
+                "    \"longitude\": 200.200,\n" +
+                "    \"population\": 350,\n" +
+                "    \"feature_code\": \"idk\"\n" +
+                "  }\n" +
+                "]";
+        CountryDao cDao = mDb.countryDao();
+        try {
+            JSONArray countriesJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < countriesJSON.length(); i++) {
+                JSONObject countryJSON = countriesJSON.getJSONObject(i);
+                Point coords = new Point();
+                coords.latitude = countryJSON.getLong("latitude");
+                coords.longitude = countryJSON.getLong("longitude");
+                Country country = new Country(countryJSON.getLong("id"), countryJSON.getString("name"),
+                        coords, countryJSON.getLong("population"));
+                cDao.insertCountries(country);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void addPosts(){
+        String rawDummy = "[\n" +
+                "  {\n" +
+                "    \"user_id\": 4,\n" +
+                "    \"post_text\": \"Ex excepturi quos vero nesciunt autem. Ipsum voluptates quaerat rerum praesentium modi.\\nEos culpa fuga maxime atque exercitationem nemo. Repellendus officiis et. Explicabo eveniet quibusdam magnam minima.\",\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"img_link\": \"https://www.lorempixel.com/370/965\",\n" +
+                "    \"vid_link\": \"https://dummyimage.com/803x720\",\n" +
+                "    \"post_date\": \"2017-02-12 08:53:43\",\n" +
+                "    \"post_class\": 0,\n" +
+                "    \"id\": 1,\n" +
+                "    \"post_original\": \"Not sure what this field is\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"user_id\": 3,\n" +
+                "    \"post_text\": \"Minus cumque corrupti porro natus tenetur delectus illum. Amet aut molestias eaque autem ea odio.\\nAsperiores sed officia. Similique accusantium facilis sed. Eligendi tempora nisi sint tempora incidunt perferendis.\",\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"img_link\": \"https://www.lorempixel.com/556/586\",\n" +
+                "    \"vid_link\": \"https://dummyimage.com/909x765\",\n" +
+                "    \"post_date\": \"2017-02-01 05:49:35\",\n" +
+                "    \"post_class\": 0,\n" +
+                "    \"id\": 2,\n" +
+                "    \"post_original\": \"Not sure what this field is\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"user_id\": 1,\n" +
+                "    \"post_text\": \"Veritatis illum occaecati est error magni nesciunt. Voluptate cum odio voluptatum quasi natus. Illo vel tempora pariatur tempore.\",\n" +
+                "    \"network_id\": 0,\n" +
+                "    \"img_link\": \"https://dummyimage.com/503x995\",\n" +
+                "    \"vid_link\": \"https://dummyimage.com/796x497\",\n" +
+                "    \"post_date\": \"2017-04-03 18:27:27\",\n" +
+                "    \"post_class\": 0,\n" +
+                "    \"id\": 3,\n" +
+                "    \"post_original\": \"Not sure what this field is\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"user_id\": 3,\n" +
+                "    \"post_text\": \"Dolorem ad ducimus laboriosam veritatis id quam rerum. Nostrum voluptatum mollitia modi.\\nVoluptas aut mollitia in perferendis blanditiis eaque eius. Recusandae similique ratione perspiciatis assumenda.\",\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"img_link\": \"https://placeholdit.imgix.net/~text?txtsize=55&txt=917x558&w=917&h=558\",\n" +
+                "    \"vid_link\": \"https://www.lorempixel.com/1016/295\",\n" +
+                "    \"post_date\": \"2016-08-29 15:27:28\",\n" +
+                "    \"post_class\": 0,\n" +
+                "    \"id\": 4,\n" +
+                "    \"post_original\": \"Not sure what this field is\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"user_id\": 4,\n" +
+                "    \"post_text\": \"Ab voluptates omnis unde voluptas. Molestiae ipsam quis sapiente.\\nProvident illum consectetur deserunt. Nisi vero minus non corrupti impedit.\\nEaque dolor facilis iusto excepturi non. Sunt possimus modi animi.\",\n" +
+                "    \"network_id\": 0,\n" +
+                "    \"img_link\": \"https://www.lorempixel.com/231/204\",\n" +
+                "    \"vid_link\": \"https://dummyimage.com/720x577\",\n" +
+                "    \"post_date\": \"2017-07-29 18:52:43\",\n" +
+                "    \"post_class\": 0,\n" +
+                "    \"id\": 5,\n" +
+                "    \"post_original\": \"Not sure what this field is\"\n" +
+                "  }\n" +
+                "]";
+        PostDao pDao = mDb.postDao();
+        try {
+            JSONArray postsJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < postsJSON.length(); i++) {
+                JSONObject postJSON = postsJSON.getJSONObject(i);
+                org.codethechange.culturemesh.models.Post post = new org.codethechange.culturemesh.models.Post(postJSON.getLong("id"), postJSON.getLong("user_id"),
+                        postJSON.getLong("network_id"),postJSON.getString("post_text"),
+                        postJSON.getString("img_link"),postJSON.getString("vid_link"),
+                        postJSON.getString("post_date"));
+                pDao.insertPosts(post);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void addEvents() {
+        String rawDummy = "[\n" +
+                "  {\n" +
+                "    \"description\": \"Ad officia impedit necessitatibus. Explicabo consequuntur commodi.\\nId id nostrum doloremque ab minus magnam. Ipsa placeat quasi dolores libero laboriosam.\\nNam tenetur ullam eius officia. Asperiores maiores soluta.\",\n" +
+                "    \"title\": \"Centralized motivating encoding\",\n" +
+                "    \"network_id\": 0,\n" +
+                "    \"date_created\": \"2017-10-13 01:49:21\",\n" +
+                "    \"address_1\": \"157 Stacy Drive\\nMercerfort, IA 59281\",\n" +
+                "    \"address_2\": \"PSC 0398, Box 9876\\nAPO AE 17620\",\n" +
+                "    \"event_date\": \"2017-11-03 17:28:51\",\n" +
+                "    \"host_id\": 5,\n" +
+                "    \"id\": 1,\n" +
+                "    \"location\": [\n" +
+                "      \"Uzbekistan\",\n" +
+                "      \"Dunnmouth\",\n" +
+                "      \"Chavezbury\"\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"description\": \"Laudantium sequi quisquam necessitatibus fugit eligendi. Rem blanditiis quibusdam molestias. Quis voluptate consequatur magnam nemo est magnam explicabo. A ipsam ipsum esse id quos.\",\n" +
+                "    \"title\": \"Reverse-engineered 6thgeneration neural-net\",\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"date_created\": \"2017-09-09 17:12:57\",\n" +
+                "    \"address_1\": \"1709 Fuller Freeway\\nChungland, PR 67499-3841\",\n" +
+                "    \"address_2\": \"916 David Green\\nLake Adamville, MA 66822\",\n" +
+                "    \"event_date\": \"2017-11-16 04:38:29\",\n" +
+                "    \"host_id\": 2,\n" +
+                "    \"id\": 2,\n" +
+                "    \"location\": [\n" +
+                "      \"Malaysia\",\n" +
+                "      \"New John\",\n" +
+                "      \"Kyliefort\"\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"description\": \"Doloremque natus cupiditate ratione sint eveniet. Vitae provident sapiente adipisci.\\nEt inventore quis quos deleniti numquam. Voluptate ipsam totam quas. Ea minima consequuntur consequuntur quaerat facere.\",\n" +
+                "    \"title\": \"Adaptive fault-tolerant hardware\",\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"date_created\": \"2017-10-11 01:13:33\",\n" +
+                "    \"address_1\": \"7874 Bowman Port Suite 466\\nPattonhaven, PR 63278-5184\",\n" +
+                "    \"address_2\": \"7436 William Village\\nRichardchester, NM 28208\",\n" +
+                "    \"event_date\": \"2017-11-10 22:35:03\",\n" +
+                "    \"host_id\": 3,\n" +
+                "    \"id\": 3,\n" +
+                "    \"location\": [\n" +
+                "      \"Macao\",\n" +
+                "      \"South Jillian\",\n" +
+                "      \"New Jenniferfort\"\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"description\": \"Expedita non nam minima aperiam explicabo. Dicta sunt incidunt optio quae. Quam quibusdam dolorum voluptate corrupti ullam sequi. Amet at repellat iusto fuga voluptates aliquam.\",\n" +
+                "    \"title\": \"Quality-focused asynchronous Graphic Interface\",\n" +
+                "    \"network_id\": 0,\n" +
+                "    \"date_created\": \"2017-11-10 17:48:56\",\n" +
+                "    \"address_1\": \"28452 Rivera Pike\\nGambletown, SC 33593-8719\",\n" +
+                "    \"address_2\": \"0314 Escobar Burgs\\nLake Bradburgh, CO 06768\",\n" +
+                "    \"event_date\": \"2017-11-04 21:46:16\",\n" +
+                "    \"host_id\": 5,\n" +
+                "    \"id\": 4,\n" +
+                "    \"location\": [\n" +
+                "      \"Norfolk Island\",\n" +
+                "      \"New Tara\",\n" +
+                "      \"Johnton\"\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]";
+        EventDao cDao = mDb.eventDao();
+        try {
+            JSONArray eventsJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < eventsJSON.length(); i++) {
+                JSONObject eventJSON = eventsJSON.getJSONObject(i);
+                Event event = new Event(eventJSON.getString("title"), eventJSON.getString("description"),
+                        eventJSON.getString("date_created"), eventJSON.getLong("host_id"),
+                        eventJSON.getString("address_1") + eventJSON.getString("address_2"));
+                cDao.addEvent(event);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     //TODO: REMOVE DUMMY GENERATORS
     /*static ArrayList<User> genUsers() {
@@ -442,8 +805,8 @@ class API {
 
     public static void loadAppDatabase(Context context) {
         if (mDb == null) {
-            mDb = Room.databaseBuilder(context.getApplicationContext(), CMDatabase.class, "cmdatabase")
-                    .build();
+            mDb = Room.databaseBuilder(context.getApplicationContext(), CMDatabase.class, "cmdatabase").
+                    fallbackToDestructiveMigration().build();
         }
     }
 

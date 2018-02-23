@@ -4,6 +4,7 @@ package org.codethechange.culturemesh.models;
 import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -15,7 +16,7 @@ import java.util.Date;
  */
 @Entity
 public class Event extends FeedItem implements Serializable{
-
+    @PrimaryKey
     public long id;
 
     public long networkId;
@@ -30,16 +31,12 @@ public class Event extends FeedItem implements Serializable{
 
     public String address;
 
-    @Embedded
-    public Language lang;
-
-    public Event(String title, String description, String timeOfEvent, User author, String address, Language lang) {
+    public Event(String title, String description, String timeOfEvent, long author, String address) {
         this.title = title;
         this.description = description;
         this.timeOfEvent = timeOfEvent;
-        this.authorId = author.id;
+        this.authorId = author;
         this.address = address;
-        this.lang = lang;
     }
 
     public String getTitle() {
@@ -82,11 +79,8 @@ public class Event extends FeedItem implements Serializable{
         this.address = address;
     }
 
-    public Language getLang() {
-        return lang;
+    public Event () {
+
     }
 
-    public void setLang(Language lang) {
-        this.lang = lang;
-    }
 }

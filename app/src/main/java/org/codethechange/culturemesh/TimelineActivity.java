@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -34,6 +35,9 @@ import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
+
+import org.codethechange.culturemesh.models.FromLocation;
+import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
@@ -64,16 +68,16 @@ private String basePath = "www.culturemesh.com/api/v1";
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_timeline);
+        API.loadAppDatabase(getApplicationContext());
         settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-        API.loadDatabases(getApplicationContext());
         getSupportActionBar().setLogo(R.drawable.logo_header);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
         if (API.NO_JOINED_NETWORKS) {
             createNoNetwork();
         } else {
             createDefaultNetwork();
         }
+        new TestDatabase().execute();
     }
 
     protected void createNoNetwork() {
@@ -92,19 +96,18 @@ private String basePath = "www.culturemesh.com/api/v1";
         getSupportActionBar().setDisplayShowTitleEnabled(false);*/
 
         //Choose selected network.
-        String selectedNetwork = settings.getString(API.SELECTED_NETWORK, "123456");
-        BigInteger id = new BigInteger(selectedNetwork);
-        NetworkResponse<Network> responseNetwork = API.Get.network(id);
-        network = responseNetwork.getPayload();
-
-        NetworkResponse<ArrayList<User>> responseUsers = API.Get.networkUsers(id);
-        ArrayList<User> users = responseUsers.getPayload();
+        long selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 123456);
+//        NetworkResponse<Network> responseNetwork = API.Get.network(selectedNetwork);
+       // network = responseNetwork.getPayload();
+        network = new Network(new NearLocation("San","ASDf","ASDF", null), new FromLocation("ASdf","asdf","sadf",null),12);
+        //NetworkResponse<ArrayList<User>> responseUsers = API.Get.networkUsers(1);
+        //ArrayList<User> users = responseUsers.getPayload();
 
         //Update number of people.
         //TODO: Manipulate string of number to have magnitude suffix (K,M,etc.)
         //Update population number
         TextView population = findViewById(R.id.network_population);
-        population.setText(String.format("%d",users.size()));
+        //population.setText(String.format("%d",users.size()));
         //Update from location/language
         TextView fromLocation = findViewById(R.id.fromLocation);
         if (network.networkClass) {
@@ -346,6 +349,22 @@ private String basePath = "www.culturemesh.com/api/v1";
                     }
                 });
             return builder.create();
+        }
+    }
+
+    private class TestDatabase extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            /*API.addUsers();
+            API.addCities();
+            API.addCountries();
+            API.addNetworks();
+            API.addRegions();
+            API.addPosts();
+            API.addEvents();*/
+            Log.i("Name Should Be Jonathan", API.Get.user(1).getPayload().firstName);
+            return null;
         }
     }
 

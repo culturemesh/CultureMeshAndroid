@@ -108,7 +108,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         }
 
 
-        Network network = API.genNetworks().get(0);
+//        Network network = API.Get.network(1).getPayload();
         Menu navMenu = navView.getMenu();
         MenuItem item = navMenu.getItem(2); //Your Networks subItem
         Log.i("netMenu", item.getTitle().toString());
@@ -116,7 +116,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         //Instantiate map with key -> menu view id, value -> network.
         subscribedNetworks = new SparseArray<Network>();
         //TODO: Replace dummy networks with real stuff.
-        ArrayList<Network> networks = API.genNetworks();
+        ArrayList<Network> networks = new ArrayList<Network>();//API.Get.userNetworks(23).getPayload();
         for (Network net : networks) {
             String name = "";
             if (net.networkClass) {
