@@ -1,14 +1,23 @@
 package org.codethechange.culturemesh.models;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
  * Created by nathaniel on 11/10/17.
  */
-
 public class Location implements Serializable{
     public long location_id;
+    /**
+     * When stored in the Database, we will store just the id's. The object returned from the API
+     * will have the country, region, and city updated.
+     */
+    public long country_id;
+    public long region_id;
+    public long city_id;
     public String country;
     public String region;
     public String city;

@@ -1,14 +1,27 @@
 package org.codethechange.culturemesh.models;
 
+import android.arch.persistence.room.Ignore;
+
 /**
  * Created by Drew Gregory on 2/19/18.
  * Exact copy of Location, but used as Embedded Entity in SQLite Database.
  */
 
 public class FromLocation {
-    public long from_location_id;
+    /**
+     * When stored in the Database, we will store just the id's. The object returned from the API
+     * will have the country, region, and city updated.
+     * The default value for country, region, city is 0.
+     */
+    public long from_country_id;
+    public long from_region_id;
+    public long from_city_id;
+
+    @Ignore
     public String from_country;
+    @Ignore
     public String from_region;
+    @Ignore
     public String from_city;
 
     //TODO: private Point[] points;
@@ -20,10 +33,13 @@ public class FromLocation {
         //TODO: this.points = points
     }
 
-    public FromLocation() {
+    public FromLocation(long cityId, long regionId,long countryId) {
         this.from_country = "";
         this.from_region = "";
         this.from_city = "";
+        this.from_city_id = cityId;
+        this.from_country_id = countryId;
+        this.from_region_id = regionId;
     }
 
 
