@@ -77,7 +77,7 @@
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="264409e41fc2e4073f71bd98485d3b60f90b0dcf"
+            android:value="@string/fabric_key"
             />
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
