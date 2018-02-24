@@ -21,11 +21,13 @@ import java.util.NoSuchElementException;
 
 /**
  * Created by nathaniel on 12/27/18.
+ *
+ * ExploreBubblesOpenGLActivity - Explore View
  */
 
 public class ExploreBubblesOpenGLActivity extends DrawerActivity {
-    BubblePicker picker;
-    ArrayList<Network> networks;
+    BubblePicker picker; // OpenGL Picker
+    ArrayList<Network> networks; // Networks for picker to draw from
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,28 +36,39 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        picker = findViewById(R.id.picker);
+        picker = findViewById(R.id.picker); // Get Picker
 
-        networks = API.Get.networks().getPayload();
+        networks = API.Get.networks().getPayload(); // Request networks from API
 
-        final TypedArray colors = getResources().obtainTypedArray(R.array.colors);
-        final TypedArray images = getResources().obtainTypedArray(R.array.images);
+        final TypedArray colors = getResources().obtainTypedArray(R.array.colors); // Preset colors
+        final TypedArray images = getResources().obtainTypedArray(R.array.images); // Type colors
 
+        // Standard adapter code for OpenGL Picker
         picker.setAdapter(new BubblePickerAdapter() {
+
+            // Total Count
             @Override
             public int getTotalCount() {
                 return networks.size();
             }
 
+            // Next Item based on index for bubble Picker
             @NotNull
             @Override
             public PickerItem getItem(int position) {
+                // Create new PickerItem
                 PickerItem item = new PickerItem();
+                // Set title based on network origination
                 item.setTitle(networks.get(position).getFromLocation().shortName());
+                // Set colors
                 item.setGradient(new BubbleGradient(colors.getColor((position * 2) % 8, 0),
                         colors.getColor((position * 2) % 8 + 1, 0), BubbleGradient.VERTICAL));
+                // Set text colors
                 item.setTextColor(ContextCompat.getColor(ExploreBubblesOpenGLActivity.this, android.R.color.white));
+                // Set background image on tap
                 //item.setBackgroundImage(ContextCompat.getDrawable(ExploreBubblesOpenGLActivity.this, images.getResourceId(position, 0)));
+
+                // DUMMY CODE TO RESIZE BUBBLES PER NETWORK
                 if (((position * 2) % 8) > 3) {
                     item.setSize(PickerItemSize.LARGE);
                 }
@@ -76,7 +89,7 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
             public void onBubbleSelected(@NotNull PickerItem item) {
                 for (int i = 0; i < networks.size(); i++) {
                     if (networks.get(i).getFromLocation().shortName().equals(item.getTitle())) {
-                        transitionToNetwork(networks.get(i));
+                        transitionToNetwork(networks.get(i)); // Transition to next.
                          return;
                     }
                 }
@@ -92,7 +105,7 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
 
     private void transitionToNetwork(Network net) {
         Intent i = new Intent(getBaseContext(), TimelineActivity.class);
-        i.putExtra("network", net);
+        i.putExtra("network", net); // Pass in network into intent. 
         startActivity(i);
     }
 
