@@ -75,17 +75,7 @@ private String basePath = "www.culturemesh.com/api/v1";
 
         getSupportActionBar().setLogo(R.drawable.logo_header);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        if (API.NO_JOINED_NETWORKS) {
-            createNoNetwork();
-        } else {
-            createDefaultNetwork();
-        }
-    }
-
-    protected void createNoNetwork() {
-        Intent startExplore = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
-        startActivity(startExplore);
+        createDefaultNetwork();
     }
 
     protected void createDefaultNetwork() {
