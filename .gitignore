@@ -10,4 +10,4 @@
 .idea
 app/fabric.properties
 app/src/main/res/values/keys.xml
-
+app/build.gradle
