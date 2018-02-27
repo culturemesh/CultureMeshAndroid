@@ -62,7 +62,9 @@ class API {
     static ArrayList<org.codethechange.culturemesh.models.Post> genPosts() {
         ArrayList<org.codethechange.culturemesh.models.Post> posts = new ArrayList<org.codethechange.culturemesh.models.Post>();
         for (int i = 0; i < 10; i++) {
-            posts.add(new org.codethechange.culturemesh.models.Post(genUsers().get(i%3), "lorem ipsum " + i,  new Date().toString()));
+            org.codethechange.culturemesh.models.Post toAdd = new org.codethechange.culturemesh.models.Post(genUsers().get(i%3), "lorem ipsum " + i,  new Date().toString());
+            //toAdd.setId(new BigInteger((i+1) + " + 37")); //dumb number
+            posts.add(toAdd);
         }
         return posts;
     }

@@ -182,22 +182,6 @@ private String basePath = "www.culturemesh.com/api/v1";
         postsRV = findViewById(R.id.postsRV);
         mLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
 
-//        postsRV.addOnItemTouchListener(new RecyclerTouchListener(this,
-//                postsRV, new PostClickListener() {
-//            public void onClick(View view, final int position) {
-//                PostViewHolder clickedPost = (PostViewHolder) postsRV.getLayoutManager().findViewByPosition(position);
-//                Toast.makeText(TimelineActivity.this, "clicked at: " + position, Toast.LENGTH_SHORT).show();
-//                Intent intent = new Intent();
-//             //   intent.putExtra("post", /* check if this is allowed */ (Serializable) clickedPost);
-//              //  startActivity(intent);
-//            }
-//
-//            @Override
-//            public void onLongClick(View view, int position) {
-//                //To ignore for now, but can also implement a new function for this later if we want
-//            }
-//        }));
-
         //check if at end of posts
         postsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
             private boolean loading = true;
@@ -222,57 +206,6 @@ private String basePath = "www.culturemesh.com/api/v1";
             }
         });
     }
-
-//    class RVOnClickListener implements View.OnClickListener {
-//        @Override
-//        public void onClick(View v) {
-//            int itemPos = postsRV.indexOfChild(v);
-//        }
-//    }
-//
-//
-//    public static interface PostClickListener{
-//        public void onClick(View view,int position);
-//        public void onLongClick(View view,int position);
-//    }
-//
-//    class RecyclerTouchListener implements RecyclerView.OnItemTouchListener{
-//
-//        private PostClickListener clicklistener;
-//        private GestureDetector gestureDetector;
-//
-//        public RecyclerTouchListener(Context context, final RecyclerView recycleView, final PostClickListener clicklistener){
-//            this.clicklistener=clicklistener;
-//            gestureDetector=new GestureDetector(context,new GestureDetector.SimpleOnGestureListener(){
-//                @Override
-//                public boolean onSingleTapUp(MotionEvent e) {
-//                    return true;
-//                }
-//
-//                @Override
-//                public void onLongPress(MotionEvent e) {
-//                    View child=recycleView.findChildViewUnder(e.getX(),e.getY());
-//                    if(child!=null && clicklistener!=null){
-//                        clicklistener.onLongClick(child,recycleView.getChildAdapterPosition(child));
-//                    }
-//                }
-//            });
-//        }
-//        @Override
-//        public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-//            return false;
-//        }
-//
-//        @Override
-//        public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-//
-//        }
-//
-//        @Override
-//        public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-//
-//        }
-//    }
 
     public void fetchPostsAtEnd(int currItem) {
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);

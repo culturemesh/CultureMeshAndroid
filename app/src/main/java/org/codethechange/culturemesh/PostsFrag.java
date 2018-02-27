@@ -95,10 +95,14 @@ public class PostsFrag extends Fragment {
             @Override
             public void onItemClick(FeedItem item) {
                 Intent intent = new Intent(getActivity(), SpecificPostActivity.class);
-                Post post = (Post) item;
-                Toast.makeText(getContext(), "Clicked" + post.getAuthor().getLastName(), Toast.LENGTH_LONG).show();
-                //intent.putExtra(item);
-                getActivity().startActivity(intent);
+                Post post = (Post) item; //to test
+                BigInteger postID = post.getId();
+                try {
+                    intent.putExtra("postID", postID.toString());
+                    getActivity().startActivity(intent);
+                } catch (NullPointerException e) {
+                    Toast.makeText(getActivity(), "Cannot open post", Toast.LENGTH_LONG).show();
+                }
             }
         }, getActivity().getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);
