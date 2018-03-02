@@ -24,7 +24,7 @@ public class PickOnboardingStatusActivity extends AppCompatActivity {
     }
 
     public void tapNew(View v) {
-        Intent start = new Intent(getApplicationContext(), LoginActivity.class);
+        Intent start = new Intent(getApplicationContext(), OnboardActivity.class);
         startActivity(start);
     }
 
