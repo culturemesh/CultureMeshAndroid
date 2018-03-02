@@ -26,9 +26,12 @@ public class Network implements Serializable{
     public Language language;
 
     public boolean networkClass;
-    //TODO: Possibly remove this field -- network object doesn't have posts field
-    //private ArrayList<Post> posts;
-    //private ArrayList<Event> events;
+
+    /**
+     * We don't have posts, events, and users fields because they are so large and often unnecessary.
+     * Instead, pass the id into an API.Get.networkUsers(), API.Get.networkEvents(), or
+     * or API.networkPosts() (asynchronously of course) to get these fields.
+     * */
 
     public Network() {
 
@@ -46,6 +49,7 @@ public class Network implements Serializable{
         this.language = lang;
         this.nearLocation = nearLocation;
         networkClass = false;
+        this.id = id;
     }
 
     //No override of toString() because getResources() requires an activity

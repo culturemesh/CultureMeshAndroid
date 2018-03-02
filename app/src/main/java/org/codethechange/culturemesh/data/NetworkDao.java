@@ -28,10 +28,7 @@ public interface NetworkDao {
     @Delete
     public void deleteNetworks(Network... networks);
 
-    @Query("SELECT * FROM network")
-    public List<Network> getNetworks();
-
-    @Query("SELECT * FROM network WHERE id = :id")
-    public Network getNetwork(long id);
+    @Query("SELECT * FROM network WHERE id=:id")
+    public List<Network> getNetwork(long id);
 
 }

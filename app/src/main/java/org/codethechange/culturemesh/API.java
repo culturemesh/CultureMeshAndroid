@@ -2,6 +2,7 @@ package org.codethechange.culturemesh;
 
 import android.arch.persistence.room.Room;
 import android.content.Context;
+import android.util.Log;
 
 import org.codethechange.culturemesh.data.CMDatabase;
 import org.codethechange.culturemesh.data.CityDao;
@@ -20,7 +21,6 @@ import org.codethechange.culturemesh.models.Country;
 import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FromLocation;
 import org.codethechange.culturemesh.models.Language;
-import org.codethechange.culturemesh.models.Location;
 import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Point;
@@ -30,10 +30,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -41,10 +38,6 @@ import java.util.List;
  */
 
 class API {
-    static final String SETTINGS_IDENTIFIER = "acmsi";
-    static final String PERSONAL_NETWORKS = "pernet";
-    static final String SELECTED_NETWORK = "selnet";
-    static final boolean NO_JOINED_NETWORKS = false;
     static CMDatabase mDb;
 
 
@@ -491,8 +484,9 @@ class API {
             JSONArray postsJSON = new JSONArray(rawDummy);
             for (int i = 0; i < postsJSON.length(); i++) {
                 JSONObject postJSON = postsJSON.getJSONObject(i);
-                org.codethechange.culturemesh.models.Post post = new org.codethechange.culturemesh.models.Post(postJSON.getLong("id"), postJSON.getLong("user_id"),
-                        postJSON.getLong("network_id"),postJSON.getString("post_text"),
+                Log.i("Network Id\'s", postJSON.getInt("network_id") + "");
+                org.codethechange.culturemesh.models.Post post = new org.codethechange.culturemesh.models.Post(postJSON.getInt("id"), postJSON.getInt("user_id"),
+                        postJSON.getInt("network_id"),postJSON.getString("post_text"),
                         postJSON.getString("img_link"),postJSON.getString("vid_link"),
                         postJSON.getString("post_date"));
                 pDao.insertPosts(post);
@@ -522,7 +516,7 @@ class API {
                 "  },\n" +
                 "  {\n" +
                 "    \"description\": \"Laudantium sequi quisquam necessitatibus fugit eligendi. Rem blanditiis quibusdam molestias. Quis voluptate consequatur magnam nemo est magnam explicabo. A ipsam ipsum esse id quos.\",\n" +
-                "    \"title\": \"Reverse-engineered 6thgeneration neural-net\",\n" +
+                "    \"title\": \"Reverse-engineered 6th Generation\",\n" +
                 "    \"network_id\": 1,\n" +
                 "    \"date_created\": \"2017-09-09 17:12:57\",\n" +
                 "    \"address_1\": \"1709 Fuller Freeway\\nChungland, PR 67499-3841\",\n" +
@@ -574,7 +568,7 @@ class API {
             JSONArray eventsJSON = new JSONArray(rawDummy);
             for (int i = 0; i < eventsJSON.length(); i++) {
                 JSONObject eventJSON = eventsJSON.getJSONObject(i);
-                Event event = new Event(eventJSON.getString("title"), eventJSON.getString("description"),
+                Event event = new Event(eventJSON.getLong("id"), eventJSON.getLong("network_id"), eventJSON.getString("title"), eventJSON.getString("description"),
                         eventJSON.getString("date_created"), eventJSON.getLong("host_id"),
                         eventJSON.getString("address_1") + eventJSON.getString("address_2"));
                 cDao.addEvent(event);
@@ -584,60 +578,18 @@ class API {
         }
     }
 
-
-    //TODO: REMOVE DUMMY GENERATORS
-    /*static ArrayList<User> genUsers() {
-        ArrayList<User> users = new ArrayList<User>();
-        User user = new User("Bob","Smith","crazyskater@hotmail.com",
-                "bobbysmithery", new ArrayList<Network>(), "http://lorempixel.com/400/400/");
-        users.add(user);
-        User user2 = new User("Olivia","Brown","cter@hotmail.com",
-                "obrown", new ArrayList<Network>(), "http://lorempixel.com/400/200/");
-        users.add(user2);
-        User user3 = new User("Nate", "Lee", "nlee@yahoo.com",
-                "nlee", new ArrayList<Network>(), "http://lorempixel.com/200/200/");
-        users.add(user3);
-        User user4 = new User("Dylan","Grosz","something@gmail.com",
-                "dgrosz", new ArrayList<Network>(), "http://lorempixel.com/200/200/");
-        return users;
-    }
-
-    static ArrayList<Network> genNetworks() {
-        ArrayList<Network> networks = new ArrayList<Network>();
-        Location[] possibleLocations = {new Location("United States",
-                "California", "Stanford", new Point[0]),
-                new Location("United States","New York","New York City", new Point[0]),
-                new Location("United States", "California", "Stanford", new Point[0]),
-                new Location("United States","New York","White Plains", new Point[0]),
-                new Location("United States", "California", "San Francisco", new Point[0]),
-                new Location("United States","New York","Albany", new Point[0]),
-                new Location("United States", "California", "Sacramento", new Point[0]),
-                new Location("United States","New York","New York City", new Point[0]),
-                new Location("United States","Maryland","Baltimore", new Point[0]),
-                new Location("France","Provence","Aix-en-Provence", new Point[0])};
-        for (int i = 0; i < 10; i++) {
-
-           // networks.add(new Network(possibleLocations[i++], possibleLocations[i],122));
+    /**
+     * For simplicity, we store the id's of other model objects in the database, not the objects
+     * themselves. Thus, when we return these objects, we need to instantiate them.
+     * @param posts
+     */
+    static void instantiatePosts(List<org.codethechange.culturemesh.models.Post> posts) {
+        for (org.codethechange.culturemesh.models.Post post : posts) {
+            //Get the user
+            post.author = API.Get.user(post.userId).getPayload();
+            post.network = API.Get.network(post.networkId).getPayload();
         }
-        return networks;
     }
-
-    static ArrayList<org.codethechange.culturemesh.models.Post> genPosts() {
-        ArrayList<org.codethechange.culturemesh.models.Post> posts = new ArrayList<org.codethechange.culturemesh.models.Post>();
-        for (int i = 0; i < 10; i++) {
-            posts.add(new org.codethechange.culturemesh.models.Post(genUsers().get(i%3), "lorem ipsum " + i,  new Date().toString()));
-        }
-        return posts;
-    }
-
-    static ArrayList<Event> genEvents() {
-        ArrayList<Event> events = new ArrayList<Event>();
-        for (int i = 0; i < 10; i++) {
-            events.add( new Event("event " + i, "lorem ipsum adsfa;lskd", new Date(), genUsers().get(0), "Stanford, CA", new Language("English")));
-        }
-        return events;
-    }*/
-
 
     static class Get {
         /**
@@ -645,7 +597,6 @@ class API {
          * 1. Check if cache has relevant data. If so, return it.
          * 2. Send network request to update data.
          */
-
 
         static NetworkResponse<User> user(long id) {
             UserDao uDao = mDb.userDao();
@@ -671,7 +622,7 @@ class API {
         /*
             When will we ever use this? Perhaps viewing a user profile?
          */
-        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> userPosts(long id) {
+        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> userPosts(int id) {
             PostDao pDao = mDb.postDao();
             List<org.codethechange.culturemesh.models.Post> posts = pDao.getUserPosts(id);
             return new NetworkResponse<>(posts);
@@ -694,14 +645,35 @@ class API {
         static NetworkResponse<Network> network(long id) {
             //TODO: Send network request if not found.
             NetworkDao netDao = mDb.networkDao();
-            Network net = netDao.getNetwork(id);
-            return new NetworkResponse<>(net);
+            List<Network> nets = netDao.getNetwork(id);
+            Network net = null;
+            if (nets != null && nets.size() > 0) {
+                net = nets.get(0);
+            }
+            //Instantiate locations.
+            CountryDao countryDao = mDb.countryDao();
+            RegionDao regionDao = mDb.regionDao();
+            CityDao cityDao = mDb.cityDao();
+            if (net != null) {
+                //Let's instantiate the location fields!
+                if (net.networkClass) {
+                    //We need to instantiate from location.
+                    net.fromLocation.from_city = cityDao.getCity(net.fromLocation.from_city_id).name;
+                    net.fromLocation.from_region = regionDao.getRegion(net.fromLocation.from_region_id).name;
+                    net.fromLocation.from_country = countryDao.getCountry(net.fromLocation.from_country_id).name;
+                }
+                net.nearLocation.near_city = cityDao.getCity(net.nearLocation.near_city_id).name;
+                net.nearLocation.near_region = regionDao.getRegion(net.nearLocation.near_region_id).name;
+                net.nearLocation.near_country = countryDao.getCountry(net.nearLocation.near_country_id).name;
+            }
+            return new NetworkResponse<>(net == null, net);
         }
 
         static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> networkPosts(long id) {
             //TODO: Send network request.
             PostDao pDao = mDb.postDao();
-            List<org.codethechange.culturemesh.models.Post> posts = pDao.getNetworkPosts(id);
+            List<org.codethechange.culturemesh.models.Post> posts = pDao.getNetworkPosts((int) id);
+            instantiatePosts(posts);
             return new NetworkResponse<>(posts);
         }
 
@@ -709,7 +681,8 @@ class API {
             //TODO:Send network request.... Applies to subsequent methods too.
             EventDao eDao = mDb.eventDao();
             List<Event> events = eDao.getNetworkEvents(id);
-            return new NetworkResponse<>(events);
+            Log.i("Getting events" , events.size() + "");
+            return new NetworkResponse<>(events == null, events);
         }
 
         static NetworkResponse<ArrayList<User>> networkUsers(long id) {
@@ -719,7 +692,7 @@ class API {
             for (long uId: userIds) {
                 NetworkResponse<User> res = user(uId);
                 if (!res.fail()) {
-                    users.add((User) res.getPayload());
+                    users.add(res.getPayload());
                 }
             }
             return new NetworkResponse<>(users);
@@ -727,7 +700,7 @@ class API {
 
         static NetworkResponse<org.codethechange.culturemesh.models.Post> post(long id) {
             PostDao pDao = mDb.postDao();
-            org.codethechange.culturemesh.models.Post post = pDao.getPost(id);
+            org.codethechange.culturemesh.models.Post post = pDao.getPost((int) id);
             return new NetworkResponse<>(post == null, post);
         }
 

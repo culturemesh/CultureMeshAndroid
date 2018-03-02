@@ -17,13 +17,13 @@ public interface PostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void insertPosts(Post... posts);
 
-    @Query("SELECT * FROM post WHERE id=:id")
-    public Post getPost(long id);
+    @Query("SELECT * FROM post WHERE id LIKE :pId")
+    public Post getPost(int pId);
 
     @Query("SELECT * FROM post WHERE networkId=:id")
-    public List<Post> getNetworkPosts(long id);
+    public List<Post> getNetworkPosts(int id);
 
     @Query("SELECT * FROM post WHERE userId=:id")
-    public List<Post> getUserPosts(long id);
+    public List<Post> getUserPosts(int id);
 
 }

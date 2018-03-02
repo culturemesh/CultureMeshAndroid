@@ -101,8 +101,8 @@ public class CreateEventActivity extends AppCompatActivity {
             // TODO: Get the User object for the current user
             User author = null;
 
-            // Create Event
-            Event event = new Event(name, description, date.toString(), 1, address);
+            // Create Event TODO: deal with arbitrary ids
+            Event event = new Event((long)(Math.random() * 10000),(long)(Math.random() * 10000), name, description, date.toString(), 1, address);
             // POST Event with AsyncTask
             new PostEvent().execute(event);
         }

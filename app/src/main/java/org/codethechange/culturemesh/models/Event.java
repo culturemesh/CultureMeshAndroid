@@ -31,7 +31,9 @@ public class Event extends FeedItem implements Serializable{
 
     public String address;
 
-    public Event(String title, String description, String timeOfEvent, long author, String address) {
+    public Event(long id, long networkId, String title, String description, String timeOfEvent, long author, String address) {
+        this.id = id;
+        this.networkId = networkId;
         this.title = title;
         this.description = description;
         this.timeOfEvent = timeOfEvent;

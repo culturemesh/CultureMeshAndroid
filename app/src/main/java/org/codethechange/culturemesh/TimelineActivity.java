@@ -14,10 +14,7 @@ import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -41,8 +38,7 @@ import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.List;
 
 public class TimelineActivity extends DrawerActivity {
 private String basePath = "www.culturemesh.com/api/v1";
@@ -59,6 +55,7 @@ private String basePath = "www.culturemesh.com/api/v1";
     private RecyclerView postsRV;
     private Animation open, close;
     private boolean isFABOpen;
+    private TextView population, fromLocation, nearLocation;
 
 
     private Network network;
@@ -72,12 +69,14 @@ private String basePath = "www.culturemesh.com/api/v1";
         settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         getSupportActionBar().setLogo(R.drawable.logo_header);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+        population = findViewById(R.id.network_population);
+        fromLocation = findViewById(R.id.fromLocation);
+        nearLocation = findViewById(R.id.nearLocation);
         if (API.NO_JOINED_NETWORKS) {
             createNoNetwork();
         } else {
             createDefaultNetwork();
         }
-        new TestDatabase().execute();
     }
 
     protected void createNoNetwork() {
@@ -86,46 +85,10 @@ private String basePath = "www.culturemesh.com/api/v1";
     }
 
     protected void createDefaultNetwork() {
-        /* //Set up Toolbar
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.action_bar);
-        setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setLogo(R.drawable.logo_header);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);*/
-
         //Choose selected network.
-        long selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 123456);
-//        NetworkResponse<Network> responseNetwork = API.Get.network(selectedNetwork);
-       // network = responseNetwork.getPayload();
-        network = new Network(new NearLocation("San","ASDf","ASDF", null), new FromLocation("ASdf","asdf","sadf",null),12);
-        //NetworkResponse<ArrayList<User>> responseUsers = API.Get.networkUsers(1);
-        //ArrayList<User> users = responseUsers.getPayload();
-
-        //Update number of people.
-        //TODO: Manipulate string of number to have magnitude suffix (K,M,etc.)
-        //Update population number
-        TextView population = findViewById(R.id.network_population);
-        //population.setText(String.format("%d",users.size()));
-        //Update from location/language
-        TextView fromLocation = findViewById(R.id.fromLocation);
-        if (network.networkClass) {
-            fromLocation.setText(network.fromLocation.shortName());
-        } else {
-            fromLocation.setText(network.language.name);
-        }
-        //Update near location
-        TextView nearLocation = findViewById(R.id.nearLocation);
-        nearLocation.setText(network.nearLocation.shortName());
-        ImageButton postsFilter = (ImageButton) findViewById(R.id.filter_feed);
-        postsFilter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new FilterDialogFragment().show(getFragmentManager(), FILTER_LABEL);
-            }
-        });
-
+        long selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
+        Log.i("selectedNetwork", selectedNetwork + "");
+        new LoadNetworkData().execute(selectedNetwork);
         //Load Animations for Floating Action Buttons
         open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
         close = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_close);
@@ -166,7 +129,13 @@ private String basePath = "www.culturemesh.com/api/v1";
                 onSwipeRefresh();
             }
         });
-
+        ImageButton postsFilter = (ImageButton) findViewById(R.id.filter_feed);
+        postsFilter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new FilterDialogFragment().show(getFragmentManager(), FILTER_LABEL);
+            }
+        });
         //set up postsRV
         postsRV = findViewById(R.id.postsRV);
 
@@ -211,10 +180,6 @@ private String basePath = "www.culturemesh.com/api/v1";
     //Returns true upon successful retrieval, returns false if issue/no connection
     public boolean refreshPosts() { //probably public? if we want to refresh from outside, if that's possible/needed
         boolean success = true;
-        //test
-        TextView tv = findViewById(R.id.fromLocation);
-        String tvTxt = (String) tv.getText();
-        String newTxt = tvTxt + "!";
 
         //re-call loading posts. this must be done asynchronously.
 
@@ -235,37 +200,8 @@ private String basePath = "www.culturemesh.com/api/v1";
         String networkId = "";
         final String postPath = basePath + network + networkId + "/posts";
         final String eventPath = basePath + network + networkId + "/events";
-        /*Ion.with(this)
-                .load(postPath)
-                .asString()
-                .setCallback(new FutureCallback<String>() {
-                    public void onCompleted(Exception e, String result) {
-                        loadPosts(result, postPath);
-                    }
-                });
-        Ion.with(this)
-                .load(eventPath)
-                .asString()
-                .setCallback(new FutureCallback<String>() {
-                    public void onCompleted(Exception e, String result) {
-                        loadPosts(result, eventPath);
-                    }
-                });*/
     }
 
-    public void loadPosts(String result, String netPath) {
-        int loadSize = 10; //how many posts we load at once
-        RecyclerView postRV = null;//(RecyclerView) findViewbyId
-        if(/* filter includes posts */ true) {
-            //build array out of post structs
-            LinearLayout layout = null;//(GridLayout) getView().findViewById(R.id.LLayout); //makes sense with fragments
-            for(int i = 0; i < loadSize; i++) {
-                //create a cardview, build post information into it.
-                //separately, create card_view.xml file
-                layout.addView(null /*postCardView*/);
-            }
-        }
-    }
 
     @Override
     public void onBackPressed() {
@@ -352,18 +288,18 @@ private String basePath = "www.culturemesh.com/api/v1";
         }
     }
 
+    //TODO: Run new TestDatabase().execute() once to load dummy data in!
     private class TestDatabase extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            /*API.addUsers();
+            API.addUsers();
             API.addCities();
             API.addCountries();
             API.addNetworks();
             API.addRegions();
             API.addPosts();
-            API.addEvents();*/
-            Log.i("Name Should Be Jonathan", API.Get.user(1).getPayload().firstName);
+            API.addEvents();
             return null;
         }
     }
@@ -427,4 +363,36 @@ private String basePath = "www.culturemesh.com/api/v1";
         isFABOpen = !isFABOpen;
     }
 
+    private class LoadNetworkData extends AsyncTask<Long, Void, NetUserWrapper> {
+        @Override
+        protected NetUserWrapper doInBackground(Long... longs) {
+            //TODO: Use NetworkResponse for error handling.
+            NetUserWrapper wrap = new NetUserWrapper();
+            wrap.network = API.Get.network(longs[0]).getPayload();
+            Log.i("network retreival", longs[0] + "");
+            wrap.netUsers = API.Get.networkUsers(longs[0]).getPayload();
+            return wrap;
+        }
+
+        @Override
+        protected void onPostExecute(NetUserWrapper wrapper) {
+            Network network = wrapper.network;
+            //Update population number
+            //TODO: Manipulate string of number to have magnitude suffix (K,M,etc.)
+            population.setText(String.format("%d",wrapper.netUsers.size()));
+            //Update from location/language
+            if (network.networkClass) {
+                fromLocation.setText(network.fromLocation.shortName());
+            } else {
+                fromLocation.setText(network.language.name);
+            }
+            //Update near location
+            nearLocation.setText(network.nearLocation.shortName());
+        }
+    }
+
+    private class NetUserWrapper {
+        Network network;
+        List<User> netUsers;
+    }
 }

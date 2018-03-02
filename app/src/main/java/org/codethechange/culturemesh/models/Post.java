@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh.models;
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 import java.io.Serializable;
@@ -14,34 +15,32 @@ import java.util.Date;
 @Entity
 public class Post extends FeedItem implements Serializable{
     @PrimaryKey
-    public long id;
-    public long userId;
-    public long networkId;
-
-    public String getImgLink() {
-        return imgLink;
-    }
-
-    public void setImgLink(String imgLink) {
-        this.imgLink = imgLink;
-    }
-
-    public String getVidLink() {
-        return vidLink;
-    }
-
-    public void setVidLink(String vidLink) {
-        this.vidLink = vidLink;
-    }
+    public int id;
+    //When saved in database, we use these.
+    public int userId;
+    public int networkId;
 
     public String content;
     public String imgLink;
     public String vidLink; //TODO: Handle multiple links?
-
-
     public String datePosted;
 
-    public Post(long id, long author, long networkId, String content, String imgLink, String vidLink, String datePosted) {
+    //When instantiated, we use these
+    @Ignore
+    public User author;
+    @Ignore
+    public Network network;
+
+    public User getAuthor() {
+        return author;
+    }
+
+    public Network getNetwork() {
+        return network;
+    }
+
+    public Post(int id, int author, int networkId, String content, String imgLink, String vidLink, String datePosted) {
+        this.id = id;
         this.userId = author;
         this.content = content;
         this.imgLink = imgLink;
@@ -66,7 +65,7 @@ public class Post extends FeedItem implements Serializable{
         this.vidLink = vidLink;
     }
 
-    public Post(long author, String content, String datePosted) {
+    public Post(int author, String content, String datePosted) {
         this.userId = author;
         this.content = content;
         this.datePosted = datePosted;

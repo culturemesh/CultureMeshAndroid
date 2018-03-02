@@ -8,7 +8,6 @@ import android.arch.persistence.room.Entity;
 @Entity
 public class Country extends Place {
     public long isoA2;
-
     public Country() {
 
     }
