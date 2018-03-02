@@ -82,4 +82,5 @@
     <string name="genericFail">Oops, something went wrong.</string>
     <string name="genericSuccess">Operation Succeeded!</string>
     <string name="title_activity_pick_onboarding_status">PickOnboardingStatusActivity</string>
+    <string name="title_activity_onboard">OnboardActivity</string>
 </resources>
