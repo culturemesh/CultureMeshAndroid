@@ -20,9 +20,13 @@ public class OnboardActivity extends AhoyOnboarderActivity {
         // TODO: Move strings to string resources
         // TODO: Document
         List<AhoyOnboarderCard> pages = new ArrayList<>();
-        pages.add(makeCard("Welcome", "Welcome to CultureMesh!", R.drawable.logo_header, 1000, 1000));
-        pages.add(makeCard("Introduction", "Join networks to learn about events and people near you.", R.drawable.ic_people_outline_white_24px));
-        pages.add(makeCard("Start", "Let's to get Started!", R.drawable.ic_arrow_forward_white_24px));
+        pages.add(makeCard("Welcome!", "CultureMesh helps you connect with nearby people" +
+                        " who speak your language or come from where you do.",
+                R.drawable.logo_header, 1000, 1000));
+        pages.add(makeCard("Networks", "Join networks to learn about events and people near you.",
+                R.drawable.ic_people_outline_white_24px, 1000, 1000));
+        pages.add(makeCard("Ready?", "Let's get Started!", R.drawable.ic_public_black_24dp,
+                1000, 1000));
 
         setGradientBackground();
 
