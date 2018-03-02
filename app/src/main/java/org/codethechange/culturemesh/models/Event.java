@@ -1,6 +1,11 @@
 package org.codethechange.culturemesh.models;
 
 
+import android.arch.persistence.room.Embedded;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 
@@ -9,34 +14,31 @@ import java.util.Date;
 /**
  * Created by nathaniel on 11/10/17.
  */
-
+@Entity
 public class Event extends FeedItem implements Serializable{
+    @PrimaryKey
+    public long id;
 
-    private BigInteger id;
-    private String title;
+    public long networkId;
 
-    public BigInteger getId() {
-        return id;
-    }
+    public String title;
 
-    public void setId(BigInteger id) {
+    public String description;
+
+    public String timeOfEvent;
+
+    public long authorId;
+
+    public String address;
+
+    public Event(long id, long networkId, String title, String description, String timeOfEvent, long author, String address) {
         this.id = id;
-    }
-
-
-    private String description;
-    private Date timeOfEvent;
-    private User author;
-    private String address;
-    private Language lang;
-
-    public Event(String title, String description, Date timeOfEvent, User author, String address, Language lang) {
+        this.networkId = networkId;
         this.title = title;
         this.description = description;
         this.timeOfEvent = timeOfEvent;
-        this.author = author;
+        this.authorId = author;
         this.address = address;
-        this.lang = lang;
     }
 
     public String getTitle() {
@@ -55,20 +57,20 @@ public class Event extends FeedItem implements Serializable{
         this.description = description;
     }
 
-    public Date getTimeOfEvent() {
+    public String getTimeOfEvent() {
         return timeOfEvent;
     }
 
-    public void setTimeOfEvent(Date timeOfEvent) {
+    public void setTimeOfEvent(String timeOfEvent) {
         this.timeOfEvent = timeOfEvent;
     }
 
-    public User getAuthor() {
-        return author;
+    public long getAuthor() {
+        return authorId;
     }
 
     public void setAuthor(User author) {
-        this.author = author;
+        this.authorId = author.id;
     }
 
     public String getAddress() {
@@ -79,11 +81,8 @@ public class Event extends FeedItem implements Serializable{
         this.address = address;
     }
 
-    public Language getLang() {
-        return lang;
+    public Event () {
+
     }
 
-    public void setLang(Language lang) {
-        this.lang = lang;
-    }
 }

@@ -144,11 +144,13 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                 //TODO: Figure out format for multiple pictures. Assuming separated by commas.
                 String[] links = post.getImageLink().split(",");
                 for (int j = 0;  j < links.length; j++) {
+                    Log.i("Image_link", links[j]);
                     Picasso.with(pvh.images[j].getContext()).load(links[j]).into(pvh.images[j]);
                 }
             }
             Picasso.with(pvh.personPhoto.getContext()).load(post.getAuthor().getImgURL()).
                     into(pvh.personPhoto);
+            Log.i("Image_link", post.getAuthor().getImgURL());
         } catch(ClassCastException e) {
             //It's an event.
             Event event = (Event) item;
