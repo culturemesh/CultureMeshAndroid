@@ -101,7 +101,9 @@ public class SpecificPostActivity extends AppCompatActivity {
         FAB.setVisibility(View.VISIBLE);
 
         ListView commentLV = findViewById(R.id.commentList);
-        commentLV.setBackgroundColor(Color.GREEN); //change to better color later
+        int r = getResources().getIdentifier("colorPrimary", "color", "org.codethechange.culturemesh");
+        commentLV.setBackgroundResource(r);
+
         String[] comments = {"test comment 1", "test comment 2", "this is good content", "this is, uh, not good content",
                 "this is a really long comment to see how comments will work if someone has a lot to say about someone's content, which is very (very) possible"};
         //TODO populate ListView with comments
