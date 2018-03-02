@@ -81,6 +81,16 @@
     <string name="error">Error</string>
     <string name="genericFail">Oops, something went wrong.</string>
     <string name="genericSuccess">Operation Succeeded!</string>
+
+    <!-- Strings for onboarding -->
     <string name="title_activity_pick_onboarding_status">PickOnboardingStatusActivity</string>
     <string name="title_activity_onboard">OnboardActivity</string>
+    <string name="welcome">Welcome!</string>
+    <string name="cultureMesh_description">CultureMesh helps you connect with nearby people who
+        speak your language or come from where you do."</string>
+    <string name="networks_explain">Join networks to learn about events and people near you.</string>
+    <string name="networks">Networks</string>
+    <string name="ready_question">Ready?</string>
+    <string name="lets_start">Let\'s get Started!</string>
+    <string name="logIn_signUp">Log In or Sign Up</string>
 </resources>

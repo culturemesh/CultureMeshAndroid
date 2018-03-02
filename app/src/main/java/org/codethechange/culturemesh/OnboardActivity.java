@@ -11,31 +11,43 @@ import com.codemybrainsout.onboarder.AhoyOnboarderCard;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Introduce user to the app through a series of informational screens that end with a button
+ * that redirects the user to a login page
+ */
 public class OnboardActivity extends AhoyOnboarderActivity {
 
+    /**
+     * Generate onboarding pages and display them
+     * @param savedInstanceState Previous state to restore from
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // TODO: Move strings to string resources
-        // TODO: Document
         List<AhoyOnboarderCard> pages = new ArrayList<>();
-        pages.add(makeCard("Welcome!", "CultureMesh helps you connect with nearby people" +
-                        " who speak your language or come from where you do.",
+        pages.add(makeCard(getString(R.string.welcome), getString(R.string.cultureMesh_description),
                 R.drawable.logo_header, 1000, 1000));
-        pages.add(makeCard("Networks", "Join networks to learn about events and people near you.",
+        pages.add(makeCard(getString(R.string.networks), getString(R.string.networks_explain),
                 R.drawable.ic_people_outline_white_24px, 1000, 1000));
-        pages.add(makeCard("Ready?", "Let's get Started!", R.drawable.ic_public_black_24dp,
-                1000, 1000));
+        pages.add(makeCard(getString(R.string.ready_question), getString(R.string.lets_start),
+                R.drawable.ic_public_black_24dp, 1000, 1000));
 
         setGradientBackground();
 
-        setFinishButtonTitle("Log In or Sign Up");
+        setFinishButtonTitle(getString(R.string.logIn_signUp));
         showNavigationControls(true);
 
         setOnboardPages(pages);
     }
 
+    /**
+     * Create an onboarding screen for AhoyOnboarder
+     * @param title Title to display on screen
+     * @param description Description to display on screen
+     * @param iconID Resource ID of the icon to display on the screen
+     * @return Card to pass to AhoyOnboarder to display
+     */
     private AhoyOnboarderCard makeCard(String title, String description, int iconID) {
         AhoyOnboarderCard card = new AhoyOnboarderCard(title, description, iconID);
         card.setBackgroundColor(R.color.black_transparent);
@@ -44,6 +56,15 @@ public class OnboardActivity extends AhoyOnboarderActivity {
         return card;
     }
 
+    /**
+     * Create an onboarding screen for AhoyOnboarder
+     * @param title Title to display on screen
+     * @param description Description to display on screen
+     * @param iconID Resource ID of the icon to display on the screen
+     * @param iconWidth Width of icon
+     * @param iconHeight Height of icon
+     * @return Card to pass to AhoyOnboarder to display
+     */
     private AhoyOnboarderCard makeCard(String title, String description, int iconID, int iconWidth,
                                        int iconHeight) {
         AhoyOnboarderCard card = makeCard(title, description, iconID);
@@ -61,6 +82,9 @@ public class OnboardActivity extends AhoyOnboarderActivity {
         return card;
     }
 
+    /**
+     * When finish button pressed at end of onboarding, send user to login page
+     */
     @Override
     public void onFinishButtonPressed() {
         Intent start = new Intent(getApplicationContext(), LoginActivity.class);
