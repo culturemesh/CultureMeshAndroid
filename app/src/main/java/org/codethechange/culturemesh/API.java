@@ -25,7 +25,7 @@ class API {
     //TODO: REMOVE DUMMY GENERATORS
     static ArrayList<User> genUsers() {
         ArrayList<User> users = new ArrayList<User>();
-        User user = new User("Bob","Smith", "crazyskater@hotmail.com",
+        User user = new User("Bob","Smith", "crazyskater@hotmail.com`",
                 "bobbysmithery", new ArrayList<Network>(), "http://lorempixel.com/400/400/");
         users.add(user);
         User user2 = new User("Olivia","Brown","cter@hotmail.com",
@@ -63,7 +63,7 @@ class API {
         ArrayList<org.codethechange.culturemesh.models.Post> posts = new ArrayList<org.codethechange.culturemesh.models.Post>();
         for (int i = 0; i < 10; i++) {
             org.codethechange.culturemesh.models.Post toAdd = new org.codethechange.culturemesh.models.Post(genUsers().get(i%3), "lorem ipsum " + i,  new Date().toString());
-            //toAdd.setId(new BigInteger((i+1) + " + 37")); //dumb number
+            toAdd.setId(new BigInteger((i+1)*10 + 37 + "")); //dumb number
             posts.add(toAdd);
         }
         return posts;

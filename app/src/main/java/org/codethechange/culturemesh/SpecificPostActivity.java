@@ -1,12 +1,18 @@
 package org.codethechange.culturemesh;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -26,7 +32,7 @@ public class SpecificPostActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String strID = intent.getStringExtra("name");
-        BigInteger postID = new BigInteger(strID);
+        BigInteger postID = new BigInteger("0"); //new BigInteger(strID);
         FeedItem item = API.Get.post(postID); //re-get post (can also switch to passing data as a bundle for data persistence reasons)
 
         CardView cv;
@@ -91,5 +97,17 @@ public class SpecificPostActivity extends AppCompatActivity {
             }
         }
 
+        FloatingActionButton FAB = findViewById(R.id.write_comment);
+        FAB.setVisibility(View.VISIBLE);
+
+        ListView commentLV = findViewById(R.id.commentList);
+        commentLV.setBackgroundColor(Color.GREEN); //change to better color later
+        String[] comments = {"test comment 1", "test comment 2", "this is good content", "this is, uh, not good content",
+                "this is a really long comment to see how comments will work if someone has a lot to say about someone's content, which is very (very) possible"};
+        //TODO populate ListView with comments
+
+        ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, comments);
+        commentLV.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
     }
 }

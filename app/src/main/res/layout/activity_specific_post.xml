@@ -215,7 +215,6 @@
 
 
                 </android.support.constraint.ConstraintLayout>
-
             </LinearLayout>
 
             <TextView
@@ -232,7 +231,12 @@
 
         </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>
-
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/commentList"
+        app:layout_constraintTop_toBottomOf="@id/cv"
+        />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/write_comment"
@@ -249,7 +253,7 @@
 
         app:srcCompat="@drawable/ic_create_white_24px" />
     <!-- app:rippleColor="@color/colorPrimaryDark"-->
-    <fragment
+<!--    <fragment
         android:id="@+id/commentFrag"
         android:name="org.codethechange.culturemesh.PostsFrag"
         android:layout_width="0dp"
@@ -261,5 +265,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
         app:layout_constraintVertical_bias="0.0"
-        tools:layout="@layout/fragment_posts" />
+        tools:layout="@layout/fragment_posts" /> -->
+
 </android.support.constraint.ConstraintLayout>
