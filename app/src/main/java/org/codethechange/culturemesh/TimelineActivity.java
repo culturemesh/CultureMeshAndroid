@@ -57,9 +57,6 @@ private String basePath = "www.culturemesh.com/api/v1";
     private boolean isFABOpen;
     private TextView population, fromLocation, nearLocation;
 
-
-    private Network network;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,11 +69,13 @@ private String basePath = "www.culturemesh.com/api/v1";
         population = findViewById(R.id.network_population);
         fromLocation = findViewById(R.id.fromLocation);
         nearLocation = findViewById(R.id.nearLocation);
+        API.loadAppDatabase(getApplicationContext());
         if (API.NO_JOINED_NETWORKS) {
             createNoNetwork();
         } else {
             createDefaultNetwork();
         }
+        //TODO: For first run, uncomment this: new TestDatabase().execute();
     }
 
     protected void createNoNetwork() {
@@ -86,8 +85,7 @@ private String basePath = "www.culturemesh.com/api/v1";
 
     protected void createDefaultNetwork() {
         //Choose selected network.
-        long selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
-        Log.i("selectedNetwork", selectedNetwork + "");
+        final long selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
         new LoadNetworkData().execute(selectedNetwork);
         //Load Animations for Floating Action Buttons
         open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
@@ -108,7 +106,7 @@ private String basePath = "www.culturemesh.com/api/v1";
             @Override
             public void onClick(View v) {
                 Intent cPA = new Intent(getApplicationContext(), CreatePostActivity.class);
-                cPA.putExtra(BUNDLE_NETWORK, network);
+                cPA.putExtra(BUNDLE_NETWORK, selectedNetwork);
                 startActivity(cPA);
                 //TODO: Have fragment post feed loading stuff be in start() method so feed updates
                 //when createPostActivity finishes.
@@ -300,6 +298,7 @@ private String basePath = "www.culturemesh.com/api/v1";
             API.addRegions();
             API.addPosts();
             API.addEvents();
+            API.subscribeUsers();
             return null;
         }
     }
@@ -377,22 +376,30 @@ private String basePath = "www.culturemesh.com/api/v1";
         @Override
         protected void onPostExecute(NetUserWrapper wrapper) {
             Network network = wrapper.network;
-            //Update population number
-            //TODO: Manipulate string of number to have magnitude suffix (K,M,etc.)
-            population.setText(String.format("%d",wrapper.netUsers.size()));
-            //Update from location/language
-            if (network.networkClass) {
-                fromLocation.setText(network.fromLocation.shortName());
-            } else {
-                fromLocation.setText(network.language.name);
+            if (network != null) {
+                //Update population number
+                //TODO: Manipulate string of number to have magnitude suffix (K,M,etc.)
+                population.setText(String.format("%d",wrapper.netUsers.size()));
+                //Update from location/language
+                if (network.networkClass) {
+                    fromLocation.setText(network.fromLocation.shortName());
+                } else {
+                    fromLocation.setText(network.language.name);
+                }
+                //Update near location
+                nearLocation.setText(network.nearLocation.shortName());
             }
-            //Update near location
-            nearLocation.setText(network.nearLocation.shortName());
         }
     }
 
     private class NetUserWrapper {
         Network network;
         List<User> netUsers;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        API.closeDatabase();
     }
 }

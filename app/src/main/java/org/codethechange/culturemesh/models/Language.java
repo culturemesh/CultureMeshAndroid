@@ -30,4 +30,8 @@ public class Language implements Serializable {
     public Language() {
 
     }
+
+    public String toString() {
+        return name;
+    }
 }

@@ -38,6 +38,10 @@ import java.util.List;
  */
 
 class API {
+    static final String SETTINGS_IDENTIFIER = "acmsi";
+    static final String PERSONAL_NETWORKS = "pernet";
+    static final String SELECTED_NETWORK = "selnet";
+    static final boolean NO_JOINED_NETWORKS = false;
     static CMDatabase mDb;
 
 
@@ -578,6 +582,16 @@ class API {
         }
     }
 
+    static void subscribeUsers() {
+        NetworkSubscription networkSubscription1 = new NetworkSubscription(3,1);
+        NetworkSubscription networkSubscription2 = new NetworkSubscription(1,1);
+        NetworkSubscription networkSubscription3 = new NetworkSubscription(2,1);
+        NetworkSubscription networkSubscription4 = new NetworkSubscription(4,1);
+        NetworkSubscriptionDao netSubDao = mDb.networkSubscriptionDao();
+        netSubDao.insertSubscriptions(networkSubscription1, networkSubscription2, networkSubscription3,
+                networkSubscription4);
+    }
+
     /**
      * For simplicity, we store the id's of other model objects in the database, not the objects
      * themselves. Thus, when we return these objects, we need to instantiate them.
@@ -783,7 +797,7 @@ class API {
         }
     }
 
-    static void closeDatabase(Context context) {
+    static void closeDatabase() {
         mDb.close();
     }
 }

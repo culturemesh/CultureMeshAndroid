@@ -2,6 +2,7 @@ package org.codethechange.culturemesh.data;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 
 import java.math.BigInteger;
 
@@ -13,13 +14,15 @@ import java.math.BigInteger;
 
 @Entity
 public class NetworkSubscription {
-    @PrimaryKey(autoGenerate = true)
-    public long id;
+    @PrimaryKey
+    @NonNull
+    public String id;
     public long userId;
     public long networkId;
 
     public NetworkSubscription(long userId, long networkId) {
         this.userId = userId;
         this.networkId = networkId;
+        this.id = userId + " " + networkId;
     }
 }

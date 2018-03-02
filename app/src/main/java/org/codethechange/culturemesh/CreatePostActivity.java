@@ -59,6 +59,7 @@ public class CreatePostActivity extends AppCompatActivity implements
     ListenableEditText content;
     SparseArray<int[]> toggleIcons;
     SparseArray<MenuItem> menuItems;
+    TextView networkLabel;
     Network network;
     private Activity myActivity = this;
 
@@ -72,10 +73,11 @@ public class CreatePostActivity extends AppCompatActivity implements
         //This hashmap-like object helps us keep track of the settings of the format buttons.
         formTogState = new SparseBooleanArray();
         content = findViewById(R.id.postContent);
+        networkLabel= findViewById(R.id.network_label);
         content.setOnSelectionChangedListener(this);
         //Allow links to redirect to browser.
         content.setMovementMethod(LinkMovementMethod.getInstance());
-
+        new LoadNetworkData().execute();
         //Set up a hashmap-like object that makes updating the toggle settings concise.
         //Check out ListenableEditText.java for more info
         int[] boldIcons = {R.drawable.ic_format_bold_white_24px,
@@ -93,24 +95,6 @@ public class CreatePostActivity extends AppCompatActivity implements
         //This sparseArray will be updated with views during onCreateOptionsMenu.
         menuItems = new SparseArray<MenuItem>();
 
-        //Fetch the current network from Intent Bundle.
-        //TODO: Random website says parcelable is better than serializable
-        //http://www.techjini.com/blog/passing-objects-via-intent-in-android/
-        network = (Network) getIntent().getSerializableExtra(TimelineActivity.BUNDLE_NETWORK);
-
-        //Update text with network name.
-        TextView networkLabel = findViewById(R.id.network_label);
-        if (network.networkClass) {
-            networkLabel.setText(getResources().getString(R.string.from) + " " +
-                    network.fromLocation.shortName() + " " +
-                    getResources().getString(R.string.near) + " " +
-                    network.nearLocation.shortName());
-        } else {
-            networkLabel.setText(network.language.toString() + " " +
-                    getResources().getString(R.string.speakers_in).toString() + " " +
-                    network.nearLocation.shortName());
-        }
-
         //Set onClick for Post button.
         Button postButton = findViewById(R.id.create_post_button);
         postButton.setOnClickListener(new View.OnClickListener() {
@@ -127,6 +111,8 @@ public class CreatePostActivity extends AppCompatActivity implements
                 new PostPost().execute(newPost);
             }
         });
+
+
     }
 
 
@@ -337,6 +323,29 @@ public class CreatePostActivity extends AppCompatActivity implements
                 progressBar.setIndeterminate(false);
             } else {
                 finish();
+            }
+        }
+    }
+
+    private class LoadNetworkData extends AsyncTask<Long, Void, Network>{
+
+        @Override
+        protected Network doInBackground(Long... longs) {
+            return API.Get.network(longs[0]).getPayload();
+        }
+
+        @Override
+        protected void onPostExecute(Network network) {
+            //Update text with network name.
+            if (network.networkClass) {
+                networkLabel.setText(getResources().getString(R.string.from) + " " +
+                        network.fromLocation.shortName() + " " +
+                        getResources().getString(R.string.near) + " " +
+                        network.nearLocation.shortName());
+            } else {
+                networkLabel.setText(network.language.toString() + " " +
+                        getResources().getString(R.string.speakers_in).toString() + " " +
+                        network.nearLocation.shortName());
             }
         }
     }
