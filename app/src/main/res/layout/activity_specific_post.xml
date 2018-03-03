@@ -248,9 +248,8 @@
         android:clickable="true"
         android:focusable="true"
         app:backgroundTint="@color/colorAccent"
-        app:layout_constraintBottom_toBottomOf="@+id/PostsFrag"
-        app:layout_constraintEnd_toEndOf="@+id/PostsFrag"
-
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/commentList"
         app:srcCompat="@drawable/ic_create_white_24px" />
     <!-- app:rippleColor="@color/colorPrimaryDark"-->
 <!--    <fragment
