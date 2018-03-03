@@ -6,6 +6,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+/**
+ * This activity is currently for testing. When production-ready, it will be replaced by logic
+ * that redirects the user based on whether they are signed in and whether they have any networks
+ */
 public class PickOnboardingStatusActivity extends AppCompatActivity {
 
     /**

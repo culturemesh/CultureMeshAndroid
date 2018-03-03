@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -88,7 +89,25 @@ public class OnboardActivity extends AhoyOnboarderActivity {
     @Override
     public void onFinishButtonPressed() {
         Intent start = new Intent(getApplicationContext(), LoginActivity.class);
-        startActivity(start);
+        startActivityForResult(start, 1);
+    }
+
+    /**
+     * After the user has logged in, this function is called to redirect user to new activity
+     * @param requestCode Code that indicates what startActivityForResult call has finished
+     * @param response Response from the completed call
+     * @param data Data returned from the call
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int response, Intent data) {
+        if (requestCode == 1) {
+            // User is coming from the login activity
+            if (response == Activity.RESULT_OK){
+                // TODO: Eventually should redirect depending on joined networks
+                startActivity(new Intent(getApplicationContext(), PickOnboardingStatusActivity.class));
+            }
+            // else do nothing, as login failed or they did not log in
+        }
     }
 
 }
