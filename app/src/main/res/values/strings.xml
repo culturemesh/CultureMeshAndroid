@@ -28,6 +28,7 @@
     <string-array name="filter_choices">
         <item>Native Posts</item>
         <item>Twitter Posts</item>
+        <item>Events</item>
     </string-array>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
@@ -81,7 +82,6 @@
     <string name="error">Error</string>
     <string name="genericFail">Oops, something went wrong.</string>
     <string name="genericSuccess">Operation Succeeded!</string>
-
     <!-- Strings for onboarding -->
     <string name="title_activity_pick_onboarding_status">PickOnboardingStatusActivity</string>
     <string name="title_activity_onboard">OnboardActivity</string>
