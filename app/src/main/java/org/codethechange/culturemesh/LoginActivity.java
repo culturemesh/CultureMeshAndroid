@@ -1,5 +1,7 @@
 package org.codethechange.culturemesh;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -34,6 +36,9 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //TODO: Handle sign in.
+                Intent returnIntent = new Intent();
+                // TODO: Change result returned to RESULT_CANCELLED for no login
+                setResult(Activity.RESULT_OK, returnIntent);
                 finish();
             }
         });
