@@ -14,6 +14,7 @@ import org.codethechange.culturemesh.data.NetworkDao;
 import org.codethechange.culturemesh.data.NetworkSubscription;
 import org.codethechange.culturemesh.data.NetworkSubscriptionDao;
 import org.codethechange.culturemesh.data.PostDao;
+import org.codethechange.culturemesh.data.PostReplyDao;
 import org.codethechange.culturemesh.data.RegionDao;
 import org.codethechange.culturemesh.data.UserDao;
 import org.codethechange.culturemesh.models.City;
@@ -24,6 +25,7 @@ import org.codethechange.culturemesh.models.Language;
 import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Point;
+import org.codethechange.culturemesh.models.PostReply;
 import org.codethechange.culturemesh.models.Region;
 import org.codethechange.culturemesh.models.User;
 import org.json.JSONArray;
@@ -592,6 +594,48 @@ class API {
                 networkSubscription4);
     }
 
+    static void addReplies() {
+        String rawDummy = "[\n" +
+                "  {\n" +
+                "    \"id\": 1,\n" +
+                "    \"parent_id\": 1,\n" +
+                "    \"user_id\": 2,\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"reply_date\": \"2017-03-12 08:53:43\",\n" +
+                "    \"reply_text\": \"Test reply 1.\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 2,\n" +
+                "    \"parent_id\": 1,\n" +
+                "    \"user_id\": 3,\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"reply_date\": \"2017-03-13 08:53:43\",\n" +
+                "    \"reply_text\": \"Test reply 2.\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 3,\n" +
+                "    \"parent_id\": 3,\n" +
+                "    \"user_id\": 4,\n" +
+                "    \"network_id\": 0,\n" +
+                "    \"reply_date\": \"2017-04-04 18:27:27\",\n" +
+                "    \"reply_text\": \"Test reply 3.\"\n" +
+                "  }\n" +
+                "]";
+        PostReplyDao postReplyDao = mDb.postReplyDao();
+        try {
+            JSONArray pRJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < pRJSON.length(); i++) {
+                JSONObject pRObj = pRJSON.getJSONObject(i);
+                PostReply pr = new PostReply(pRObj.getLong("id"), pRObj.getLong("parent_id"),
+                        pRObj.getLong("user_id"), pRObj.getLong("network_id"),
+                        pRObj.getString("reply_date"), pRObj.getString("reply_text"));
+                postReplyDao.insertPostReplies(pr);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * For simplicity, we store the id's of other model objects in the database, not the objects
      * themselves. Thus, when we return these objects, we need to instantiate them.
@@ -737,6 +781,11 @@ class API {
             return new NetworkResponse<>(users);
         }
 
+        static NetworkResponse<List<PostReply>> postReplies(long id){
+            PostReplyDao dao = mDb.postReplyDao();
+            List<PostReply> replies = dao.getPostReplies(id);
+            return new NetworkResponse<>(replies == null, replies);
+        }
 
     }
 
@@ -771,6 +820,12 @@ class API {
         }
 
         static NetworkResponse post(org.codethechange.culturemesh.models.Post post) {
+            PostDao pDao = mDb.postDao();
+            pDao.insertPosts(post);
+            return new NetworkResponse();
+        }
+
+        static NetworkResponse reply(PostReply comment) {
             return new NetworkResponse();
         }
 

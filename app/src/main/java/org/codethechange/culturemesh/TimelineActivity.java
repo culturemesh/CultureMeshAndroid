@@ -291,6 +291,7 @@ private String basePath = "www.culturemesh.com/api/v1";
 
         @Override
         protected Void doInBackground(Void... voids) {
+            API.addReplies();
             API.addUsers();
             API.addCities();
             API.addCountries();
