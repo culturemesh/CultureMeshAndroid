@@ -145,7 +145,9 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                 String[] links = post.getImageLink().split(",");
                 for (int j = 0;  j < links.length; j++) {
                     Log.i("Image_link", links[j]);
-                    Picasso.with(pvh.images[j].getContext()).load(links[j]).into(pvh.images[j]);
+                    if (links[j].length() > 0) {
+                        Picasso.with(pvh.images[j].getContext()).load(links[j]).into(pvh.images[j]);
+                    }
                 }
             }
             Picasso.with(pvh.personPhoto.getContext()).load(post.getAuthor().getImgURL()).

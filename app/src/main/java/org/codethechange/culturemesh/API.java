@@ -822,7 +822,7 @@ class API {
         static NetworkResponse post(org.codethechange.culturemesh.models.Post post) {
             PostDao pDao = mDb.postDao();
             pDao.insertPosts(post);
-            return new NetworkResponse();
+            return new NetworkResponse<>(false, post);
         }
 
         static NetworkResponse reply(PostReply comment) {
