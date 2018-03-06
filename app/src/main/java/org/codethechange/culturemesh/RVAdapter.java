@@ -2,6 +2,8 @@ package org.codethechange.culturemesh;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -11,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -51,6 +54,8 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
         //TODO: Add support for onClick by adding viewholder ConstraintLayout items for
         //TODO: event time and event place.
         ImageView[] images;
+        ConstraintLayout layout;
+        RelativeLayout commentsLinearLayout;
 
         PostViewHolder(View itemView) {
             super(itemView);
@@ -70,10 +75,16 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             eventTime = itemView.findViewById(R.id.event_time);
             eventLocation = itemView.findViewById(R.id.event_location);
             eventDescription = itemView.findViewById(R.id.event_description);
+            layout = itemView.findViewById(R.id.layout);
+            commentsLinearLayout = itemView.findViewById(R.id.comments_linear_layout);
 
         }
 
         void hidePostViews() {
+            ConstraintSet constraints = new ConstraintSet();
+            constraints.clone(layout);
+            constraints.connect(R.id.comments_linear_layout, ConstraintSet.TOP, R.id.event_description, ConstraintSet.BOTTOM);
+            constraints.applyTo(layout);
             post = false;
             personName.setVisibility(View.GONE);
             username.setVisibility(View.GONE);
@@ -92,6 +103,10 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
 
         void hideEventViews()
         {
+            ConstraintSet constraints = new ConstraintSet();
+            constraints.clone(layout);
+            constraints.connect(R.id.comments_linear_layout, ConstraintSet.TOP, R.id.timestamp, ConstraintSet.BOTTOM);
+            constraints.applyTo(layout);
             post = true;
             eventTitle.setVisibility(View.GONE);
             eventDetailsLL.setVisibility(View.GONE);

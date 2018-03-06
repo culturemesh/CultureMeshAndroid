@@ -102,7 +102,7 @@ public class CreatePostActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 //TODO: Replace user with logged in user
                 //TODO: Why do we have a title field??
-                //TODO: somehow preserve formatting.
+                //TODO: somehow preserve formatting (if you are tackling this, ask Drew to forward you some emails)
                 String contentHTML = content.getText().toString();
                 String datePosted = new Date().toString();
                 //TODO: Replace random with user id.
