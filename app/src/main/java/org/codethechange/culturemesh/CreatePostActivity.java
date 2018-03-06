@@ -77,7 +77,7 @@ public class CreatePostActivity extends AppCompatActivity implements
         content.setOnSelectionChangedListener(this);
         //Allow links to redirect to browser.
         content.setMovementMethod(LinkMovementMethod.getInstance());
-        new LoadNetworkData().execute();
+        new LoadNetworkData().execute(Long.valueOf(1));
         //Set up a hashmap-like object that makes updating the toggle settings concise.
         //Check out ListenableEditText.java for more info
         int[] boldIcons = {R.drawable.ic_format_bold_white_24px,
@@ -337,15 +337,17 @@ public class CreatePostActivity extends AppCompatActivity implements
         @Override
         protected void onPostExecute(Network network) {
             //Update text with network name.
-            if (network.networkClass) {
-                networkLabel.setText(getResources().getString(R.string.from) + " " +
-                        network.fromLocation.shortName() + " " +
-                        getResources().getString(R.string.near) + " " +
-                        network.nearLocation.shortName());
-            } else {
-                networkLabel.setText(network.language.toString() + " " +
-                        getResources().getString(R.string.speakers_in).toString() + " " +
-                        network.nearLocation.shortName());
+            if (network != null) {
+                if (network.networkClass) {
+                    networkLabel.setText(getResources().getString(R.string.from) + " " +
+                            network.fromLocation.shortName() + " " +
+                            getResources().getString(R.string.near) + " " +
+                            network.nearLocation.shortName());
+                } else {
+                    networkLabel.setText(network.language.toString() + " " +
+                            getResources().getString(R.string.speakers_in).toString() + " " +
+                            network.nearLocation.shortName());
+                }
             }
         }
     }

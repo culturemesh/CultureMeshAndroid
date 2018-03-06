@@ -76,6 +76,7 @@ private String basePath = "www.culturemesh.com/api/v1";
             createDefaultNetwork();
         }
         //TODO: For first run, uncomment this: new TestDatabase().execute();
+        new TestDatabase().execute();
     }
 
     protected void createNoNetwork() {
@@ -291,15 +292,17 @@ private String basePath = "www.culturemesh.com/api/v1";
 
         @Override
         protected Void doInBackground(Void... voids) {
-            API.addReplies();
-            API.addUsers();
-            API.addCities();
-            API.addCountries();
-            API.addNetworks();
-            API.addRegions();
-            API.addPosts();
-            API.addEvents();
-            API.subscribeUsers();
+            if (API.Get.network(1).getPayload() == null) {
+                API.addReplies();
+                API.addUsers();
+                API.addCities();
+                API.addCountries();
+                API.addNetworks();
+                API.addRegions();
+                API.addPosts();
+                API.addEvents();
+                API.subscribeUsers();
+            }
             return null;
         }
     }
