@@ -5,17 +5,17 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".CultureMeshApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:name=".CultureMeshApplication">
+        android:theme="@style/AppTheme">
         <activity
             android:name=".TimelineActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ExploreBubblesOpenGLActivity"
             android:label="@string/title_activity_explore_bubbles_open_gl"
@@ -91,9 +91,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.codethechange.culturemesh.PickOnboardingStatusActivity" />
         </activity>
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="264409e41fc2e4073f71bd98485d3b60f90b0dcf" />
+
+        <activity
+            android:name=".AboutActivity"
+            android:label="@string/title_activity_about"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
