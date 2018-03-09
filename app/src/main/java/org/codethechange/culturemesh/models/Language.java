@@ -1,5 +1,9 @@
 package org.codethechange.culturemesh.models;
 
+import android.arch.persistence.room.Embedded;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 
@@ -8,20 +12,26 @@ import java.math.BigInteger;
  * Created by nathaniel on 11/10/17.
  */
 
+@Entity
 public class Language implements Serializable {
-    private BigInteger id;
+    @PrimaryKey
+    public long language_id;
 
-    private String name;
+    public String name;
 
-    public Language(String name) {
+    public int numSpeakers;
+
+    public Language(long id, String name, int numSpeakers) {
         this.name = name;
+        this.numSpeakers = numSpeakers;
+        this.language_id = id;
     }
 
-    public String getName() {
+    public Language() {
+
+    }
+
+    public String toString() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }
