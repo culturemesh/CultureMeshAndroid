@@ -221,6 +221,17 @@ public class FindNetworkActivity extends DrawerActivity {
                             promptView.setVisibility(GONE);
                         }
                     });
+
+                    Button join = (Button) promptView.findViewById(R.id.join_button);
+                    join.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            promptView.setVisibility(GONE);
+                            Intent i = new Intent(v.getContext(), FindNetworkActivity.class);
+                            i.putExtra("network", 0); // Pass in network into intent.
+                            v.getContext().startActivity(i);
+                        }
+                    });
                 }
             });
             return rootView;
@@ -320,6 +331,17 @@ public class FindNetworkActivity extends DrawerActivity {
                         @Override
                         public void onClick(View v) {
                             promptView.setVisibility(GONE);
+                        }
+                    });
+
+                    Button join = (Button) promptView.findViewById(R.id.join_button_location);
+                    join.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            promptView.setVisibility(GONE);
+                            Intent i = new Intent(v.getContext(), FindNetworkActivity.class);
+                            i.putExtra("network", 0); // Pass in network into intent.
+                            v.getContext().startActivity(i);
                         }
                     });
                 }

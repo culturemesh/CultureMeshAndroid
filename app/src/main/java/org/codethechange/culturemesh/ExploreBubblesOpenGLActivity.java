@@ -38,7 +38,7 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
 
         picker = findViewById(R.id.picker); // Get Picker
 
-        networks = API.Get.networks().getPayload(); // Request networks from API
+        networks = API.Get.userNetworks(0).getPayload(); // Request networks from API
 
         final TypedArray colors = getResources().obtainTypedArray(R.array.colors); // Preset colors
         final TypedArray images = getResources().obtainTypedArray(R.array.images); // Type colors
@@ -59,7 +59,7 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
                 // Create new PickerItem
                 PickerItem item = new PickerItem();
                 // Set title based on network origination
-                item.setTitle(networks.get(position).getFromLocation().shortName());
+                item.setTitle(networks.get(position).fromLocation.from_country);
                 // Set colors
                 item.setGradient(new BubbleGradient(colors.getColor((position * 2) % 8, 0),
                         colors.getColor((position * 2) % 8 + 1, 0), BubbleGradient.VERTICAL));
@@ -88,7 +88,7 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
             @Override
             public void onBubbleSelected(@NotNull PickerItem item) {
                 for (int i = 0; i < networks.size(); i++) {
-                    if (networks.get(i).getFromLocation().shortName().equals(item.getTitle())) {
+                    if (networks.get(i).fromLocation.from_country.equals(item.getTitle())) {
                         transitionToNetwork(networks.get(i)); // Transition to next.
                          return;
                     }
@@ -105,7 +105,7 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
 
     private void transitionToNetwork(Network net) {
         Intent i = new Intent(getBaseContext(), TimelineActivity.class);
-        i.putExtra("network", net); // Pass in network into intent. 
+        i.putExtra("network", net); // Pass in network into intent.
         startActivity(i);
     }
 
