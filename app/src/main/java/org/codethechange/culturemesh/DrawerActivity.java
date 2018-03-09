@@ -160,6 +160,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
 
         @Override
         protected Void doInBackground(Long... longs) {
+            API.loadAppDatabase(getApplicationContext());
             List<Network> networks = API.Get.userNetworks(longs[0]).getPayload();
             subscribedNetworks = new SparseArray<Network>();
 
@@ -168,6 +169,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                 int viewId = View.generateViewId();
                 subscribedNetworks.put(viewId, net);
             }
+            API.closeDatabase();
             return null;
         }
 

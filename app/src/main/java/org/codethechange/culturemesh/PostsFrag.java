@@ -33,6 +33,7 @@ import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 
+//TODO: If no posts, show text view saying add a post!
 public class PostsFrag extends Fragment {
     private String basePath = "www.culturemesh.com/api/v1";
 
@@ -122,7 +123,12 @@ public class PostsFrag extends Fragment {
             }
             if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_NATIVE, true)) {
                 //If posts aren't filtered out, add them to arraylist.
-                feedItems.addAll(API.Get.networkPosts(longs[0]).getPayload());
+                //We also need to get the post replies.
+                List<Post> posts = API.Get.networkPosts(longs[0]).getPayload();
+                for (Post post : posts) {
+                    post.comments = API.Get.postReplies(post.id).getPayload();
+                }
+                feedItems.addAll(posts);
             }
             //TODO: Add ability check out twitter posts.
             return feedItems;

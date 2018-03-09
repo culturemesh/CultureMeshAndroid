@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh.models;
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 /**
@@ -21,6 +22,9 @@ public class PostReply {
     public String replyDate;
 
     public String replyText;
+
+    @Ignore
+    public User author;
 
     public PostReply(long id, long parentId, long userId, long networkId, String replyDate, String replyText) {
         this.id = id;

@@ -46,7 +46,6 @@ public class CreateEventActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_event);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         nameRef = findViewById(R.id.eventName);
@@ -100,9 +99,11 @@ public class CreateEventActivity extends AppCompatActivity {
             Language lang = new Language(12, "TempLanguage", 21);
             // TODO: Get the User object for the current user
             User author = null;
-
-            // Create Event TODO: deal with arbitrary ids
-            Event event = new Event((long)(Math.random() * 10000),(long)(Math.random() * 10000), name, description, date.toString(), 1, address);
+            // Create Event TODO: deal with arbitrary id. Perhaps it doesn't matter cuz API.Post(event)
+            // should take care of it?
+            long networkId = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE)
+                    .getLong(API.SELECTED_NETWORK, 1);
+            Event event = new Event((long)(Math.random() * 10000), networkId, name, description, date.toString(), 1, address);
             // POST Event with AsyncTask
             new PostEvent().execute(event);
         }
@@ -361,6 +362,7 @@ public class CreateEventActivity extends AppCompatActivity {
          */
         @Override
         protected NetworkResponse doInBackground(Event... events) {
+            API.loadAppDatabase(getApplicationContext());
             return API.Post.event(events[0]);
         }
 
@@ -394,6 +396,7 @@ public class CreateEventActivity extends AppCompatActivity {
         protected void onPostExecute(NetworkResponse response) {
             super.onPostExecute(response);
             // SOURCE: https://stackoverflow.com/questions/4038479/android-go-back-to-previous-activity
+            API.closeDatabase();
             if (response.fail()) {
                 response.showErrorDialog(myActivity);
                 progressBar.setIndeterminate(false);
@@ -402,4 +405,5 @@ public class CreateEventActivity extends AppCompatActivity {
             }
         }
     }
+
 }

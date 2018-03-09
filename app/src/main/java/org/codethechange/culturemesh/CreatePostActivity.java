@@ -90,7 +90,6 @@ public class CreatePostActivity extends AppCompatActivity implements
         int[] linkIcons= {R.drawable.ic_insert_link_white_24px,
                 R.drawable.ic_insert_link_black_24px};
         toggleIcons.put(R.id.insert_link, linkIcons);
-
         //Instantiate a hash-map like object that is also used for updating toggle settings.
         //This sparseArray will be updated with views during onCreateOptionsMenu.
         menuItems = new SparseArray<MenuItem>();
@@ -296,6 +295,7 @@ public class CreatePostActivity extends AppCompatActivity implements
          */
         @Override
         protected NetworkResponse doInBackground(Post... posts) {
+            API.loadAppDatabase(getApplicationContext());
             return API.Post.post(posts[0]);
         }
 
@@ -321,6 +321,7 @@ public class CreatePostActivity extends AppCompatActivity implements
                 response.showErrorDialog(myActivity);
                 progressBar.setIndeterminate(false);
             } else {
+                API.closeDatabase();
                 finish();
             }
         }
@@ -330,6 +331,7 @@ public class CreatePostActivity extends AppCompatActivity implements
 
         @Override
         protected Network doInBackground(Long... longs) {
+            API.loadAppDatabase(getApplicationContext());
             return API.Get.network(longs[0]).getPayload();
         }
 
@@ -348,6 +350,8 @@ public class CreatePostActivity extends AppCompatActivity implements
                             network.nearLocation.shortName());
                 }
             }
+            API.closeDatabase();
         }
     }
+
 }
