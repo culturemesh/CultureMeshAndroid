@@ -105,7 +105,7 @@ public class SpecificPostActivity extends AppCompatActivity {
         commentLV.setBackgroundResource(r);
 
         String[] comments = {"test comment 1", "test comment 2", "this is good content", "this is, uh, not good content",
-                "this is a really long comment to see how comments will work if someone has a lot to say about someone's content, which is very (very) possible"};
+                "this is a really really really long comment to see how comments will work if someone has a lot to say about someone's content, which is very (very) possible"};
         //TODO populate ListView with comments
 
         ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, comments);
