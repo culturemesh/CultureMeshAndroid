@@ -15,10 +15,10 @@ import java.util.Date;
 @Entity
 public class Post extends FeedItem implements Serializable{
     @PrimaryKey
-    public int id;
+    public long id;
     //When saved in database, we use these.
-    public int userId;
-    public int networkId;
+    public long userId;
+    public long networkId;
 
     public String content;
     public String imgLink;
