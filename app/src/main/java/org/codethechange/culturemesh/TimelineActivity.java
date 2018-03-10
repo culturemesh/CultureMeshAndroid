@@ -14,7 +14,8 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.net.Uri;
-import android.os.Build;
+//import android.os.Build;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
@@ -82,10 +83,16 @@ private String basePath = "www.culturemesh.com/api/v1";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_timeline);
 
+        setContentView(R.layout.activity_timeline);
         settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
 
+        getSupportActionBar().setLogo(R.drawable.logo_header);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        createDefaultNetwork();
+    }
+
+    protected void createDefaultNetwork() {
         /* //Set up Toolbar
         Toolbar mToolbar = (Toolbar) findViewById(R.id.action_bar);
         setSupportActionBar(mToolbar);
@@ -106,12 +113,13 @@ private String basePath = "www.culturemesh.com/api/v1";
 
 
         //Choose selected network.
-        //TODO: Create better default behavior for no selected networks.
         String selectedNetwork = settings.getString(API.SELECTED_NETWORK, "123456");
         BigInteger id = new BigInteger(selectedNetwork);
-        network = API.Get.network(id);
+        NetworkResponse<Network> responseNetwork = API.Get.network(id);
+        network = responseNetwork.getPayload();
 
-        ArrayList<User> users = API.Get.networkUsers(id);
+        NetworkResponse<ArrayList<User>> responseUsers = API.Get.networkUsers(id);
+        ArrayList<User> users = responseUsers.getPayload();
 
         //Update number of people.
         //TODO: Manipulate string of number to have magnitude suffix (K,M,etc.)
@@ -434,7 +442,6 @@ private String basePath = "www.culturemesh.com/api/v1";
             create.setImageDrawable(getResources().getDrawable(R.drawable.ic_create_white_24px));
         } else {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-
                 @SuppressLint("ObjectAnimatorBinding") ObjectAnimator changeColor = ObjectAnimator.ofInt(create,
                         "backgroundTint", colorAccent, primaryDark);
                 changeColor.setDuration(300);
@@ -459,4 +466,5 @@ private String basePath = "www.culturemesh.com/api/v1";
         }
         isFABOpen = !isFABOpen;
     }
+
 }

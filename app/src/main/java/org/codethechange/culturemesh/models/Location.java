@@ -30,6 +30,12 @@ public class Location implements Serializable{
         this.points = points;
     }
 
+    public Location() {
+        this.country = "";
+        this.region = "";
+        this.city = "";
+    }
+
     public String getCountry() {
         return country;
     }

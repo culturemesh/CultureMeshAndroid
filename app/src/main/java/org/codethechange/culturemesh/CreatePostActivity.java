@@ -1,12 +1,19 @@
 package org.codethechange.culturemesh;
 
+import android.app.Activity;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -29,8 +36,10 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.User;
@@ -42,6 +51,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
+import static android.support.v4.os.LocaleListCompat.create;
+
 public class CreatePostActivity extends AppCompatActivity implements
         ListenableEditText.onSelectionChangedListener {
     SparseBooleanArray formTogState;
@@ -49,6 +60,7 @@ public class CreatePostActivity extends AppCompatActivity implements
     SparseArray<int[]> toggleIcons;
     SparseArray<MenuItem> menuItems;
     Network network;
+    private Activity myActivity = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,11 +118,13 @@ public class CreatePostActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 //TODO: Replace user with logged in user
                 //TODO: Why do we have a title field??
-                User user = API.Get.user(new BigInteger("11"));
+                NetworkResponse<User> response = API.Get.user(new BigInteger("11"));
+                User user = response.getPayload();
                 String contentHTML = Html.toHtml(content.getText());
                 String datePosted = new Date().toString();
-                API.Post.post(new Post(user, contentHTML, datePosted));
-                finish();
+
+                Post newPost = new Post(user, contentHTML, datePosted);
+                new PostPost().execute(newPost);
             }
         });
     }
@@ -279,6 +293,50 @@ public class CreatePostActivity extends AppCompatActivity implements
                 int iconIndex = (formTogState.get(id, false)) ? 1 : 0;
                 //Update icon!
                 item.setIcon(toggleIcons.get(id)[iconIndex]);
+            }
+        }
+    }
+
+    /**
+     * AsyncTask class to handle network latency when POSTing post
+     */
+    private class PostPost extends AsyncTask<Post, Integer, NetworkResponse> {
+
+        private ProgressBar progressBar;
+
+        /**
+         * In the background, POST the provided post
+         * @param posts List of posts, the first of which will be POSTed
+         * @return Result from network operation
+         */
+        @Override
+        protected NetworkResponse doInBackground(Post... posts) {
+            return API.Post.post(posts[0]);
+        }
+
+        /**
+         * Makes the progress bar indeterminate
+         */
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressBar = findViewById(R.id.postPostProgressBar);
+            progressBar.setIndeterminate(true); // Only because cannot get status from API
+        }
+
+        /**
+         * If POSTing succeeded: Closes the activity and returns the user to the previous screen
+         * If POSTing failed: Displays error message and returns uer to composition screen
+         * @param response Status of doInBackground method that represents whether POSTing succeeded
+         */
+        @Override
+        protected void onPostExecute(NetworkResponse response) {
+            super.onPostExecute(response);
+            if (response.fail()) {
+                response.showErrorDialog(myActivity);
+                progressBar.setIndeterminate(false);
+            } else {
+                finish();
             }
         }
     }
