@@ -128,7 +128,6 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         //TODO: Handle navigation view item clicks here.
@@ -147,8 +146,6 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         } else if (id == R.id.nav_join_network) {
             Intent startFindNet = new Intent(getApplicationContext(), FindNetworkActivity.class);
             startActivity(startFindNet);
-        } else if (id == R.id.nav_manage) {
-
         } else if (id == R.id.nav_about) {
             Intent startAbout = new Intent(getApplicationContext(), AboutActivity.class);
             startActivity(startAbout);
