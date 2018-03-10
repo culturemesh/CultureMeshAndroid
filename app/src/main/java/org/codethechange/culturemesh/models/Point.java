@@ -5,26 +5,6 @@ package org.codethechange.culturemesh.models;
  */
 
 public class Point {
-    private int latitude;
-    private int longitude;
-
-    public Point(int latitude) {
-        this.latitude = latitude;
-    }
-
-    public int getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(int latitude) {
-        this.latitude = latitude;
-    }
-
-    public int getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(int longitude) {
-        this.longitude = longitude;
-    }
+    public long latitude;
+    public long longitude;
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -33,19 +34,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
- */
+import static android.content.Context.MODE_PRIVATE;
+
+//TODO: If no posts, show text view saying add a post!
 public class PostsFrag extends Fragment {
     private String basePath = "www.culturemesh.com/api/v1";
 
     private RecyclerView mRecyclerView;
     private RVAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    SharedPreferences settings;
     //To figure out params that would be passed in
-
-
-    private OnFragmentInteractionListener mListener;
 
     public PostsFrag() {
         // Required empty public constructor
@@ -53,6 +52,7 @@ public class PostsFrag extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         super.onCreate(savedInstanceState);
 
     }
@@ -61,7 +61,6 @@ public class PostsFrag extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         AppCompatActivity activity = (AppCompatActivity) getActivity();
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         View rootView = inflater.inflate(R.layout.fragment_posts, container, false);
 
         mRecyclerView = rootView.findViewById(R.id.postsRV);
@@ -130,52 +129,22 @@ public class PostsFrag extends Fragment {
                 });
         //TextView tx = rootView.findViewById();*/
 
+        //Get network id
+        long selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
+        new LoadFeedItems().execute(selectedNetwork);
         return rootView;
     }
 
-    private void loadPosts(String RESTresult, String path, RecyclerView rv, User user) {
-        //discuss parsing REST data using path
-        try {
-            JSONObject postJSON = new JSONObject(RESTresult);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        String[] postData = RESTresult.split("," /*determine this*/);
-        ArrayList<Post> posts = new ArrayList<Post>();
-        for(String p : postData) {
-            String content = null;
-            String title = null;
-            Date datePosted = new Date(); /* initialize with string version of date */
-            Post post = new Post(user, content, datePosted.toString());
-            //instantiate post with the REST data, to discuss
-            posts.add(post);
-        }
-        //RVAdapter adapter = new RVAdapter(posts);
-        //mRecyclerView.setAdapter(adapter);
-    }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
 
     /**
@@ -192,4 +161,70 @@ public class PostsFrag extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
+    private class LoadFeedItems extends AsyncTask<Long,Void,ArrayList<FeedItem>> {
+
+        /**
+         * This is the asynchronous part. It calls the client API, which can make network requests
+         * and read from the cache database.
+         * @param longs This should be the network id.
+         * @return a collection of feed items to be displayed in the feed.
+         */
+        @Override
+        protected ArrayList<FeedItem> doInBackground(Long... longs) {
+            SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
+                    MODE_PRIVATE);
+            //We generalize posts/events to be feed items for polymorphism.
+            //TODO: Consider error checking for when getPayload is null.
+            ArrayList<FeedItem> feedItems = new ArrayList<FeedItem>();
+            if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_EVENTS, true)) {
+                //If events aren't filtered out, add them to arraylist.
+                feedItems.addAll(API.Get.networkEvents(longs[0]).getPayload());
+            }
+            if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_NATIVE, true)) {
+                //If posts aren't filtered out, add them to arraylist.
+                //We also need to get the post replies.
+                List<Post> posts = API.Get.networkPosts(longs[0]).getPayload();
+                for (Post post : posts) {
+                    post.comments = API.Get.postReplies(post.id).getPayload();
+                }
+                feedItems.addAll(posts);
+            }
+            //TODO: Add ability check out twitter posts.
+            return feedItems;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<FeedItem> feedItems) {
+            mAdapter = new RVAdapter(feedItems, getActivity().getApplicationContext());
+            ArrayList<FeedItem> posts = new ArrayList<FeedItem>();
+            for (Post post : API.genPosts()) {
+                posts.add(post);
+            }
+            posts.add(API.genEvents().get(2));
+
+            mAdapter = new RVAdapter(posts, new RVAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(FeedItem item) {
+                    Intent intent = new Intent(getActivity(), SpecificPostActivity.class);
+                    Post post = (Post) item; //to test
+                    BigInteger postID = post.getId();
+                    try {
+                        intent.putExtra("postID", postID.toString());
+                        getActivity().startActivity(intent);
+                    } catch (NullPointerException e) {
+                        Toast.makeText(getActivity(), "Cannot open post", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }, getActivity().getApplicationContext());
+            mRecyclerView.setAdapter(mAdapter);
+            mRecyclerView.setAdapter(mAdapter);
+            getFragmentManager().beginTransaction()
+                    .detach(PostsFrag.this)
+                    .attach(PostsFrag.this)
+                    .commit();
+        }
+    }
+
+
 }

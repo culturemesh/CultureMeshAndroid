@@ -1,12 +1,18 @@
 package org.codethechange.culturemesh.models;
 
+import android.arch.persistence.room.Ignore;
+
+import java.util.List;
+
 /**
  * Created by drewgregory on 1/18/18.
  * Superclass for Posts and Events so we can use Polymorphism for feeds.
  */
 
 public class FeedItem {
-    public FeedItem() {
-
-    }
+    /**
+     * This list of PostReplies will be where we store the comments for each post.
+     */
+    @Ignore
+    public List<PostReply> comments;
 }

@@ -1,19 +1,51 @@
 package org.codethechange.culturemesh;
 
+import android.arch.persistence.room.Room;
+import android.content.Context;
+import android.util.Log;
+
+import org.codethechange.culturemesh.data.CMDatabase;
+import org.codethechange.culturemesh.data.CityDao;
+import org.codethechange.culturemesh.data.CountryDao;
+import org.codethechange.culturemesh.data.EventDao;
+import org.codethechange.culturemesh.data.EventSubscription;
+import org.codethechange.culturemesh.data.EventSubscriptionDao;
+import org.codethechange.culturemesh.data.NetworkDao;
+import org.codethechange.culturemesh.data.NetworkSubscription;
+import org.codethechange.culturemesh.data.NetworkSubscriptionDao;
+import org.codethechange.culturemesh.data.PostDao;
+import org.codethechange.culturemesh.data.PostReplyDao;
+import org.codethechange.culturemesh.data.RegionDao;
+import org.codethechange.culturemesh.data.UserDao;
+import org.codethechange.culturemesh.models.City;
+import org.codethechange.culturemesh.models.Country;
 import org.codethechange.culturemesh.models.Event;
+import org.codethechange.culturemesh.models.FromLocation;
 import org.codethechange.culturemesh.models.Language;
-import org.codethechange.culturemesh.models.Location;
+import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Point;
+import org.codethechange.culturemesh.models.PostReply;
+import org.codethechange.culturemesh.models.Region;
 import org.codethechange.culturemesh.models.User;
-import org.codethechange.culturemesh.models.Post;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Drew Gregory on 11/14/17.
+ *
+ * IMPORTANT: If you want to use this class in your activity, make sure you run API.loadAppDatabase()
+ * at the beginning of onPreExecute()/doInBackground(), and API.closeDatabase() in onPostExecute().
+ * The app will crash otherwise.
+ *
+ *
+ * TODO: USE ALARMS FOR UPDATING DATA ON SUBSCRIBED NETWORKS
+ * TODO: Figure out how we can handle trying to update data.
+ *      - Perhaps check if it comes from subscribed network, if not do network request instead of cache?
  */
 
 class API {
@@ -21,143 +53,810 @@ class API {
     static final String PERSONAL_NETWORKS = "pernet";
     static final String SELECTED_NETWORK = "selnet";
     static final boolean NO_JOINED_NETWORKS = false;
+    static CMDatabase mDb;
+    //reqCounter to ensure that we don't close the database while another thread is using it.
+    static int reqCounter;
 
 
-    //TODO: REMOVE DUMMY GENERATORS
-    static ArrayList<User> genUsers() {
-        ArrayList<User> users = new ArrayList<User>();
-        User user = new User("Bob","Smith", "crazyskater@hotmail.com`",
-                "bobbysmithery", new ArrayList<Network>(), "http://lorempixel.com/400/400/");
-        users.add(user);
-        User user2 = new User("Olivia","Brown","cter@hotmail.com",
-                "obrown", new ArrayList<Network>(), "http://lorempixel.com/400/200/");
-        users.add(user2);
-        User user3 = new User("Nate", "Lee", "nlee@yahoo.com",
-                "nlee", new ArrayList<Network>(), "http://lorempixel.com/200/200/");
-        users.add(user3);
-        User user4 = new User("Dylan","Grosz","something@gmail.com",
-                "dgrosz", new ArrayList<Network>(), "http://lorempixel.com/200/200/");
-        return users;
-    }
 
-    static ArrayList<Network> genNetworks() {
-        ArrayList<Network> networks = new ArrayList<Network>();
-        Location[] possibleLocations = {new Location("United States",
-                "California", "Stanford", new Point[0]),
-                new Location("United States","New York","New York City", new Point[0]),
-                new Location("United States", "California", "Stanford", new Point[0]),
-                new Location("United States","New York","White Plains", new Point[0]),
-                new Location("United States", "California", "San Francisco", new Point[0]),
-                new Location("United States","New York","Albany", new Point[0]),
-                new Location("United States", "California", "Sacramento", new Point[0]),
-                new Location("United States","New York","New York City", new Point[0]),
-                new Location("United States","Maryland","Baltimore", new Point[0]),
-                new Location("France","Provence","Aix-en-Provence", new Point[0])};
-        for (int i = 0; i < 10; i++) {
+    /**
+     *This next section is code that parses JSON dummy data and adds it to the database. We can reuse
+     * some of this code later.
+     */
+    static void addUsers(){
+        String rawDummy = "\n" +
+                "[\n" +
+                "  {\n" +
+                "    \"username\": \"boonekathryn\",\n" +
+                "    \"fp_code\": \"IDK\",\n" +
+                "    \"confirmed\": false,\n" +
+                "    \"user_id\": 1,\n" +
+                "    \"firstName\": \"Jonathan\",\n" +
+                "    \"act_code\": \"IDK\",\n" +
+                "    \"lastName\": \"Simpson\",\n" +
+                "    \"about_me\": \"Adipisci ad molestiae vel fugit dolor in. Dolore ipsa libero. Doloremque dolor itaque enim. Saepe nam odit.\\nSimilique commodi ex quam quae vel in rerum. Esse nesciunt sunt sed magnam nihil.\",\n" +
+                "    \"img_link\": \"https://www.lorempixel.com/720/691\",\n" +
+                "    \"role\": 1,\n" +
+                "    \"gender\": \"female\",\n" +
+                "    \"last_login\": \"2017-11-21 13:21:47\",\n" +
+                "    \"registerDate\": \"2017-02-21 11:53:30\",\n" +
+                "    \"email\": \"kristina00@reynolds.com\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"username\": \"williamosborne\",\n" +
+                "    \"fp_code\": \"IDK\",\n" +
+                "    \"confirmed\": true,\n" +
+                "    \"user_id\": 2,\n" +
+                "    \"firstName\": \"Abigail\",\n" +
+                "    \"act_code\": \"IDK\",\n" +
+                "    \"lastName\": \"Long\",\n" +
+                "    \"about_me\": \"Doloremque maiores veritatis neque itaque earum molestias. Ab quos reprehenderit suscipit qui repellat maxime natus. Animi sit necessitatibus dicta magnam.\",\n" +
+                "    \"img_link\": \"https://dummyimage.com/882x818\",\n" +
+                "    \"role\": 1,\n" +
+                "    \"gender\": \"female\",\n" +
+                "    \"last_login\": \"2017-11-25 08:22:44\",\n" +
+                "    \"registerDate\": \"2017-11-09 00:46:13\",\n" +
+                "    \"email\": \"williamsjade@watkins.com\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"username\": \"rscott\",\n" +
+                "    \"fp_code\": \"IDK\",\n" +
+                "    \"confirmed\": false,\n" +
+                "    \"user_id\": 3,\n" +
+                "    \"firstName\": \"Emily\",\n" +
+                "    \"act_code\": \"IDK\",\n" +
+                "    \"lastName\": \"Miller\",\n" +
+                "    \"about_me\": \"Quae iste eum labore. Harum in deleniti.\\nMagni distinctio non repellendus accusantium accusantium corporis. Cum provident perspiciatis molestias dolore voluptate reiciendis.\",\n" +
+                "    \"img_link\": \"https://picsum.photos/400\",\n" +
+                "    \"role\": 1,\n" +
+                "    \"gender\": \"male\",\n" +
+                "    \"last_login\": \"2017-11-23 15:31:51\",\n" +
+                "    \"registerDate\": \"2015-08-09 13:56:37\",\n" +
+                "    \"email\": \"camposjohn@weber.com\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"username\": \"ihudson\",\n" +
+                "    \"fp_code\": \"IDK\",\n" +
+                "    \"confirmed\": false,\n" +
+                "    \"user_id\": 4,\n" +
+                "    \"firstName\": \"Mindy\",\n" +
+                "    \"act_code\": \"IDK\",\n" +
+                "    \"lastName\": \"Beltran\",\n" +
+                "    \"about_me\": \"Eos libero eveniet sit tempore accusantium. Eveniet voluptates quos excepturi.\\nSaepe ut exercitationem sunt porro laborum. Doloremque quas assumenda cumque tenetur distinctio quis nobis.\",\n" +
+                "    \"img_link\": \"https://picsum.photos/200\",\n" +
+                "    \"role\": 1,\n" +
+                "    \"gender\": \"male\",\n" +
+                "    \"last_login\": \"2017-11-21 07:32:34\",\n" +
+                "    \"registerDate\": \"2016-05-08 21:44:02\",\n" +
+                "    \"email\": \"nicholas32@hotmail.com\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"username\": \"oellis\",\n" +
+                "    \"fp_code\": \"IDK\",\n" +
+                "    \"confirmed\": false,\n" +
+                "    \"user_id\": 5,\n" +
+                "    \"firstName\": \"Kristin\",\n" +
+                "    \"act_code\": \"IDK\",\n" +
+                "    \"lastName\": \"Carey\",\n" +
+                "    \"about_me\": \"Aut tenetur fugiat voluptas tenetur eos ducimus. Aut officiis aliquam ab voluptatem.\\nIpsum et aperiam totam voluptas voluptas. Dolor nulla voluptatem molestiae.\",\n" +
+                "    \"img_link\": \"https://picsum.photos/400\",\n" +
+                "    \"role\": 1,\n" +
+                "    \"gender\": \"male\",\n" +
+                "    \"last_login\": \"2017-11-21 03:03:05\",\n" +
+                "    \"registerDate\": \"2015-06-26 12:19:38\",\n" +
+                "    \"email\": \"christopher18@allen.com\"\n" +
+                "  }\n" +
+                "]";
+        try {
+            UserDao uDAo = mDb.userDao();
+            JSONArray usersJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < usersJSON.length(); i++) {
+                JSONObject userJSON = usersJSON.getJSONObject(i);
+                User user = new User(userJSON.getLong("user_id"), userJSON.getString("firstName"),userJSON.getString("lastName"),
+                        userJSON.getString("email"), userJSON.getString("username"), userJSON.getString("img_link"));
+                uDAo.addUser(user);
+            }
 
-            networks.add(new Network(genPosts(), genEvents(), possibleLocations[i++], possibleLocations[i]));
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        return networks;
     }
 
-    static ArrayList<org.codethechange.culturemesh.models.Post> genPosts() {
-        ArrayList<org.codethechange.culturemesh.models.Post> posts = new ArrayList<org.codethechange.culturemesh.models.Post>();
-        for (int i = 0; i < 10; i++) {
-            org.codethechange.culturemesh.models.Post toAdd = new org.codethechange.culturemesh.models.Post(genUsers().get(i%3), "lorem ipsum " + i,  new Date().toString());
-            toAdd.setId(new BigInteger((i+1)*10 + 37 + "")); //dumb number
-            posts.add(toAdd);
+    static void addNetworks() {
+        String rawDummy = "[\n" +
+                "    {\n" +
+                "      \"id\": 0,\n" +
+                "      \"location_cur\": {\n" +
+                "        \"country_id\": 1,\n" +
+                "        \"region_id\": 1,\n" +
+                "        \"city_id\": 2\n" +
+                "      },\n" +
+                "      \"location_origin\": {\n" +
+                "        \"country_id\": 1,\n" +
+                "        \"region_id\": 2,\n" +
+                "        \"city_id\": 3\n" +
+                "      },\n" +
+                "      \"language_origin\": {\n" +
+                "        \"id\": 2,\n" +
+                "        \"name\": \"entish\",\n" +
+                "        \"num_speakers\": 10,\n" +
+                "        \"added\": 0\n" +
+                "      },\n" +
+                "      \"network_class\": 1,\n" +
+                "      \"date_added\": \"1990-11-23 15:31:51\",\n" +
+                "      \"img_link\": \"img1.png\"\n" +
+                "    },\n" +
+                "\n" +
+                "    {\n" +
+                "      \"id\": 1,\n" +
+                "      \"location_cur\": {\n" +
+                "        \"country_id\": 2,\n" +
+                "        \"region_id\": 4,\n" +
+                "        \"city_id\": 6\n" +
+                "      },\n" +
+                "      \"location_origin\": {\n" +
+                "        \"country_id\": 1,\n" +
+                "        \"region_id\": 1,\n" +
+                "        \"city_id\": 1\n" +
+                "      },\n" +
+                "      \"language_origin\": {\n" +
+                "        \"id\": 3,\n" +
+                "        \"name\": \"valarin\",\n" +
+                "        \"num_speakers\": 1000,\n" +
+                "        \"added\": 0\n" +
+                "      },\n" +
+                "      \"network_class\": 0,\n" +
+                "      \"date_added\": \"1995-11-23 15:31:51\",\n" +
+                "      \"img_link\": \"img2.png\"\n" +
+                "    }\n" +
+                "]\n";
+        try {
+            NetworkDao nDAo = mDb.networkDao();
+            JSONArray usersJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < usersJSON.length(); i++) {
+                JSONObject netJSON = usersJSON.getJSONObject(i);
+                Network network;
+                JSONObject nearLocObj = netJSON.getJSONObject("location_cur");
+                NearLocation nearLocation = new NearLocation(nearLocObj.getLong("city_id"),
+                        nearLocObj.getLong("region_id"), nearLocObj.getLong("country_id"));
+                if (netJSON.getInt("network_class") == 0) { //This means that it is a language?
+                    JSONObject langJSON = netJSON.getJSONObject("language_origin");
+                    Language lang = new Language(langJSON.getLong("id"),
+                            langJSON.getString("name"), langJSON.getInt("num_speakers"));
+                    network = new Network(nearLocation, lang, netJSON.getLong("id"));
+                } else {//Location network.
+                    JSONObject fromLocJSON = netJSON.getJSONObject("location_origin");
+                    FromLocation fromLoc = new FromLocation(fromLocJSON.getLong("city_id"),
+                            fromLocJSON.getLong("region_id"),fromLocJSON.getLong("country_id"));
+                    network = new Network(nearLocation,fromLoc, netJSON.getLong("id"));
+                }
+                nDAo.insertNetworks(network);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        return posts;
+
     }
 
-    static ArrayList<Event> genEvents() {
-        ArrayList<Event> events = new ArrayList<Event>();
-        for (int i = 0; i < 10; i++) {
-            events.add( new Event("event " + i, "lorem ipsum adsfa;lskd", new Date(), genUsers().get(0), "Stanford, CA", new Language("English")));
+    static void addRegions(){
+        String rawDummy = "[\n" +
+                "  {\n" +
+                "    \"id\": 1,\n" +
+                "    \"name\": \"north\",\n" +
+                "    \"latitude\": 5000.4321,\n" +
+                "    \"longitude\": 1000.1234,\n" +
+                "    \"country_id\": 1,\n" +
+                "    \"country_name\": \"corneria\",\n" +
+                "    \"population\": 400000,\n" +
+                "    \"feature_code\": \"string\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 2,\n" +
+                "    \"name\": \"south\",\n" +
+                "    \"latitude\": 4000.4321,\n" +
+                "    \"longitude\": 1000.1234,\n" +
+                "    \"country_id\": 1,\n" +
+                "    \"country_name\": \"corneria\",\n" +
+                "    \"population\": 600000,\n" +
+                "    \"feature_code\": \"string\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 3,\n" +
+                "    \"name\": \"east\",\n" +
+                "    \"latitude\": 50.100,\n" +
+                "    \"longitude\": 250.200,\n" +
+                "    \"country_id\": 2,\n" +
+                "    \"country_name\": \"rohan\",\n" +
+                "    \"population\": 300,\n" +
+                "    \"feature_code\": \"idk\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 4,\n" +
+                "    \"name\": \"west\",\n" +
+                "    \"latitude\": 150.100,\n" +
+                "    \"longitude\": 150.200,\n" +
+                "    \"country_id\": 2,\n" +
+                "    \"country_name\": \"rohan\",\n" +
+                "    \"population\": 50,\n" +
+                "    \"feature_code\": \"idk\"\n" +
+                "  }\n" +
+                "]";
+        RegionDao rDao = mDb.regionDao();
+        try {
+            JSONArray regionsJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < regionsJSON.length(); i++) {
+                JSONObject regionJSON = regionsJSON.getJSONObject(i);
+                Point coords = new Point();
+                coords.latitude = regionJSON.getLong("latitude");
+                coords.longitude = regionJSON.getLong("longitude");
+                Region region = new Region(regionJSON.getLong("id"), regionJSON.getString("name"),
+                        coords, regionJSON.getLong("population"), regionJSON.getLong("country_id"),
+                        regionJSON.getString("country_name"));
+                rDao.insertRegions(region);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        return events;
+
     }
 
+    static void addCities() {
+        String rawDummy = "[\n" +
+                "  {\n" +
+                "    \"id\": 1,\n" +
+                "    \"name\": \"City A\",\n" +
+                "    \"latitude\": 1.1,\n" +
+                "    \"longitude\": 2.2,\n" +
+                "    \"region_id\": 1,\n" +
+                "    \"region_name\": \"north\",\n" +
+                "    \"country_id\": 1,\n" +
+                "    \"country_name\": \"corneria\",\n" +
+                "    \"population\": 350000,\n" +
+                "    \"feature_code\": \"idk\",\n" +
+                "    \"tweet_terms\": \"idk\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 2,\n" +
+                "    \"name\": \"City B\",\n" +
+                "    \"latitude\": 3.3,\n" +
+                "    \"longitude\": 4.4,\n" +
+                "    \"region_id\": 1,\n" +
+                "    \"region_name\": \"north\",\n" +
+                "    \"country_id\": 1,\n" +
+                "    \"country_name\": \"corneria\",\n" +
+                "    \"population\": 100000,\n" +
+                "    \"feature_code\": \"idk\",\n" +
+                "    \"tweet_terms\": \"idk\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 3,\n" +
+                "    \"name\": \"City C\",\n" +
+                "    \"latitude\": 5.5,\n" +
+                "    \"longitude\": 6.6,\n" +
+                "    \"region_id\": 2,\n" +
+                "    \"region_name\": \"south\",\n" +
+                "    \"country_id\": 1,\n" +
+                "    \"country_name\": \"corneria\",\n" +
+                "    \"population\": 20000,\n" +
+                "    \"feature_code\": \"idk\",\n" +
+                "    \"tweet_terms\": \"idk\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 4,\n" +
+                "    \"name\": \"City D\",\n" +
+                "    \"latitude\": 7.7,\n" +
+                "    \"longitude\": 8.8,\n" +
+                "    \"region_id\": 3,\n" +
+                "    \"region_name\": \"east\",\n" +
+                "    \"country_id\": 2,\n" +
+                "    \"country_name\": \"rohan\",\n" +
+                "    \"population\": 280,\n" +
+                "    \"feature_code\": \"idk\",\n" +
+                "    \"tweet_terms\": \"idk\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 5,\n" +
+                "    \"name\": \"City E\",\n" +
+                "    \"latitude\": 9.9,\n" +
+                "    \"longitude\": 10.10,\n" +
+                "    \"region_id\": 4,\n" +
+                "    \"region_name\": \"west\",\n" +
+                "    \"country_id\": 2,\n" +
+                "    \"country_name\": \"rohan\",\n" +
+                "    \"population\": 20,\n" +
+                "    \"feature_code\": \"idk\",\n" +
+                "    \"tweet_terms\": \"idk\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 6,\n" +
+                "    \"name\": \"City F\",\n" +
+                "    \"latitude\": 11.11,\n" +
+                "    \"longitude\": 12.12,\n" +
+                "    \"region_id\": 4,\n" +
+                "    \"region_name\": \"west\",\n" +
+                "    \"country_id\": 2,\n" +
+                "    \"country_name\": \"rohan\",\n" +
+                "    \"population\": 25,\n" +
+                "    \"feature_code\": \"idk\",\n" +
+                "    \"tweet_terms\": \"idk\"\n" +
+                "  }\n" +
+                "]";
+        CityDao cDao = mDb.cityDao();
+        try {
+            JSONArray citiesJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < citiesJSON.length(); i++) {
+                JSONObject cityJSON = citiesJSON.getJSONObject(i);
+                Point coords = new Point();
+                coords.latitude = cityJSON.getLong("latitude");
+                coords.longitude = cityJSON.getLong("longitude");
+                City city = new City(cityJSON.getLong("id"), cityJSON.getString("name"),
+                        coords, cityJSON.getLong("population"), cityJSON.getLong("country_id"),
+                        cityJSON.getString("country_name"), cityJSON.getLong("region_id"),
+                        cityJSON.getString("region_name"));
+                cDao.insertCities(city);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void addCountries() {
+        String rawDummy = "[\n" +
+                "  {\n" +
+                "    \"id\": 1,\n" +
+                "    \"iso_a2\": 0,\n" +
+                "    \"name\": \"corneria\",\n" +
+                "    \"latitude\": 4321.4321,\n" +
+                "    \"longitude\": 1234.1234,\n" +
+                "    \"population\": 1000000,\n" +
+                "    \"feature_code\": \"idk\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 2,\n" +
+                "    \"iso_a2\": 0,\n" +
+                "    \"name\": \"rohan\",\n" +
+                "    \"latitude\": 100.100,\n" +
+                "    \"longitude\": 200.200,\n" +
+                "    \"population\": 350,\n" +
+                "    \"feature_code\": \"idk\"\n" +
+                "  }\n" +
+                "]";
+        CountryDao cDao = mDb.countryDao();
+        try {
+            JSONArray countriesJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < countriesJSON.length(); i++) {
+                JSONObject countryJSON = countriesJSON.getJSONObject(i);
+                Point coords = new Point();
+                coords.latitude = countryJSON.getLong("latitude");
+                coords.longitude = countryJSON.getLong("longitude");
+                Country country = new Country(countryJSON.getLong("id"), countryJSON.getString("name"),
+                        coords, countryJSON.getLong("population"));
+                cDao.insertCountries(country);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void addPosts(){
+        String rawDummy = "[\n" +
+                "  {\n" +
+                "    \"user_id\": 4,\n" +
+                "    \"post_text\": \"Ex excepturi quos vero nesciunt autem. Ipsum voluptates quaerat rerum praesentium modi.\\nEos culpa fuga maxime atque exercitationem nemo. Repellendus officiis et. Explicabo eveniet quibusdam magnam minima.\",\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"img_link\": \"https://www.lorempixel.com/370/965\",\n" +
+                "    \"vid_link\": \"https://dummyimage.com/803x720\",\n" +
+                "    \"post_date\": \"2017-02-12 08:53:43\",\n" +
+                "    \"post_class\": 0,\n" +
+                "    \"id\": 1,\n" +
+                "    \"post_original\": \"Not sure what this field is\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"user_id\": 3,\n" +
+                "    \"post_text\": \"Minus cumque corrupti porro natus tenetur delectus illum. Amet aut molestias eaque autem ea odio.\\nAsperiores sed officia. Similique accusantium facilis sed. Eligendi tempora nisi sint tempora incidunt perferendis.\",\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"img_link\": \"https://www.lorempixel.com/556/586\",\n" +
+                "    \"vid_link\": \"https://dummyimage.com/909x765\",\n" +
+                "    \"post_date\": \"2017-02-01 05:49:35\",\n" +
+                "    \"post_class\": 0,\n" +
+                "    \"id\": 2,\n" +
+                "    \"post_original\": \"Not sure what this field is\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"user_id\": 1,\n" +
+                "    \"post_text\": \"Veritatis illum occaecati est error magni nesciunt. Voluptate cum odio voluptatum quasi natus. Illo vel tempora pariatur tempore.\",\n" +
+                "    \"network_id\": 0,\n" +
+                "    \"img_link\": \"https://dummyimage.com/503x995\",\n" +
+                "    \"vid_link\": \"https://dummyimage.com/796x497\",\n" +
+                "    \"post_date\": \"2017-04-03 18:27:27\",\n" +
+                "    \"post_class\": 0,\n" +
+                "    \"id\": 3,\n" +
+                "    \"post_original\": \"Not sure what this field is\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"user_id\": 3,\n" +
+                "    \"post_text\": \"Dolorem ad ducimus laboriosam veritatis id quam rerum. Nostrum voluptatum mollitia modi.\\nVoluptas aut mollitia in perferendis blanditiis eaque eius. Recusandae similique ratione perspiciatis assumenda.\",\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"img_link\": \"https://placeholdit.imgix.net/~text?txtsize=55&txt=917x558&w=917&h=558\",\n" +
+                "    \"vid_link\": \"https://www.lorempixel.com/1016/295\",\n" +
+                "    \"post_date\": \"2016-08-29 15:27:28\",\n" +
+                "    \"post_class\": 0,\n" +
+                "    \"id\": 4,\n" +
+                "    \"post_original\": \"Not sure what this field is\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"user_id\": 4,\n" +
+                "    \"post_text\": \"Ab voluptates omnis unde voluptas. Molestiae ipsam quis sapiente.\\nProvident illum consectetur deserunt. Nisi vero minus non corrupti impedit.\\nEaque dolor facilis iusto excepturi non. Sunt possimus modi animi.\",\n" +
+                "    \"network_id\": 0,\n" +
+                "    \"img_link\": \"https://www.lorempixel.com/231/204\",\n" +
+                "    \"vid_link\": \"https://dummyimage.com/720x577\",\n" +
+                "    \"post_date\": \"2017-07-29 18:52:43\",\n" +
+                "    \"post_class\": 0,\n" +
+                "    \"id\": 5,\n" +
+                "    \"post_original\": \"Not sure what this field is\"\n" +
+                "  }\n" +
+                "]";
+        PostDao pDao = mDb.postDao();
+        try {
+            JSONArray postsJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < postsJSON.length(); i++) {
+                JSONObject postJSON = postsJSON.getJSONObject(i);
+                Log.i("Network Id\'s", postJSON.getInt("network_id") + "");
+                org.codethechange.culturemesh.models.Post post = new org.codethechange.culturemesh.models.Post(postJSON.getInt("id"), postJSON.getInt("user_id"),
+                        postJSON.getInt("network_id"),postJSON.getString("post_text"),
+                        postJSON.getString("img_link"),postJSON.getString("vid_link"),
+                        postJSON.getString("post_date"));
+                pDao.insertPosts(post);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void addEvents() {
+        String rawDummy = "[\n" +
+                "  {\n" +
+                "    \"description\": \"Ad officia impedit necessitatibus. Explicabo consequuntur commodi.\\nId id nostrum doloremque ab minus magnam. Ipsa placeat quasi dolores libero laboriosam.\\nNam tenetur ullam eius officia. Asperiores maiores soluta.\",\n" +
+                "    \"title\": \"Centralized motivating encoding\",\n" +
+                "    \"network_id\": 0,\n" +
+                "    \"date_created\": \"2017-10-13 01:49:21\",\n" +
+                "    \"address_1\": \"157 Stacy Drive\\nMercerfort, IA 59281\",\n" +
+                "    \"address_2\": \"PSC 0398, Box 9876\\nAPO AE 17620\",\n" +
+                "    \"event_date\": \"2017-11-03 17:28:51\",\n" +
+                "    \"host_id\": 5,\n" +
+                "    \"id\": 1,\n" +
+                "    \"location\": [\n" +
+                "      \"Uzbekistan\",\n" +
+                "      \"Dunnmouth\",\n" +
+                "      \"Chavezbury\"\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"description\": \"Laudantium sequi quisquam necessitatibus fugit eligendi. Rem blanditiis quibusdam molestias. Quis voluptate consequatur magnam nemo est magnam explicabo. A ipsam ipsum esse id quos.\",\n" +
+                "    \"title\": \"Reverse-engineered 6th Generation\",\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"date_created\": \"2017-09-09 17:12:57\",\n" +
+                "    \"address_1\": \"1709 Fuller Freeway\\nChungland, PR 67499-3841\",\n" +
+                "    \"address_2\": \"916 David Green\\nLake Adamville, MA 66822\",\n" +
+                "    \"event_date\": \"2017-11-16 04:38:29\",\n" +
+                "    \"host_id\": 2,\n" +
+                "    \"id\": 2,\n" +
+                "    \"location\": [\n" +
+                "      \"Malaysia\",\n" +
+                "      \"New John\",\n" +
+                "      \"Kyliefort\"\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"description\": \"Doloremque natus cupiditate ratione sint eveniet. Vitae provident sapiente adipisci.\\nEt inventore quis quos deleniti numquam. Voluptate ipsam totam quas. Ea minima consequuntur consequuntur quaerat facere.\",\n" +
+                "    \"title\": \"Adaptive fault-tolerant hardware\",\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"date_created\": \"2017-10-11 01:13:33\",\n" +
+                "    \"address_1\": \"7874 Bowman Port Suite 466\\nPattonhaven, PR 63278-5184\",\n" +
+                "    \"address_2\": \"7436 William Village\\nRichardchester, NM 28208\",\n" +
+                "    \"event_date\": \"2017-11-10 22:35:03\",\n" +
+                "    \"host_id\": 3,\n" +
+                "    \"id\": 3,\n" +
+                "    \"location\": [\n" +
+                "      \"Macao\",\n" +
+                "      \"South Jillian\",\n" +
+                "      \"New Jenniferfort\"\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"description\": \"Expedita non nam minima aperiam explicabo. Dicta sunt incidunt optio quae. Quam quibusdam dolorum voluptate corrupti ullam sequi. Amet at repellat iusto fuga voluptates aliquam.\",\n" +
+                "    \"title\": \"Quality-focused asynchronous Graphic Interface\",\n" +
+                "    \"network_id\": 0,\n" +
+                "    \"date_created\": \"2017-11-10 17:48:56\",\n" +
+                "    \"address_1\": \"28452 Rivera Pike\\nGambletown, SC 33593-8719\",\n" +
+                "    \"address_2\": \"0314 Escobar Burgs\\nLake Bradburgh, CO 06768\",\n" +
+                "    \"event_date\": \"2017-11-04 21:46:16\",\n" +
+                "    \"host_id\": 5,\n" +
+                "    \"id\": 4,\n" +
+                "    \"location\": [\n" +
+                "      \"Norfolk Island\",\n" +
+                "      \"New Tara\",\n" +
+                "      \"Johnton\"\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]";
+        EventDao cDao = mDb.eventDao();
+        try {
+            JSONArray eventsJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < eventsJSON.length(); i++) {
+                JSONObject eventJSON = eventsJSON.getJSONObject(i);
+                Event event = new Event(eventJSON.getLong("id"), eventJSON.getLong("network_id"), eventJSON.getString("title"), eventJSON.getString("description"),
+                        eventJSON.getString("date_created"), eventJSON.getLong("host_id"),
+                        eventJSON.getString("address_1") + eventJSON.getString("address_2"));
+                cDao.addEvent(event);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void subscribeUsers() {
+        NetworkSubscription networkSubscription1 = new NetworkSubscription(3,1);
+        NetworkSubscription networkSubscription2 = new NetworkSubscription(1,1);
+        NetworkSubscription networkSubscription3 = new NetworkSubscription(2,1);
+        NetworkSubscription networkSubscription4 = new NetworkSubscription(4,1);
+        NetworkSubscriptionDao netSubDao = mDb.networkSubscriptionDao();
+        netSubDao.insertSubscriptions(networkSubscription1, networkSubscription2, networkSubscription3,
+                networkSubscription4);
+    }
+
+    static void addReplies() {
+        String rawDummy = "[\n" +
+                "  {\n" +
+                "    \"id\": 1,\n" +
+                "    \"parent_id\": 1,\n" +
+                "    \"user_id\": 2,\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"reply_date\": \"2017-03-12 08:53:43\",\n" +
+                "    \"reply_text\": \"Test reply 1.\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 2,\n" +
+                "    \"parent_id\": 1,\n" +
+                "    \"user_id\": 3,\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"reply_date\": \"2017-03-13 08:53:43\",\n" +
+                "    \"reply_text\": \"Test reply 2.\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 3,\n" +
+                "    \"parent_id\": 3,\n" +
+                "    \"user_id\": 4,\n" +
+                "    \"network_id\": 0,\n" +
+                "    \"reply_date\": \"2017-04-04 18:27:27\",\n" +
+                "    \"reply_text\": \"Test reply 3.\"\n" +
+                "  }\n" +
+                "]";
+        PostReplyDao postReplyDao = mDb.postReplyDao();
+        try {
+            JSONArray pRJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < pRJSON.length(); i++) {
+                JSONObject pRObj = pRJSON.getJSONObject(i);
+                PostReply pr = new PostReply(pRObj.getLong("id"), pRObj.getLong("parent_id"),
+                        pRObj.getLong("user_id"), pRObj.getLong("network_id"),
+                        pRObj.getString("reply_date"), pRObj.getString("reply_text"));
+                postReplyDao.insertPostReplies(pr);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * For simplicity, we store the id's of other model objects in the database, not the objects
+     * themselves. Thus, when we return these objects, we need to instantiate them.
+     * @param posts
+     */
+    static void instantiatePosts(List<org.codethechange.culturemesh.models.Post> posts) {
+        for (org.codethechange.culturemesh.models.Post post : posts) {
+            //Get the user
+            post.author = API.Get.user(post.userId).getPayload();
+        }
+    }
+
+    /**
+     * For simplicity, we store the id's of other model objects in the database, not the objects
+     * themselves. Thus, when we return these objects, we need to instantiate them.
+     * @param comments List of PostReplies with which we will get comments for.
+     */
+    static void instantiatePostReplies(List<PostReply> comments) {
+        for (PostReply comment : comments) {
+            //Get the user
+            comment.author = API.Get.user(comment.userId).getPayload();
+        }
+    }
 
     static class Get {
-        static NetworkResponse<ArrayList<User>> users() {
-            return new NetworkResponse<>(genUsers());
+        /**
+         * The protocol for GET requests is as follows...
+         * 1. Check if cache has relevant data. If so, return it.
+         * 2. Send network request to update data.
+         */
+
+        static NetworkResponse<User> user(long id) {
+            UserDao uDao = mDb.userDao();
+            User user = uDao.getUser(id);
+            //TODO: Send network request.
+            return new NetworkResponse<>(user == null, user);
         }
 
-        static NetworkResponse<User> user(BigInteger id) {
-            return new NetworkResponse<>(genUsers().get(0));
+        static NetworkResponse<ArrayList<Network>> userNetworks(long id) {
+            //TODO: Send network request for all subscriptions.
+            NetworkSubscriptionDao nSDao  = mDb.networkSubscriptionDao();
+            List<Long> netIds = nSDao.getUserNetworks(id);
+            ArrayList<Network> nets = new ArrayList<>();
+            for (Long netId : netIds ) {
+                NetworkResponse res = network(netId);
+                if (!res.fail()) {
+                    nets.add((Network) res.getPayload());
+                }
+            }
+            return new NetworkResponse<>(nets);
         }
 
-        static NetworkResponse<ArrayList<Network>> userNetworks(BigInteger id) {
-            return new NetworkResponse<>(genNetworks());
+        /*
+            When will we ever use this? Perhaps viewing a user profile?
+         */
+        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> userPosts(int id) {
+            PostDao pDao = mDb.postDao();
+            List<org.codethechange.culturemesh.models.Post> posts = pDao.getUserPosts(id);
+            return new NetworkResponse<>(posts);
         }
 
-        static NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Post>> userPosts(BigInteger id) {
-            return new NetworkResponse<>(genPosts());
+        static NetworkResponse<ArrayList<Event>> userEvents(long id) {
+            //TODO: Check for event subscriptions with network request.
+            EventSubscriptionDao eSDao = mDb.eventSubscriptionDao();
+            List<Long> eventIds = eSDao.getUserEventSubscriptions(id);
+            ArrayList<Event> events = new ArrayList<>();
+            for (Long eId : eventIds) {
+                NetworkResponse res = event(eId);
+                if (!res.fail()) {
+                    events.add((Event) res.getPayload());
+                }
+            }
+            return new NetworkResponse<>(events);
         }
 
-        static NetworkResponse<ArrayList<Event>> userEvents(BigInteger id) {
-            return new NetworkResponse<>( genEvents());
+        static NetworkResponse<Network> network(long id) {
+            //TODO: Send network request if not found.
+            NetworkDao netDao = mDb.networkDao();
+            List<Network> nets = netDao.getNetwork(id);
+            Network net = null;
+            if (nets != null && nets.size() > 0) {
+                net = nets.get(0);
+            }
+            //Instantiate locations.
+            CountryDao countryDao = mDb.countryDao();
+            RegionDao regionDao = mDb.regionDao();
+            CityDao cityDao = mDb.cityDao();
+            if (net != null) {
+                //Let's instantiate the location fields!
+                if (net.networkClass) {
+                    //We need to instantiate from location.
+                    net.fromLocation.from_city = cityDao.getCity(net.fromLocation.from_city_id).name;
+                    net.fromLocation.from_region = regionDao.getRegion(net.fromLocation.from_region_id).name;
+                    net.fromLocation.from_country = countryDao.getCountry(net.fromLocation.from_country_id).name;
+                }
+                net.nearLocation.near_city = cityDao.getCity(net.nearLocation.near_city_id).name;
+                net.nearLocation.near_region = regionDao.getRegion(net.nearLocation.near_region_id).name;
+                net.nearLocation.near_country = countryDao.getCountry(net.nearLocation.near_country_id).name;
+            }
+            return new NetworkResponse<>(net == null, net);
         }
 
-        static NetworkResponse<ArrayList<Network>> networks() {
-            return new NetworkResponse<>(genNetworks());
+        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> networkPosts(long id) {
+            //TODO: Send network request.
+            PostDao pDao = mDb.postDao();
+            List<org.codethechange.culturemesh.models.Post> posts = pDao.getNetworkPosts((int) id);
+            instantiatePosts(posts);
+            return new NetworkResponse<>(posts);
         }
 
-        static NetworkResponse<Network> network(BigInteger id) {
-            return new NetworkResponse<>(genNetworks().get(0));
+        static NetworkResponse<List<Event>> networkEvents(long id) {
+            //TODO:Send network request.... Applies to subsequent methods too.
+            EventDao eDao = mDb.eventDao();
+            List<Event> events = eDao.getNetworkEvents(id);
+            Log.i("Getting events" , events.size() + "");
+            return new NetworkResponse<>(events == null, events);
         }
 
-        static NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Post>> networkPosts(BigInteger id) {
-            return new NetworkResponse<>(genPosts());
+        static NetworkResponse<ArrayList<User>> networkUsers(long id) {
+            NetworkSubscriptionDao nSDao = mDb.networkSubscriptionDao();
+            List<Long> userIds = nSDao.getNetworkUsers(id);
+            ArrayList<User> users = new ArrayList<>();
+            for (long uId: userIds) {
+                NetworkResponse<User> res = user(uId);
+                if (!res.fail()) {
+                    users.add(res.getPayload());
+                }
+            }
+            return new NetworkResponse<>(users);
         }
 
-        static NetworkResponse<ArrayList<Event>> networkEvents(BigInteger id) {
-            return new NetworkResponse<>(genEvents());
+        static NetworkResponse<org.codethechange.culturemesh.models.Post> post(long id) {
+            PostDao pDao = mDb.postDao();
+            org.codethechange.culturemesh.models.Post post = pDao.getPost((int) id);
+            return new NetworkResponse<>(post == null, post);
         }
 
-        static NetworkResponse<ArrayList<User>> networkUsers(BigInteger id) {
-            return new NetworkResponse<>(genUsers());
+        static NetworkResponse<Event> event(long id) {
+            EventDao eDao = mDb.eventDao();
+            Event event = eDao.getEvent(id);
+            return new NetworkResponse<>(event == null, event);
         }
 
-        static NetworkResponse<org.codethechange.culturemesh.models.Post> post(BigInteger id) {
-            return new NetworkResponse<>(genPosts().get(0));
+        static NetworkResponse<ArrayList<User>> eventAttendance(long id) {
+            EventSubscriptionDao eSDao = mDb.eventSubscriptionDao();
+            List<Long> uIds = eSDao.getEventUsers(id);
+            ArrayList<User> users = new ArrayList<>();
+            for (long uid : uIds) {
+                NetworkResponse res = user(uid);
+                if (!res.fail()) {
+                    users.add((User) res.getPayload());
+                }
+            }
+            return new NetworkResponse<>(users);
         }
 
-        static NetworkResponse<Event> event(BigInteger id) {
-            return new NetworkResponse<>(genEvents().get(0));
+        static NetworkResponse<List<PostReply>> postReplies(long id){
+            PostReplyDao dao = mDb.postReplyDao();
+            List<PostReply> replies = dao.getPostReplies(id);
+            instantiatePostReplies(replies);
+            return new NetworkResponse<>(replies == null, replies);
         }
-
-        static NetworkResponse<ArrayList<User>> eventAttendance(BigInteger id) {
-            return new NetworkResponse<>(genUsers());
-        }
-
 
     }
 
     static class Post {
-        static NetworkResponse addUserToEvent(BigInteger userId, BigInteger eventId) {
-            return new NetworkResponse();
+        /*
+            TODO: During production time, we will just send it off to server, not update locally.
+         */
+        static NetworkResponse<EventSubscription> addUserToEvent(long userId, long eventId) {
+            EventSubscriptionDao eSDao = mDb.eventSubscriptionDao();
+            EventSubscription es = new EventSubscription(userId, eventId);
+            eSDao.insertSubscriptions(es);
+            return new NetworkResponse<>(es);
         }
 
-        static NetworkResponse addUserToNetwork(BigInteger userId, BigInteger networkId) {
-            return new NetworkResponse();
+        static NetworkResponse addUserToNetwork(long userId, long networkId) {
+            NetworkSubscriptionDao nSDao = mDb.networkSubscriptionDao();
+            NetworkSubscription ns = new NetworkSubscription(userId, networkId);
+            nSDao.insertSubscriptions(ns);
+            return new NetworkResponse<>(ns);
         }
 
         static NetworkResponse user(User user) {
-            return new NetworkResponse();
+            UserDao uDao = mDb.userDao();
+            uDao.addUser(user);
+            return new NetworkResponse<>(user);
         }
 
         static NetworkResponse network(Network network) {
-            return new NetworkResponse();
+            NetworkDao nDao = mDb.networkDao();
+            nDao.insertNetworks(network);
+            return new NetworkResponse<>(network);
         }
 
         static NetworkResponse post(org.codethechange.culturemesh.models.Post post) {
+            PostDao pDao = mDb.postDao();
+            pDao.insertPosts(post);
+            return new NetworkResponse<>(false, post);
+        }
+
+        static NetworkResponse reply(PostReply comment) {
             return new NetworkResponse();
         }
 
         static NetworkResponse event(Event event) {
-            return new NetworkResponse();
+            EventDao eDao = mDb.eventDao();
+            eDao.addEvent(event);
+            return new NetworkResponse<>(false, event);
         }
     }
 
@@ -172,4 +871,17 @@ class API {
 
     }
 
+    public static void loadAppDatabase(Context context) {
+        reqCounter++;
+        if (mDb == null) {
+            mDb = Room.databaseBuilder(context.getApplicationContext(), CMDatabase.class, "cmdatabase").
+                    fallbackToDestructiveMigration().build();
+        }
+    }
+
+    static void closeDatabase() {
+        if (--reqCounter <= 0) {
+            mDb.close();
+        }
+    }
 }
