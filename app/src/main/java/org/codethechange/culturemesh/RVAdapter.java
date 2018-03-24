@@ -30,7 +30,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
     private List<FeedItem> netPosts;
     private Context context;
 
-    static class PostViewHolder extends RecyclerView.ViewHolder implements org.codethechange.culturemesh.PostViewHolder/*, Serializable */{
+    static class PostViewHolder extends RecyclerView.ViewHolder {
         boolean post = true;
 
         public boolean isPost() {
@@ -214,7 +214,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                     pvh.viewMoreComments.setVisibility(View.GONE);
                 }
             }
-            Log.i("Image Link", post.getAuthor().getImgURL());
         } catch(ClassCastException e) {
             //It's an event.
             Event event = (Event) item;
