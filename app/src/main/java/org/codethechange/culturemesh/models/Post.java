@@ -1,53 +1,95 @@
 package org.codethechange.culturemesh.models;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
+
+import java.io.Serializable;
+import java.math.BigInteger;
+
 import java.util.Date;
 
 /**
  * Created by nathaniel on 11/10/17.
  */
+@Entity
+public class Post extends FeedItem implements Serializable{
+    @PrimaryKey
+    public long id;
+    //When saved in database, we use these.
+    public long userId;
+    public long networkId;
 
-public class Post {
-    private User author;
-    private String content;
-    private String title;
-    private Date datePosted;
+    public String content;
+    public String imgLink;
+    public String vidLink; //TODO: Handle multiple links?
+    public String datePosted;
 
-    public Post(User author, String content, String title, Date datePosted) {
-        this.author = author;
-        this.content = content;
-        this.title = title;
-        this.datePosted = datePosted;
-    }
+    //When instantiated, we use these
+    @Ignore
+    public User author;
+    @Ignore
+    public Network network;
 
     public User getAuthor() {
         return author;
+    }
+
+    public Network getNetwork() {
+        return network;
+    }
+
+    public Post(int id, int author, int networkId, String content, String imgLink, String vidLink, String datePosted) {
+        this.id = id;
+        this.userId = author;
+        this.content = content;
+        this.imgLink = imgLink;
+        this.vidLink = vidLink;
+        this.datePosted = datePosted;
+        this.networkId = networkId;
+    }
+
+    public String getImageLink() {
+        return imgLink;
+    }
+
+    public void setImageLink(String imgLink) {
+        this.imgLink = imgLink;
+    }
+
+    public String getVideoLink() {
+        return vidLink;
+    }
+
+    public void setVideoLink(String vidLink) {
+        this.vidLink = vidLink;
+    }
+
+    public Post(int author, String content, String datePosted) {
+        this.userId = author;
+        this.content = content;
+        this.datePosted = datePosted;
+        this.imgLink = null;
+        this.vidLink = null;
     }
 
     public String getContent() {
         return content;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public Date getDatePosted() {
+    public String getDatePosted() {
         return datePosted;
-    }
-
-    public void setAuthor(User author) {
-        this.author = author;
     }
 
     public void setContent(String content) {
         this.content = content;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setDatePosted(String datePosted) {
+        this.datePosted = datePosted;
     }
 
-    public void setDatePosted(Date datePosted) {
-        this.datePosted = datePosted;
+    public Post(){
+
     }
 }
