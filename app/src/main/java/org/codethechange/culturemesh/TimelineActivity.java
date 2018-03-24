@@ -60,8 +60,7 @@ import java.util.Set;
 /**
  * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/8/17.
  */
-public class TimelineActivity extends DrawerActivity
-        implements PostsFrag.OnFragmentInteractionListener {
+public class TimelineActivity extends DrawerActivity {
 private String basePath = "www.culturemesh.com/api/v1";
     final String FILTER_LABEL = "fl";
     final static String FILTER_CHOICE_NATIVE = "fcn";

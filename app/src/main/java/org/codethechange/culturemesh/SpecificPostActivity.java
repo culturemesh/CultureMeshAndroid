@@ -2,6 +2,7 @@ package org.codethechange.culturemesh;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,10 +32,9 @@ public class SpecificPostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_specific_post);
 
         Intent intent = getIntent();
-        String strID = intent.getStringExtra("name");
-        BigInteger postID = new BigInteger("0"); //new BigInteger(strID);
-        FeedItem item = API.Get.post(postID); //re-get post (can also switch to passing data as a bundle for data persistence reasons)
+        long postID  = intent.getLongExtra("postID", 0);
 
+        FeedItem item = new FeedItem();
         CardView cv;
         TextView personName;
         TextView username;
@@ -111,5 +111,17 @@ public class SpecificPostActivity extends AppCompatActivity {
         ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, comments);
         commentLV.setAdapter(adapter);
         adapter.notifyDataSetChanged();
+    }
+
+    class PostBundleWrapper {
+        Post post;
+    }
+
+    public class loadPostReplies extends AsyncTask<Long, Void, PostBundleWrapper> {
+
+        @Override
+        protected PostBundleWrapper doInBackground(Long... longs) {
+            return null;
+        }
     }
 }

@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
@@ -136,16 +137,18 @@ public class PostsFrag extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(ArrayList<FeedItem> feedItems) {
+        protected void onPostExecute(final ArrayList<FeedItem> feedItems) {
             mAdapter = new RVAdapter(feedItems, new RVAdapter.OnItemClickListener() {
                 @Override
                 public void onItemClick(FeedItem item) {
                     Intent intent = new Intent(getActivity(), SpecificPostActivity.class);
-                    Post post = (Post) item; //to test
-                    BigInteger postID = post.getId();
+                    long id;
                     try {
-                        intent.putExtra("postID", postID.toString());
+                        id = ((Post) item).id;
+                        intent.putExtra("postID", id);
                         getActivity().startActivity(intent);
+                    } catch(ClassCastException e) {
+                        //I don't think we have commenting support for events??
                     } catch (NullPointerException e) {
                         Toast.makeText(getActivity(), "Cannot open post", Toast.LENGTH_LONG).show();
                     }
