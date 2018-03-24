@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.v7.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cv"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/cv"
     android:layout_marginTop="@dimen/activity_vertical_margin"
-    card_view:cardElevation="8dp"
-    card_view:cardCornerRadius="12dp"
     card_view:cardBackgroundColor="@color/colorPrimaryDark"
-    >
+    card_view:cardCornerRadius="12dp"
+    card_view:cardElevation="8dp">
 
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        >
+        android:padding="16dp">
 
         <ImageView
             android:id="@+id/attachedImage3"
@@ -28,8 +26,7 @@
             android:layout_marginTop="8dp"
             card_view:layout_constraintStart_toEndOf="@+id/attachedImage2"
             card_view:layout_constraintTop_toBottomOf="@+id/content"
-            card_view:srcCompat="@color/colorAccent"
-            />
+            card_view:srcCompat="@color/colorAccent" />
 
         <ImageView
             android:id="@+id/person_photo"
@@ -52,10 +49,10 @@
             android:layout_marginTop="16dp"
             android:layout_toEndOf="@+id/person_photo"
             android:text="asdfasdf"
+            android:textColor="@android:color/white"
             android:textSize="18sp"
             card_view:layout_constraintStart_toEndOf="@+id/person_photo"
-            card_view:layout_constraintTop_toTopOf="parent"
-            android:textColor="@android:color/white"/>
+            card_view:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/username"
@@ -66,10 +63,10 @@
             android:layout_marginTop="16dp"
             android:layout_toEndOf="@+id/person_name"
             android:text="isermae"
+            android:textColor="@android:color/white"
             android:textSize="18sp"
             card_view:layout_constraintStart_toEndOf="@+id/person_name"
-            card_view:layout_constraintTop_toTopOf="parent"
-            android:textColor="@android:color/white"/>
+            card_view:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/post_type_photo"
@@ -77,8 +74,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/person_photo"
-            android:layout_marginRight="16dp"
-            />
+            android:layout_marginRight="16dp" />
 
         <TextView
             android:id="@+id/content"
@@ -92,20 +88,22 @@
             android:text="lorem ipsum"
             android:textColor="@android:color/white"
             card_view:layout_constraintEnd_toEndOf="parent"
-            card_view:layout_constraintStart_toEndOf="@+id/person_photo"
+            card_view:layout_constraintStart_toStartOf="parent"
             card_view:layout_constraintTop_toBottomOf="@+id/person_photo" />
 
         <TextView
             android:id="@+id/timestamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/content"
-            android:layout_marginStart="8dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
             android:text="some time"
+            android:textColor="@android:color/white"
             android:textStyle="italic"
             card_view:layout_constraintStart_toStartOf="parent"
-            card_view:layout_constraintTop_toBottomOf="@+id/attachedImage2"
-            android:textColor="@android:color/white"/>
+            card_view:layout_constraintTop_toBottomOf="@+id/attachedImage1" />
 
 
         <ImageView
@@ -125,8 +123,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             card_view:layout_constraintStart_toStartOf="parent"
-            card_view:layout_constraintTop_toBottomOf="@+id/content"
-            card_view:srcCompat="@color/colorAccent" />
+            card_view:layout_constraintTop_toBottomOf="@+id/content" />
 
         <TextView
             android:id="@+id/event_title"
@@ -147,14 +144,11 @@
             android:id="@+id/event_details_linear_layout"
             android:layout_width="395dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
             android:layout_marginTop="50dp"
             android:orientation="vertical"
             android:visibility="gone"
-            card_view:layout_constraintEnd_toEndOf="parent"
-            card_view:layout_constraintStart_toStartOf="parent"
-            card_view:layout_constraintTop_toTopOf="parent">
+            card_view:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="206dp">
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
@@ -232,9 +226,92 @@
             android:visibility="gone"
             card_view:layout_constraintEnd_toEndOf="parent"
             card_view:layout_constraintStart_toStartOf="parent"
-            card_view:layout_constraintTop_toBottomOf="@+id/event_details_linear_layout" />/>
+            card_view:layout_constraintTop_toBottomOf="@+id/event_details_linear_layout" />
+
+        <RelativeLayout
+            android:id="@+id/comment1_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/message_shape"
+            card_view:layout_constraintEnd_toEndOf="parent"
+            card_view:layout_constraintHorizontal_bias="0.0"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toBottomOf="@+id/timestamp">
+
+            <TextView
+                android:id="@+id/comment1_name"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="8dp"
+                android:text="A Super Super Duper Long Name"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/comment1_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="11dp"
+                android:layout_toEndOf="@+id/comment1_name"
+                android:text="This is a lot of comment text. Obviously, this guy has a lot to say. Like, a lot to say."
+                android:textColor="@color/white"
+                android:textSize="10sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/comment2_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/message_shape"
+            card_view:layout_constraintEnd_toEndOf="parent"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toBottomOf="@+id/comment1_layout">
+
+            <TextView
+                android:id="@+id/comment2_name"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="8dp"
+                android:text="A Super Super Duper Long Name"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/comment2_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="13dp"
+                android:layout_toEndOf="@+id/comment2_name"
+                android:text="This is a lot of comment text. Obviously, this guy has a lot to say. Like, a lot to say. "
+                android:textColor="@color/white"
+                android:textSize="10sp" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/view_more_comments"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/view_more_comments"
+            android:textColor="@color/white"
+            card_view:layout_constraintEnd_toEndOf="parent"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toBottomOf="@+id/comment2_layout" />
 
     </android.support.constraint.ConstraintLayout>
+
 </android.support.v7.widget.CardView>
 <!--
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
