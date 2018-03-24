@@ -28,6 +28,7 @@
     <string-array name="filter_choices">
         <item>Native Posts</item>
         <item>Twitter Posts</item>
+        <item>Events</item>
     </string-array>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
@@ -47,4 +48,50 @@
     <string name="your_networks">Your Networks</string>
     <string name="title_activity_drawer">DrawerActivity</string>
     <string name="title_activity_specific_post">SpecificPostActivity</string>
+    <string name="title_activity_explore_bubbles">ExploreBubblesActivity</string>
+    <string name="title_activity_explore_bubbles_open_gl">ExploreBubblesOpenGLActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <!-- Strings for Event Information; Currently matches Website mostly -->
+    <string name="eventProperty_name">Name of Event</string>
+    <string name="eventProperty_date">Event Date</string>
+    <!-- Address handles the following website fields: Address 1, Address 2, City, Region -->
+    <string name="eventProperty_address">Address</string>
+    <string name="eventProperty_description">What\'s Happening</string>
+    <string name="eventProperty_time">Event Start Time</string>
+    <string name="createEvent_setTime">Set Start Time</string>
+    <string name="createEvent_setDate">Set Event Date</string>
+    <!-- Error messages for missing or invalid fields -->
+    <string name="createEvent_missingDate">Please set a date for your event.</string>
+    <string name="createEvent_missingTime">Please set a time for your event.</string>
+    <string name="createEvent_missingName">Please choose a name for your event.</string>
+    <string name="createEvent_missingDescription">Please describe what\'s happening at your event.</string>
+    <string name="createEvent_missingAddress">Please choose a location for your event.</string>
+    <string name="noErrors">noerr</string>
+    <!-- Strings for Login and New Account UI -->
+    <string name="title_activity_login">Sign In</string>
+    <string name="username">Email</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="need_account">Need Account?</string>
+    <string name="already_have_account">Already Have Account?</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="confirm_password">Confirm Password</string>
+
+    <string name="error">Error</string>
+    <string name="genericFail">Oops, something went wrong.</string>
+    <string name="genericSuccess">Operation Succeeded!</string>
+    <!-- Strings for onboarding -->
+    <string name="title_activity_pick_onboarding_status">PickOnboardingStatusActivity</string>
+    <string name="title_activity_onboard">OnboardActivity</string>
+    <string name="welcome">Welcome!</string>
+    <string name="cultureMesh_description">CultureMesh helps you connect with nearby people who
+        speak your language or come from where you do."</string>
+    <string name="networks_explain">Join networks to learn about events and people near you.</string>
+    <string name="networks">Networks</string>
+    <string name="ready_question">Ready?</string>
+    <string name="lets_start">Let\'s get Started!</string>
+    <string name="logIn_signUp">Log In or Sign Up</string>
 </resources>

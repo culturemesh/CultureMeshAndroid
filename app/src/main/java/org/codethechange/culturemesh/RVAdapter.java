@@ -172,7 +172,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                 pvh.hidePostViews();
                 pvh.cv.setCardBackgroundColor(context.getResources().
                         getColor(R.color.colorAccent));
-       //         pvh.personPhoto.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_event_white_24px));
+                pvh.personPhoto.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_event_white_24px));
             }
             pvh.eventTitle.setText(event.getTitle());
             pvh.eventLocation.setText(event.getAddress());

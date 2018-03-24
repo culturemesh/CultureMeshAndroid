@@ -15,7 +15,7 @@ import android.widget.EditText;
 /**
  * This is a custom EditText that allows us to listen for changes in cursor position.
  * CreatePostActivity uses this view so that the format toggle buttons can update their settings
- * when a new region in the edit text is selected.
+ * when a new near_region in the edit text is selected.
  */
 public class ListenableEditText extends EditText {
 

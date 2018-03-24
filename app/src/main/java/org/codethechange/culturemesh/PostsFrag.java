@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -33,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+
 /**
  * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
  */
@@ -42,10 +45,8 @@ public class PostsFrag extends Fragment {
     private RecyclerView mRecyclerView;
     private RVAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    SharedPreferences settings;
     //To figure out params that would be passed in
-
-
-    private OnFragmentInteractionListener mListener;
 
     public PostsFrag() {
         // Required empty public constructor
@@ -53,6 +54,7 @@ public class PostsFrag extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         super.onCreate(savedInstanceState);
 
     }
@@ -73,109 +75,22 @@ public class PostsFrag extends Fragment {
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(activity);
         mRecyclerView.setLayoutManager(mLayoutManager);
-
-        //get User info, this will be from SavedInstances from login or account
-        String fn = null;
-        String ln = null;
-        String email = null;
-        String un = null;
-        Network[] networks = null;
-
-        SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
-                Context.MODE_PRIVATE);
-        BigInteger networkId = new BigInteger(settings.getString(API.SELECTED_NETWORK,
-                "123456"));
-        ArrayList<FeedItem> posts = new ArrayList<FeedItem>();
-        for (Post post : API.genPosts()) {
-            posts.add(post);
-        }
-        posts.add(API.genEvents().get(2));
-
-        mAdapter = new RVAdapter(posts, new RVAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(FeedItem item) {
-                Intent intent = new Intent(getActivity(), SpecificPostActivity.class);
-                Post post = (Post) item; //to test
-                BigInteger postID = post.getId();
-                try {
-                    intent.putExtra("postID", postID.toString());
-                    getActivity().startActivity(intent);
-                } catch (NullPointerException e) {
-                    Toast.makeText(getActivity(), "Cannot open post", Toast.LENGTH_LONG).show();
-                }
-            }
-        }, getActivity().getApplicationContext());
-        mRecyclerView.setAdapter(mAdapter);
-
-        //REDACTED AND MOVED/CHANGED IN loadPosts
-        /*String network = ""; //to draw from explore/saved Instances
-        String networkId = "";
-        final String postPath = basePath + network + networkId + "/posts";
-        final String eventPath = basePath + network + networkId + "/events";
-        Ion.with(this)
-                .load(postPath)
-                .asString()
-                .setCallback(new FutureCallback<String>() {
-                    public void onCompleted(Exception e, String result) {
-                        loadPosts(result, postPath, rv, user);
-                    }
-                });
-        Ion.with(this)
-                .load(eventPath)
-                .asString()
-                .setCallback(new FutureCallback<String>() {
-                    public void onCompleted(Exception e, String result) {
-                        loadPosts(result, eventPath, rv, user);
-                    }
-                });
-        //TextView tx = rootView.findViewById();*/
-
+        //Get network id
+        long selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
+        new LoadFeedItems().execute(selectedNetwork);
         return rootView;
     }
 
-    private void loadPosts(String RESTresult, String path, RecyclerView rv, User user) {
-        //discuss parsing REST data using path
-        try {
-            JSONObject postJSON = new JSONObject(RESTresult);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        String[] postData = RESTresult.split("," /*determine this*/);
-        ArrayList<Post> posts = new ArrayList<Post>();
-        for(String p : postData) {
-            String content = null;
-            String title = null;
-            Date datePosted = new Date(); /* initialize with string version of date */
-            Post post = new Post(user, content, datePosted.toString());
-            //instantiate post with the REST data, to discuss
-            posts.add(post);
-        }
-        //RVAdapter adapter = new RVAdapter(posts);
-        //mRecyclerView.setAdapter(adapter);
-    }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
 
     /**
@@ -192,4 +107,57 @@ public class PostsFrag extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
+    private class LoadFeedItems extends AsyncTask<Long,Void,ArrayList<FeedItem>> {
+
+        /**
+         * This is the asynchronous part. It calls the client API, which can make network requests
+         * and read from the cache database.
+         * @param longs This should be the network id.
+         * @return a collection of feed items to be displayed in the feed.
+         */
+        @Override
+        protected ArrayList<FeedItem> doInBackground(Long... longs) {
+            SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
+                    MODE_PRIVATE);
+            //We generalize posts/events to be feed items for polymorphism.
+            //TODO: Consider error checking for when getPayload is null.
+            ArrayList<FeedItem> feedItems = new ArrayList<FeedItem>();
+            if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_EVENTS, true)) {
+                //If events aren't filtered out, add them to arraylist.
+                feedItems.addAll(API.Get.networkEvents(longs[0]).getPayload());
+            }
+            if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_NATIVE, true)) {
+                //If posts aren't filtered out, add them to arraylist.
+                feedItems.addAll(API.Get.networkPosts(longs[0]).getPayload());
+            }
+            //TODO: Add ability check out twitter posts.
+            return feedItems;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<FeedItem> feedItems) {
+            mAdapter = new RVAdapter(feedItems, new RVAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(FeedItem item) {
+                    Intent intent = new Intent(getActivity(), SpecificPostActivity.class);
+                    Post post = (Post) item; //to test
+                    BigInteger postID = post.getId();
+                    try {
+                        intent.putExtra("postID", postID.toString());
+                        getActivity().startActivity(intent);
+                    } catch (NullPointerException e) {
+                        Toast.makeText(getActivity(), "Cannot open post", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }, getActivity().getApplicationContext());
+            mRecyclerView.setAdapter(mAdapter);
+            getFragmentManager().beginTransaction()
+                    .detach(PostsFrag.this)
+                    .attach(PostsFrag.this)
+                    .commit();
+        }
+    }
+
+
 }

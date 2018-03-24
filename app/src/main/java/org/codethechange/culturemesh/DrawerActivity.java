@@ -1,7 +1,9 @@
 package org.codethechange.culturemesh;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -20,12 +22,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 
 import org.codethechange.culturemesh.models.Network;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class DrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -35,6 +41,9 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
     protected DrawerLayout mDrawerLayout;
     protected ActionBarDrawerToggle mDrawerToggle;
     protected SparseArray<Network> subscribedNetworks;
+    final static String USER_PREFS = "userprefs";
+    final static String USER_NAME = "username";
+    NavigationView navView;
 
     @Override
     public void setContentView(int layoutResID) {
@@ -49,6 +58,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         //Set Up Navigation Drawer
         //Setup Navigation Drawer Layout
         mDrawerLayout= findViewById(R.id.drawer_layout);
+        navView = findViewById(R.id.nav_view);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar,
                 R.string.app_name, R.string.app_name) {
 
@@ -84,35 +94,24 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
             }
         });
 
-        NavigationView navView = findViewById(R.id.nav_view);
-        Network network = API.genNetworks().get(0);
-        Menu navMenu = navView.getMenu();
-        MenuItem item = navMenu.getItem(2); //Your Networks subItem
-        Log.i("netMenu", item.getTitle().toString());
-        SubMenu netMenu = item.getSubMenu();
-        //Instantiate map with key -> menu view id, value -> network.
-        subscribedNetworks = new SparseArray<Network>();
-        //TODO: Replace dummy networks with real stuff.
-        ArrayList<Network> networks = API.genNetworks();
-        for (Network net : networks) {
-            String name = "";
-            if (net.isLocationNetwork()) {
-                name = getResources().getString(R.string.from) + " " +
-                        net.getFromLocation().shortName() + " " +
-                        getResources().getString(R.string.near) + " " +
-                        net.getNearLocation().shortName();
-            } else {
-                name = net.getLang().toString() + " " +
-                        getResources().getString(R.string.speakers_in) + " " +
-                        net.getNearLocation().shortName();
-            }
-            int viewId = View.generateViewId();
-            subscribedNetworks.put(viewId, net);
-            SpannableStringBuilder sb = new SpannableStringBuilder(name);
-            sb.setSpan(new RelativeSizeSpan(.8f), 0, sb.length(), 0);
-            netMenu.add(Menu.NONE, viewId, 0, sb);
+        Fabric.with(this, new Crashlytics());
+        SharedPreferences userPrefs = getSharedPreferences(USER_PREFS, MODE_PRIVATE);
+        if (userPrefs.getString(USER_NAME, null) == null) {
+            //User is not signed in. Replace user info with sign in button
+            Button button = navView.getHeaderView(0).findViewById(R.id.nav_user_sign_in_button);
+            button.setVisibility(View.VISIBLE);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Open LogInActivity
+                    Intent logInIntent = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(logInIntent);
+                }
+            });
+
         }
-        navView.setNavigationItemSelectedListener(this);
+
+        new LoadUserSubscriptions().execute(Long.valueOf(1));
     }
 
 
@@ -143,7 +142,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
             startActivity(toTimeline);
         }
         if (id == R.id.nav_explore) {
-            Intent startExplore = new Intent(getApplicationContext(), ExploreListActivity.class);
+            Intent startExplore = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
             startActivity(startExplore);
         } else if (id == R.id.nav_join_network) {
             Intent startFindNet = new Intent(getApplicationContext(), FindNetworkActivity.class);
@@ -156,5 +155,49 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         finish();
         return true;
     }
+
+    private class LoadUserSubscriptions extends AsyncTask<Long, Void, Void>{
+
+        @Override
+        protected Void doInBackground(Long... longs) {
+            List<Network> networks = API.Get.userNetworks(longs[0]).getPayload();
+            subscribedNetworks = new SparseArray<Network>();
+
+            //Instantiate map with key -> menu view id, value -> network.
+            for (Network net : networks) {
+                int viewId = View.generateViewId();
+                subscribedNetworks.put(viewId, net);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+
+            Menu navMenu = navView.getMenu();
+            MenuItem item = navMenu.getItem(2); //Your Networks subItem
+            SubMenu netMenu = item.getSubMenu();
+            for (int i = 0; i < subscribedNetworks.size(); i++) {
+                int id = subscribedNetworks.keyAt(i);
+                Network net = subscribedNetworks.get(id);
+                String name = "";
+                if (net.networkClass) {
+                    name = getResources().getString(R.string.from) + " " +
+                            net.fromLocation.shortName() + " " +
+                            getResources().getString(R.string.near) + " " +
+                            net.nearLocation.shortName();
+                } else {
+                    name = net.language.toString() + " " +
+                            getResources().getString(R.string.speakers_in) + " " +
+                            net.nearLocation.shortName();
+                }
+                SpannableStringBuilder sb = new SpannableStringBuilder(name);
+                sb.setSpan(new RelativeSizeSpan(.8f), 0, sb.length(), 0);
+                netMenu.add(Menu.NONE, id, 0, sb);
+            }
+            navView.setNavigationItemSelectedListener(DrawerActivity.this);
+        }
+    }
+
 
 }
