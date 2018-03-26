@@ -16,6 +16,7 @@ import android.transition.TransitionManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -74,7 +75,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_specific_post);
-
         Intent intent = getIntent();
         long postID = intent.getLongExtra("postID", 0);
         cv = findViewById(R.id.cv);
@@ -130,23 +130,24 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
             }
         });
         writeReplyView = findViewById(R.id.write_reply_view);
-        formatManager = new FormatManager(commentField, this);
+        formatManager = new FormatManager(commentField, this, R.id.comment_bold,
+                R.id.comment_italic, R.id.comment_link);
         boldButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                formatManager.setBold(R.id.comment_bold);
+                formatManager.setBold();
             }
         });
         italicButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                formatManager.setItalic(R.id.comment_italic);
+                formatManager.setItalic();
             }
         });
         linkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                formatManager.setLink(R.id.comment_link);
+                formatManager.setLink();
             }
         });
         postButton.setOnClickListener(new View.OnClickListener() {
@@ -169,16 +170,13 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         for (int keyIndex = 0; keyIndex < toggleIcons.size(); keyIndex++) {
             //Get id of toggle icon - key of toggleIcons SparseArray
             int id = toggleIcons.keyAt(keyIndex);
-            Log.i("Any of these match?", R.id.comment_bold + " " + R.id.comment_italic + " " + R.id.comment_link);
             //Get corresponding menuItem - value of menuItems SparseArray
-            Log.i("We in here? icon", "maybe" + id);
             ImageButton toggleButton = toggleButtons.get(id);
             if (toggleButton != null) {
                 //Get index of toggleIcon array for corresponding drawable id.
                 //0 index is untoggled (false/white), 1 index is toggled (true/black)
                 //Use fancy ternary statement from boolean to int to make code more concise.
                 int iconIndex = (formTogState.get(id, false)) ? 1 : 0;
-                Log.i(iconIndex + " icon", iconIndex + "");
                 //Update icon!
                 toggleButton.setImageDrawable(getResources().getDrawable(toggleIcons.get(id)[iconIndex]));
             }
@@ -216,6 +214,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                 //TODO: Figure out format for multiple pictures. Assuming separated by commas.
                 String[] links = post.getImageLink().split(",");
                 for (int j = 0;  j < links.length; j++) {
+                    if (links[j] != null && links[j].length() > 0)
                     Picasso.with(images[j].getContext()).load(links[j]).into(images[j]);
                 }
             }

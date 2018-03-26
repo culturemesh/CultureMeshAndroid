@@ -53,14 +53,12 @@ import java.util.HashMap;
 
 import static android.support.v4.os.LocaleListCompat.create;
 
-public class CreatePostActivity extends AppCompatActivity implements
-        ListenableEditText.onSelectionChangedListener {
-    SparseBooleanArray formTogState;
+public class CreatePostActivity extends AppCompatActivity implements FormatManager.IconUpdateListener {
     ListenableEditText content;
-    SparseArray<int[]> toggleIcons;
     SparseArray<MenuItem> menuItems;
     TextView networkLabel;
     private Activity myActivity = this;
+    FormatManager formatManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,10 +68,8 @@ public class CreatePostActivity extends AppCompatActivity implements
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         //This hashmap-like object helps us keep track of the settings of the format buttons.
-        formTogState = new SparseBooleanArray();
         content = findViewById(R.id.postContent);
         networkLabel= findViewById(R.id.network_label);
-        content.setOnSelectionChangedListener(this);
         //Allow links to redirect to browser.
         content.setMovementMethod(LinkMovementMethod.getInstance());
         new LoadNetworkData().execute(Long.valueOf(1));
@@ -81,18 +77,11 @@ public class CreatePostActivity extends AppCompatActivity implements
         //Check out ListenableEditText.java for more info
         int[] boldIcons = {R.drawable.ic_format_bold_white_24px,
                 R.drawable.ic_format_bold_black_24px};
-        toggleIcons = new SparseArray<int[]>();
-        toggleIcons.put(R.id.bold, boldIcons);
-        int[] italicIcons = {R.drawable.ic_format_italic_white_24px,
-                R.drawable.ic_format_italic_black_24px};
-        toggleIcons.put(R.id.italic, italicIcons);
-        int[] linkIcons= {R.drawable.ic_insert_link_white_24px,
-                R.drawable.ic_insert_link_black_24px};
-        toggleIcons.put(R.id.insert_link, linkIcons);
         //Instantiate a hash-map like object that is also used for updating toggle settings.
         //This sparseArray will be updated with views during onCreateOptionsMenu.
         menuItems = new SparseArray<MenuItem>();
-
+        formatManager = new FormatManager(content, this, R.id.comment_bold, R.id.comment_italic,
+                R.id.comment_link);
         //Set onClick for Post button.
         Button postButton = findViewById(R.id.create_post_button);
         postButton.setOnClickListener(new View.OnClickListener() {
@@ -101,7 +90,7 @@ public class CreatePostActivity extends AppCompatActivity implements
                 //TODO: Replace user with logged in user
                 //TODO: Why do we have a title field??
                 //TODO: somehow preserve formatting (if you are tackling this, ask Drew to forward you some emails)
-                String contentHTML = content.getText().toString();
+                String contentHTML = formatManager.toString();
                 String datePosted = new Date().toString();
                 //TODO: Replace random with user id.
                 Post newPost = new Post((int) (Math.random() * 100000), 1, 1, contentHTML, "", "", datePosted );
@@ -134,135 +123,29 @@ public class CreatePostActivity extends AppCompatActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        boolean prevToggle = formTogState.get(id, false);
-        int sP = content.getSelectionStart(); //Start position of cursor
-        int sE = content.getSelectionEnd(); //End position of cursor - same if no selection
-        content.clearFocus();
-        if (id != R.id.attach_image && sP >= 0 && sE >= 0) { //Changing formatting
-            SpannableStringBuilder sSB = new SpannableStringBuilder(content.getText());
-            switch (id) {
-                case R.id.bold:
-                    if (prevToggle) {
-                        //Undo boldness.
-                        item.setIcon(R.drawable.ic_format_bold_white_24px);
-                        StyleSpan[] spans = sSB.getSpans(sP, sE, StyleSpan.class);
-                        for (StyleSpan span : spans) {
-                            if (span.getStyle() == Typeface.BOLD) {
-                                sSB.removeSpan(span);
-                            }
-                        }
-                    } else {
-                        //Make text bold
-                        StyleSpan style = new StyleSpan(Typeface.BOLD);
-                        item.setIcon(R.drawable.ic_format_bold_black_24px);
-                        sSB.setSpan(style, sP, sE, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }
-                    break;
-                case R.id.italic:
-                    if (prevToggle) {
-                        //Undo italics.
-                        item.setIcon(R.drawable.ic_format_italic_white_24px);
-                        StyleSpan[] spans = sSB.getSpans(sP, sE, StyleSpan.class);
-                        for (StyleSpan span : spans) {
-                            if (span.getStyle() == Typeface.ITALIC) {
-                                sSB.removeSpan(span);
-                            }
-                        }
-                    } else {
-                        //Redo Italics
-                        StyleSpan style = new StyleSpan(Typeface.ITALIC);
-                        item.setIcon(R.drawable.ic_format_italic_black_24px);
-                        sSB.setSpan(style, sP, sE, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }
-                    break;
-                case R.id.insert_link:
-                    if (prevToggle) {
-                        //Undo link.
-                        item.setIcon(R.drawable.ic_insert_link_white_24px);
-                        URLSpan[] spans = sSB.getSpans(sP, sE, URLSpan.class);
-                        for (URLSpan span : spans) {
-                            sSB.removeSpan(span);
-                        }
-                    } else {
-                        //Add link formatting.
-                        item.setIcon(R.drawable.ic_insert_link_black_24px);
-                        //Use selected text as url.
-                        String url = content.getText().toString().substring(sP, sE);
-                        sSB.setSpan(new URLSpan(url), sP, sE, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }
-                    break;
-            }
-            //Strange phenomenon where underline spans from keyboard focus are created.
-            //Let's remove them.
-            UnderlineSpan[] spans = sSB.getSpans(0, sSB.length(), UnderlineSpan.class);
-            for (UnderlineSpan span : spans) {
-                sSB.removeSpan(span);
-            }
-            //Also remove the keyboard cursor so we avoid that pesky underline bug.
-            InputMethodManager inputManager =
-                    (InputMethodManager) getApplicationContext().
-                            getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (inputManager != null && this.getCurrentFocus() != null) {
-                inputManager.hideSoftInputFromWindow( this.getCurrentFocus().getWindowToken(),
-                        InputMethodManager.HIDE_NOT_ALWAYS);
-            }
-            //Update formatting for ListenableEditText with the SpannableStringBuilder.
-            content.setText(sSB);
+        SpannableStringBuilder sSB = new SpannableStringBuilder(content.getText());
+        switch (id) {
+            case R.id.bold:
+                formatManager.setBold();
+                break;
+            case R.id.italic:
+                formatManager.setItalic();
+                break;
+            case R.id.insert_link:
+                formatManager.setLink();
+                break;
         }
         //TODO: Allow for attach image functionality.
-
-        formTogState.put(id, !prevToggle);
-        Log.i("HTML", Html.toHtml(content.getText()));// to submit post HTML
-
         return super.onOptionsItemSelected(item);
     }
 
 
-    /**
-     * This is the listener for when the cursor in the ListenableEditText is changed deliberately
-     * by the user - ignoring when the user merely types in the content area and the cursor shifts
-     * one position. We have to update the format toggle settings accordingly with the new position.
-     * @param selStart The start cursor position.
-     * @param selEnd The end cursor position: =selStart if no text is selected, >selStart if text
-     *               is selected.
-     */
-    @Override
-    public void onSelectionChanged(int selStart, int selEnd) {
-        //Update the state of the format buttons by checking what spans are inside the new selection
-        SpannableStringBuilder sSB = new SpannableStringBuilder(content.getText());
-        formTogState.clear();
-        StyleSpan[] styleSpans = sSB.getSpans(selStart, selEnd, StyleSpan.class);
-        //Check what spans (formatting areas) are within the selected range.
-        for(StyleSpan span : styleSpans){
-            if (!formTogState.get(R.id.bold, false) && span.getStyle() ==
-                    Typeface.BOLD) {
-                //We have a bold span.
-                formTogState.put(R.id.bold, true);
-            } else if (!formTogState.get(R.id.italic, false) && span.getStyle() ==
-                    Typeface.ITALIC) {
-                //We have an italic span.
-                formTogState.put(R.id.italic, true);
-            }
-            if (formTogState.get(R.id.bold, false) && formTogState.get(R.id.italic,
-                    false)) {
-                //If we already have both, then let's break out of the loop: we don't care about
-                //additional bold/italics.
-                break;
-            }
-        }
-        URLSpan[] linkSpans = sSB.getSpans(selStart, selEnd, URLSpan.class);
-        if (linkSpans.length > 0) {
-            //We have a link, so let's update the SparseBooleanArray.
-            formTogState.put(R.id.insert_link, true);
-        }
-        updateIconToggles();
-    }
 
     /**
      * This fancy function uses our SparseArray's to concisely iterate over our toggle icons
      * and update their colors - white if untoggled, black if toggled.
      */
-    void updateIconToggles() {
+    public void updateIconToggles(SparseBooleanArray formTogState, SparseArray<int[]> toggleIcons) {
         //toggleIcons -- Key is menuItem Id, value is array of drawable ids.
         for (int keyIndex = 0; keyIndex < toggleIcons.size(); keyIndex++) {
             //Get id of toggle icon - key of toggleIcons SparseArray

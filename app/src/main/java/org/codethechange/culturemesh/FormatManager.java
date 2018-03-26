@@ -3,17 +3,13 @@ package org.codethechange.culturemesh;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.text.Editable;
 import android.text.Html;
-import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.widget.EditText;
 
 /**
  * Created by Drew Gregory on 3/26/18.
@@ -47,6 +43,7 @@ public class FormatManager implements
         void updateIconToggles(SparseBooleanArray formTogState, SparseArray<int[]> toggleIcons);
     }
 
+    
     final int START = 0, END = 1;
     @NonNull
     private SparseBooleanArray formTogState;
@@ -54,11 +51,13 @@ public class FormatManager implements
     private ListenableEditText content;
     @NonNull
     SparseArray<int[]> toggleIcons;
+    
+    private int boldIcon, italicIcon, linkIcon; 
 
     private IconUpdateListener mListener;
 
     FormatManager(ListenableEditText content,
-                         IconUpdateListener listener) {
+                         IconUpdateListener listener, int boldIcon, int italicIcon, int linkIcon) {
         //TODO: Pass in ids of views for toggleIcons and formTogState....
         this.formTogState = new SparseBooleanArray();
         this.content = content;
@@ -67,24 +66,26 @@ public class FormatManager implements
         toggleIcons = new SparseArray<int[]>();
         int[] boldIcons = {R.drawable.ic_format_bold_white_24px,
                 R.drawable.ic_format_bold_black_24px};
-        toggleIcons.put(R.id.comment_bold, boldIcons);
+        toggleIcons.put(boldIcon, boldIcons);
         int[] italicIcons = {R.drawable.ic_format_italic_white_24px,
                 R.drawable.ic_format_italic_black_24px};
-        toggleIcons.put(R.id.comment_italic, italicIcons);
+        toggleIcons.put(italicIcon, italicIcons);
         int[] linkIcons= {R.drawable.ic_insert_link_white_24px,
                 R.drawable.ic_insert_link_black_24px};
-        toggleIcons.put(R.id.comment_link, linkIcons);
+        toggleIcons.put(linkIcon, linkIcons);
+        this.boldIcon = boldIcon;
+        this.italicIcon = italicIcon;
+        this.linkIcon = linkIcon;
     }
 
     /**
      * This method will set the currently selected text to bold.
-     * @param id int id representing the toggle view.
      */
-    void setBold(int id){
+    void setBold(){
         int[] pos = getCursors();
         if (pos[START] < 0 || pos[END] < 0) return; //We can't reset spans if there is no start/end.
         SpannableStringBuilder sSB = new SpannableStringBuilder(content.getText());
-        boolean prevToggle = formTogState.get(id, false);
+        boolean prevToggle = formTogState.get(boldIcon, false);
         if (prevToggle) {
             //Undo boldness.
             StyleSpan[] spans = sSB.getSpans(pos[0], pos[1], StyleSpan.class);
@@ -98,20 +99,19 @@ public class FormatManager implements
             StyleSpan style = new StyleSpan(Typeface.BOLD);
             sSB.setSpan(style, pos[START], pos[END], Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        formTogState.put(id, !prevToggle);
+        formTogState.put(boldIcon, !prevToggle);
         content.setText(sSB);
         mListener.updateIconToggles(formTogState, toggleIcons);
     }
 
     /**
-     * This method will set the currently selected text to italic.
-     * @param id int id representing the toggle view.
+     * This method will set the currently selected text to italic
      */
-    void setItalic(int id){
+    void setItalic(){
         int[] pos = getCursors();
         if (pos[START] < 0 || pos[END] < 0) return; //We can't reset spans if there is no start/end.
         SpannableStringBuilder sSB = new SpannableStringBuilder(content.getText());
-        boolean prevToggle = formTogState.get(id, false);
+        boolean prevToggle = formTogState.get(italicIcon, false);
         if (prevToggle) {
             //Undo italics.
             StyleSpan[] spans = sSB.getSpans(pos[START], pos[END], StyleSpan.class);
@@ -125,20 +125,19 @@ public class FormatManager implements
             StyleSpan style = new StyleSpan(Typeface.ITALIC);
             sSB.setSpan(style, pos[0], pos[1], Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        formTogState.put(id, !prevToggle);
+        formTogState.put(italicIcon, !prevToggle);
         content.setText(sSB);
         mListener.updateIconToggles(formTogState, toggleIcons);
     }
 
     /**
      * This method will set the currently selected text to a link.
-     * @param id int id representing the toggle view.
      */
-    void setLink(int id){
+    void setLink(){
         int[] pos = getCursors();
         if (pos[START] < 0 || pos[END] < 0) return; //We can't reset spans if there is no start/end.
         SpannableStringBuilder sSB = new SpannableStringBuilder(content.getText());
-        boolean prevToggle = formTogState.get(id, false);
+        boolean prevToggle = formTogState.get(linkIcon, false);
         if (prevToggle) {
             //Undo link.
             URLSpan[] spans = sSB.getSpans(pos[START], pos[END], URLSpan.class);
@@ -151,7 +150,7 @@ public class FormatManager implements
             String url = content.getText().toString().substring(pos[START], pos[END]);
             sSB.setSpan(new URLSpan(url), pos[START], pos[END], Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        formTogState.put(id, !prevToggle);
+        formTogState.put(linkIcon, !prevToggle);
         content.setText(sSB);
         mListener.updateIconToggles(formTogState, toggleIcons);
     }
@@ -173,16 +172,16 @@ public class FormatManager implements
         StyleSpan[] styleSpans = sSB.getSpans(selStart, selEnd, StyleSpan.class);
         //Check what spans (formatting areas) are within the selected range.
         for(StyleSpan span : styleSpans){
-            if (!formTogState.get(R.id.comment_bold, false) && span.getStyle() ==
+            if (!formTogState.get(boldIcon, false) && span.getStyle() ==
                     Typeface.BOLD) {
                 //We have a bold span.
-                formTogState.put(R.id.comment_bold, true);
-            } else if (!formTogState.get(R.id.comment_italic, false) && span.getStyle() ==
+                formTogState.put(boldIcon, true);
+            } else if (!formTogState.get(italicIcon, false) && span.getStyle() ==
                     Typeface.ITALIC) {
                 //We have an italic span.
-                formTogState.put(R.id.comment_italic, true);
+                formTogState.put(italicIcon, true);
             }
-            if (formTogState.get(R.id.comment_bold, false) && formTogState.get(R.id.comment_italic,
+            if (formTogState.get(boldIcon, false) && formTogState.get(italicIcon,
                     false)) {
                 //If we already have both, then let's break out of the loop: we don't care about
                 //additional bold/italics.
@@ -192,7 +191,7 @@ public class FormatManager implements
         URLSpan[] linkSpans = sSB.getSpans(selStart, selEnd, URLSpan.class);
         if (linkSpans.length > 0) {
             //We have a link, so let's update the SparseBooleanArray.
-            formTogState.put(R.id.comment_link, true);
+            formTogState.put(linkIcon, true);
         }
         mListener.updateIconToggles(formTogState, toggleIcons);
     }
