@@ -14,7 +14,10 @@ import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.util.Log;
+import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
@@ -40,9 +43,10 @@ import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
 
 import java.math.BigInteger;
+import java.util.Formattable;
 import java.util.List;
 
-public class SpecificPostActivity extends AppCompatActivity {
+public class SpecificPostActivity extends AppCompatActivity implements FormatManager.IconUpdateListener {
 
     CardView cv;
     TextView personName;
@@ -57,12 +61,14 @@ public class SpecificPostActivity extends AppCompatActivity {
     TextView eventLocation;
     TextView eventDescription;
     ImageView[] images;
-    EditText commentField;
+    ListenableEditText commentField;
     Button postButton;
     ConstraintLayout writeReplyView;
     boolean editTextOpened = false;
     ImageButton boldButton, italicButton, linkButton;
     ListView commentLV;
+    FormatManager formatManager;
+    SparseArray<ImageButton> toggleButtons;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,13 +98,15 @@ public class SpecificPostActivity extends AppCompatActivity {
         boldButton = findViewById(R.id.comment_bold);
         italicButton = findViewById(R.id.comment_italic);
         linkButton = findViewById(R.id.comment_link);
+        toggleButtons = new SparseArray<ImageButton>();
+        toggleButtons.put(R.id.comment_bold, boldButton);
+        toggleButtons.put(R.id.comment_italic, italicButton);
+        toggleButtons.put(R.id.comment_link, linkButton);
         commentField.setOnFocusChangeListener( new View.OnFocusChangeListener(){
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                   if (hasFocus) {
                       openEditTextView();
-                  } else {
-                      closeEditTextView();
                   }
             }
         });
@@ -121,12 +129,53 @@ public class SpecificPostActivity extends AppCompatActivity {
             }
         });
         writeReplyView = findViewById(R.id.write_reply_view);
-
+        formatManager = new FormatManager(commentField, this);
+        boldButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                formatManager.setBold(R.id.comment_bold);
+            }
+        });
+        italicButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                formatManager.setItalic(R.id.comment_italic);
+            }
+        });
+        linkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                formatManager.setLink(R.id.comment_link);
+            }
+        });
         //For now, since I believe events cannot take comments, I don't think it is worth the user's
         //time to navigate to this activity with an event.
         new loadPostReplies().execute(postID);
 
     }
+
+    @Override
+    public void updateIconToggles(SparseBooleanArray formTogState, SparseArray<int[]> toggleIcons) {
+        //toggleIcons -- Key is menuItem Id, value is array of drawable ids.
+        for (int keyIndex = 0; keyIndex < toggleIcons.size(); keyIndex++) {
+            //Get id of toggle icon - key of toggleIcons SparseArray
+            int id = toggleIcons.keyAt(keyIndex);
+            Log.i("Any of these match?", R.id.comment_bold + " " + R.id.comment_italic + " " + R.id.comment_link);
+            //Get corresponding menuItem - value of menuItems SparseArray
+            Log.i("We in here? icon", "maybe" + id);
+            ImageButton toggleButton = toggleButtons.get(id);
+            if (toggleButton != null) {
+                //Get index of toggleIcon array for corresponding drawable id.
+                //0 index is untoggled (false/white), 1 index is toggled (true/black)
+                //Use fancy ternary statement from boolean to int to make code more concise.
+                int iconIndex = (formTogState.get(id, false)) ? 1 : 0;
+                Log.i(iconIndex + " icon", iconIndex + "");
+                //Update icon!
+                toggleButton.setImageDrawable(getResources().getDrawable(toggleIcons.get(id)[iconIndex]));
+            }
+        }
+    }
+
 
     class PostBundleWrapper {
         Post post;

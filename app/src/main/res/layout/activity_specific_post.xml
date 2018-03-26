@@ -266,7 +266,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <EditText
+        <org.codethechange.culturemesh.ListenableEditText
             android:id="@+id/write_comment_text"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -282,7 +282,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/post_comment_button"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:clickable="true"/>
 
         <Button
             android:id="@+id/post_comment_button"
@@ -308,6 +309,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/write_comment_text"
             app:layout_constraintTop_toTopOf="parent"
+            android:clickable="true"
+            android:focusable="true"
             app:srcCompat="@drawable/ic_format_bold_white_24px" />
 
         <ImageButton
@@ -315,6 +318,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:focusable="true"
             android:layout_marginStart="8dp"
             android:backgroundTint="@color/colorAccent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -327,6 +332,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:focusable="true"
             android:layout_marginStart="8dp"
             android:backgroundTint="@color/colorAccent"
             app:layout_constraintEnd_toEndOf="parent"
