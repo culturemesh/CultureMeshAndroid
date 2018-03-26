@@ -1,15 +1,30 @@
 package org.codethechange.culturemesh;
 
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.transition.ChangeBounds;
+import android.transition.Scene;
+import android.transition.Transition;
+import android.transition.TransitionManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -29,7 +44,6 @@ import java.util.List;
 
 public class SpecificPostActivity extends AppCompatActivity {
 
-
     CardView cv;
     TextView personName;
     TextView username;
@@ -43,6 +57,12 @@ public class SpecificPostActivity extends AppCompatActivity {
     TextView eventLocation;
     TextView eventDescription;
     ImageView[] images;
+    EditText commentField;
+    Button postButton;
+    ConstraintLayout writeReplyView;
+    boolean editTextOpened = false;
+    ImageButton boldButton, italicButton, linkButton;
+    ListView commentLV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +87,41 @@ public class SpecificPostActivity extends AppCompatActivity {
         eventTime = findViewById(R.id.event_time);
         eventLocation = findViewById(R.id.event_location);
         eventDescription = findViewById(R.id.event_description);
+        commentField = findViewById(R.id.write_comment_text);
+        commentLV = findViewById(R.id.commentList);
+        boldButton = findViewById(R.id.comment_bold);
+        italicButton = findViewById(R.id.comment_italic);
+        linkButton = findViewById(R.id.comment_link);
+        commentField.setOnFocusChangeListener( new View.OnFocusChangeListener(){
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                  if (hasFocus) {
+                      openEditTextView();
+                  } else {
+                      closeEditTextView();
+                  }
+            }
+        });
+        commentField.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openEditTextView();
+            }
+        });
+        cv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeEditTextView();
+            }
+        });
+        commentLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                closeEditTextView();
+            }
+        });
+        writeReplyView = findViewById(R.id.write_reply_view);
+
         //For now, since I believe events cannot take comments, I don't think it is worth the user's
         //time to navigate to this activity with an event.
         new loadPostReplies().execute(postID);
@@ -108,11 +163,8 @@ public class SpecificPostActivity extends AppCompatActivity {
             }
             Picasso.with(personPhoto.getContext()).load(post.getAuthor().getImgURL()).
                     into(personPhoto);
-            FloatingActionButton FAB = findViewById(R.id.write_comment);
-            FAB.setVisibility(View.VISIBLE);
 
-            ListView commentLV = findViewById(R.id.commentList);
-            int r = getResources().getIdentifier("colorPrimary", "color", "org.codethechange.culturemesh");
+            int r = getResources().getIdentifier("commentColor", "color", "org.codethechange.culturemesh");
             commentLV.setBackgroundResource(r);
 
             String[] comments = {"test comment 1", "test comment 2", "this is good content", "this is, uh, not good content",
@@ -123,6 +175,63 @@ public class SpecificPostActivity extends AppCompatActivity {
             commentLV.setAdapter(adapter);
             adapter.notifyDataSetChanged();
         }
+    }
+
+
+    /**
+     * This function animates the bottom view to expand up, allowing for a greater text field
+     * as well as toggle buttons.
+     */
+    void openEditTextView() {
+        if (!editTextOpened) {
+            Log.i("Specific Post", "Opening Edit Text");
+            editTextOpened = true;
+            final int oldPixelSize = getResources().getDimensionPixelSize(R.dimen.write_reply_close_height);
+            final int newPixelSize = getResources().getDimensionPixelSize(R.dimen.write_reply_open_height);
+            genResizeAnimation(oldPixelSize, newPixelSize, writeReplyView);
+            boldButton.setVisibility(View.VISIBLE);
+            italicButton.setVisibility(View.VISIBLE);
+            linkButton.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    /**
+     * When the user selects out of the text field, the view will shrink back to its original
+     * position.
+     */
+    void closeEditTextView() {
+        if (editTextOpened) {
+            Log.i("Specific  Post", "Closing Edit Text");
+            editTextOpened = false;
+            final int newPixelSize = getResources().getDimensionPixelSize(R.dimen.write_reply_close_height);
+            final int oldPixelSize = getResources().getDimensionPixelSize(R.dimen.write_reply_open_height);
+            genResizeAnimation(oldPixelSize, newPixelSize, writeReplyView);
+            boldButton.setVisibility(View.GONE);
+            italicButton.setVisibility(View.GONE);
+            linkButton.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     *
+     * This little helper handles the animation involved in changing the size of the write reply view.
+     * @param oldSize start height, in pixels.
+     * @param newSize final height, in pixels.
+     * @param layout writeReplyView
+     */
+    void genResizeAnimation(final int oldSize, final int newSize, final ConstraintLayout layout){
+        Animation anim = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)
+                        layout.getLayoutParams();
+                params.height = (int) (oldSize + (newSize - oldSize)*interpolatedTime);
+                layout.setLayoutParams(params);
+            }
+        };
+        anim.setDuration(500);
+        layout.startAnimation(anim);
     }
 }
 

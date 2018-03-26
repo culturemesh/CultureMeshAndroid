@@ -7,25 +7,22 @@
     android:id="@+id/specific_post_scene_root"
     tools:context="org.codethechange.culturemesh.SpecificPostActivity">
 
-    <android.support.v7.widget.CardView
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:card_view="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/cv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/cv"
         android:layout_marginTop="@dimen/activity_vertical_margin"
-        card_view:cardElevation="0dp"
-        card_view:cardCornerRadius="12dp"
         card_view:cardBackgroundColor="@color/colorPrimaryDark"
-        >
+        card_view:cardCornerRadius="12dp"
+        card_view:cardElevation="8dp">
 
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
-            >
+            android:padding="16dp">
 
             <ImageView
                 android:id="@+id/attachedImage3"
@@ -35,8 +32,7 @@
                 android:layout_marginTop="8dp"
                 card_view:layout_constraintStart_toEndOf="@+id/attachedImage2"
                 card_view:layout_constraintTop_toBottomOf="@+id/content"
-                card_view:srcCompat="@color/colorAccent"
-                />
+                card_view:srcCompat="@color/colorAccent" />
 
             <ImageView
                 android:id="@+id/person_photo"
@@ -59,10 +55,10 @@
                 android:layout_marginTop="16dp"
                 android:layout_toEndOf="@+id/person_photo"
                 android:text="asdfasdf"
+                android:textColor="@android:color/white"
                 android:textSize="18sp"
                 card_view:layout_constraintStart_toEndOf="@+id/person_photo"
-                card_view:layout_constraintTop_toTopOf="parent"
-                android:textColor="@android:color/white"/>
+                card_view:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/username"
@@ -73,10 +69,10 @@
                 android:layout_marginTop="16dp"
                 android:layout_toEndOf="@+id/person_name"
                 android:text="isermae"
+                android:textColor="@android:color/white"
                 android:textSize="18sp"
                 card_view:layout_constraintStart_toEndOf="@+id/person_name"
-                card_view:layout_constraintTop_toTopOf="parent"
-                android:textColor="@android:color/white"/>
+                card_view:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/post_type_photo"
@@ -84,8 +80,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_below="@+id/person_photo"
-                android:layout_marginRight="16dp"
-                />
+                android:layout_marginRight="16dp" />
 
             <TextView
                 android:id="@+id/content"
@@ -96,9 +91,9 @@
                 android:layout_marginTop="8dp"
                 android:layout_toRightOf="@+id/post_type_photo"
                 android:text="lorem ipsum"
+                android:textColor="@android:color/white"
                 card_view:layout_constraintStart_toEndOf="@+id/person_photo"
-                card_view:layout_constraintTop_toBottomOf="@+id/person_photo"
-                android:textColor="@android:color/white"/>
+                card_view:layout_constraintTop_toBottomOf="@+id/person_photo" />
 
             <TextView
                 android:id="@+id/timestamp"
@@ -107,10 +102,10 @@
                 android:layout_below="@+id/content"
                 android:layout_marginStart="8dp"
                 android:text="some time"
+                android:textColor="@android:color/white"
                 android:textStyle="italic"
                 card_view:layout_constraintStart_toStartOf="parent"
-                card_view:layout_constraintTop_toBottomOf="@+id/attachedImage2"
-                android:textColor="@android:color/white"/>
+                card_view:layout_constraintTop_toBottomOf="@+id/attachedImage2" />
 
 
             <ImageView
@@ -139,12 +134,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="60dp"
                 android:layout_marginTop="16dp"
-                android:textSize="20sp"
                 android:text="Title of Event"
                 android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:visibility="gone"
                 card_view:layout_constraintStart_toStartOf="parent"
-                card_view:layout_constraintTop_toTopOf="parent"
-                android:visibility="gone"/>
+                card_view:layout_constraintTop_toTopOf="parent" />
 
             <LinearLayout
                 android:id="@+id/event_details_linear_layout"
@@ -154,10 +149,10 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="50dp"
                 android:orientation="vertical"
+                android:visibility="gone"
                 card_view:layout_constraintEnd_toEndOf="parent"
                 card_view:layout_constraintStart_toStartOf="parent"
-                card_view:layout_constraintTop_toTopOf="parent"
-                android:visibility="gone">
+                card_view:layout_constraintTop_toTopOf="parent">
 
                 <android.support.constraint.ConstraintLayout
                     android:layout_width="match_parent"
@@ -226,37 +221,38 @@
                 android:layout_marginTop="8dp"
                 android:text="lorem ipsum description lorem ipsum"
                 android:textColor="@android:color/white"
+                android:visibility="gone"
                 card_view:layout_constraintStart_toStartOf="parent"
-                card_view:layout_constraintTop_toBottomOf="@+id/event_details_linear_layout"
-                android:visibility="gone"/>/>
+                card_view:layout_constraintTop_toBottomOf="@+id/event_details_linear_layout" />/>
 
         </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>
 
     <ListView
         android:id="@+id/commentList"
-        android:layout_width="match_parent"
+        android:layout_width="368dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/write_reply_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cv" />
+        app:layout_constraintTop_toBottomOf="@+id/cv"
+        app:layout_constraintVertical_bias="0.0" />
 
     <!-- app:rippleColor="@color/colorPrimaryDark"-->
-<!--    <fragment
-        android:id="@+id/commentFrag"
-        android:name="org.codethechange.culturemesh.PostsFrag"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout="@layout/fragment_posts"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
-        app:layout_constraintVertical_bias="0.0"
-        tools:layout="@layout/fragment_posts" /> -->
+    <!--    <fragment
+            android:id="@+id/commentFrag"
+            android:name="org.codethechange.culturemesh.PostsFrag"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout="@layout/fragment_posts"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+            app:layout_constraintVertical_bias="0.0"
+            tools:layout="@layout/fragment_posts" /> -->
     <android.support.constraint.ConstraintLayout
         android:id="@+id/write_reply_view"
         android:layout_width="0dp"
@@ -277,62 +273,27 @@
             android:background="@color/white"
             android:ellipsize="none"
             android:ems="10"
-            android:hint="@string/write_comments"
             android:inputType="textMultiLine"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/post_comment_button"
+            android:singleLine="false"
+            android:text="@string/write_comments"
+            app:layout_constraintBottom_toTopOf="@+id/post_comment_button"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
 
         <Button
             android:id="@+id/post_comment_button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
             android:background="@color/colorAccent"
             android:text="@string/post"
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/comment_link" />
-
-        <ImageButton
-            android:id="@+id/comment_bold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@color/colorAccent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/write_comment_text"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_format_bold_white_24px" />
-
-        <ImageButton
-            android:id="@+id/comment_italic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:backgroundTint="@color/colorAccent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/write_comment_text"
-            app:layout_constraintTop_toBottomOf="@+id/comment_bold"
-            app:srcCompat="@drawable/ic_format_italic_white_24px" />
-
-        <ImageButton
-            android:id="@+id/comment_link"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:backgroundTint="@color/colorAccent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/write_comment_text"
-            app:layout_constraintTop_toBottomOf="@+id/comment_italic"
-            app:srcCompat="@drawable/ic_insert_link_white_24px" />
+            app:layout_constraintStart_toStartOf="parent" />
     </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

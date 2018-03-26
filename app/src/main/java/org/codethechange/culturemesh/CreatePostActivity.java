@@ -60,7 +60,6 @@ public class CreatePostActivity extends AppCompatActivity implements
     SparseArray<int[]> toggleIcons;
     SparseArray<MenuItem> menuItems;
     TextView networkLabel;
-    Network network;
     private Activity myActivity = this;
 
     @Override
@@ -273,7 +272,7 @@ public class CreatePostActivity extends AppCompatActivity implements
             if (item != null) {
                 //Get index of toggleIcon array for corresponding drawable id.
                 //0 index is untoggled (false/white), 1 index is toggled (true/black)
-                //Use fancy conversion from boolean to int to make code more concise.
+                //Use fancy ternary statement from boolean to int to make code more concise.
                 int iconIndex = (formTogState.get(id, false)) ? 1 : 0;
                 //Update icon!
                 item.setIcon(toggleIcons.get(id)[iconIndex]);
