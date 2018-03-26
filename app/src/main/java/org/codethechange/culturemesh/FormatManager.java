@@ -1,16 +1,19 @@
 package org.codethechange.culturemesh;
 
 import android.graphics.Typeface;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.text.Editable;
+import android.text.Html;
+import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.SparseIntArray;
-import android.view.MenuItem;
+import android.widget.EditText;
 
 /**
  * Created by Drew Gregory on 3/26/18.
@@ -54,7 +57,7 @@ public class FormatManager implements
 
     private IconUpdateListener mListener;
 
-    public FormatManager(ListenableEditText content,
+    FormatManager(ListenableEditText content,
                          IconUpdateListener listener) {
         //TODO: Pass in ids of views for toggleIcons and formTogState....
         this.formTogState = new SparseBooleanArray();
@@ -194,6 +197,61 @@ public class FormatManager implements
         mListener.updateIconToggles(formTogState, toggleIcons);
     }
 
-    //TODO: Create toString()
-    //TODO: Create static parser method to take string with formatting tags into spannable.
+    /**
+     * Gets the EditText content in the desired tag format. See comment above.
+     */
+    public String toString() {
+        SpannableStringBuilder sSB = new SpannableStringBuilder(content.getText());
+        String html = Html.toHtml(content.getText());
+        //We need to swap out the link tags from <a href=""></a> to <link></link>
+        html = html.replaceAll("</a>", "</link>");
+        html = html.replaceAll("<a[^<>]*>", "<link>");
+        //Remove all tags that are not <link><b><i>
+        html = html.replaceAll("<[^/bil][^<>]*>", "");
+        html = html.replaceAll("</[^bil][^<>]*>", "");
+        return html;
+    }
+
+    /**
+     * This function converts the CultureMesh tags into a spannable string for textview.
+     * @param formattedText should only have <b></b>, <link></link>, <i></i>
+     * @return Spannable to be passed to TextView.
+     */
+    public static Spanned parseText(String formattedText) {
+        //Replace <link> with <a>
+        try {
+            int cursor = 0;
+            for (cursor = formattedText.indexOf("<link>", cursor); cursor != -1; cursor = formattedText.indexOf("<a", cursor)) {
+                //We need to replace <link> with <a href="">
+                String before = formattedText.substring(0, cursor);
+                //Cut out <link>
+                formattedText = before + formattedText.substring(cursor + "<link>".length());
+                String link = formattedText.substring(cursor, formattedText.indexOf("</link>",cursor));
+                formattedText = before + "<a href=\"" + link + "\">" + formattedText.substring(cursor);
+                formattedText = formattedText.replaceFirst("</link>","</a>");
+            }
+        } catch(StringIndexOutOfBoundsException e) {
+            //TODO: Do some error handling when having malformed text.
+        }
+        return fromHtml(formattedText);
+    }
+
+
+    /**
+     *
+     * Different Android versions use different fromHtml method signatures.
+     * Sourced from https://stackoverflow.com/questions/37904739/html-fromhtml-deprecated-in-android-n
+     * @param html
+     * @return
+     */
+    @SuppressWarnings("deprecation")
+    public static Spanned fromHtml(String html){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
+        } else {
+            return Html.fromHtml(html);
+        }
+    }
 }
+
+

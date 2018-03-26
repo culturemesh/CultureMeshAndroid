@@ -166,8 +166,8 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             }
             String name = post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName();
             pvh.personName.setText(name);
-            pvh.content.setText(post.getContent());
-            pvh.postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
+            pvh.content.setText(FormatManager.parseText(post.getContent()));
+            pvh.postTypePhoto.setImageDrawable(null /* TODO: logic flow depending on post source */);
             pvh.timestamp.setText(post.getDatePosted().toString());
             pvh.username.setText(post.getAuthor().getUsername());
             pvh.bind(item, listener);

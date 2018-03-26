@@ -98,6 +98,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         boldButton = findViewById(R.id.comment_bold);
         italicButton = findViewById(R.id.comment_italic);
         linkButton = findViewById(R.id.comment_link);
+        postButton = findViewById(R.id.post_comment_button);
         toggleButtons = new SparseArray<ImageButton>();
         toggleButtons.put(R.id.comment_bold, boldButton);
         toggleButtons.put(R.id.comment_italic, italicButton);
@@ -146,6 +147,14 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
             @Override
             public void onClick(View v) {
                 formatManager.setLink(R.id.comment_link);
+            }
+        });
+        postButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: Check if valid string (nonempty)
+                //TODO: Submit Post Reply to API AsyncTask call.
+                Log.i("HTML", formatManager.toString());
             }
         });
         //For now, since I believe events cannot take comments, I don't think it is worth the user's
