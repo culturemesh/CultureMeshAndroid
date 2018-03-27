@@ -7,17 +7,28 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
+import android.net.Uri;
+import android.os.Build;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.SubMenu;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -29,6 +40,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
@@ -39,7 +51,15 @@ import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
 import java.util.List;
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
+/**
+ * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/8/17.
+ */
 public class TimelineActivity extends DrawerActivity {
 private String basePath = "www.culturemesh.com/api/v1";
     final String FILTER_LABEL = "fl";
@@ -53,10 +73,12 @@ private String basePath = "www.culturemesh.com/api/v1";
     private FloatingActionButton create, createPost, createEvent;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView postsRV;
+    private LinearLayoutManager mLayoutManager;
     private Animation open, close;
     private boolean isFABOpen;
     private TextView population, fromLocation, nearLocation;
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,7 +90,6 @@ private String basePath = "www.culturemesh.com/api/v1";
         population = findViewById(R.id.network_population);
         fromLocation = findViewById(R.id.fromLocation);
         nearLocation = findViewById(R.id.nearLocation);
-        API.loadAppDatabase(getApplicationContext());
         if (API.NO_JOINED_NETWORKS) {
             createNoNetwork();
         } else {
@@ -136,6 +157,46 @@ private String basePath = "www.culturemesh.com/api/v1";
         });
         //set up postsRV
         postsRV = findViewById(R.id.postsRV);
+        mLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
+
+        //check if at end of posts
+        postsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            private boolean loading = true;
+            int pastVisiblesItems, visibleItemCount, totalItemCount;
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if(dy > 0) {
+                    visibleItemCount = mLayoutManager.getChildCount();
+                    totalItemCount = mLayoutManager.getItemCount();
+                    pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
+                    if (loading)
+                    {
+                        if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
+                        {
+                            loading = false;
+                            Log.v("...", "Last Item");
+                            fetchPostsAtEnd(pastVisiblesItems);
+                            loading = true;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    public void fetchPostsAtEnd(int currItem) {
+        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+
+        //TODO: load extra posts by loadSize amount
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+            }
+        }, 1000);
+
 
     }
 
@@ -179,13 +240,12 @@ private String basePath = "www.culturemesh.com/api/v1";
     public boolean refreshPosts() { //probably public? if we want to refresh from outside, if that's possible/needed
         boolean success = true;
 
-        //re-call loading posts. this must be done asynchronously.
+        //TODO: re-call loading posts. this must be done asynchronously.
 
         swipeRefreshLayout.setRefreshing(false);
-        //if server/connection error, success = false;
+        //TODO: if server/connection error, success = false;
 
-        // animate post-refresh
-        // when done, animate old posts fading away and new posts then fading in
+        //TODO:     when done, animate old posts fading away and new posts then fading in
         return success;
     }
 
@@ -375,8 +435,8 @@ private String basePath = "www.culturemesh.com/api/v1";
             //TODO: Use NetworkResponse for error handling.
             NetUserWrapper wrap = new NetUserWrapper();
             wrap.network = API.Get.network(longs[0]).getPayload();
-            Log.i("network retreival", longs[0] + "");
             wrap.netUsers = API.Get.networkUsers(longs[0]).getPayload();
+            API.closeDatabase();
             return wrap;
         }
 

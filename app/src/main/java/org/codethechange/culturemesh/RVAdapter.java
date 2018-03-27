@@ -7,7 +7,6 @@ import android.support.constraint.ConstraintSet;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,10 +24,9 @@ import org.codethechange.culturemesh.models.PostReply;
 
 import java.util.List;
 
-//progress circle
-//refresh posts
-
-
+/**
+ * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
+ */
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
     private List<FeedItem> netPosts;
     private Context context;
@@ -81,6 +79,8 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             viewMoreComments = itemView.findViewById(R.id.view_more_comments);
         }
 
+
+
         void hidePostViews() {
             ConstraintSet constraints = new ConstraintSet();
             constraints.clone(layout);
@@ -129,11 +129,24 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             viewMoreComments.setVisibility(View.VISIBLE);
         }
 
+        public void bind(final FeedItem item, final OnItemClickListener listener) {
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onItemClick(item);
+                }
+            });
+        }
+
     }
 
-    RVAdapter(List<FeedItem> posts, Context context) {
-        netPosts = posts;
+    private final OnItemClickListener listener;
+
+    public RVAdapter(List<FeedItem> netPosts, OnItemClickListener listener, Context context) {
+        this.netPosts = netPosts;
         this.context = context;
+        this.listener = listener;
+
     }
 
     @Override
@@ -142,9 +155,10 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
         return new PostViewHolder(v);
     }
 
+
     @Override
     public void onBindViewHolder(PostViewHolder pvh, int i) {
-        FeedItem item = netPosts.get(i);
+        final FeedItem item = netPosts.get(i);
         //Check if post or event.
         try{
             Post post = (Post) item;
@@ -153,10 +167,11 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             }
             String name = post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName();
             pvh.personName.setText(name);
-            pvh.content.setText(post.getContent());
-            pvh.postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
+            pvh.content.setText(FormatManager.parseText(post.getContent()));
+            pvh.postTypePhoto.setImageDrawable(null /* TODO: logic flow depending on post source */);
             pvh.timestamp.setText(post.getDatePosted().toString());
             pvh.username.setText(post.getAuthor().getUsername());
+            pvh.bind(item, listener);
             if (post.getImageLink() != null || post.getVideoLink() != null ) {
                 //TODO: Figure out how to display videos
                 //TODO: Figure out format for multiple pictures. Assuming separated by commas.
@@ -170,6 +185,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             //TODO: Picasso isn't loading all the images. Figure that out.
             Picasso.with(pvh.personPhoto.getContext()).load(post.getAuthor().getImgURL()).
                     into(pvh.personPhoto);
+
             //Next, insert 2 preview comments if there are any.
             if (post.comments != null) {
                 if (post.comments.size() >= 1) {
@@ -199,7 +215,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                     pvh.viewMoreComments.setVisibility(View.GONE);
                 }
             }
-            Log.i("Image Link", post.getAuthor().getImgURL());
         } catch(ClassCastException e) {
             //It's an event.
             Event event = (Event) item;
@@ -213,11 +228,18 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             pvh.eventDescription.setText(event.getDescription());
             //TODO: Format event time.
             pvh.eventTime.setText(event.getTimeOfEvent().toString());
+            pvh.bind(item, listener);
 
         }
+
     }
 
 
+
+    public interface OnItemClickListener {
+        void onItemClick(FeedItem item);
+        //add more custom click functions here e.g. long click
+    }
 
     @Override
     public int getItemCount() {

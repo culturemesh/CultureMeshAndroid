@@ -11,4 +11,6 @@
     <dimen name="ui_element_vertical_spacing">16dp</dimen>
     <dimen name="ui_element_horizontal_spacing">16dp</dimen>
     <dimen name="edit_text_spacing">8dp</dimen>
+    <dimen name="write_reply_close_height">50dp</dimen>
+    <dimen name="write_reply_open_height">200dp</dimen>
 </resources>
