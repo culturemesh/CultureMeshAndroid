@@ -7,6 +7,20 @@
     android:id="@+id/specific_post_scene_root"
     tools:context="org.codethechange.culturemesh.SpecificPostActivity">
 
+    <ProgressBar
+        android:id="@+id/post_reply_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <android.support.v7.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:card_view="http://schemas.android.com/apk/res-auto"
@@ -228,7 +242,7 @@
                 android:textColor="@android:color/white"
                 card_view:layout_constraintStart_toStartOf="parent"
                 card_view:layout_constraintTop_toBottomOf="@+id/event_details_linear_layout"
-                android:visibility="gone"/>/>
+                android:visibility="gone"/>
 
         </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>
@@ -244,19 +258,19 @@
         app:layout_constraintTop_toBottomOf="@+id/cv" />
 
     <!-- app:rippleColor="@color/colorPrimaryDark"-->
-<!--    <fragment
-        android:id="@+id/commentFrag"
-        android:name="org.codethechange.culturemesh.PostsFrag"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout="@layout/fragment_posts"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
-        app:layout_constraintVertical_bias="0.0"
-        tools:layout="@layout/fragment_posts" /> -->
+    <!--    <fragment
+            android:id="@+id/commentFrag"
+            android:name="org.codethechange.culturemesh.PostsFrag"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout="@layout/fragment_posts"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+            app:layout_constraintVertical_bias="0.0"
+            tools:layout="@layout/fragment_posts" /> -->
     <android.support.constraint.ConstraintLayout
         android:id="@+id/write_reply_view"
         android:layout_width="0dp"
@@ -304,6 +318,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
+            android:visibility="gone"
             android:layout_marginTop="8dp"
             android:backgroundTint="@color/colorAccent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -319,6 +334,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:clickable="true"
+            android:visibility="gone"
             android:focusable="true"
             android:layout_marginStart="8dp"
             android:backgroundTint="@color/colorAccent"
@@ -334,6 +350,7 @@
             android:layout_marginEnd="8dp"
             android:clickable="true"
             android:focusable="true"
+            android:visibility="gone"
             android:layout_marginStart="8dp"
             android:backgroundTint="@color/colorAccent"
             app:layout_constraintEnd_toEndOf="parent"

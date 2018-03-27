@@ -47,6 +47,7 @@ public class PostsFrag extends Fragment {
     private RecyclerView mRecyclerView;
     private RVAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    long selectedNetwork;
     SharedPreferences settings;
     //To figure out params that would be passed in
 
@@ -78,7 +79,7 @@ public class PostsFrag extends Fragment {
         mLayoutManager = new LinearLayoutManager(activity);
         mRecyclerView.setLayoutManager(mLayoutManager);
         //Get network id
-        long selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
+        selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
         new LoadFeedItems().execute(selectedNetwork);
         return rootView;
     }
@@ -152,6 +153,7 @@ public class PostsFrag extends Fragment {
                     try {
                         id = ((Post) item).id;
                         intent.putExtra("postID", id);
+                        intent.putExtra("networkID", selectedNetwork);
                         getActivity().startActivity(intent);
                     } catch(ClassCastException e) {
                         //I don't think we have commenting support for events??

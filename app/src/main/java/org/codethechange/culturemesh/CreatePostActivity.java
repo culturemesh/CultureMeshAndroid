@@ -88,8 +88,6 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
             @Override
             public void onClick(View v) {
                 //TODO: Replace user with logged in user
-                //TODO: Why do we have a title field??
-                //TODO: somehow preserve formatting (if you are tackling this, ask Drew to forward you some emails)
                 String contentHTML = formatManager.toString();
                 String datePosted = new Date().toString();
                 //TODO: Replace random with user id.
@@ -178,7 +176,9 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
         @Override
         protected NetworkResponse doInBackground(Post... posts) {
             API.loadAppDatabase(getApplicationContext());
-            return API.Post.post(posts[0]);
+            NetworkResponse res =  API.Post.post(posts[0]);
+            API.closeDatabase();
+            return res;
         }
 
         /**
@@ -203,7 +203,7 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
                 response.showErrorDialog(myActivity);
                 progressBar.setIndeterminate(false);
             } else {
-                API.closeDatabase();
+
                 finish();
             }
         }

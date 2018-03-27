@@ -90,7 +90,6 @@ private String basePath = "www.culturemesh.com/api/v1";
         population = findViewById(R.id.network_population);
         fromLocation = findViewById(R.id.fromLocation);
         nearLocation = findViewById(R.id.nearLocation);
-        API.loadAppDatabase(getApplicationContext());
         if (API.NO_JOINED_NETWORKS) {
             createNoNetwork();
         } else {
@@ -436,8 +435,8 @@ private String basePath = "www.culturemesh.com/api/v1";
             //TODO: Use NetworkResponse for error handling.
             NetUserWrapper wrap = new NetUserWrapper();
             wrap.network = API.Get.network(longs[0]).getPayload();
-            Log.i("network retreival", longs[0] + "");
             wrap.netUsers = API.Get.networkUsers(longs[0]).getPayload();
+            API.closeDatabase();
             return wrap;
         }
 

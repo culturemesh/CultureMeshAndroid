@@ -6,6 +6,8 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v4.widget.CircularProgressDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -33,7 +35,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -44,8 +48,10 @@ import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
 
 import java.math.BigInteger;
+import java.util.Date;
 import java.util.Formattable;
 import java.util.List;
+import java.util.Random;
 
 public class SpecificPostActivity extends AppCompatActivity implements FormatManager.IconUpdateListener {
 
@@ -70,13 +76,15 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
     ListView commentLV;
     FormatManager formatManager;
     SparseArray<ImageButton> toggleButtons;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_specific_post);
         Intent intent = getIntent();
-        long postID = intent.getLongExtra("postID", 0);
+        final long postID = intent.getLongExtra("postID", 0);
+        final long networkID = intent.getLongExtra("networkID", 0);
         cv = findViewById(R.id.cv);
         personName = findViewById(R.id.person_name);
         username = findViewById(R.id.username);
@@ -103,6 +111,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         toggleButtons.put(R.id.comment_bold, boldButton);
         toggleButtons.put(R.id.comment_italic, italicButton);
         toggleButtons.put(R.id.comment_link, linkButton);
+        progressBar = findViewById(R.id.post_reply_progress);
         commentField.setOnFocusChangeListener( new View.OnFocusChangeListener(){
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -154,8 +163,17 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
             @Override
             public void onClick(View v) {
                 //TODO: Check if valid string (nonempty)
+                String content = formatManager.toString();
+                if (content.length() <= 0) {
+                    Snackbar.make(v, getResources().getString(R.string.cannot_write_empty),
+                            Snackbar.LENGTH_LONG).show();
+                }
                 //TODO: Submit Post Reply to API AsyncTask call.
-                Log.i("HTML", formatManager.toString());
+                //TODO: Come up with valid id.
+                //TODO: Come up with user id.
+                PostReply pReply = new PostReply((int) (Math.random() * 10000), postID, 1, networkID,
+                        new Date().toString(), content);
+                new SubmitPostReply().execute(pReply);
             }
         });
         //For now, since I believe events cannot take comments, I don't think it is worth the user's
@@ -197,6 +215,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
             PostBundleWrapper wrapper = new PostBundleWrapper();
             wrapper.post = API.Get.post(longs[0]).getPayload();
             wrapper.replies = API.Get.postReplies(longs[0]).getPayload();
+            API.closeDatabase();
             return wrapper;
         }
 
@@ -241,7 +260,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
      */
     void openEditTextView() {
         if (!editTextOpened) {
-            Log.i("Specific Post", "Opening Edit Text");
             editTextOpened = true;
             final int oldPixelSize = getResources().getDimensionPixelSize(R.dimen.write_reply_close_height);
             final int newPixelSize = getResources().getDimensionPixelSize(R.dimen.write_reply_open_height);
@@ -289,6 +307,43 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         };
         anim.setDuration(500);
         layout.startAnimation(anim);
+    }
+
+    class SubmitPostReply extends AsyncTask<PostReply, Void, NetworkResponse> {
+
+        @Override
+        protected NetworkResponse doInBackground(PostReply... postReplies) {
+            API.loadAppDatabase(getApplicationContext());
+            NetworkResponse res = API.Post.reply(postReplies[0]);
+            API.closeDatabase();
+            return res;
+        }
+
+        /**
+         * Makes the progress bar indeterminate
+         */
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
+        /**
+         * If POSTing succeeded: Closes the activity and returns the user to the previous screen
+         * If POSTing failed: Displays error message and returns uer to composition screen
+         * @param response Status of doInBackground method that represents whether POSTing succeeded
+         */
+        @Override
+        protected void onPostExecute(NetworkResponse response) {
+            super.onPostExecute(response);
+            if (response.fail()) {
+                response.showErrorDialog(SpecificPostActivity.this);
+            } else {
+                progressBar.setVisibility(View.GONE);
+                commentField.setText("");
+                closeEditTextView();
+            }
+        }
     }
 }
 

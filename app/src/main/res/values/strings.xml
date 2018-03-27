@@ -97,4 +97,5 @@
     <string name="view_more_comments">View More Comments &#8230;</string>
     <string name="write_comments">Write a Comment &#8230; </string>
     <string name="post">Post</string>
+    <string name="cannot_write_empty">Cannot write an empty comment.</string>
 </resources>

@@ -861,7 +861,9 @@ class API {
         }
 
         static NetworkResponse reply(PostReply comment) {
-            return new NetworkResponse();
+            PostReplyDao prDao = mDb.postReplyDao();
+            prDao.insertPostReplies(comment);
+            return new NetworkResponse(false, comment);
         }
 
         static NetworkResponse event(Event event) {
@@ -893,6 +895,7 @@ class API {
     static void closeDatabase() {
         if (--reqCounter <= 0) {
             mDb.close();
+            mDb = null;
         }
     }
 }
