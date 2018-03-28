@@ -52,7 +52,7 @@ class API {
     static final String SETTINGS_IDENTIFIER = "acmsi";
     static final String PERSONAL_NETWORKS = "pernet";
     static final String SELECTED_NETWORK = "selnet";
-    static final boolean NO_JOINED_NETWORKS = false;
+    static final String CURRENT_USER = "curruser";
     static CMDatabase mDb;
     //reqCounter to ensure that we don't close the database while another thread is using it.
     static int reqCounter;
