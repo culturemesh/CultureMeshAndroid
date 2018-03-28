@@ -2,15 +2,22 @@ package org.codethechange.culturemesh;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Display;
 
 import com.codemybrainsout.onboarder.AhoyOnboarderActivity;
 import com.codemybrainsout.onboarder.AhoyOnboarderCard;
 
+import org.codethechange.bubblepicker.rendering.BubblePicker;
+import org.codethechange.culturemesh.models.Network;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Introduce user to the app through a series of informational screens that end with a button
@@ -102,12 +109,21 @@ public class OnboardActivity extends AhoyOnboarderActivity {
     protected void onActivityResult(int requestCode, int response, Intent data) {
         if (requestCode == 1) {
             // User is coming from the login activity
-            if (response == Activity.RESULT_OK){
-                // TODO: Eventually should redirect depending on joined networks
-                startActivity(new Intent(getApplicationContext(), PickOnboardingStatusActivity.class));
+            if (response == Activity.RESULT_OK) {
+                Intent launchNext = new Intent(getApplicationContext(), PickOnboardingStatusActivity.class);
+
+                SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+                // TODO: What does the "1" here do?
+                long currUser = settings.getLong(API.CURRENT_USER, 1);
+                NetworkResponse<ArrayList<Network>> responseNetworks = ApiUtils.getJoinedNetworks(currUser);
+                if (responseNetworks.fail() || responseNetworks.getPayload().isEmpty()) {
+                    launchNext.putExtra(Redirection.LAUNCH_ON_FINISH_EXTRA, ExploreBubblesOpenGLActivity.class);
+                } else {
+                    launchNext.putExtra(Redirection.LAUNCH_ON_FINISH_EXTRA, TimelineActivity.class);
+                }
+                startActivity(launchNext);
             }
             // else do nothing, as login failed or they did not log in
         }
     }
-
 }

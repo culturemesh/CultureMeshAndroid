@@ -12,8 +12,22 @@ import java.util.concurrent.ExecutionException;
  */
 
 public class ApiUtils {
-    public static NetworkResponse<ArrayList<Network>> getJoinedNetworks(long currUser) {
-        AsyncTask<Long, Void, NetworkResponse<ArrayList<Network>>> task = new checkJoinedNetworks();
+
+    private static final String CURRENT_USER_BUNDLE_ID = "currUser";
+    private static final String APPLICATION_CONTEXT_BUNDLE_ID = "currUser";
+
+    public static boolean hasJoinedNetwork(
+            long currUser, AsyncTask<Long, Void, NetworkResponse<ArrayList<Network>>> task) {
+        NetworkResponse<ArrayList<Network>> response = getJoinedNetworks(currUser, task);
+        if (response.fail() || response.getPayload().isEmpty()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public static NetworkResponse<ArrayList<Network>> getJoinedNetworks(
+            long currUser, AsyncTask<Long, Void, NetworkResponse<ArrayList<Network>>> task) {
         task.execute(currUser);
         NetworkResponse<ArrayList<Network>> result;
         try {
@@ -24,19 +38,5 @@ public class ApiUtils {
             result = new NetworkResponse<>(true);
         }
         return result;
-    }
-
-    private static class checkJoinedNetworks extends AsyncTask<Long, Void, NetworkResponse<ArrayList<Network>>> {
-        @Override
-        protected NetworkResponse<ArrayList<Network>> doInBackground(Long... longs) {
-            long currUser = longs[0];
-            NetworkResponse<ArrayList<Network>> responseNetworks = API.Get.userNetworks(currUser);
-            return responseNetworks;
-        }
-
-        @Override
-        protected void onPostExecute(NetworkResponse<ArrayList<Network>> arrayListNetworkResponse) {
-            super.onPostExecute(arrayListNetworkResponse);
-        }
     }
 }
