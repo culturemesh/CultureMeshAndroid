@@ -14,6 +14,7 @@ import org.codethechange.culturemesh.data.NetworkDao;
 import org.codethechange.culturemesh.data.NetworkSubscription;
 import org.codethechange.culturemesh.data.NetworkSubscriptionDao;
 import org.codethechange.culturemesh.data.PostDao;
+import org.codethechange.culturemesh.data.PostReplyDao;
 import org.codethechange.culturemesh.data.RegionDao;
 import org.codethechange.culturemesh.data.UserDao;
 import org.codethechange.culturemesh.models.City;
@@ -24,6 +25,7 @@ import org.codethechange.culturemesh.models.Language;
 import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Point;
+import org.codethechange.culturemesh.models.PostReply;
 import org.codethechange.culturemesh.models.Region;
 import org.codethechange.culturemesh.models.User;
 import org.json.JSONArray;
@@ -35,14 +37,26 @@ import java.util.List;
 
 /**
  * Created by Drew Gregory on 11/14/17.
+ *
+ * IMPORTANT: If you want to use this class in your activity, make sure you run API.loadAppDatabase()
+ * at the beginning of onPreExecute()/doInBackground(), and API.closeDatabase() in onPostExecute().
+ * The app will crash otherwise.
+ *
+ *
+ * TODO: USE ALARMS FOR UPDATING DATA ON SUBSCRIBED NETWORKS
+ * TODO: Figure out how we can handle trying to update data.
+ *      - Perhaps check if it comes from subscribed network, if not do network request instead of cache?
  */
 
 class API {
     static final String SETTINGS_IDENTIFIER = "acmsi";
     static final String PERSONAL_NETWORKS = "pernet";
     static final String SELECTED_NETWORK = "selnet";
-    static final boolean NO_JOINED_NETWORKS = false;
+    static final String CURRENT_USER = "curruser";
     static CMDatabase mDb;
+    //reqCounter to ensure that we don't close the database while another thread is using it.
+    static int reqCounter;
+
 
 
     /**
@@ -93,7 +107,7 @@ class API {
                 "    \"act_code\": \"IDK\",\n" +
                 "    \"lastName\": \"Miller\",\n" +
                 "    \"about_me\": \"Quae iste eum labore. Harum in deleniti.\\nMagni distinctio non repellendus accusantium accusantium corporis. Cum provident perspiciatis molestias dolore voluptate reiciendis.\",\n" +
-                "    \"img_link\": \"https://dummyimage.com/900x38\",\n" +
+                "    \"img_link\": \"https://picsum.photos/400\",\n" +
                 "    \"role\": 1,\n" +
                 "    \"gender\": \"male\",\n" +
                 "    \"last_login\": \"2017-11-23 15:31:51\",\n" +
@@ -109,7 +123,7 @@ class API {
                 "    \"act_code\": \"IDK\",\n" +
                 "    \"lastName\": \"Beltran\",\n" +
                 "    \"about_me\": \"Eos libero eveniet sit tempore accusantium. Eveniet voluptates quos excepturi.\\nSaepe ut exercitationem sunt porro laborum. Doloremque quas assumenda cumque tenetur distinctio quis nobis.\",\n" +
-                "    \"img_link\": \"https://www.lorempixel.com/273/913\",\n" +
+                "    \"img_link\": \"https://picsum.photos/200\",\n" +
                 "    \"role\": 1,\n" +
                 "    \"gender\": \"male\",\n" +
                 "    \"last_login\": \"2017-11-21 07:32:34\",\n" +
@@ -125,7 +139,7 @@ class API {
                 "    \"act_code\": \"IDK\",\n" +
                 "    \"lastName\": \"Carey\",\n" +
                 "    \"about_me\": \"Aut tenetur fugiat voluptas tenetur eos ducimus. Aut officiis aliquam ab voluptatem.\\nIpsum et aperiam totam voluptas voluptas. Dolor nulla voluptatem molestiae.\",\n" +
-                "    \"img_link\": \"https://placeholdit.imgix.net/~text?txtsize=55&txt=20x249&w=20&h=249\",\n" +
+                "    \"img_link\": \"https://picsum.photos/400\",\n" +
                 "    \"role\": 1,\n" +
                 "    \"gender\": \"male\",\n" +
                 "    \"last_login\": \"2017-11-21 03:03:05\",\n" +
@@ -592,6 +606,48 @@ class API {
                 networkSubscription4);
     }
 
+    static void addReplies() {
+        String rawDummy = "[\n" +
+                "  {\n" +
+                "    \"id\": 1,\n" +
+                "    \"parent_id\": 1,\n" +
+                "    \"user_id\": 2,\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"reply_date\": \"2017-03-12 08:53:43\",\n" +
+                "    \"reply_text\": \"Test reply 1.\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 2,\n" +
+                "    \"parent_id\": 1,\n" +
+                "    \"user_id\": 3,\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"reply_date\": \"2017-03-13 08:53:43\",\n" +
+                "    \"reply_text\": \"Test reply 2.\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"id\": 3,\n" +
+                "    \"parent_id\": 3,\n" +
+                "    \"user_id\": 4,\n" +
+                "    \"network_id\": 0,\n" +
+                "    \"reply_date\": \"2017-04-04 18:27:27\",\n" +
+                "    \"reply_text\": \"Test reply 3.\"\n" +
+                "  }\n" +
+                "]";
+        PostReplyDao postReplyDao = mDb.postReplyDao();
+        try {
+            JSONArray pRJSON = new JSONArray(rawDummy);
+            for (int i = 0; i < pRJSON.length(); i++) {
+                JSONObject pRObj = pRJSON.getJSONObject(i);
+                PostReply pr = new PostReply(pRObj.getLong("id"), pRObj.getLong("parent_id"),
+                        pRObj.getLong("user_id"), pRObj.getLong("network_id"),
+                        pRObj.getString("reply_date"), pRObj.getString("reply_text"));
+                postReplyDao.insertPostReplies(pr);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * For simplicity, we store the id's of other model objects in the database, not the objects
      * themselves. Thus, when we return these objects, we need to instantiate them.
@@ -601,7 +657,18 @@ class API {
         for (org.codethechange.culturemesh.models.Post post : posts) {
             //Get the user
             post.author = API.Get.user(post.userId).getPayload();
-            post.network = API.Get.network(post.networkId).getPayload();
+        }
+    }
+
+    /**
+     * For simplicity, we store the id's of other model objects in the database, not the objects
+     * themselves. Thus, when we return these objects, we need to instantiate them.
+     * @param comments List of PostReplies with which we will get comments for.
+     */
+    static void instantiatePostReplies(List<PostReply> comments) {
+        for (PostReply comment : comments) {
+            //Get the user
+            comment.author = API.Get.user(comment.userId).getPayload();
         }
     }
 
@@ -737,6 +804,12 @@ class API {
             return new NetworkResponse<>(users);
         }
 
+        static NetworkResponse<List<PostReply>> postReplies(long id){
+            PostReplyDao dao = mDb.postReplyDao();
+            List<PostReply> replies = dao.getPostReplies(id);
+            instantiatePostReplies(replies);
+            return new NetworkResponse<>(replies == null, replies);
+        }
 
     }
 
@@ -771,11 +844,19 @@ class API {
         }
 
         static NetworkResponse post(org.codethechange.culturemesh.models.Post post) {
+            PostDao pDao = mDb.postDao();
+            pDao.insertPosts(post);
+            return new NetworkResponse<>(false, post);
+        }
+
+        static NetworkResponse reply(PostReply comment) {
             return new NetworkResponse();
         }
 
         static NetworkResponse event(Event event) {
-            return new NetworkResponse();
+            EventDao eDao = mDb.eventDao();
+            eDao.addEvent(event);
+            return new NetworkResponse<>(false, event);
         }
     }
 
@@ -791,6 +872,7 @@ class API {
     }
 
     public static void loadAppDatabase(Context context) {
+        reqCounter++;
         if (mDb == null) {
             mDb = Room.databaseBuilder(context.getApplicationContext(), CMDatabase.class, "cmdatabase").
                     fallbackToDestructiveMigration().build();
@@ -798,6 +880,8 @@ class API {
     }
 
     static void closeDatabase() {
-        mDb.close();
+        if (--reqCounter <= 0) {
+            mDb.close();
+        }
     }
 }

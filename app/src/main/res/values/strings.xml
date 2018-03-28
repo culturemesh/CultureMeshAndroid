@@ -92,6 +92,7 @@
     <string name="ready_question">Ready?</string>
     <string name="lets_start">Let\'s get Started!</string>
     <string name="logIn_signUp">Log In or Sign Up</string>
+    <string name="view_more_comments">View More Comments &#8230;</string>
     <string name="title_activity_about">AboutActivity</string>
     <!-- Strings for help and about pages -->
     <string name="help">Help</string>

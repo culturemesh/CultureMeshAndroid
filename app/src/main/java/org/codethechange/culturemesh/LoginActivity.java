@@ -2,6 +2,7 @@ package org.codethechange.culturemesh;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -16,7 +17,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends RedirectableAppCompatActivity {
     private boolean signInToggle = true;
     EditText firstNameText;
     EditText lastNameText;
@@ -38,6 +39,13 @@ public class LoginActivity extends AppCompatActivity {
                 //TODO: Handle sign in.
                 Intent returnIntent = new Intent();
                 // TODO: Change result returned to RESULT_CANCELLED for no login
+                // Set the current user in the SharedPreferences settings to the user that just logged in
+                SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                // TODO: Update the "1" here with the correct user ID
+                editor.putLong(API.CURRENT_USER, 1);
+                editor.apply();
+
                 setResult(Activity.RESULT_OK, returnIntent);
                 finish();
             }
@@ -169,5 +177,4 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
-
 }

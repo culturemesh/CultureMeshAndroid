@@ -38,6 +38,7 @@ import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TimelineActivity extends DrawerActivity {
@@ -62,7 +63,6 @@ private String basePath = "www.culturemesh.com/api/v1";
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_timeline);
-        API.loadAppDatabase(getApplicationContext());
         settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         getSupportActionBar().setLogo(R.drawable.logo_header);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -70,12 +70,14 @@ private String basePath = "www.culturemesh.com/api/v1";
         fromLocation = findViewById(R.id.fromLocation);
         nearLocation = findViewById(R.id.nearLocation);
         API.loadAppDatabase(getApplicationContext());
-        if (API.NO_JOINED_NETWORKS) {
+        long currUser = settings.getLong(API.CURRENT_USER, 1);
+        if (ApiUtils.hasJoinedNetwork(currUser, new checkJoinedNetworks())) {
             createNoNetwork();
         } else {
             createDefaultNetwork();
         }
         //TODO: For first run, uncomment this: new TestDatabase().execute();
+        new TestDatabase().execute();
     }
 
     protected void createNoNetwork() {
@@ -291,14 +293,19 @@ private String basePath = "www.culturemesh.com/api/v1";
 
         @Override
         protected Void doInBackground(Void... voids) {
-            API.addUsers();
-            API.addCities();
-            API.addCountries();
-            API.addNetworks();
-            API.addRegions();
-            API.addPosts();
-            API.addEvents();
-            API.subscribeUsers();
+            API.loadAppDatabase(getApplicationContext());
+            if (API.Get.network(1).getPayload() == null) {
+                API.addReplies();
+                API.addUsers();
+                API.addCities();
+                API.addCountries();
+                API.addNetworks();
+                API.addRegions();
+                API.addPosts();
+                API.addEvents();
+                API.subscribeUsers();
+            }
+            API.closeDatabase();
             return null;
         }
     }
@@ -311,6 +318,7 @@ private String basePath = "www.culturemesh.com/api/v1";
     void animateFAB() {
         int colorAccent = getResources().getColor(R.color.colorAccent);
         int primaryDark = getResources().getColor(R.color.colorPrimaryDark);
+        int primary = getResources().getColor(R.color.colorPrimary);
         if (isFABOpen) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
 
@@ -338,7 +346,7 @@ private String basePath = "www.culturemesh.com/api/v1";
         } else {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                 @SuppressLint("ObjectAnimatorBinding") ObjectAnimator changeColor = ObjectAnimator.ofInt(create,
-                        "backgroundTint", colorAccent, primaryDark);
+                        "backgroundTint", colorAccent, primary);
                 changeColor.setDuration(300);
                 changeColor.setEvaluator(new ArgbEvaluator());
                 changeColor.setInterpolator(new DecelerateInterpolator(2));
@@ -365,6 +373,7 @@ private String basePath = "www.culturemesh.com/api/v1";
     private class LoadNetworkData extends AsyncTask<Long, Void, NetUserWrapper> {
         @Override
         protected NetUserWrapper doInBackground(Long... longs) {
+            API.loadAppDatabase(getApplicationContext());
             //TODO: Use NetworkResponse for error handling.
             NetUserWrapper wrap = new NetUserWrapper();
             wrap.network = API.Get.network(longs[0]).getPayload();
@@ -389,6 +398,7 @@ private String basePath = "www.culturemesh.com/api/v1";
                 //Update near location
                 nearLocation.setText(network.nearLocation.shortName());
             }
+            API.closeDatabase();
         }
     }
 
@@ -397,9 +407,19 @@ private String basePath = "www.culturemesh.com/api/v1";
         List<User> netUsers;
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        API.closeDatabase();
+    private class checkJoinedNetworks extends AsyncTask<Long, Void, NetworkResponse<ArrayList<Network>>> {
+        @Override
+        protected NetworkResponse<ArrayList<Network>> doInBackground(Long... longs) {
+            API.loadAppDatabase(getApplicationContext());
+            long currUser = longs[0];
+            NetworkResponse<ArrayList<Network>> responseNetworks = API.Get.userNetworks(currUser);
+            return responseNetworks;
+        }
+
+        @Override
+        protected void onPostExecute(NetworkResponse<ArrayList<Network>> arrayListNetworkResponse) {
+            super.onPostExecute(arrayListNetworkResponse);
+            API.closeDatabase();
+        }
     }
 }
