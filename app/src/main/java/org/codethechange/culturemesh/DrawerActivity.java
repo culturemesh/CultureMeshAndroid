@@ -150,9 +150,8 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
             Intent startAbout = new Intent(getApplicationContext(), AboutActivity.class);
             startActivity(startAbout);
         } else if (id == R.id.nav_help) {
-            // TODO: What does this do at the end of onboarding? It shouldn't go to login.
-            Intent startOnboarding = new Intent(getApplicationContext(), OnboardActivity.class);
-            startActivity(startOnboarding);
+            Intent startHelp = new Intent(getApplicationContext(), HelpActivity.class);
+            startActivity(startHelp);
         }
 
         mDrawerLayout.closeDrawer(GravityCompat.START);
