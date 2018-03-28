@@ -17,7 +17,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends RedirectableAppCompatActivity {
     private boolean signInToggle = true;
     EditText firstNameText;
     EditText lastNameText;
@@ -177,20 +177,4 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (isFinishing()) {
-            if (getIntent().hasExtra(Redirection.LAUNCH_ON_FINISH_EXTRA)) {
-                Class<?> nextActivity = (Class) getIntent().getSerializableExtra(Redirection.LAUNCH_ON_FINISH_EXTRA);
-                Intent next = new Intent(getApplicationContext(), nextActivity);
-                if (getIntent().hasExtra(Redirection.PASS_ON_FINISH_EXTRA)) {
-                    next.putExtras(getIntent().getBundleExtra(Redirection.PASS_ON_FINISH_EXTRA));
-                }
-            }
-        }
-
-    }
-
 }
