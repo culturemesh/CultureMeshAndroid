@@ -2,6 +2,7 @@ package org.codethechange.culturemesh;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -38,6 +39,13 @@ public class LoginActivity extends AppCompatActivity {
                 //TODO: Handle sign in.
                 Intent returnIntent = new Intent();
                 // TODO: Change result returned to RESULT_CANCELLED for no login
+                // Set the current user in the SharedPreferences settings to the user that just logged in
+                SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                // TODO: Update the "1" here with the correct user ID
+                editor.putLong(API.CURRENT_USER, 1);
+                editor.apply();
+
                 setResult(Activity.RESULT_OK, returnIntent);
                 finish();
             }
@@ -168,6 +176,21 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (isFinishing()) {
+            if (getIntent().hasExtra(Redirection.LAUNCH_ON_FINISH_EXTRA)) {
+                Class<?> nextActivity = (Class) getIntent().getSerializableExtra(Redirection.LAUNCH_ON_FINISH_EXTRA);
+                Intent next = new Intent(getApplicationContext(), nextActivity);
+                if (getIntent().hasExtra(Redirection.PASS_ON_FINISH_EXTRA)) {
+                    next.putExtras(getIntent().getBundleExtra(Redirection.PASS_ON_FINISH_EXTRA));
+                }
+            }
+        }
+
     }
 
 }
