@@ -49,7 +49,7 @@ public class OnboardActivity extends AhoyOnboarderActivity {
         setOnboardPages(pages);
     }
 
-    private String getFinishButtonTitle() {
+    public String getFinishButtonTitle() {
         return getString(R.string.logIn_signUp);
     }
 
