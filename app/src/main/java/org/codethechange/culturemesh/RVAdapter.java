@@ -1,12 +1,10 @@
 package org.codethechange.culturemesh;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +35,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
         public boolean isPost() {
             return post;
         }
-
         CardView cv;
         TextView personName, username, content, timestamp, eventTitle, eventTime, eventLocation,
                 eventDescription, comment1Name, comment1Text, comment2Name, comment2Text,
@@ -142,7 +139,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
 
     private final OnItemClickListener listener;
 
-    public RVAdapter(List<FeedItem> netPosts, OnItemClickListener listener, Context context) {
+    RVAdapter(List<FeedItem> netPosts, OnItemClickListener listener, Context context) {
         this.netPosts = netPosts;
         this.context = context;
         this.listener = listener;

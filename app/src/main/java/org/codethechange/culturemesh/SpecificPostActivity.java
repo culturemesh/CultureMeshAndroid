@@ -158,6 +158,8 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         //time to navigate to this activity with an event.
         new loadPostReplies().execute(postID);
 
+
+
     }
 
     @Override
@@ -198,7 +200,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         }
 
         @Override
-        protected void onPostExecute(PostBundleWrapper postBundleWrapper) {
+        protected void onPostExecute(final PostBundleWrapper postBundleWrapper) {
             Post post = postBundleWrapper.post;
             String name = post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName();
             personName.setText(name);
@@ -206,6 +208,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
             postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
             timestamp.setText(post.getDatePosted());
             username.setText(post.getAuthor().getUsername());
+
             if (post.getImageLink() != null || post.getVideoLink() != null ) {
                 //TODO: Figure out how to display videos
                 //TODO: Figure out format for multiple pictures. Assuming separated by commas.
@@ -217,6 +220,16 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
             }
             Picasso.with(personPhoto.getContext()).load(post.getAuthor().getImgURL()).
                     into(personPhoto);
+
+            //Now, allow redirect to ViewProfileActivity if username or profile pic is tapped.
+            View.OnClickListener viewUserProfile = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent viewUser = new Intent(getApplicationContext(),ViewProfileActivity.class);
+                    viewUser.putExtra(ViewProfileActivity.SELECTED_USER, postBundleWrapper.post.author.id);
+                    startActivity(viewUser);
+                }
+            };
 
             int r = getResources().getIdentifier("commentColor", "color", "org.codethechange.culturemesh");
             commentLV.setBackgroundResource(r);

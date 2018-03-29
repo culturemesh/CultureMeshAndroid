@@ -45,6 +45,7 @@ import java.util.List;
  *
  * TODO: USE ALARMS FOR UPDATING DATA ON SUBSCRIBED NETWORKS
  * TODO: Figure out how we can handle trying to update data.
+ * TODO: Figure out alternative to id's other than longs and ints, which cannot represent all numbers. (Maybe just use strings?)
  *      - Perhaps check if it comes from subscribed network, if not do network request instead of cache?
  */
 

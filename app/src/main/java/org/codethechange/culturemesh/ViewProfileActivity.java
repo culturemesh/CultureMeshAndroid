@@ -14,9 +14,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 public class ViewProfileActivity extends AppCompatActivity {
-
+    public static final String SELECTED_USER = "seluser";
     ViewPager mViewPager;
     TabLayout mTabLayout;
+    long selUser;
 
 
     @Override
@@ -24,6 +25,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_profile);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        selUser = savedInstanceState.getLong(SELECTED_USER, -1);
         setSupportActionBar(toolbar);
         mViewPager = findViewById(R.id.contributions_pager);
         PagerAdapter mPagerAdapter = new ContributionsPager(getSupportFragmentManager());
@@ -48,7 +50,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return null;
+                    return ListNetworksFragment.newInstance(selUser);
                 case 1:
                     return null;
                 default:

@@ -445,8 +445,8 @@ private String basePath = "www.culturemesh.com/api/v1";
             Network network = wrapper.network;
             if (network != null) {
                 //Update population number
-                //TODO: Manipulate string of number to have magnitude suffix (K,M,etc.)
-                population.setText(String.format("%d",wrapper.netUsers.size()));
+                //Manipulate string of number to have magnitude suffix (K,M,etc.)
+                population.setText(FormatManager.abbreviateNumber(wrapper.netUsers.size()));
                 //Update from location/language
                 if (network.networkClass) {
                     fromLocation.setText(network.fromLocation.shortName());

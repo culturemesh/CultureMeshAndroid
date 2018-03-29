@@ -251,6 +251,31 @@ public class FormatManager implements
             return Html.fromHtml(html);
         }
     }
+
+    /**
+     * In the interest of screen space and accessibility, we will format the number to have
+     * a magnitude suffix instead of the exact number.
+     * @param number exact number, in floating point if necessary.
+     * @return Formatted String representing number magnitude (e.x. 100K)
+     */
+    public static String abbreviateNumber(long number) {
+        //TODO: Manipulate string of number to have magnitude suffix (K,M,etc.)
+        String abbrev = number + "";
+        String suffix = "";
+        if (number < 1000) {
+            return abbrev + suffix;
+        } else if (number < Math.pow(10,6)) {
+            suffix = "K";
+        } else if (number < Math.pow(10,9)) {
+            suffix = "M";
+        } else if (number < Math.pow(10,12)) {
+            suffix = "B";
+        } else {
+            return "10^" + Math.log10(number);
+        }
+        abbrev = abbrev.substring(0,3);
+        return abbrev + suffix;
+    }
 }
 
 
