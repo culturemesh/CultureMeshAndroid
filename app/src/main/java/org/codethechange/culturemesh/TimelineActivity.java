@@ -38,6 +38,7 @@ import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TimelineActivity extends DrawerActivity {
@@ -69,7 +70,8 @@ private String basePath = "www.culturemesh.com/api/v1";
         fromLocation = findViewById(R.id.fromLocation);
         nearLocation = findViewById(R.id.nearLocation);
         API.loadAppDatabase(getApplicationContext());
-        if (API.NO_JOINED_NETWORKS) {
+        long currUser = settings.getLong(API.CURRENT_USER, 1);
+        if (ApiUtils.hasJoinedNetwork(currUser, new checkJoinedNetworks())) {
             createNoNetwork();
         } else {
             createDefaultNetwork();
@@ -405,5 +407,19 @@ private String basePath = "www.culturemesh.com/api/v1";
         List<User> netUsers;
     }
 
+    private class checkJoinedNetworks extends AsyncTask<Long, Void, NetworkResponse<ArrayList<Network>>> {
+        @Override
+        protected NetworkResponse<ArrayList<Network>> doInBackground(Long... longs) {
+            API.loadAppDatabase(getApplicationContext());
+            long currUser = longs[0];
+            NetworkResponse<ArrayList<Network>> responseNetworks = API.Get.userNetworks(currUser);
+            return responseNetworks;
+        }
 
+        @Override
+        protected void onPostExecute(NetworkResponse<ArrayList<Network>> arrayListNetworkResponse) {
+            super.onPostExecute(arrayListNetworkResponse);
+            API.closeDatabase();
+        }
+    }
 }
