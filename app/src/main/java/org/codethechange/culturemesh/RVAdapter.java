@@ -182,7 +182,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                     }
                 }
             }
-            //TODO: Picasso isn't loading all the images. Figure that out.
             Picasso.with(pvh.personPhoto.getContext()).load(post.getAuthor().getImgURL()).
                     into(pvh.personPhoto);
 

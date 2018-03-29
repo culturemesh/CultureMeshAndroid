@@ -17,7 +17,7 @@ import org.codethechange.culturemesh.models.User;
 
 /**
  * Created by Drew Gregory on 2/19/18.
- * TODO: Check out LiveData: https://developer.android.com/reference/android/arch/lifecycle/LiveData.htmls
+ * TODO: Check out LiveData: https://developer.android.com/reference/android/arch/lifecycle/LiveData.html
  */
 @Database(version = 13, entities = {Network.class, User.class, Post.class, Event.class,
         EventSubscription.class, NetworkSubscription.class, Region.class, City.class, Country.class,

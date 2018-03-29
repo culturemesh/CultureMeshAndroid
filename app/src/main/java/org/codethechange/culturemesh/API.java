@@ -22,8 +22,10 @@ import org.codethechange.culturemesh.models.Country;
 import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FromLocation;
 import org.codethechange.culturemesh.models.Language;
+import org.codethechange.culturemesh.models.Location;
 import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
+import org.codethechange.culturemesh.models.Place;
 import org.codethechange.culturemesh.models.Point;
 import org.codethechange.culturemesh.models.PostReply;
 import org.codethechange.culturemesh.models.Region;
@@ -52,7 +54,7 @@ class API {
     static final String SETTINGS_IDENTIFIER = "acmsi";
     static final String PERSONAL_NETWORKS = "pernet";
     static final String SELECTED_NETWORK = "selnet";
-    static final boolean NO_JOINED_NETWORKS = false;
+    static final String CURRENT_USER = "curruser";
     static CMDatabase mDb;
     //reqCounter to ensure that we don't close the database while another thread is using it.
     static int reqCounter;
@@ -822,6 +824,17 @@ class API {
             return new NetworkResponse<>(replies == null, replies);
         }
 
+        static NetworkResponse<List<Place>> autocomplete(String text) {
+            List<Place> locations = new ArrayList<>();
+            //Get any related cities, countries, or regions.
+            CityDao cityDao = mDb.cityDao();
+            locations.addAll(cityDao.autoCompleteCities(text));
+            RegionDao regionDao = mDb.regionDao();
+            locations.addAll(regionDao.autoCompleteRegions(text));
+            CountryDao countryDao = mDb.countryDao();
+            locations.addAll(countryDao.autoCompleteCountries(text));
+            return new NetworkResponse<List<Place>>(locations == null, locations);
+        }
     }
 
     static class Post {
