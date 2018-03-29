@@ -43,10 +43,14 @@ public class OnboardActivity extends AhoyOnboarderActivity {
 
         setGradientBackground();
 
-        setFinishButtonTitle(getString(R.string.logIn_signUp));
+        setFinishButtonTitle(getFinishButtonTitle());
         showNavigationControls(true);
 
         setOnboardPages(pages);
+    }
+
+    public String getFinishButtonTitle() {
+        return getString(R.string.logIn_signUp);
     }
 
     /**
