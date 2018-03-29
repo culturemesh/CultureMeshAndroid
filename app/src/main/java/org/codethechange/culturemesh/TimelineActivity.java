@@ -72,9 +72,9 @@ private String basePath = "www.culturemesh.com/api/v1";
         API.loadAppDatabase(getApplicationContext());
         long currUser = settings.getLong(API.CURRENT_USER, 1);
         if (ApiUtils.hasJoinedNetwork(currUser, new checkJoinedNetworks())) {
-            createNoNetwork();
-        } else {
             createDefaultNetwork();
+        } else {
+            createNoNetwork();
         }
         //TODO: For first run, uncomment this: new TestDatabase().execute();
         new TestDatabase().execute();
