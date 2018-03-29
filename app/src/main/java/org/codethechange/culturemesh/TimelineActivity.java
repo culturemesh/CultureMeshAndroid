@@ -82,7 +82,6 @@ private String basePath = "www.culturemesh.com/api/v1";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_timeline);
         settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         getSupportActionBar().setLogo(R.drawable.logo_header);
@@ -457,7 +456,6 @@ private String basePath = "www.culturemesh.com/api/v1";
                 //Update near location
                 nearLocation.setText(network.nearLocation.shortName());
             }
-            API.closeDatabase();
         }
     }
 
@@ -472,13 +470,14 @@ private String basePath = "www.culturemesh.com/api/v1";
             API.loadAppDatabase(getApplicationContext());
             long currUser = longs[0];
             NetworkResponse<ArrayList<Network>> responseNetworks = API.Get.userNetworks(currUser);
+            API.closeDatabase();
             return responseNetworks;
         }
 
         @Override
         protected void onPostExecute(NetworkResponse<ArrayList<Network>> arrayListNetworkResponse) {
             super.onPostExecute(arrayListNetworkResponse);
-            API.closeDatabase();
+
         }
     }
 }

@@ -121,6 +121,7 @@ public class PostsFrag extends Fragment {
          */
         @Override
         protected ArrayList<FeedItem> doInBackground(Long... longs) {
+            API.loadAppDatabase(getActivity());
             SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
                     MODE_PRIVATE);
             //We generalize posts/events to be feed items for polymorphism.
@@ -139,6 +140,7 @@ public class PostsFrag extends Fragment {
                 }
                 feedItems.addAll(posts);
             }
+            API.closeDatabase();
             //TODO: Add ability check out twitter posts.
             return feedItems;
         }
