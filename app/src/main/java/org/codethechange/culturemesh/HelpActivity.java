@@ -6,7 +6,7 @@ package org.codethechange.culturemesh;
 public class HelpActivity extends OnboardActivity {
     @Override
     public String getFinishButtonTitle() {
-        return getString(R.string.logIn_signUp);
+        return getString(R.string.exit);
     }
 
     /**
@@ -15,5 +15,6 @@ public class HelpActivity extends OnboardActivity {
     @Override
     public void onFinishButtonPressed() {
         finish();
+        // TODO: BUG: Should return to drawer on Timeline Activity but launches PickOnboardingStatus
     }
 }
