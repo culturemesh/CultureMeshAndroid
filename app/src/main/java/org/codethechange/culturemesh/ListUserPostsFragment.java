@@ -83,7 +83,12 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
             long userId = longs[0];
             API.loadAppDatabase(getActivity());
             RVAdapter adapter = (RVAdapter) rv.getAdapter();
-            adapter.getNetPosts().addAll(API.Get.userPosts(userId).getPayload());
+
+            List<Post> posts = API.Get.userPosts(userId).getPayload();
+            for (Post post : posts) {
+                post.comments = API.Get.postReplies(post.id).getPayload();
+            }
+            adapter.getNetPosts().addAll(posts);
             API.closeDatabase();
             return null;
         }
