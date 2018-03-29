@@ -24,10 +24,16 @@ import android.view.SubMenu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
+
 import com.crashlytics.android.Crashlytics;
+import com.squareup.picasso.Picasso;
+
 import io.fabric.sdk.android.Fabric;
 
 import org.codethechange.culturemesh.models.Network;
+import org.codethechange.culturemesh.models.User;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -43,6 +49,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
     protected SparseArray<Network> subscribedNetworks;
     final static String USER_PREFS = "userprefs";
     final static String USER_NAME = "username";
+    final static String USER_ID = "userid";
     NavigationView navView;
 
     @Override
@@ -96,7 +103,8 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
 
         Fabric.with(this, new Crashlytics());
         SharedPreferences userPrefs = getSharedPreferences(USER_PREFS, MODE_PRIVATE);
-        if (userPrefs.getString(USER_NAME, null) == null) {
+        long userId = userPrefs.getLong(USER_ID, -1);
+        if (userId == -1) {
             //User is not signed in. Replace user info with sign in button
             Button button = navView.getHeaderView(0).findViewById(R.id.nav_user_sign_in_button);
             button.setVisibility(View.VISIBLE);
@@ -108,7 +116,9 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                     startActivity(logInIntent);
                 }
             });
-
+        } else {
+            //Load User info.
+            new LoadUserInfo().execute(userId);
         }
 
         new LoadUserSubscriptions().execute(Long.valueOf(1));
@@ -204,5 +214,31 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         }
     }
 
+    private class LoadUserInfo extends AsyncTask<Long, Void, NetworkResponse<User>> {
+
+        @Override
+        protected NetworkResponse<User> doInBackground(Long... longs) {
+            API.loadAppDatabase(getApplicationContext());
+            NetworkResponse<User> res = API.Get.user(longs[0]);
+            API.closeDatabase();
+            return res;
+        }
+
+        @Override
+        protected void onPostExecute(NetworkResponse<User> res) {
+            if (res.fail()) {
+                res.showErrorDialog(DrawerActivity.this);
+            } else {
+                User user = res.getPayload();
+                TextView userName = navView.getHeaderView(0).findViewById(R.id.user_name);
+                userName.setText(user.username);
+                TextView email = navView.getHeaderView(0).findViewById(R.id.user_email);
+                email.setText(user.email);
+                ImageView profilePic = navView.getHeaderView(0).findViewById(R.id.user_icon);
+                Picasso.with(getApplicationContext()).load(user.imgURL).into(profilePic);
+            }
+
+        }
+    }
 
 }
