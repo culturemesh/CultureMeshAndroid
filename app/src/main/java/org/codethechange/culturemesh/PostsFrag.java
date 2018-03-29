@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -9,6 +10,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -17,7 +19,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
@@ -34,12 +38,16 @@ import java.util.List;
 import static android.content.Context.MODE_PRIVATE;
 
 //TODO: If no posts, show text view saying add a post!
+/**
+ * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
+ */
 public class PostsFrag extends Fragment {
     private String basePath = "www.culturemesh.com/api/v1";
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private RVAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    long selectedNetwork;
     SharedPreferences settings;
     //To figure out params that would be passed in
 
@@ -58,6 +66,7 @@ public class PostsFrag extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         AppCompatActivity activity = (AppCompatActivity) getActivity();
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         View rootView = inflater.inflate(R.layout.fragment_posts, container, false);
 
         mRecyclerView = rootView.findViewById(R.id.postsRV);
@@ -70,7 +79,7 @@ public class PostsFrag extends Fragment {
         mLayoutManager = new LinearLayoutManager(activity);
         mRecyclerView.setLayoutManager(mLayoutManager);
         //Get network id
-        long selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
+        selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
         new LoadFeedItems().execute(selectedNetwork);
         return rootView;
     }
@@ -112,6 +121,7 @@ public class PostsFrag extends Fragment {
          */
         @Override
         protected ArrayList<FeedItem> doInBackground(Long... longs) {
+            API.loadAppDatabase(getActivity());
             SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
                     MODE_PRIVATE);
             //We generalize posts/events to be feed items for polymorphism.
@@ -130,13 +140,30 @@ public class PostsFrag extends Fragment {
                 }
                 feedItems.addAll(posts);
             }
+            API.closeDatabase();
             //TODO: Add ability check out twitter posts.
             return feedItems;
         }
 
         @Override
-        protected void onPostExecute(ArrayList<FeedItem> feedItems) {
-            mAdapter = new RVAdapter(feedItems, getActivity().getApplicationContext());
+        protected void onPostExecute(final ArrayList<FeedItem> feedItems) {
+            mAdapter = new RVAdapter(feedItems, new RVAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(FeedItem item) {
+                    Intent intent = new Intent(getActivity(), SpecificPostActivity.class);
+                    long id;
+                    try {
+                        id = ((Post) item).id;
+                        intent.putExtra("postID", id);
+                        intent.putExtra("networkID", selectedNetwork);
+                        getActivity().startActivity(intent);
+                    } catch(ClassCastException e) {
+                        //I don't think we have commenting support for events??
+                    } catch (NullPointerException e) {
+                        Toast.makeText(getActivity(), "Cannot open post", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }, getActivity().getApplicationContext());
             mRecyclerView.setAdapter(mAdapter);
             getFragmentManager().beginTransaction()
                     .detach(PostsFrag.this)

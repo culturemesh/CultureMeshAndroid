@@ -44,8 +44,10 @@
     <string name="in">In</string>
     <string name="near">Near</string>
     <string name="speakers_in">Speakers In</string>
+    <string name="help">Help</string>
     <string name="your_networks">Your Networks</string>
     <string name="title_activity_drawer">DrawerActivity</string>
+    <string name="title_activity_specific_post">SpecificPostActivity</string>
     <string name="title_activity_explore_bubbles">ExploreBubblesActivity</string>
     <string name="title_activity_explore_bubbles_open_gl">ExploreBubblesOpenGLActivity</string>
     <string name="title_activity_main">MainActivity</string>
@@ -95,8 +97,10 @@
     <string name="exit">Exit</string>
 
     <string name="view_more_comments">View More Comments &#8230;</string>
+    <string name="write_comments">Write a Comment &#8230; </string>
+    <string name="post">Post</string>
+    <string name="cannot_write_empty">Cannot write an empty comment.</string>
     <!-- Strings for help and about pages -->
-    <string name="help">Help</string>
     <string name="about">About</string>
     <string name="culturemesh_mission">
 

@@ -11,7 +11,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:windowSoftInputMode="adjustNothing"
+        android:theme="@style/AppTheme"
+        >
         <activity
             android:name=".TimelineActivity"
             android:label="@string/app_name"
@@ -90,6 +92,15 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.codethechange.culturemesh.PickOnboardingStatusActivity" />
+        </activity>
+        <activity
+            android:name=".SpecificPostActivity"
+            android:label="@string/title_activity_specific_post"
+            android:parentActivityName=".TimelineActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.codethechange.culturemesh.TimelineActivity" />
         </activity>
 
         <activity
