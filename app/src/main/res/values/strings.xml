@@ -82,8 +82,8 @@
     <string name="genericFail">Oops, something went wrong.</string>
     <string name="genericSuccess">Operation Succeeded!</string>
     <!-- Strings for onboarding -->
-    <string name="title_activity_pick_onboarding_status">PickOnboardingStatusActivity</string>
-    <string name="title_activity_onboard">OnboardActivity</string>
+    <string name="title_activity_pick_onboarding_status">Status Picker (For Testing)</string>
+    <string name="title_activity_onboard">Welcome!</string>
     <string name="welcome">Welcome!</string>
     <string name="cultureMesh_description">CultureMesh helps you connect with nearby people who
         speak your language or come from where you do."</string>
@@ -92,8 +92,9 @@
     <string name="ready_question">Ready?</string>
     <string name="lets_start">Let\'s get Started!</string>
     <string name="logIn_signUp">Log In or Sign Up</string>
+    <string name="exit">Exit</string>
+
     <string name="view_more_comments">View More Comments &#8230;</string>
-    <string name="title_activity_about">AboutActivity</string>
     <!-- Strings for help and about pages -->
     <string name="help">Help</string>
     <string name="about">About</string>
