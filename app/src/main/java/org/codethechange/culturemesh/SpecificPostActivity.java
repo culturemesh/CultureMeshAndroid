@@ -230,7 +230,9 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                     startActivity(viewUser);
                 }
             };
-
+            personPhoto.setOnClickListener(viewUserProfile);
+            username.setOnClickListener(viewUserProfile);
+            personName.setOnClickListener(viewUserProfile);
             int r = getResources().getIdentifier("commentColor", "color", "org.codethechange.culturemesh");
             commentLV.setBackgroundResource(r);
 

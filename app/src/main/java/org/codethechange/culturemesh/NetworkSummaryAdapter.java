@@ -19,6 +19,18 @@ public class NetworkSummaryAdapter extends RecyclerView.Adapter<NetworkSummaryAd
     ArrayList<Network> networks;
     ArrayList<Integer> postCounts, userCounts;
 
+    public ArrayList<Network> getNetworks() {
+        return networks;
+    }
+
+    public ArrayList<Integer> getPostCounts() {
+        return postCounts;
+    }
+
+    public ArrayList<Integer> getUserCounts() {
+        return userCounts;
+    }
+
     public NetworkSummaryAdapter(ArrayList<Network> networks, ArrayList<Integer> postCounts,
                                  ArrayList<Integer> userCounts) {
         this.networks = networks;

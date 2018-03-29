@@ -5,9 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -15,9 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
-import android.util.Log;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -35,10 +31,7 @@ import io.fabric.sdk.android.Fabric;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class DrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -227,7 +220,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                 res.showErrorDialog(DrawerActivity.this);
             } else {
                 User user = res.getPayload();
-                TextView userName = navView.getHeaderView(0).findViewById(R.id.user_name);
+                TextView userName = navView.getHeaderView(0).findViewById(R.id.full_name);
                 userName.setText(user.username);
                 TextView email = navView.getHeaderView(0).findViewById(R.id.user_email);
                 email.setText(user.email);

@@ -26,6 +26,10 @@ import java.util.List;
  * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
  */
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
+    public List<FeedItem> getNetPosts() {
+        return netPosts;
+    }
+
     private List<FeedItem> netPosts;
     private Context context;
 

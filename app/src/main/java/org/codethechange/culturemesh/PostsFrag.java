@@ -120,7 +120,9 @@ public class PostsFrag extends Fragment {
          * @return a collection of feed items to be displayed in the feed.
          */
         @Override
-        protected ArrayList<FeedItem> doInBackground(Long... longs) {
+        protected ArrayList<FeedItem> doInBackground(Long... longs)
+        {
+            API.loadAppDatabase(getActivity());
             SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
                     MODE_PRIVATE);
             //We generalize posts/events to be feed items for polymorphism.
@@ -140,6 +142,7 @@ public class PostsFrag extends Fragment {
                 feedItems.addAll(posts);
             }
             //TODO: Add ability check out twitter posts.
+            API.closeDatabase();
             return feedItems;
         }
 
@@ -163,6 +166,8 @@ public class PostsFrag extends Fragment {
                 }
             }, getActivity().getApplicationContext());
             mRecyclerView.setAdapter(mAdapter);
+            //TODO: There's a better way than this. Check out ListNetworkFragment to modify the lists
+            //in the adapter themselves instead having to restart the fragment.
             getFragmentManager().beginTransaction()
                     .detach(PostsFrag.this)
                     .attach(PostsFrag.this)

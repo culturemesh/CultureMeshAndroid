@@ -53,6 +53,8 @@ class API {
     static final String SETTINGS_IDENTIFIER = "acmsi";
     static final String PERSONAL_NETWORKS = "pernet";
     static final String SELECTED_NETWORK = "selnet";
+    final static String SELECTED_USER="seluser";
+    final static String FIRST_TIME = "firsttime";
     static final boolean NO_JOINED_NETWORKS = false;
     static CMDatabase mDb;
     //reqCounter to ensure that we don't close the database while another thread is using it.
@@ -153,8 +155,10 @@ class API {
             JSONArray usersJSON = new JSONArray(rawDummy);
             for (int i = 0; i < usersJSON.length(); i++) {
                 JSONObject userJSON = usersJSON.getJSONObject(i);
-                User user = new User(userJSON.getLong("user_id"), userJSON.getString("firstName"),userJSON.getString("lastName"),
-                        userJSON.getString("email"), userJSON.getString("username"), userJSON.getString("img_link"));
+                User user = new User(userJSON.getLong("user_id"), userJSON.getString("firstName"),
+                        userJSON.getString("lastName"), userJSON.getString("email"),
+                        userJSON.getString("username"), userJSON.getString("img_link"),
+                        userJSON.getString("about_me"));
                 uDAo.addUser(user);
             }
 
@@ -602,9 +606,10 @@ class API {
         NetworkSubscription networkSubscription2 = new NetworkSubscription(1,1);
         NetworkSubscription networkSubscription3 = new NetworkSubscription(2,1);
         NetworkSubscription networkSubscription4 = new NetworkSubscription(4,1);
+        NetworkSubscription networkSubscription5 = new NetworkSubscription(4,0);
         NetworkSubscriptionDao netSubDao = mDb.networkSubscriptionDao();
         netSubDao.insertSubscriptions(networkSubscription1, networkSubscription2, networkSubscription3,
-                networkSubscription4);
+                networkSubscription4, networkSubscription5);
     }
 
     static void addReplies() {
@@ -714,9 +719,10 @@ class API {
         /*
             When will we ever use this? Perhaps viewing a user profile?
          */
-        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> userPosts(int id) {
+        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> userPosts(long id) {
             PostDao pDao = mDb.postDao();
             List<org.codethechange.culturemesh.models.Post> posts = pDao.getUserPosts(id);
+            instantiatePosts(posts);
             return new NetworkResponse<>(posts);
         }
 

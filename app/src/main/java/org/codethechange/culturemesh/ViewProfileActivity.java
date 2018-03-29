@@ -1,22 +1,28 @@
 package org.codethechange.culturemesh;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+
+import org.codethechange.culturemesh.models.User;
 
 public class ViewProfileActivity extends AppCompatActivity {
     public static final String SELECTED_USER = "seluser";
     ViewPager mViewPager;
     TabLayout mTabLayout;
+    TextView userName, bio, fullName;
+    ImageView profilePic;
     long selUser;
 
 
@@ -25,14 +31,18 @@ public class ViewProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_profile);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        selUser = savedInstanceState.getLong(SELECTED_USER, -1);
+        selUser = getIntent().getLongExtra(SELECTED_USER, -1);
         setSupportActionBar(toolbar);
         mViewPager = findViewById(R.id.contributions_pager);
         PagerAdapter mPagerAdapter = new ContributionsPager(getSupportFragmentManager());
         mViewPager.setAdapter(mPagerAdapter);
         mTabLayout = findViewById(R.id.contributions_tab_layout);
         mTabLayout.setupWithViewPager(mViewPager);
-
+        fullName = findViewById(R.id.full_name);
+        userName = findViewById(R.id.user_name);
+        bio = findViewById(R.id.bio);
+        profilePic = findViewById(R.id.user_profile);
+        new LoadUserData().execute(selUser);
     }
 
     /**
@@ -40,7 +50,7 @@ public class ViewProfileActivity extends AppCompatActivity {
      * This could be seeing the list of networks the user is subscribed to, the list of posts
      * the user has written, or the list of events the user has attended.
      */
-    class ContributionsPager extends FragmentPagerAdapter {
+    class ContributionsPager extends FragmentStatePagerAdapter {
 
         ContributionsPager(FragmentManager fm) {
             super(fm);
@@ -52,11 +62,11 @@ public class ViewProfileActivity extends AppCompatActivity {
                 case 0:
                     return ListNetworksFragment.newInstance(selUser);
                 case 1:
-                    return null;
+                    return ListUserPostsFragment.newInstance(selUser);
                 default:
 
             }
-            return null;
+            return ListNetworksFragment.newInstance(selUser);
         }
 
         @Override
@@ -64,6 +74,41 @@ public class ViewProfileActivity extends AppCompatActivity {
             //We have three sections: Posts, Events, and Networks.
             return 3;
         }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return getResources().getString(R.string.networks);
+                case 1:
+                    return getResources().getString(R.string.posts);
+            }
+            return getResources().getString(R.string.events);
+        }
     }
 
+
+    class LoadUserData extends AsyncTask<Long, Void, NetworkResponse<User>> {
+
+        @Override
+        protected NetworkResponse<User> doInBackground(Long... longs) {
+            API.loadAppDatabase(getApplicationContext());
+            NetworkResponse res = API.Get.user(longs[0]);
+            API.closeDatabase();
+            return res;
+        }
+
+        @Override
+        protected void onPostExecute(NetworkResponse<User> res) {
+            if (res.fail()) {
+                res.showErrorDialog(ViewProfileActivity.this);
+            } else {
+                User user = res.getPayload();
+                bio.setText(user.aboutMe);
+                fullName.setText(user.firstName + " " + user.lastName);
+                userName.setText(user.username);
+                Picasso.with(getApplicationContext()).load(user.imgURL).into(profilePic);
+            }
+        }
+    }
 }

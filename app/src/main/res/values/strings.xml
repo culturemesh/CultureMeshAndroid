@@ -102,4 +102,6 @@
     <string name="events">Events</string>
     <string name="networks">Networks</string>
     <string name="no_networks">No Networks</string>
+    <string name="no_posts">No Posts</string>
+    <string name="no_events">No Events</string>
 </resources>
