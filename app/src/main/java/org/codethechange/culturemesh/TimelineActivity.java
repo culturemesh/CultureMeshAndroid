@@ -50,6 +50,7 @@ import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -78,7 +79,6 @@ private String basePath = "www.culturemesh.com/api/v1";
     private boolean isFABOpen;
     private TextView population, fromLocation, nearLocation;
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,10 +90,12 @@ private String basePath = "www.culturemesh.com/api/v1";
         population = findViewById(R.id.network_population);
         fromLocation = findViewById(R.id.fromLocation);
         nearLocation = findViewById(R.id.nearLocation);
-        if (API.NO_JOINED_NETWORKS) {
-            createNoNetwork();
-        } else {
+        API.loadAppDatabase(getApplicationContext());
+        long currUser = settings.getLong(API.CURRENT_USER, 1);
+        if (ApiUtils.hasJoinedNetwork(currUser, new checkJoinedNetworks())) {
             createDefaultNetwork();
+        } else {
+            createNoNetwork();
         }
         //TODO: For first run, uncomment this: new TestDatabase().execute();
         new TestDatabase().execute();
@@ -464,5 +466,19 @@ private String basePath = "www.culturemesh.com/api/v1";
         List<User> netUsers;
     }
 
+    private class checkJoinedNetworks extends AsyncTask<Long, Void, NetworkResponse<ArrayList<Network>>> {
+        @Override
+        protected NetworkResponse<ArrayList<Network>> doInBackground(Long... longs) {
+            API.loadAppDatabase(getApplicationContext());
+            long currUser = longs[0];
+            NetworkResponse<ArrayList<Network>> responseNetworks = API.Get.userNetworks(currUser);
+            return responseNetworks;
+        }
 
+        @Override
+        protected void onPostExecute(NetworkResponse<ArrayList<Network>> arrayListNetworkResponse) {
+            super.onPostExecute(arrayListNetworkResponse);
+            API.closeDatabase();
+        }
+    }
 }
