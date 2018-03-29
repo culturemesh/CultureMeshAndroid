@@ -1,6 +1,5 @@
 package org.codethechange.culturemesh;
 
-
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,19 +13,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.codethechange.culturemesh.models.FeedItem;
-import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.codethechange.culturemesh.API.SELECTED_USER;
 
 /**
  * Created by Drew Gregory on 03/29/18.
+ * This fragment lists the the events a user is subscribed to. It is used in ViewProfileActivity.
  */
-public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemClickListener {
-    View root;
+public class ListUserEventsFragment extends Fragment implements RVAdapter.OnItemClickListener {
     RecyclerView rv;
     TextView emptyText;
 
@@ -34,8 +31,8 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
      * Returns a new instance of this fragment for the given section
      * number.
      */
-    public static ListUserPostsFragment newInstance(long selUser) {
-        ListUserPostsFragment fragment = new ListUserPostsFragment();
+    public static ListUserEventsFragment newInstance(long selUser) {
+        ListUserEventsFragment fragment = new ListUserEventsFragment();
         Bundle args = new Bundle();
         args.putLong(SELECTED_USER, selUser);
         fragment.setArguments(args);
@@ -46,7 +43,7 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Get the intent, verify the action and get the query
-        root = inflater.inflate(R.layout.rv_container, container, false);
+        View root = inflater.inflate(R.layout.rv_container, container, false);
         rv = root.findViewById(R.id.rv);
         //Say it's empty.
         ArrayList<FeedItem> posts = new ArrayList<>();
@@ -54,8 +51,8 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
         emptyText = root.findViewById(R.id.empty_text);
-        emptyText.setText(getResources().getString(R.string.no_posts));
-        new ListUserPostsFragment.LoadUserPosts().execute(getArguments().getLong(SELECTED_USER, -1));
+        emptyText.setText(getResources().getString(R.string.no_events));
+        new ListUserEventsFragment.LoadUserEvents().execute(getArguments().getLong(SELECTED_USER, -1));
         return root;
 
     }
@@ -76,14 +73,14 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
         }
     }
 
-    class LoadUserPosts extends AsyncTask<Long, Void, Void> {
+    class LoadUserEvents extends AsyncTask<Long, Void, Void> {
 
         @Override
         protected Void doInBackground(Long... longs) {
             long userId = longs[0];
             API.loadAppDatabase(getActivity());
             RVAdapter adapter = (RVAdapter) rv.getAdapter();
-            adapter.getNetPosts().addAll(API.Get.userPosts(userId).getPayload());
+            adapter.getNetPosts().addAll(API.Get.userEvents(userId).getPayload());
             API.closeDatabase();
             return null;
         }
@@ -103,3 +100,5 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
         }
     }
 }
+
+

@@ -140,16 +140,21 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         if (subNet != null) {
             //The user tapped a subscribed network. We will now restart TimeLineActivity for that
             //network.
-            //TODO: Set up way to pass network as data point for timelineactivity.
+            //Pass network as data point for timelineactivity by putting it in sharedprefs.
+            getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
+                    .putLong(API.SELECTED_NETWORK, subNet.id).apply();
             Intent toTimeline = new Intent(getApplicationContext(), TimelineActivity.class);
             startActivity(toTimeline);
+            finish();
         }
         if (id == R.id.nav_explore) {
             Intent startExplore = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
             startActivity(startExplore);
+            finish();
         } else if (id == R.id.nav_join_network) {
             Intent startFindNet = new Intent(getApplicationContext(), FindNetworkActivity.class);
             startActivity(startFindNet);
+            finish();
         } else if (id == R.id.nav_manage) {
 
         }

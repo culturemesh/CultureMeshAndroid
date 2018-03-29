@@ -15,7 +15,7 @@
         android:layout_marginTop="8dp"
         android:text="TextView"
         android:textAlignment="center"
-        android:textAppearance="@android:style/TextAppearance.Material.Large"
+        android:textAppearance="@android:style/TextAppearance.Large"
         android:textColor="@color/darkBackground"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -25,8 +25,10 @@
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginStart="1dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

@@ -1,5 +1,8 @@
 package org.codethechange.culturemesh;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,9 +19,12 @@ import java.util.ArrayList;
  * can view other users' subscribed networks.
  */
 public class NetworkSummaryAdapter extends RecyclerView.Adapter<NetworkSummaryAdapter.PostViewHolder>{
-    ArrayList<Network> networks;
-    ArrayList<Integer> postCounts, userCounts;
-
+    private ArrayList<Network> networks;
+    private ArrayList<Integer> postCounts, userCounts;
+    interface OnNetworkTapListener {
+        void onItemClick(View v, Network network);
+    }
+    private OnNetworkTapListener listener;
     public ArrayList<Network> getNetworks() {
         return networks;
     }
@@ -31,11 +37,12 @@ public class NetworkSummaryAdapter extends RecyclerView.Adapter<NetworkSummaryAd
         return userCounts;
     }
 
-    public NetworkSummaryAdapter(ArrayList<Network> networks, ArrayList<Integer> postCounts,
-                                 ArrayList<Integer> userCounts) {
+    NetworkSummaryAdapter(ArrayList<Network> networks, ArrayList<Integer> postCounts,
+                          ArrayList<Integer> userCounts, OnNetworkTapListener listener) {
         this.networks = networks;
         this.postCounts = postCounts;
         this.userCounts = userCounts;
+        this.listener = listener;
     }
 
     @Override
@@ -46,7 +53,7 @@ public class NetworkSummaryAdapter extends RecyclerView.Adapter<NetworkSummaryAd
 
     @Override
     public void onBindViewHolder(PostViewHolder holder, int position) {
-        Network network = networks.get(position);
+        final Network network = networks.get(position);
         if (network.networkClass) {//fromLoc
             holder.fromLocation.setText(network.fromLocation.shortName());
         } else {
@@ -55,6 +62,12 @@ public class NetworkSummaryAdapter extends RecyclerView.Adapter<NetworkSummaryAd
         holder.nearLocation.setText(network.nearLocation.shortName());
         holder.postCount.setText(FormatManager.abbreviateNumber(postCounts.get(position)));
         holder.subscribedUserCount.setText(FormatManager.abbreviateNumber(userCounts.get(position)));
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onItemClick(v, network);
+            }
+        });
     }
 
     @Override

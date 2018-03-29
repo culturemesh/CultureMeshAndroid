@@ -33,6 +33,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         selUser = getIntent().getLongExtra(SELECTED_USER, -1);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mViewPager = findViewById(R.id.contributions_pager);
         PagerAdapter mPagerAdapter = new ContributionsPager(getSupportFragmentManager());
         mViewPager.setAdapter(mPagerAdapter);
@@ -63,10 +64,8 @@ public class ViewProfileActivity extends AppCompatActivity {
                     return ListNetworksFragment.newInstance(selUser);
                 case 1:
                     return ListUserPostsFragment.newInstance(selUser);
-                default:
-
             }
-            return ListNetworksFragment.newInstance(selUser);
+            return ListUserEventsFragment.newInstance(selUser);
         }
 
         @Override
@@ -87,6 +86,15 @@ public class ViewProfileActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * This allows the user to hit the back button on the toolbar to go to the previous activity.
+     * @return
+     */
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
 
     class LoadUserData extends AsyncTask<Long, Void, NetworkResponse<User>> {
 

@@ -456,7 +456,6 @@ private String basePath = "www.culturemesh.com/api/v1";
                 //Update near location
                 nearLocation.setText(network.nearLocation.shortName());
             }
-            API.closeDatabase();
         }
     }
 

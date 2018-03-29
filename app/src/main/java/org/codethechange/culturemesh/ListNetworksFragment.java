@@ -1,5 +1,8 @@
 package org.codethechange.culturemesh;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -24,7 +27,7 @@ import java.util.ArrayList;
 /**
  * Created by Drew Gregory on 03/27/18.
  */
-public class ListNetworksFragment extends Fragment {
+public class ListNetworksFragment extends Fragment implements  NetworkSummaryAdapter.OnNetworkTapListener {
     View root;
     RecyclerView rv;
     TextView emptyText;
@@ -53,7 +56,7 @@ public class ListNetworksFragment extends Fragment {
         ArrayList<Network> networks = new ArrayList<>();
         ArrayList<Integer> counts = new ArrayList<>();
         ArrayList<Integer> users = new ArrayList<>();
-        NetworkSummaryAdapter adapter = new NetworkSummaryAdapter(networks, counts, users);
+        NetworkSummaryAdapter adapter = new NetworkSummaryAdapter(networks, counts, users, this);
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
         emptyText = root.findViewById(R.id.empty_text);
@@ -64,6 +67,25 @@ public class ListNetworksFragment extends Fragment {
         }
         return root;
 
+    }
+
+
+    /**
+     * This is the onClick() passed to NetworkSummaryAdapter. Thus, this is executed when the user
+     * taps on of the network card views.
+     * We want to view the tapped network in TimelineActivity.
+     * @param v the CardView.
+     * @param network The Network
+     */
+    @Override
+    public void onItemClick(View v, Network network) {
+        //View Network in TimelineActivity
+        //Commit selected network id to sharedPrefs.
+        SharedPreferences prefs = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, Context.MODE_PRIVATE);
+        prefs.edit().putLong(API.SELECTED_NETWORK, network.id).apply();
+        Intent viewNetwork = new Intent(getActivity() ,TimelineActivity.class);
+        getActivity().startActivity(viewNetwork);
+        getActivity().finish();
     }
 
     class LoadSubscribedNetworks extends AsyncTask<Long, Void, Void> {
@@ -88,7 +110,6 @@ public class ListNetworksFragment extends Fragment {
                     adapter.getPostCounts().add(0);
                 }
             }
-
             API.closeDatabase();
             return null;
         }
@@ -105,8 +126,6 @@ public class ListNetworksFragment extends Fragment {
                 //Hide empty text.
                 emptyText.setVisibility(View.GONE);
             }
-            getArguments().putBoolean(FIRST_TIME, false);
-            getArguments().putLong(SELECTED_USER, getArguments().getLong(SELECTED_USER, -1));
         }
     }
 }
