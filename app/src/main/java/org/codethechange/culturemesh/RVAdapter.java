@@ -167,7 +167,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                     }
                 }
             }
-            //TODO: Picasso isn't loading all the images. Figure that out.
             Picasso.with(pvh.personPhoto.getContext()).load(post.getAuthor().getImgURL()).
                     into(pvh.personPhoto);
             //Next, insert 2 preview comments if there are any.
@@ -199,7 +198,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                     pvh.viewMoreComments.setVisibility(View.GONE);
                 }
             }
-            Log.i("Image Link", post.getAuthor().getImgURL());
         } catch(ClassCastException e) {
             //It's an event.
             Event event = (Event) item;
