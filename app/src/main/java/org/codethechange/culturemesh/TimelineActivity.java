@@ -50,20 +50,18 @@ import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
+import java.util.List;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.List;
 
-public class TimelineActivity extends DrawerActivity {
 /**
  * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/8/17.
  */
-public class TimelineActivity extends DrawerActivity
-        implements PostsFrag.OnFragmentInteractionListener {
-private String basePath = "www.culturemesh.com/api/v1";
+public class TimelineActivity extends DrawerActivity {
+    private String basePath = "www.culturemesh.com/api/v1";
     final String FILTER_LABEL = "fl";
     final static String FILTER_CHOICE_NATIVE = "fcn";
     final static String FILTER_CHOICE_TWITTER = "fct";
@@ -95,6 +93,7 @@ private String basePath = "www.culturemesh.com/api/v1";
         API.loadAppDatabase(getApplicationContext());
         if (API.NO_JOINED_NETWORKS) {
             createNoNetwork();
+>>>>>>>>> Temporary merge branch 2
         } else {
             createDefaultNetwork();
         }
@@ -108,25 +107,6 @@ private String basePath = "www.culturemesh.com/api/v1";
     }
 
     protected void createDefaultNetwork() {
-        /* //Set up Toolbar
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.action_bar);
-        setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setLogo(R.drawable.logo_header);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        */
-
-        getSupportActionBar().setLogo(R.drawable.logo_header);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
-
-        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-
-
         //Choose selected network.
         final long selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
         new LoadNetworkData().execute(selectedNetwork);

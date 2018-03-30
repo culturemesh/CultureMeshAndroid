@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
@@ -37,6 +38,9 @@ import java.util.List;
 import static android.content.Context.MODE_PRIVATE;
 
 //TODO: If no posts, show text view saying add a post!
+/**
+ * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
+ */
 public class PostsFrag extends Fragment {
     private String basePath = "www.culturemesh.com/api/v1";
 
@@ -195,29 +199,23 @@ public class PostsFrag extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(ArrayList<FeedItem> feedItems) {
-            mAdapter = new RVAdapter(feedItems, getActivity().getApplicationContext());
-            ArrayList<FeedItem> posts = new ArrayList<FeedItem>();
-            for (Post post : API.genPosts()) {
-                posts.add(post);
-            }
-            posts.add(API.genEvents().get(2));
-
-            mAdapter = new RVAdapter(posts, new RVAdapter.OnItemClickListener() {
+        protected void onPostExecute(final ArrayList<FeedItem> feedItems) {
+            mAdapter = new RVAdapter(feedItems, new RVAdapter.OnItemClickListener() {
                 @Override
                 public void onItemClick(FeedItem item) {
                     Intent intent = new Intent(getActivity(), SpecificPostActivity.class);
-                    Post post = (Post) item; //to test
-                    BigInteger postID = post.getId();
+                    long id;
                     try {
-                        intent.putExtra("postID", postID.toString());
+                        id = ((Post) item).id;
+                        intent.putExtra("postID", id);
                         getActivity().startActivity(intent);
+                    } catch(ClassCastException e) {
+                        //I don't think we have commenting support for events??
                     } catch (NullPointerException e) {
                         Toast.makeText(getActivity(), "Cannot open post", Toast.LENGTH_LONG).show();
                     }
                 }
             }, getActivity().getApplicationContext());
-            mRecyclerView.setAdapter(mAdapter);
             mRecyclerView.setAdapter(mAdapter);
             getFragmentManager().beginTransaction()
                     .detach(PostsFrag.this)

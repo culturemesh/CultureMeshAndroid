@@ -663,6 +663,16 @@ class API {
     /**
      * For simplicity, we store the id's of other model objects in the database, not the objects
      * themselves. Thus, when we return these objects, we need to instantiate them.
+     * @param post
+     */
+    static void instantiatePost(org.codethechange.culturemesh.models.Post post) {
+            //Get the user
+            post.author = API.Get.user(post.userId).getPayload();
+    }
+
+    /**
+     * For simplicity, we store the id's of other model objects in the database, not the objects
+     * themselves. Thus, when we return these objects, we need to instantiate them.
      * @param comments List of PostReplies with which we will get comments for.
      */
     static void instantiatePostReplies(List<PostReply> comments) {
@@ -782,6 +792,7 @@ class API {
         static NetworkResponse<org.codethechange.culturemesh.models.Post> post(long id) {
             PostDao pDao = mDb.postDao();
             org.codethechange.culturemesh.models.Post post = pDao.getPost((int) id);
+            instantiatePost(post);
             return new NetworkResponse<>(post == null, post);
         }
 

@@ -30,7 +30,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
     private List<FeedItem> netPosts;
     private Context context;
 
-    static class PostViewHolder extends RecyclerView.ViewHolder implements org.codethechange.culturemesh.PostViewHolder/*, Serializable */{
+    static class PostViewHolder extends RecyclerView.ViewHolder {
         boolean post = true;
 
         public boolean isPost() {
@@ -225,9 +225,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             if (pvh.isPost()) {
                 //Let's make all post-related stuff gone.
                 pvh.hidePostViews();
-                pvh.cv.setCardBackgroundColor(context.getResources().
-                        getColor(R.color.colorAccent));
-       //         pvh.personPhoto.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_event_white_24px));
                 pvh.personPhoto.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_event_white_24px));
             }
             pvh.eventTitle.setText(event.getTitle());
