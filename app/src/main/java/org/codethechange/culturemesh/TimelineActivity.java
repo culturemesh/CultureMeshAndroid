@@ -19,6 +19,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -38,6 +40,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -95,6 +98,7 @@ private String basePath = "www.culturemesh.com/api/v1";
         } else {
             createNoNetwork();
         }
+
         //TODO: For first run, uncomment this: new TestDatabase().execute();
         new TestDatabase().execute();
     }
@@ -435,18 +439,33 @@ private String basePath = "www.culturemesh.com/api/v1";
             //TODO: Use NetworkResponse for error handling.
             NetUserWrapper wrap = new NetUserWrapper();
             wrap.network = API.Get.network(longs[0]).getPayload();
-            wrap.netUsers = API.Get.networkUsers(longs[0]).getPayload();
+            List<User> users = API.Get.networkUsers(longs[0]).getPayload();
+            /*The user information is only used for the ViewUsersModalSheetFragment.
+            Fragments like default constructors, so parameters should be passed as an args bundle.
+            Thus, since bundle arguments are either parcelable, serializable, or primitive data types,
+            we will be passing in the relevant information for the recycler view (string username,
+            string profile picture URL, and long user if for ViewProfileActivity) as separate arguments.
+             */
+            wrap.netUsernames = new ArrayList<>();
+            wrap.netProfilePictures = new ArrayList<>();
+            wrap.netUserIds = new long[users.size()];
+            for (int i = 0; i < users.size(); i++) {
+                User user = users.get(i);
+                wrap.netUsernames.add(user.firstName + " " + user.lastName);
+                wrap.netProfilePictures.add(user.imgURL);
+                wrap.netUserIds[i] = user.id;
+            }
             API.closeDatabase();
             return wrap;
         }
 
         @Override
-        protected void onPostExecute(NetUserWrapper wrapper) {
+        protected void onPostExecute(final NetUserWrapper wrapper) {
             Network network = wrapper.network;
             if (network != null) {
                 //Update population number
                 //Manipulate string of number to have magnitude suffix (K,M,etc.)
-                population.setText(FormatManager.abbreviateNumber(wrapper.netUsers.size()));
+                population.setText(FormatManager.abbreviateNumber(wrapper.netUserIds.length));
                 //Update from location/language
                 if (network.networkClass) {
                     fromLocation.setText(network.fromLocation.shortName());
@@ -455,13 +474,28 @@ private String basePath = "www.culturemesh.com/api/v1";
                 }
                 //Update near location
                 nearLocation.setText(network.nearLocation.shortName());
+                View.OnClickListener showUsersListener = new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        BottomSheetDialogFragment bsFrag = new ViewUsersModalSheetFragment();
+                        Bundle args = new Bundle();
+                        args.putStringArrayList(ViewUsersModalSheetFragment.USER_NAMES, wrapper.netUsernames);
+                        args.putStringArrayList(ViewUsersModalSheetFragment.IMAGE_URLS, wrapper.netProfilePictures);
+                        args.putLongArray(ViewUsersModalSheetFragment.USER_IDS, wrapper.netUserIds);
+                        bsFrag.setArguments(args);
+                        bsFrag.show(getSupportFragmentManager(), "ViewUsersModalSheet");
+                    }
+                };
+                population.setOnClickListener(showUsersListener);
+                findViewById(R.id.population_button).setOnClickListener(showUsersListener);
             }
         }
     }
 
     private class NetUserWrapper {
         Network network;
-        List<User> netUsers;
+        ArrayList<String> netUsernames, netProfilePictures;
+        long[] netUserIds;
     }
 
     private class checkJoinedNetworks extends AsyncTask<Long, Void, NetworkResponse<ArrayList<Network>>> {

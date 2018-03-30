@@ -27,8 +27,6 @@ public class User implements Serializable{
 
     public int role;
 
-    public String imageLink;
-
     public String imgURL;
 
     public String getImgURL() {

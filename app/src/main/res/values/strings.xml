@@ -106,6 +106,7 @@
     <string name="no_networks">No Networks</string>
     <string name="no_posts">No Posts</string>
     <string name="no_events">No Events</string>
+    <string name="no_users">No Users</string>
     <!-- Strings for help and about pages -->
     <string name="about">About</string>
     <string name="culturemesh_mission">

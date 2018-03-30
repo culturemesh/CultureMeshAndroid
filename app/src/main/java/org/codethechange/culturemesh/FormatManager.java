@@ -8,6 +8,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
@@ -218,20 +219,27 @@ public class FormatManager implements
      */
     public static Spanned parseText(String formattedText) {
         //Replace <link> with <a>
+        Log.i("Pre-format", formattedText);
         try {
             int cursor = 0;
-            for (cursor = formattedText.indexOf("<link>", cursor); cursor != -1; cursor = formattedText.indexOf("<a", cursor)) {
+            for (cursor = formattedText.indexOf("<link>", cursor); cursor != -1; cursor = formattedText.indexOf("<link>", cursor)) {
                 //We need to replace <link> with <a href="">
                 String before = formattedText.substring(0, cursor);
                 //Cut out <link>
                 formattedText = before + formattedText.substring(cursor + "<link>".length());
                 String link = formattedText.substring(cursor, formattedText.indexOf("</link>",cursor));
+                Log.i("BEFORE",before);
+                Log.i("LINK",link);
+                Log.i("AFTER", formattedText.substring(cursor));
                 formattedText = before + "<a href=\"" + link + "\">" + formattedText.substring(cursor);
-                formattedText = formattedText.replaceFirst("</link>","</a>");
+                Log.i("formattedTextB4rF",formattedText);
+
             }
         } catch(StringIndexOutOfBoundsException e) {
             //TODO: Do some error handling when having malformed text.
         }
+        formattedText = formattedText.replace("</link>","</a>");
+        Log.i("Post-parse",formattedText);
         return fromHtml(formattedText);
     }
 

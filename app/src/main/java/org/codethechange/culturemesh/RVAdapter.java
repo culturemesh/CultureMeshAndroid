@@ -193,13 +193,13 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                     //We have at least one post to display! Let's display it.
                     PostReply comment1 = post.comments.get(0);
                     pvh.comment1Name.setText(comment1.author.getUsername());
-                    pvh.comment1Text.setText(comment1.replyText);
+                    pvh.comment1Text.setText(FormatManager.parseText(comment1.replyText));
                     pvh.comment1Layout.setVisibility(View.VISIBLE);
                     if (post.comments.size() >= 2) {
                         //Now let's display comment 2.
                         PostReply comment2 = post.comments.get(1);
                         pvh.comment2Name.setText(comment2.author.getUsername());
-                        pvh.comment2Text.setText(comment2.replyText);
+                        pvh.comment2Text.setText(FormatManager.parseText(comment2.replyText));
                         pvh.comment2Layout.setVisibility(View.VISIBLE);
                         if (post.comments.size() > 2) {
                             //Even more comemnts? The user will have to check them out
