@@ -53,6 +53,7 @@ public class NetworkSummaryAdapter extends RecyclerView.Adapter<NetworkSummaryAd
 
     @Override
     public void onBindViewHolder(PostViewHolder holder, int position) {
+        if (position >= networks.size() || position >= postCounts.size()) return;
         final Network network = networks.get(position);
         if (network.networkClass) {//fromLoc
             holder.fromLocation.setText(network.fromLocation.shortName());
