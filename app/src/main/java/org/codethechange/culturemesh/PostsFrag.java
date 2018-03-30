@@ -142,6 +142,7 @@ public class PostsFrag extends Fragment {
             }
             API.closeDatabase();
             //TODO: Add ability check out twitter posts.
+            API.closeDatabase();
             return feedItems;
         }
 
@@ -165,6 +166,8 @@ public class PostsFrag extends Fragment {
                 }
             }, getActivity().getApplicationContext());
             mRecyclerView.setAdapter(mAdapter);
+            //TODO: There's a better way than this. Check out ListNetworkFragment to modify the lists
+            //in the adapter themselves instead having to restart the fragment.
             getFragmentManager().beginTransaction()
                     .detach(PostsFrag.this)
                     .attach(PostsFrag.this)

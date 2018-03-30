@@ -108,6 +108,16 @@
             android:label="@string/help"
             android:theme="@style/AppTheme.NoActionBar"></activity>
 
+        <activity
+            android:name=".SpecificPostActivity"
+            android:label="@string/title_activity_specific_post"
+            android:parentActivityName=".TimelineActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.codethechange.culturemesh.TimelineActivity" />
+        </activity>
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="264409e41fc2e4073f71bd98485d3b60f90b0dcf" />
@@ -115,6 +125,11 @@
         <activity
             android:name=".AboutActivity"
             android:label="@string/about"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+
+        <activity
+            android:name=".ViewProfileActivity"
+            android:label="@string/title_activity_view_profile"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

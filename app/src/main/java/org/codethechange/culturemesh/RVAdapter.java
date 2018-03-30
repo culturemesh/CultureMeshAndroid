@@ -1,7 +1,6 @@
 package org.codethechange.culturemesh;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v7.widget.CardView;
@@ -28,6 +27,10 @@ import java.util.List;
  * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
  */
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
+    public List<FeedItem> getNetPosts() {
+        return netPosts;
+    }
+
     private List<FeedItem> netPosts;
     private Context context;
 
@@ -37,7 +40,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
         public boolean isPost() {
             return post;
         }
-
         CardView cv;
         TextView personName, username, content, timestamp, eventTitle, eventTime, eventLocation,
                 eventDescription, comment1Name, comment1Text, comment2Name, comment2Text,

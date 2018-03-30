@@ -5,9 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -15,9 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
-import android.util.Log;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -35,10 +31,7 @@ import io.fabric.sdk.android.Fabric;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class DrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -146,16 +139,21 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         if (subNet != null) {
             //The user tapped a subscribed network. We will now restart TimeLineActivity for that
             //network.
-            //TODO: Set up way to pass network as data point for timelineactivity.
+            //Pass network as data point for timelineactivity by putting it in sharedprefs.
+            getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
+                    .putLong(API.SELECTED_NETWORK, subNet.id).apply();
             Intent toTimeline = new Intent(getApplicationContext(), TimelineActivity.class);
             startActivity(toTimeline);
+            finish();
         }
         if (id == R.id.nav_explore) {
             Intent startExplore = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
             startActivity(startExplore);
+            finish();
         } else if (id == R.id.nav_join_network) {
             Intent startFindNet = new Intent(getApplicationContext(), FindNetworkActivity.class);
             startActivity(startFindNet);
+            finish();
         } else if (id == R.id.nav_about) {
             Intent startAbout = new Intent(getApplicationContext(), AboutActivity.class);
             startActivity(startAbout);

@@ -25,6 +25,11 @@ public class Network implements Serializable{
     @Embedded
     public Language language;
 
+    /**
+     * networkClass is a boolean determining if a network is fromloc->nearLoc or language->nearLoc.
+     * true: fromLoc->nearLoc
+     * false: lang->nearLoc
+     */
     public boolean networkClass;
 
     /**
