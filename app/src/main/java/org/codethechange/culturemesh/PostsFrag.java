@@ -120,8 +120,7 @@ public class PostsFrag extends Fragment {
          * @return a collection of feed items to be displayed in the feed.
          */
         @Override
-        protected ArrayList<FeedItem> doInBackground(Long... longs)
-        {
+        protected ArrayList<FeedItem> doInBackground(Long... longs) {
             API.loadAppDatabase(getActivity());
             SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
                     MODE_PRIVATE);
@@ -141,6 +140,7 @@ public class PostsFrag extends Fragment {
                 }
                 feedItems.addAll(posts);
             }
+            API.closeDatabase();
             //TODO: Add ability check out twitter posts.
             API.closeDatabase();
             return feedItems;
