@@ -44,6 +44,7 @@
     <string name="in">In</string>
     <string name="near">Near</string>
     <string name="speakers_in">Speakers In</string>
+    <string name="help">Help</string>
     <string name="your_networks">Your Networks</string>
     <string name="title_activity_drawer">DrawerActivity</string>
     <string name="title_activity_specific_post">View Post</string>
@@ -106,7 +107,6 @@
     <string name="no_posts">No Posts</string>
     <string name="no_events">No Events</string>
     <!-- Strings for help and about pages -->
-    <string name="help">Help</string>
     <string name="about">About</string>
     <string name="culturemesh_mission">
 

@@ -228,7 +228,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                 res.showErrorDialog(DrawerActivity.this);
             } else {
                 User user = res.getPayload();
-                TextView userName = navView.getHeaderView(0).findViewById(R.id.full_name);
+                TextView userName = navView.getHeaderView(0).findViewById(R.id.user_name);
                 userName.setText(user.username);
                 TextView email = navView.getHeaderView(0).findViewById(R.id.user_email);
                 email.setText(user.email);

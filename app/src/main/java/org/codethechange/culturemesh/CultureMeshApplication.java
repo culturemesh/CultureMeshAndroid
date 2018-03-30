@@ -2,6 +2,8 @@ package org.codethechange.culturemesh;
 
 import android.app.Application;
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
+
 import io.fabric.sdk.android.Fabric;
 
 /**
@@ -13,6 +15,5 @@ public class CultureMeshApplication extends Application {
     public void onCreate() {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
-        API.loadAppDatabase(getApplicationContext());
     }
 }

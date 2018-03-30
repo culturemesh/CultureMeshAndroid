@@ -5,6 +5,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -143,7 +144,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
 
     private final OnItemClickListener listener;
 
-    RVAdapter(List<FeedItem> netPosts, OnItemClickListener listener, Context context) {
+    public RVAdapter(List<FeedItem> netPosts, OnItemClickListener listener, Context context) {
         this.netPosts = netPosts;
         this.context = context;
         this.listener = listener;

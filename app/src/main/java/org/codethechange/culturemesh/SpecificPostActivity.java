@@ -157,9 +157,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         //For now, since I believe events cannot take comments, I don't think it is worth the user's
         //time to navigate to this activity with an event.
         new loadPostReplies().execute(postID);
-
-
-
     }
 
     @Override
@@ -208,7 +205,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
             postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
             timestamp.setText(post.getDatePosted());
             username.setText(post.getAuthor().getUsername());
-
             if (post.getImageLink() != null || post.getVideoLink() != null ) {
                 //TODO: Figure out how to display videos
                 //TODO: Figure out format for multiple pictures. Assuming separated by commas.
