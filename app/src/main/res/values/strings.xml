@@ -153,4 +153,5 @@
         "limitations under the License.\n\n"
 
     </string>
+    <string name="title_activity_settings">SettingsActivity</string>
 </resources>

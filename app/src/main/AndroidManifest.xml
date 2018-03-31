@@ -11,9 +11,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:windowSoftInputMode="adjustNothing"
         android:theme="@style/AppTheme"
-        >
+        android:windowSoftInputMode="adjustNothing">
         <activity
             android:name=".TimelineActivity"
             android:label="@string/app_name"
@@ -102,12 +101,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.codethechange.culturemesh.TimelineActivity" />
         </activity>
-
         <activity
             android:name=".HelpActivity"
             android:label="@string/help"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".SpecificPostActivity"
             android:label="@string/title_activity_specific_post"
@@ -125,11 +122,14 @@
         <activity
             android:name=".AboutActivity"
             android:label="@string/about"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ViewProfileActivity"
             android:label="@string/title_activity_view_profile"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
