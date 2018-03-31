@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,7 +33,9 @@ import io.fabric.sdk.android.Fabric;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -40,10 +44,14 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
     protected DrawerLayout mDrawerLayout;
     protected ActionBarDrawerToggle mDrawerToggle;
     protected SparseArray<Network> subscribedNetworks;
-    final static String USER_PREFS = "userprefs";
-    final static String USER_NAME = "username";
-    final static String USER_ID = "userid";
+    protected Set<Long> subscribedNetworkIds;
     NavigationView navView;
+    protected long currentUser;
+    Activity thisActivity = this;
+
+    public interface WaitForSubscribedList {
+        void onSubscribeListFinish();
+    }
 
     @Override
     public void setContentView(int layoutResID) {
@@ -93,11 +101,10 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                 }
             }
         });
-
-        Fabric.with(this, new Crashlytics());
-        SharedPreferences userPrefs = getSharedPreferences(USER_PREFS, MODE_PRIVATE);
-        long userId = userPrefs.getLong(USER_ID, -1);
-        if (userId == -1) {
+        subscribedNetworkIds = new HashSet<>();
+        SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+        currentUser = settings.getLong(API.CURRENT_USER, -1);
+        if (currentUser == -1) {
             //User is not signed in. Replace user info with sign in button
             Button button = navView.getHeaderView(0).findViewById(R.id.nav_user_sign_in_button);
             button.setVisibility(View.VISIBLE);
@@ -111,11 +118,12 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
             });
         } else {
             //Load User info.
-            new LoadUserInfo().execute(userId);
+            new LoadUserInfo().execute(currentUser);
+            new LoadUserSubscriptions().execute(currentUser);
         }
-
-        new LoadUserSubscriptions().execute(Long.valueOf(1));
     }
+
+
 
 
     @Override
@@ -177,6 +185,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
 
             //Instantiate map with key -> menu view id, value -> network.
             for (Network net : networks) {
+                subscribedNetworkIds.add(net.id);
                 int viewId = View.generateViewId();
                 subscribedNetworks.put(viewId, net);
             }
@@ -209,6 +218,11 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                 netMenu.add(Menu.NONE, id, 0, sb);
             }
             navView.setNavigationItemSelectedListener(DrawerActivity.this);
+            Log.i("About to test", "for instance of waitforsubscribedlist");
+            if (thisActivity instanceof WaitForSubscribedList) {
+                Log.i("This happens", "Instance works!");
+                ((WaitForSubscribedList) thisActivity).onSubscribeListFinish();
+            }
         }
     }
 
@@ -228,7 +242,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                 res.showErrorDialog(DrawerActivity.this);
             } else {
                 User user = res.getPayload();
-                TextView userName = navView.getHeaderView(0).findViewById(R.id.user_name);
+                TextView userName = navView.getHeaderView(0).findViewById(R.id.full_name);
                 userName.setText(user.username);
                 TextView email = navView.getHeaderView(0).findViewById(R.id.user_email);
                 email.setText(user.email);

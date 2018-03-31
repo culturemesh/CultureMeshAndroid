@@ -109,6 +109,7 @@
     <string name="no_users">No Users</string>
     <!-- Strings for help and about pages -->
     <string name="about">About</string>
+    <string name="join_success">You successfully joined the network!</string>
     <string name="culturemesh_mission">
 
         "CultureMesh's Mission\n\n"
