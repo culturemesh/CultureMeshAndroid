@@ -16,6 +16,7 @@ public class AboutActivity extends DrawerActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        getSupportActionBar().setLogo(R.drawable.logo_header);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 }
