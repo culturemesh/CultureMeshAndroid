@@ -6,6 +6,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,9 +39,8 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
         }
 
         CardView cv;
-        TextView personName, username, content, timestamp, eventTitle, eventTime, eventLocation,
-                eventDescription, comment1Name, comment1Text, comment2Name, comment2Text,
-                viewMoreComments;
+        TextView personName, username, content, timestamp, eventTitle, comment1Name,
+                 comment1Text, comment2Name, comment2Text, viewMoreComments;
         ImageView personPhoto, postTypePhoto;
         ImageView[] images;
         LinearLayout eventDetailsLL;

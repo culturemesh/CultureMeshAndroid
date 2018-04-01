@@ -231,12 +231,25 @@
 
         </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>
-    <ListView
+    <!--<ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/commentList"
         app:layout_constraintTop_toBottomOf="@id/cv"
-        />
+        />-->
+    <fragment
+        android:id="@+id/commentFrag"
+        android:name="org.codethechange.culturemesh.CommentsFrag"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout="@layout/fragment_posts"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout="@layout/fragment_posts" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/write_comment"
@@ -249,21 +262,6 @@
         android:focusable="true"
         app:backgroundTint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/commentList"
+        app:layout_constraintEnd_toEndOf="@+id/commentFrag"
         app:srcCompat="@drawable/ic_create_white_24px" />
-    <!-- app:rippleColor="@color/colorPrimaryDark"-->
-<!--    <fragment
-        android:id="@+id/commentFrag"
-        android:name="org.codethechange.culturemesh.PostsFrag"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout="@layout/fragment_posts"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
-        app:layout_constraintVertical_bias="0.0"
-        tools:layout="@layout/fragment_posts" /> -->
-
 </android.support.constraint.ConstraintLayout>

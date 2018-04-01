@@ -1,56 +1,42 @@
 package org.codethechange.culturemesh;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import org.codethechange.culturemesh.models.Event;
-import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Network;
-import org.codethechange.culturemesh.models.Post;
-import org.codethechange.culturemesh.models.User;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.codethechange.culturemesh.models.PostReply;
 
 import java.math.BigInteger;
-import java.sql.Time;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 
-//TODO: If no posts, show text view saying add a post!
 /**
- * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
+ * Created by Dylan Grosz (dgrosz@stanford.edu) on 3/26/18.
  */
-public class PostsFrag extends Fragment {
+
+public class CommentsFrag extends Fragment {
+
     private String basePath = "www.culturemesh.com/api/v1";
 
     private RecyclerView mRecyclerView;
-    private RVAdapter mAdapter;
+    private RVCommentAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     SharedPreferences settings;
     //To figure out params that would be passed in
 
-    public PostsFrag() {
+    public CommentsFrag() {
         // Required empty public constructor
     }
 
@@ -67,7 +53,7 @@ public class PostsFrag extends Fragment {
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         View rootView = inflater.inflate(R.layout.fragment_posts, container, false);
 
-        mRecyclerView = rootView.findViewById(R.id.postsRV);
+        mRecyclerView = rootView.findViewById(R.id.commentsRV);
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -89,8 +75,8 @@ public class PostsFrag extends Fragment {
         BigInteger networkId = new BigInteger(settings.getString(API.SELECTED_NETWORK,
                 "123456"));
 
-        long selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
-        new LoadFeedItems().execute(selectedNetwork);
+        long selectedPost = settings.getLong(API.SELECTED_POST, 1);
+        new CommentsFrag.LoadComments().execute(selectedPost);
         return rootView;
     }
 
@@ -121,7 +107,7 @@ public class PostsFrag extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    private class LoadFeedItems extends AsyncTask<Long,Void,ArrayList<FeedItem>> {
+    private class LoadComments extends AsyncTask<Long,Void,ArrayList<PostReply>> {
 
         /**
          * This is the asynchronous part. It calls the client API, which can make network requests
@@ -130,54 +116,32 @@ public class PostsFrag extends Fragment {
          * @return a collection of feed items to be displayed in the feed.
          */
         @Override
-        protected ArrayList<FeedItem> doInBackground(Long... longs) {
+        protected ArrayList<PostReply> doInBackground(Long... longs) {
+            API.loadAppDatabase(getActivity());
             SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
                     MODE_PRIVATE);
             //We generalize posts/events to be feed items for polymorphism.
             //TODO: Consider error checking for when getPayload is null.
-            ArrayList<FeedItem> feedItems = new ArrayList<FeedItem>();
-            if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_EVENTS, true)) {
-                //If events aren't filtered out, add them to arraylist.
-                feedItems.addAll(API.Get.networkEvents(longs[0]).getPayload());
-            }
-            if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_NATIVE, true)) {
-                //If posts aren't filtered out, add them to arraylist.
-                //We also need to get the post replies.
-                List<Post> posts = API.Get.networkPosts(longs[0]).getPayload();
-                for (Post post : posts) {
-                    post.comments = API.Get.postReplies(post.id).getPayload();
-                }
-                feedItems.addAll(posts);
-            }
-            //TODO: Add ability check out twitter posts.
-            return feedItems;
+            ArrayList<PostReply> comments = new ArrayList<PostReply>();
+            comments.addAll(API.Get.postReplies(longs[0]).getPayload());
+            return comments;
         }
 
         @Override
-        protected void onPostExecute(final ArrayList<FeedItem> feedItems) {
-            mAdapter = new RVAdapter(feedItems, new RVAdapter.OnItemClickListener() {
+        protected void onPostExecute(final ArrayList<PostReply> comments) {
+            mAdapter = new RVCommentAdapter(comments, new RVCommentAdapter.OnItemClickListener() {
                 @Override
-                public void onItemClick(FeedItem item) {
-                    Intent intent = new Intent(getActivity(), SpecificPostActivity.class);
-                    long id;
-                    try {
-                        id = ((Post) item).id;
-                        intent.putExtra("postID", id);
-                        getActivity().startActivity(intent);
-                    } catch(ClassCastException e) {
-                        //I don't think we have commenting support for events??
-                    } catch (NullPointerException e) {
-                        Toast.makeText(getActivity(), "Cannot open post", Toast.LENGTH_LONG).show();
-                    }
+                public void onCommentClick(PostReply comment) {
+                     //to add comment click/long click functionality
+                    Toast.makeText(getActivity(), "Comment by " + comment.getAuthor() + " clicked!", Toast.LENGTH_LONG).show();
                 }
             }, getActivity().getApplicationContext());
             mRecyclerView.setAdapter(mAdapter);
             getFragmentManager().beginTransaction()
-                    .detach(PostsFrag.this)
-                    .attach(PostsFrag.this)
+                    .detach(CommentsFrag.this)
+                    .attach(CommentsFrag.this)
                     .commit();
+            API.closeDatabase();
         }
     }
-
-
 }

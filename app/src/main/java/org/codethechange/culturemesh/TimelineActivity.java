@@ -93,7 +93,6 @@ public class TimelineActivity extends DrawerActivity {
         API.loadAppDatabase(getApplicationContext());
         if (API.NO_JOINED_NETWORKS) {
             createNoNetwork();
->>>>>>>>> Temporary merge branch 2
         } else {
             createDefaultNetwork();
         }

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cv_comment"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/activity_vertical_margin"
+    card_view:cardBackgroundColor="@color/colorPrimary"
+    card_view:cardCornerRadius="12dp"
+    card_view:cardElevation="8dp">
+
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/layout_comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/attachedImage3_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            card_view:layout_constraintStart_toEndOf="@+id/attachedImage2_comment"
+            card_view:layout_constraintTop_toBottomOf="@+id/content_comment"
+            card_view:srcCompat="@color/colorAccent" />
+
+        <ImageView
+            android:id="@+id/person_photo_comment"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toTopOf="parent"
+            card_view:srcCompat="@drawable/ic_people_outline" />
+
+        <TextView
+            android:id="@+id/person_name_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="16dp"
+            android:layout_toEndOf="@+id/person_photo_comment"
+            android:text="asdfasdf"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            card_view:layout_constraintStart_toEndOf="@+id/person_photo_comment"
+            card_view:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/username_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_toEndOf="@+id/person_name_comment"
+            android:text="isermae"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            card_view:layout_constraintStart_toEndOf="@+id/person_name_comment"
+            card_view:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/post_type_photo_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/person_photo_comment"
+            android:layout_marginRight="16dp" />
+
+        <TextView
+            android:id="@+id/content_comment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/person_name_comment"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_toRightOf="@+id/post_type_photo_comment"
+            android:text="lorem ipsum"
+            android:textColor="@android:color/white"
+            card_view:layout_constraintEnd_toEndOf="parent"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toBottomOf="@+id/person_photo_comment" />
+
+        <TextView
+            android:id="@+id/timestamp_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="some time"
+            android:textColor="@android:color/white"
+            android:textStyle="italic"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toBottomOf="@+id/attachedImage1_comment" />
+
+
+        <ImageView
+            android:id="@+id/attachedImage2_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            card_view:layout_constraintStart_toEndOf="@+id/attachedImage1_comment"
+            card_view:layout_constraintTop_toBottomOf="@+id/content"
+            card_view:srcCompat="@color/colorAccent" />
+
+        <ImageView
+            android:id="@+id/attachedImage1_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toBottomOf="@+id/content_comment" />
+
+    </android.support.constraint.ConstraintLayout>
+</android.support.v7.widget.CardView>
