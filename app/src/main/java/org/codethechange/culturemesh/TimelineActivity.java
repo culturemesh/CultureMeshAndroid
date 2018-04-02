@@ -93,10 +93,10 @@ private String basePath = "www.culturemesh.com/api/v1";
         fromLocation = findViewById(R.id.fromLocation);
         nearLocation = findViewById(R.id.nearLocation);
         long currUser = settings.getLong(API.CURRENT_USER, 1);
-        if (ApiUtils.hasJoinedNetwork(currUser, new checkJoinedNetworks())) {
-            createDefaultNetwork();
-        } else {
+        if (subscribedNetworks.size() == 0) {
             createNoNetwork();
+        } else {
+            createDefaultNetwork();
         }
 
         //TODO: For first run, uncomment this: new TestDatabase().execute();
