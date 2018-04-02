@@ -95,9 +95,12 @@ private String basePath = "www.culturemesh.com/api/v1";
         population = findViewById(R.id.network_population);
         fromLocation = findViewById(R.id.fromLocation);
         nearLocation = findViewById(R.id.nearLocation);
-        create = findViewById(R.id.create);
-        createPost = findViewById(R.id.create_post);
-        createEvent = findViewById(R.id.create_event);
+        long currUser = settings.getLong(API.CURRENT_USER, 1);
+        if (subscribedNetworks.size() == 0) {
+            createNoNetwork();
+        } else {
+            createDefaultNetwork();
+        }
 
 
     }
