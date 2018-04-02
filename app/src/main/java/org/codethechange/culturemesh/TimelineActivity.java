@@ -226,7 +226,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     protected void onStart() {
         super.onStart();
         //TODO: For first run, uncomment this: new TestDatabase().execute();
-        //new TestDatabase().execute();
+        new TestDatabase().execute();
         //Check if user has selected a network to view, regardless of whether the user is subscribed
         //to any networks yet. Previously, we checked if the user joined a network, and instead
         //navigate the user to ExploreBubbles. This is not ideal because if a user wants to check
@@ -402,8 +402,8 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                 API.addPosts();
                 API.addEvents();
                 API.subscribeUsers();
+                settings.edit().putLong(API.CURRENT_USER, 1).apply();
             }
-            settings.edit().putLong(API.CURRENT_USER, 1).apply();
             API.closeDatabase();
             return null;
         }
@@ -559,7 +559,9 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                             public void onDismiss(DialogInterface dialog) {
                                 subscribedNetworkIds.add(selectedNetwork);
                                 //Restart the activity.
-                                onStart();
+                                Intent restart = new Intent(getApplicationContext(), TimelineActivity.class);
+                                startActivity(restart);
+                                finish();
                             }
                         })
                         .create();

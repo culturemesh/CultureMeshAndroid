@@ -1,9 +1,13 @@
 package org.codethechange.culturemesh;
 
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.Image;
+import android.os.AsyncTask;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -190,11 +194,7 @@ public class FindNetworkActivity extends DrawerActivity {
             //TODO: Remove dummy data
             //TODO: Use abstracted API interface.
 
-            dummy.add("New York, New York, United States");
-            dummy.add("Singapore");
-            dummy.add("London, United Kingdom");
-            dummy.add("Stanford, California, United States");
-
+            dummy.add("Sample Location Network 1");
             adapter = new LocationSearchAdapter(getActivity(),
                     android.R.layout.simple_list_item_1, dummy);
             searchList.setTextFilterEnabled(true);
@@ -203,6 +203,11 @@ public class FindNetworkActivity extends DrawerActivity {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    //TODO: Replace this lame thing.
+                    getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
+                            .putLong(API.SELECTED_NETWORK, 0).apply();
+                    startActivity(new Intent(getActivity(), TimelineActivity.class));
+                    /*TODO: Do a prompt.
                     final ConstraintLayout promptView = (ConstraintLayout)
                             getActivity().findViewById(R.id.prompt_join_network_view);
                     fromLocation = (String) parent.getItemAtPosition(position);
@@ -220,7 +225,7 @@ public class FindNetworkActivity extends DrawerActivity {
                         public void onClick(View v) {
                             promptView.setVisibility(GONE);
                         }
-                    });
+                    });*/
                 }
             });
             return rootView;
@@ -291,10 +296,7 @@ public class FindNetworkActivity extends DrawerActivity {
             //TODO: Remove dummy data
             //TODO: Use abstracted API interface.
 
-            dummyLanguages.add("French");
-            dummyLanguages.add("German");
-            dummyLanguages.add("English");
-            dummyLanguages.add("Cantonese");
+            dummyLanguages.add("Sample Language 1");
 
             adapter = new LocationSearchAdapter(getActivity(),
                     android.R.layout.simple_list_item_1, dummyLanguages);
@@ -304,6 +306,10 @@ public class FindNetworkActivity extends DrawerActivity {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
+                            .putLong(API.SELECTED_NETWORK, 1).apply();
+                    startActivity(new Intent(getActivity(), TimelineActivity.class));
+                    /**TODO: Possibly use this prompt code.
                     final ConstraintLayout promptView = (ConstraintLayout)
                             getActivity().findViewById(R.id.prompt_join_language_network_view);
                     String fromLanguage = (String) parent.getItemAtPosition(position);
@@ -321,7 +327,7 @@ public class FindNetworkActivity extends DrawerActivity {
                         public void onClick(View v) {
                             promptView.setVisibility(GONE);
                         }
-                    });
+                    });**/
                 }
             });
             return rootView;
@@ -385,4 +391,5 @@ public class FindNetworkActivity extends DrawerActivity {
             return null;
         }
     }
+
 }
