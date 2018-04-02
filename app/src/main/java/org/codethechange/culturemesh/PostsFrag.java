@@ -142,7 +142,6 @@ public class PostsFrag extends Fragment {
             }
             API.closeDatabase();
             //TODO: Add ability check out twitter posts.
-            API.closeDatabase();
             return feedItems;
         }
 
