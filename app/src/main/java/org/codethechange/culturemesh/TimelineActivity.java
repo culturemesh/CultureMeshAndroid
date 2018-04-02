@@ -67,7 +67,7 @@ import java.util.Set;
  * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/8/17.
  */
 public class TimelineActivity extends DrawerActivity implements DrawerActivity.WaitForSubscribedList{
-private String basePath = "www.culturemesh.com/api/v1";
+    private String basePath = "www.culturemesh.com/api/v1";
     final String FILTER_LABEL = "fl";
     final static String FILTER_CHOICE_NATIVE = "fcn";
     final static String FILTER_CHOICE_TWITTER = "fct";
@@ -95,12 +95,9 @@ private String basePath = "www.culturemesh.com/api/v1";
         population = findViewById(R.id.network_population);
         fromLocation = findViewById(R.id.fromLocation);
         nearLocation = findViewById(R.id.nearLocation);
-        long currUser = settings.getLong(API.CURRENT_USER, 1);
-        if (subscribedNetworks.size() == 0) {
-            createNoNetwork();
-        } else {
-            createDefaultNetwork();
-        }
+        create = findViewById(R.id.create);
+        createPost = findViewById(R.id.create_post);
+        createEvent = findViewById(R.id.create_event);
 
 
     }
@@ -358,33 +355,33 @@ private String basePath = "www.culturemesh.com/api/v1";
             filterSettings[1] = settings.getBoolean(FILTER_CHOICE_TWITTER, true);
             filterSettings[2] = settings.getBoolean(FILTER_CHOICE_EVENTS, true);
             builder.setTitle(getResources().getString(R.string.filter_posts))
-                .setMultiChoiceItems(R.array.filter_choices, filterSettings,
-                        new DialogInterface.OnMultiChoiceClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                               filterSettings[which] = isChecked;
-                            }
-                })
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User clicked OK, so save the results somewhere
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putBoolean(FILTER_CHOICE_NATIVE, filterSettings[0]);
-                        editor.putBoolean(FILTER_CHOICE_TWITTER, filterSettings[1]);
-                        editor.putBoolean(FILTER_CHOICE_EVENTS, filterSettings[2]);
-                        editor.apply();
-                        //Refresh the fragment to apply new filter settings.
-                        getActivity().recreate();
-                        dismiss();
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //Do nothing.
-                    }
-                });
+                    .setMultiChoiceItems(R.array.filter_choices, filterSettings,
+                            new DialogInterface.OnMultiChoiceClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                                    filterSettings[which] = isChecked;
+                                }
+                            })
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User clicked OK, so save the results somewhere
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putBoolean(FILTER_CHOICE_NATIVE, filterSettings[0]);
+                            editor.putBoolean(FILTER_CHOICE_TWITTER, filterSettings[1]);
+                            editor.putBoolean(FILTER_CHOICE_EVENTS, filterSettings[2]);
+                            editor.apply();
+                            //Refresh the fragment to apply new filter settings.
+                            getActivity().recreate();
+                            dismiss();
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //Do nothing.
+                        }
+                    });
             return builder.create();
         }
     }
@@ -571,3 +568,5 @@ private String basePath = "www.culturemesh.com/api/v1";
         }
     }
 }
+
+
