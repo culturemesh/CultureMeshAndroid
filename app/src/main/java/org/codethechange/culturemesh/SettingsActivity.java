@@ -56,8 +56,8 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
             public void onSwiped(final RecyclerView.ViewHolder viewHolder, int swipeDir) {
                 //Remove swiped item from list and notify the RecyclerView
                 AlertDialog success = new AlertDialog.Builder(SettingsActivity.this)
-                        .setTitle(R.string.genericSuccess)
-                        .setMessage(R.string.join_success)
+                        .setTitle(R.string.are_you_sure)
+                        .setMessage(R.string.leave_network_question)
                         .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
