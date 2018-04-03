@@ -66,8 +66,8 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                     //Have animation move edit texts in place.
                     //Move first name text from bottom to just under username
                     Animation firstNameTextAnim = new Animation() {
-                            @Override
-                            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                        @Override
+                        protected void applyTransformation(float interpolatedTime, Transformation t) {
                             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)
                                     firstNameText.getLayoutParams();
                             params.topMargin = (int)(1000 - (1000 - eightDp) * interpolatedTime);

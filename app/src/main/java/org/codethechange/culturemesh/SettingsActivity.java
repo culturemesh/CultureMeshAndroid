@@ -15,6 +15,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -29,9 +30,11 @@ import java.util.ArrayList;
 public class SettingsActivity extends DrawerActivity implements NetworkSummaryAdapter.OnNetworkTapListener {
 
     RecyclerView rv;
-    TextView emptyText, fullName, userName;
-    EditText bio;
+    TextView emptyText, userName, email;
+    EditText bio, firstName, lastName;
     ImageView profilePicture;
+    Button updateProfile;
+    User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,10 +42,28 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         setContentView(R.layout.activity_settings);
         rv = findViewById(R.id.rv);
         bio = findViewById(R.id.bio);
+        firstName = findViewById(R.id.first_name_field);
+        lastName = findViewById(R.id.last_name_field);
         emptyText = findViewById(R.id.empty_text);
-        fullName = findViewById(R.id.full_name);
+        email = findViewById(R.id.email);
         userName = findViewById(R.id.user_name);
         profilePicture = findViewById(R.id.user_profile);
+        updateProfile = findViewById(R.id.update_profile_button);
+        updateProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    user.firstName = firstName.getText().toString();
+                    user.lastName = lastName.getText().toString();
+                    user.aboutMe = bio.getText().toString();
+                    new UpdateProfile().execute(user);
+                } catch(NullPointerException e) {
+                    //TODO: User is null. We should handle that.
+                    e.printStackTrace();
+                }
+
+            }
+        });
         new LoadUserInfo().execute(currentUser);
         rv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         resetAdapter();
@@ -70,14 +91,19 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                         .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                //Although we aren't changing anything, the swipe motion removes
-                                //the item from the recycler
-                                resetAdapter();
+                                //Nothing here.
                             }
                         })
                         .create();
+                success.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialogInterface) {
+                        //Even if we aren't changing anything, the swipe motion removes
+                        //the item from the recycler. We need to include it again.
+                        resetAdapter();
+                    }
+                });
                 success.show();
-                Log.i("Swiping!!", "Hello");
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(listener);
@@ -144,12 +170,6 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
             API.closeDatabase();
             return null;
         }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            resetAdapter();
-        }
     }
 
     class LoadUserInfo extends AsyncTask<Long, Void, User> {
@@ -157,7 +177,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         @Override
         protected User doInBackground(Long... longs) {
             API.loadAppDatabase(getApplicationContext());
-            User user = API.Get.user(longs[0]).getPayload();
+            user = API.Get.user(longs[0]).getPayload();
             API.closeDatabase();
             return user;
         }
@@ -165,13 +185,40 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         @Override
         protected void onPostExecute(User user) {
             bio.setText(user.aboutMe);
-            fullName.setText(user.firstName + " " + user.lastName);
+            firstName.setText(user.firstName);
+            lastName.setText(user.lastName);
             userName.setText(user.username);
+            email.setText(user.email);
             Picasso.with(getApplicationContext()).load(user.getImgURL()).into(profilePicture);
 
         }
     }
 
+
+    class UpdateProfile extends AsyncTask<User, Void, NetworkResponse> {
+
+        @Override
+        protected NetworkResponse doInBackground(User... users) {
+            API.loadAppDatabase(getApplicationContext());
+            NetworkResponse res = API.Put.user(users[0]);
+            API.closeDatabase();
+            return res;
+        }
+
+        @Override
+        protected void onPostExecute(NetworkResponse networkResponse) {
+            if (networkResponse.fail()) {
+                //Uh oh. We have a network error.
+                networkResponse.showErrorDialog(SettingsActivity.this);
+            } else {
+                //Yay! We updated the user's settings.
+                new AlertDialog.Builder(SettingsActivity.this)
+                        .setTitle(R.string.genericSuccess)
+                        .setMessage(R.string.updated_profile)
+                        .show();
+            }
+        }
+    }
 
     void resetAdapter(){
         ArrayList<Network> networks = new ArrayList<>();

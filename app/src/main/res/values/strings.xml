@@ -112,6 +112,8 @@
     <string name="join_success">You successfully joined the network!</string>
     <string name="are_you_sure">Are You Sure?</string>
     <string name="leave_network_question">Are you sure you want to leave this network?</string>
+    <string name="update_profile">Update Profile</string>
+    <string name="updated_profile">Updated Profile!</string>
     <string name="culturemesh_mission">
 
         "CultureMesh's Mission\n\n"
@@ -155,5 +157,5 @@
         "limitations under the License.\n\n"
 
     </string>
-    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="title_activity_settings">Edit Profile</string>
 </resources>
