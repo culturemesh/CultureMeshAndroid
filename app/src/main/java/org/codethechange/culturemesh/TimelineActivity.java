@@ -39,6 +39,7 @@ import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -53,6 +54,7 @@ import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.Serializable;
@@ -64,8 +66,8 @@ import java.util.Set;
 /**
  * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/8/17.
  */
-public class TimelineActivity extends DrawerActivity {
-private String basePath = "www.culturemesh.com/api/v1";
+public class TimelineActivity extends DrawerActivity implements DrawerActivity.WaitForSubscribedList{
+    private String basePath = "www.culturemesh.com/api/v1";
     final String FILTER_LABEL = "fl";
     final static String FILTER_CHOICE_NATIVE = "fcn";
     final static String FILTER_CHOICE_TWITTER = "fct";
@@ -81,6 +83,7 @@ private String basePath = "www.culturemesh.com/api/v1";
     private Animation open, close;
     private boolean isFABOpen;
     private TextView population, fromLocation, nearLocation;
+    private long selectedNetwork;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,58 +95,23 @@ private String basePath = "www.culturemesh.com/api/v1";
         population = findViewById(R.id.network_population);
         fromLocation = findViewById(R.id.fromLocation);
         nearLocation = findViewById(R.id.nearLocation);
-        long currUser = settings.getLong(API.CURRENT_USER, 1);
-        if (subscribedNetworks.size() == 0) {
-            createNoNetwork();
-        } else {
-            createDefaultNetwork();
-        }
+        create = findViewById(R.id.create);
+        createPost = findViewById(R.id.create_post);
+        createEvent = findViewById(R.id.create_event);
 
-        //TODO: For first run, uncomment this: new TestDatabase().execute();
-        new TestDatabase().execute();
+
     }
 
     protected void createNoNetwork() {
         Intent startExplore = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
         startActivity(startExplore);
+        finish();
     }
 
     protected void createDefaultNetwork() {
-        //Choose selected network.
-        final long selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
         new LoadNetworkData().execute(selectedNetwork);
-        //Load Animations for Floating Action Buttons
-        open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
-        close = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_close);
 
-        //Setup FloatingActionButton Listeners
-        create = findViewById(R.id.create);
-        createPost = findViewById(R.id.create_post);
-        createEvent = findViewById(R.id.create_event);
 
-        create.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                animateFAB();
-            }
-        });
-        createPost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent cPA = new Intent(getApplicationContext(), CreatePostActivity.class);
-                cPA.putExtra(BUNDLE_NETWORK, selectedNetwork);
-                startActivity(cPA);
-                //TODO: Have fragment post feed loading stuff be in start() method so feed updates
-                //when createPostActivity finishes.
-            }
-        });
-        createEvent.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent cEA = new Intent(getApplicationContext(), CreateEventActivity.class);
-                startActivity(cEA);
-            }
-        });
 
         swipeRefreshLayout = findViewById(R.id.postsRefresh);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -256,12 +224,19 @@ private String basePath = "www.culturemesh.com/api/v1";
 
     @Override
     protected void onStart() {
-        //Discuss how to pull from server, add in Ion functionality
         super.onStart();
-        String network = ""; //to draw from explore/saved Instances
-        String networkId = "";
-        final String postPath = basePath + network + networkId + "/posts";
-        final String eventPath = basePath + network + networkId + "/events";
+        //TODO: For first run, uncomment this: new TestDatabase().execute();
+        new TestDatabase().execute();
+        //Check if user has selected a network to view, regardless of whether the user is subscribed
+        //to any networks yet. Previously, we checked if the user joined a network, and instead
+        //navigate the user to ExploreBubbles. This is not ideal because if a user wants to check
+        //out a network before joining one, then they will be unable to view the network.
+        selectedNetwork = settings.getLong(API.SELECTED_NETWORK, -1);
+        if (selectedNetwork != -1) {
+            createDefaultNetwork();
+        } else {
+            createNoNetwork();
+        }
     }
 
 
@@ -307,6 +282,67 @@ private String basePath = "www.culturemesh.com/api/v1";
     }
 
     /**
+     * If the user is subscribed to the network, they are able to write posts and events. If
+     * the user is not subscribed to the network, there should be a pretty button for them that
+     * encourages the user to join the network.
+     * This control flow relies on checking if the user is subscribed to a network or not, which
+     * requires an instantiated subscribedNetworkIds set in DrawerActivity. This set is instantiated
+     * off the UI thread, so we need to wait until that thread completes. Thus, this function is
+     * called by DrawerActivity after the network thread completes.
+     */
+    @Override
+    public void onSubscribeListFinish() {
+        //Check if the user is subscribed or not this network.
+        if (subscribedNetworkIds.contains(selectedNetwork)) {
+            //We are subscribed! Thus, the user can write posts an events. Let's make sure they have
+            //the right listeners.
+
+            //Setup FloatingActionButton Listeners
+            //Load Animations for Floating Action Buttons
+            open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
+            close = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_close);
+
+            create.setVisibility(View.VISIBLE);
+            create.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    animateFAB();
+                }
+            });
+            createPost.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent cPA = new Intent(getApplicationContext(), CreatePostActivity.class);
+                    cPA.putExtra(BUNDLE_NETWORK, selectedNetwork);
+                    startActivity(cPA);
+                    //TODO: Have fragment post feed loading stuff be in start() method so feed updates
+                    //when createPostActivity finishes.
+                }
+            });
+            createEvent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent cEA = new Intent(getApplicationContext(), CreateEventActivity.class);
+                    startActivity(cEA);
+                }
+            });
+        } else {
+            //The user has not joined this network yet. We should hide the write post/events buttons
+            //and show the join network button.
+            Button joinNetwork = findViewById(R.id.join_network_button);
+            joinNetwork.setVisibility(View.VISIBLE);
+            joinNetwork.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //We need to subscribe this user!
+                    new JoinNetwork().execute(selectedNetwork);
+                }
+            });
+
+        }
+    }
+
+    /**
      * This dialog allows us to filter out native/twitter posts from the feed
      */
     public static class FilterDialogFragment extends DialogFragment {
@@ -319,33 +355,33 @@ private String basePath = "www.culturemesh.com/api/v1";
             filterSettings[1] = settings.getBoolean(FILTER_CHOICE_TWITTER, true);
             filterSettings[2] = settings.getBoolean(FILTER_CHOICE_EVENTS, true);
             builder.setTitle(getResources().getString(R.string.filter_posts))
-                .setMultiChoiceItems(R.array.filter_choices, filterSettings,
-                        new DialogInterface.OnMultiChoiceClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                               filterSettings[which] = isChecked;
-                            }
-                })
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User clicked OK, so save the results somewhere
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putBoolean(FILTER_CHOICE_NATIVE, filterSettings[0]);
-                        editor.putBoolean(FILTER_CHOICE_TWITTER, filterSettings[1]);
-                        editor.putBoolean(FILTER_CHOICE_EVENTS, filterSettings[2]);
-                        editor.apply();
-                        //Refresh the fragment to apply new filter settings.
-                        getActivity().recreate();
-                        dismiss();
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //Do nothing.
-                    }
-                });
+                    .setMultiChoiceItems(R.array.filter_choices, filterSettings,
+                            new DialogInterface.OnMultiChoiceClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                                    filterSettings[which] = isChecked;
+                                }
+                            })
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User clicked OK, so save the results somewhere
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putBoolean(FILTER_CHOICE_NATIVE, filterSettings[0]);
+                            editor.putBoolean(FILTER_CHOICE_TWITTER, filterSettings[1]);
+                            editor.putBoolean(FILTER_CHOICE_EVENTS, filterSettings[2]);
+                            editor.apply();
+                            //Refresh the fragment to apply new filter settings.
+                            getActivity().recreate();
+                            dismiss();
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //Do nothing.
+                        }
+                    });
             return builder.create();
         }
     }
@@ -366,6 +402,7 @@ private String basePath = "www.culturemesh.com/api/v1";
                 API.addPosts();
                 API.addEvents();
                 API.subscribeUsers();
+                settings.edit().putLong(API.CURRENT_USER, 1).apply();
             }
             API.closeDatabase();
             return null;
@@ -498,20 +535,40 @@ private String basePath = "www.culturemesh.com/api/v1";
         long[] netUserIds;
     }
 
-    private class checkJoinedNetworks extends AsyncTask<Long, Void, NetworkResponse<ArrayList<Network>>> {
+
+    class JoinNetwork extends AsyncTask<Long, Void, NetworkResponse> {
+
         @Override
-        protected NetworkResponse<ArrayList<Network>> doInBackground(Long... longs) {
+        protected NetworkResponse doInBackground(Long... longs) {
             API.loadAppDatabase(getApplicationContext());
-            long currUser = longs[0];
-            NetworkResponse<ArrayList<Network>> responseNetworks = API.Get.userNetworks(currUser);
+            NetworkResponse response = API.Post.addUserToNetwork(currentUser, longs[0]);
             API.closeDatabase();
-            return responseNetworks;
+            return response;
         }
 
         @Override
-        protected void onPostExecute(NetworkResponse<ArrayList<Network>> arrayListNetworkResponse) {
-            super.onPostExecute(arrayListNetworkResponse);
-
+        protected void onPostExecute(NetworkResponse networkResponse) {
+            if (networkResponse.fail()) {
+                networkResponse.showErrorDialog(TimelineActivity.this);
+            } else {
+                AlertDialog success = new AlertDialog.Builder(TimelineActivity.this)
+                        .setTitle(R.string.genericSuccess)
+                        .setMessage(R.string.join_success)
+                        .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                            @Override
+                            public void onDismiss(DialogInterface dialog) {
+                                subscribedNetworkIds.add(selectedNetwork);
+                                //Restart the activity.
+                                Intent restart = new Intent(getApplicationContext(), TimelineActivity.class);
+                                startActivity(restart);
+                                finish();
+                            }
+                        })
+                        .create();
+                success.show();
+            }
         }
     }
 }
+
+

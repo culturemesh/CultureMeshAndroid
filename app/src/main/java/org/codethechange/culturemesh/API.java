@@ -81,7 +81,7 @@ class API {
                 "    \"act_code\": \"IDK\",\n" +
                 "    \"lastName\": \"Simpson\",\n" +
                 "    \"about_me\": \"Adipisci ad molestiae vel fugit dolor in. Dolore ipsa libero. Doloremque dolor itaque enim. Saepe nam odit.\\nSimilique commodi ex quam quae vel in rerum. Esse nesciunt sunt sed magnam nihil.\",\n" +
-                "    \"img_link\": \"https://www.lorempixel.com/720/691\",\n" +
+                "    \"img_link\": \"https://lorempixel.com/200/200/\",\n" +
                 "    \"role\": 1,\n" +
                 "    \"gender\": \"female\",\n" +
                 "    \"last_login\": \"2017-11-21 13:21:47\",\n" +
@@ -860,6 +860,13 @@ class API {
             NetworkSubscriptionDao nSDao = mDb.networkSubscriptionDao();
             NetworkSubscription ns = new NetworkSubscription(userId, networkId);
             nSDao.insertSubscriptions(ns);
+            return new NetworkResponse<>(ns);
+        }
+
+        static NetworkResponse removeUserFromNetwork(long userId, long networkId) {
+            NetworkSubscriptionDao nSDao = mDb.networkSubscriptionDao();
+            NetworkSubscription ns = new NetworkSubscription(userId, networkId);
+            nSDao.deleteNetworkSubscriptions(ns);
             return new NetworkResponse<>(ns);
         }
 
