@@ -28,6 +28,7 @@ import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
+import org.w3c.dom.Comment;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -54,6 +55,7 @@ public class SpecificPostActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         long postID = intent.getLongExtra("postID", 0);
+
         cv = findViewById(R.id.cv);
         personName = findViewById(R.id.person_name);
         username = findViewById(R.id.username);

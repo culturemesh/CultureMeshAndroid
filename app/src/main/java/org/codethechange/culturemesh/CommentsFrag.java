@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -9,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +19,8 @@ import android.widget.Toast;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.PostReply;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -34,7 +36,6 @@ public class CommentsFrag extends Fragment {
     private RVCommentAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     SharedPreferences settings;
-    //To figure out params that would be passed in
 
     public CommentsFrag() {
         // Required empty public constructor
@@ -73,8 +74,9 @@ public class CommentsFrag extends Fragment {
         SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
                 Context.MODE_PRIVATE);
 
-        long selectedPost = settings.getLong(API.SELECTED_POST, 1);
-        new CommentsFrag.LoadComments().execute(selectedPost);
+        Intent intent = getActivity().getIntent();
+        long postID = intent.getLongExtra("postID", 0);
+        new CommentsFrag.LoadComments().execute(postID);
         return rootView;
     }
 
@@ -115,13 +117,10 @@ public class CommentsFrag extends Fragment {
          */
         @Override
         protected ArrayList<PostReply> doInBackground(Long... longs) {
-            API.loadAppDatabase(getActivity());
-            SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
-                    MODE_PRIVATE);
-            //We generalize posts/events to be feed items for polymorphism.
+            API.loadAppDatabase(getActivity().getApplicationContext());
+
             //TODO: Consider error checking for when getPayload is null.
-            ArrayList<PostReply> comments = new ArrayList<PostReply>();
-            comments.addAll(API.Get.postReplies(longs[0]).getPayload());
+            ArrayList<PostReply> comments = (ArrayList<PostReply>) API.Get.postReplies(longs[0]).getPayload();
             return comments;
         }
 
@@ -131,7 +130,7 @@ public class CommentsFrag extends Fragment {
                 @Override
                 public void onCommentClick(PostReply comment) {
                      //to add comment click/long click functionality
-                    Toast.makeText(getActivity(), "Comment by " + comment.getAuthor() + " clicked!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), "Comment by " + comment.author + " clicked!", Toast.LENGTH_LONG).show();
                 }
             }, getActivity().getApplicationContext());
             mRecyclerView.setAdapter(mAdapter);
