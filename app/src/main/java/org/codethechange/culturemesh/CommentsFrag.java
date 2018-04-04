@@ -51,7 +51,7 @@ public class CommentsFrag extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         AppCompatActivity activity = (AppCompatActivity) getActivity();
-        View rootView = inflater.inflate(R.layout.fragment_posts, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_comments, container, false);
 
         mRecyclerView = rootView.findViewById(R.id.commentsRV);
 
@@ -72,8 +72,6 @@ public class CommentsFrag extends Fragment {
 
         SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
                 Context.MODE_PRIVATE);
-        BigInteger networkId = new BigInteger(settings.getString(API.SELECTED_NETWORK,
-                "123456"));
 
         long selectedPost = settings.getLong(API.SELECTED_POST, 1);
         new CommentsFrag.LoadComments().execute(selectedPost);
