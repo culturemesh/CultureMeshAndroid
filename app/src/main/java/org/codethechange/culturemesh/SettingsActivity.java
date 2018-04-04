@@ -49,6 +49,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         userName = findViewById(R.id.user_name);
         profilePicture = findViewById(R.id.user_profile);
         updateProfile = findViewById(R.id.update_profile_button);
+        //TODO: Add ability to change profile picture.
         updateProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -847,7 +847,7 @@ class API {
 
     static class Post {
         /*
-            TODO: During production time, we will just send it off to server, not update locally.
+            TODO: During production time, we will send it off to server (as well as update locally?).
          */
         static NetworkResponse<EventSubscription> addUserToEvent(long userId, long eventId) {
             EventSubscriptionDao eSDao = mDb.eventSubscriptionDao();
@@ -902,8 +902,10 @@ class API {
     }
 
     static class Put {
-        static NetworkResponse user(User user) {
-            return new NetworkResponse();
+        static NetworkResponse<User> user(User user) {
+            UserDao uDao = mDb.userDao();
+            uDao.addUser(user);
+            return new NetworkResponse<User>(user == null, user);
         }
 
         static NetworkResponse event(Event event) {
