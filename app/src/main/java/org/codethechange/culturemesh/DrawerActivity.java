@@ -1,13 +1,12 @@
 package org.codethechange.culturemesh;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -17,19 +16,23 @@ import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
+
 import com.crashlytics.android.Crashlytics;
+import com.squareup.picasso.Picasso;
+
 import io.fabric.sdk.android.Fabric;
 
 import org.codethechange.culturemesh.models.Network;
+import org.codethechange.culturemesh.models.User;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,9 +44,14 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
     protected DrawerLayout mDrawerLayout;
     protected ActionBarDrawerToggle mDrawerToggle;
     protected SparseArray<Network> subscribedNetworks;
-    final static String USER_PREFS = "userprefs";
-    final static String USER_NAME = "username";
+    protected Set<Long> subscribedNetworkIds;
     NavigationView navView;
+    protected long currentUser;
+    Activity thisActivity = this;
+
+    public interface WaitForSubscribedList {
+        void onSubscribeListFinish();
+    }
 
     @Override
     public void setContentView(int layoutResID) {
@@ -93,10 +101,10 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                 }
             }
         });
-
-        Fabric.with(this, new Crashlytics());
-        SharedPreferences userPrefs = getSharedPreferences(USER_PREFS, MODE_PRIVATE);
-        if (userPrefs.getString(USER_NAME, null) == null) {
+        subscribedNetworkIds = new HashSet<>();
+        SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+        currentUser = settings.getLong(API.CURRENT_USER, -1);
+        if (currentUser == -1) {
             //User is not signed in. Replace user info with sign in button
             Button button = navView.getHeaderView(0).findViewById(R.id.nav_user_sign_in_button);
             button.setVisibility(View.VISIBLE);
@@ -108,11 +116,14 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                     startActivity(logInIntent);
                 }
             });
-
+        } else {
+            //Load User info.
+            new LoadUserInfo().execute(currentUser);
+            new LoadUserSubscriptions().execute(currentUser);
         }
-
-        new LoadUserSubscriptions().execute(Long.valueOf(1));
     }
+
+
 
 
     @Override
@@ -128,7 +139,6 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         //TODO: Handle navigation view item clicks here.
@@ -137,9 +147,12 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         if (subNet != null) {
             //The user tapped a subscribed network. We will now restart TimeLineActivity for that
             //network.
-            //TODO: Set up way to pass network as data point for timelineactivity.
+            //Pass network as data point for timelineactivity by putting it in sharedprefs.
+            getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
+                    .putLong(API.SELECTED_NETWORK, subNet.id).apply();
             Intent toTimeline = new Intent(getApplicationContext(), TimelineActivity.class);
             startActivity(toTimeline);
+            finish();
         }
         if (id == R.id.nav_explore) {
             Intent startExplore = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
@@ -147,8 +160,15 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         } else if (id == R.id.nav_join_network) {
             Intent startFindNet = new Intent(getApplicationContext(), FindNetworkActivity.class);
             startActivity(startFindNet);
-        } else if (id == R.id.nav_manage) {
-
+        } else if (id == R.id.nav_about) {
+            Intent startAbout = new Intent(getApplicationContext(), AboutActivity.class);
+            startActivity(startAbout);
+        } else if (id == R.id.nav_help) {
+            Intent startHelp = new Intent(getApplicationContext(), HelpActivity.class);
+            startActivity(startHelp);
+        } else if (id == R.id.nav_settings) {
+            Intent startHelp = new Intent(getApplicationContext(), SettingsActivity.class);
+            startActivity(startHelp);
         }
 
         mDrawerLayout.closeDrawer(GravityCompat.START);
@@ -166,6 +186,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
 
             //Instantiate map with key -> menu view id, value -> network.
             for (Network net : networks) {
+                subscribedNetworkIds.add(net.id);
                 int viewId = View.generateViewId();
                 subscribedNetworks.put(viewId, net);
             }
@@ -198,8 +219,39 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                 netMenu.add(Menu.NONE, id, 0, sb);
             }
             navView.setNavigationItemSelectedListener(DrawerActivity.this);
+            Log.i("About to test", "for instance of waitforsubscribedlist");
+            if (thisActivity instanceof WaitForSubscribedList) {
+                Log.i("This happens", "Instance works!");
+                ((WaitForSubscribedList) thisActivity).onSubscribeListFinish();
+            }
         }
     }
 
+    private class LoadUserInfo extends AsyncTask<Long, Void, NetworkResponse<User>> {
+
+        @Override
+        protected NetworkResponse<User> doInBackground(Long... longs) {
+            API.loadAppDatabase(getApplicationContext());
+            NetworkResponse<User> res = API.Get.user(longs[0]);
+            API.closeDatabase();
+            return res;
+        }
+
+        @Override
+        protected void onPostExecute(NetworkResponse<User> res) {
+            if (res.fail()) {
+                res.showErrorDialog(DrawerActivity.this);
+            } else {
+                User user = res.getPayload();
+                TextView userName = navView.getHeaderView(0).findViewById(R.id.full_name);
+                userName.setText(user.username);
+                TextView email = navView.getHeaderView(0).findViewById(R.id.user_email);
+                email.setText(user.email);
+                ImageView profilePic = navView.getHeaderView(0).findViewById(R.id.user_icon);
+                Picasso.with(getApplicationContext()).load(user.imgURL).into(profilePic);
+            }
+
+        }
+    }
 
 }

@@ -7,6 +7,8 @@ import android.arch.persistence.room.Query;
 
 import org.codethechange.culturemesh.models.Country;
 
+import java.util.List;
+
 
 /**
  * Created by Drew Gregory on 2/23/18.
@@ -19,4 +21,7 @@ public interface CountryDao {
 
     @Query("SELECT * FROM country WHERE id = :id")
     public Country getCountry(long id);
+
+    @Query("SELECT * FROM country WHERE NAME LIKE :query")
+    public List<Country> autoCompleteCountries(String query);
 }

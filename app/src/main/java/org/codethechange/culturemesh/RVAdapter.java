@@ -1,7 +1,6 @@
 package org.codethechange.culturemesh;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v7.widget.CardView;
@@ -28,6 +27,10 @@ import java.util.List;
  * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
  */
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
+    public List<FeedItem> getNetPosts() {
+        return netPosts;
+    }
+
     private List<FeedItem> netPosts;
     private Context context;
 
@@ -37,7 +40,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
         public boolean isPost() {
             return post;
         }
-
         CardView cv;
         TextView personName, username, content, timestamp, eventTitle, comment1Name,
                  comment1Text, comment2Name, comment2Text, viewMoreComments;
@@ -170,8 +172,8 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             }
             String name = post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName();
             pvh.personName.setText(name);
-            pvh.content.setText(post.getContent());
-            pvh.postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
+            pvh.content.setText(FormatManager.parseText(post.getContent()));
+            pvh.postTypePhoto.setImageDrawable(null /* TODO: logic flow depending on post source */);
             pvh.timestamp.setText(post.getDatePosted().toString());
             pvh.username.setText(post.getAuthor().getUsername());
             pvh.bind(item, listener);
@@ -185,7 +187,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                     }
                 }
             }
-            //TODO: Picasso isn't loading all the images. Figure that out.
             Picasso.with(pvh.personPhoto.getContext()).load(post.getAuthor().getImgURL()).
                     into(pvh.personPhoto);
 
@@ -195,13 +196,13 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                     //We have at least one post to display! Let's display it.
                     PostReply comment1 = post.comments.get(0);
                     pvh.comment1Name.setText(comment1.author.getUsername());
-                    pvh.comment1Text.setText(comment1.replyText);
+                    pvh.comment1Text.setText(FormatManager.parseText(comment1.replyText));
                     pvh.comment1Layout.setVisibility(View.VISIBLE);
                     if (post.comments.size() >= 2) {
                         //Now let's display comment 2.
                         PostReply comment2 = post.comments.get(1);
                         pvh.comment2Name.setText(comment2.author.getUsername());
-                        pvh.comment2Text.setText(comment2.replyText);
+                        pvh.comment2Text.setText(FormatManager.parseText(comment2.replyText));
                         pvh.comment2Layout.setVisibility(View.VISIBLE);
                         if (post.comments.size() > 2) {
                             //Even more comemnts? The user will have to check them out

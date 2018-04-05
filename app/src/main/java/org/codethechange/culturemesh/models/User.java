@@ -27,25 +27,22 @@ public class User implements Serializable{
 
     public int role;
 
-    public String imageLink;
-
     public String imgURL;
 
     public String getImgURL() {
         return imgURL;
     }
 
-    public void setImgURL(String imgURL) {
-        this.imgURL = imgURL;
-    }
 
-    public User(long id, String firstName, String lastName, String email, String username, String imgURL) {
+    public User(long id, String firstName, String lastName, String email, String username,
+                String imgURL, String aboutMe) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.username = username;
         this.imgURL = imgURL;
+        this.aboutMe = aboutMe;
     }
 
     public User(){

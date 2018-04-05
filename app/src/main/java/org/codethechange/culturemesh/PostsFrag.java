@@ -47,6 +47,7 @@ public class PostsFrag extends Fragment {
     private RecyclerView mRecyclerView;
     private RVAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    long selectedNetwork;
     SharedPreferences settings;
     //To figure out params that would be passed in
 
@@ -76,20 +77,8 @@ public class PostsFrag extends Fragment {
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(activity);
         mRecyclerView.setLayoutManager(mLayoutManager);
-
-        //get User info, this will be from SavedInstances from login or account
-        String fn = null;
-        String ln = null;
-        String email = null;
-        String un = null;
-        Network[] networks = null;
-
-        SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
-                Context.MODE_PRIVATE);
-        BigInteger networkId = new BigInteger(settings.getString(API.SELECTED_NETWORK,
-                "123456"));
-
-        long selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
+        //Get network id
+        selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
         new LoadFeedItems().execute(selectedNetwork);
         return rootView;
     }
@@ -131,6 +120,7 @@ public class PostsFrag extends Fragment {
          */
         @Override
         protected ArrayList<FeedItem> doInBackground(Long... longs) {
+            API.loadAppDatabase(getActivity());
             SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
                     MODE_PRIVATE);
             //We generalize posts/events to be feed items for polymorphism.
@@ -149,6 +139,7 @@ public class PostsFrag extends Fragment {
                 }
                 feedItems.addAll(posts);
             }
+            API.closeDatabase();
             //TODO: Add ability check out twitter posts.
             return feedItems;
         }
@@ -163,6 +154,7 @@ public class PostsFrag extends Fragment {
                     try {
                         id = ((Post) item).id;
                         intent.putExtra("postID", id);
+                        intent.putExtra("networkID", selectedNetwork);
                         getActivity().startActivity(intent);
                     } catch(ClassCastException e) {
                         //I don't think we have commenting support for events??
@@ -172,6 +164,8 @@ public class PostsFrag extends Fragment {
                 }
             }, getActivity().getApplicationContext());
             mRecyclerView.setAdapter(mAdapter);
+            //TODO: There's a better way than this. Check out ListNetworkFragment to modify the lists
+            //in the adapter themselves instead having to restart the fragment.
             getFragmentManager().beginTransaction()
                     .detach(PostsFrag.this)
                     .attach(PostsFrag.this)

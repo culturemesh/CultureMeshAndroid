@@ -22,8 +22,10 @@ import org.codethechange.culturemesh.models.Country;
 import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FromLocation;
 import org.codethechange.culturemesh.models.Language;
+import org.codethechange.culturemesh.models.Location;
 import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
+import org.codethechange.culturemesh.models.Place;
 import org.codethechange.culturemesh.models.Point;
 import org.codethechange.culturemesh.models.PostReply;
 import org.codethechange.culturemesh.models.Region;
@@ -45,6 +47,7 @@ import java.util.List;
  *
  * TODO: USE ALARMS FOR UPDATING DATA ON SUBSCRIBED NETWORKS
  * TODO: Figure out how we can handle trying to update data.
+ * TODO: Figure out alternative to id's other than longs and ints, which cannot represent all numbers. (Maybe just use strings?)
  *      - Perhaps check if it comes from subscribed network, if not do network request instead of cache?
  */
 
@@ -52,7 +55,10 @@ class API {
     static final String SETTINGS_IDENTIFIER = "acmsi";
     static final String PERSONAL_NETWORKS = "pernet";
     static final String SELECTED_NETWORK = "selnet";
+    final static String SELECTED_USER="seluser";
+    final static String FIRST_TIME = "firsttime";
     static final boolean NO_JOINED_NETWORKS = false;
+    static final String CURRENT_USER = "curruser";
     static CMDatabase mDb;
     //reqCounter to ensure that we don't close the database while another thread is using it.
     static int reqCounter;
@@ -75,7 +81,7 @@ class API {
                 "    \"act_code\": \"IDK\",\n" +
                 "    \"lastName\": \"Simpson\",\n" +
                 "    \"about_me\": \"Adipisci ad molestiae vel fugit dolor in. Dolore ipsa libero. Doloremque dolor itaque enim. Saepe nam odit.\\nSimilique commodi ex quam quae vel in rerum. Esse nesciunt sunt sed magnam nihil.\",\n" +
-                "    \"img_link\": \"https://www.lorempixel.com/720/691\",\n" +
+                "    \"img_link\": \"https://lorempixel.com/200/200/\",\n" +
                 "    \"role\": 1,\n" +
                 "    \"gender\": \"female\",\n" +
                 "    \"last_login\": \"2017-11-21 13:21:47\",\n" +
@@ -152,8 +158,10 @@ class API {
             JSONArray usersJSON = new JSONArray(rawDummy);
             for (int i = 0; i < usersJSON.length(); i++) {
                 JSONObject userJSON = usersJSON.getJSONObject(i);
-                User user = new User(userJSON.getLong("user_id"), userJSON.getString("firstName"),userJSON.getString("lastName"),
-                        userJSON.getString("email"), userJSON.getString("username"), userJSON.getString("img_link"));
+                User user = new User(userJSON.getLong("user_id"), userJSON.getString("firstName"),
+                        userJSON.getString("lastName"), userJSON.getString("email"),
+                        userJSON.getString("username"), userJSON.getString("img_link"),
+                        userJSON.getString("about_me"));
                 uDAo.addUser(user);
             }
 
@@ -601,9 +609,10 @@ class API {
         NetworkSubscription networkSubscription2 = new NetworkSubscription(1,1);
         NetworkSubscription networkSubscription3 = new NetworkSubscription(2,1);
         NetworkSubscription networkSubscription4 = new NetworkSubscription(4,1);
+        NetworkSubscription networkSubscription5 = new NetworkSubscription(4,0);
         NetworkSubscriptionDao netSubDao = mDb.networkSubscriptionDao();
         netSubDao.insertSubscriptions(networkSubscription1, networkSubscription2, networkSubscription3,
-                networkSubscription4);
+                networkSubscription4, networkSubscription5);
     }
 
     static void addReplies() {
@@ -713,9 +722,10 @@ class API {
         /*
             When will we ever use this? Perhaps viewing a user profile?
          */
-        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> userPosts(int id) {
+        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> userPosts(long id) {
             PostDao pDao = mDb.postDao();
             List<org.codethechange.culturemesh.models.Post> posts = pDao.getUserPosts(id);
+            instantiatePosts(posts);
             return new NetworkResponse<>(posts);
         }
 
@@ -822,6 +832,17 @@ class API {
             return new NetworkResponse<>(replies == null, replies);
         }
 
+        static NetworkResponse<List<Place>> autocomplete(String text) {
+            List<Place> locations = new ArrayList<>();
+            //Get any related cities, countries, or regions.
+            CityDao cityDao = mDb.cityDao();
+            locations.addAll(cityDao.autoCompleteCities(text));
+            RegionDao regionDao = mDb.regionDao();
+            locations.addAll(regionDao.autoCompleteRegions(text));
+            CountryDao countryDao = mDb.countryDao();
+            locations.addAll(countryDao.autoCompleteCountries(text));
+            return new NetworkResponse<List<Place>>(locations == null, locations);
+        }
     }
 
     static class Post {
@@ -839,6 +860,13 @@ class API {
             NetworkSubscriptionDao nSDao = mDb.networkSubscriptionDao();
             NetworkSubscription ns = new NetworkSubscription(userId, networkId);
             nSDao.insertSubscriptions(ns);
+            return new NetworkResponse<>(ns);
+        }
+
+        static NetworkResponse removeUserFromNetwork(long userId, long networkId) {
+            NetworkSubscriptionDao nSDao = mDb.networkSubscriptionDao();
+            NetworkSubscription ns = new NetworkSubscription(userId, networkId);
+            nSDao.deleteNetworkSubscriptions(ns);
             return new NetworkResponse<>(ns);
         }
 
@@ -861,7 +889,9 @@ class API {
         }
 
         static NetworkResponse reply(PostReply comment) {
-            return new NetworkResponse();
+            PostReplyDao prDao = mDb.postReplyDao();
+            prDao.insertPostReplies(comment);
+            return new NetworkResponse(false, comment);
         }
 
         static NetworkResponse event(Event event) {
@@ -893,6 +923,7 @@ class API {
     static void closeDatabase() {
         if (--reqCounter <= 0) {
             mDb.close();
+            mDb = null;
         }
     }
 }

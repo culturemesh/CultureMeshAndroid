@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Culture Mesh</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -47,7 +47,7 @@
     <string name="help">Help</string>
     <string name="your_networks">Your Networks</string>
     <string name="title_activity_drawer">DrawerActivity</string>
-    <string name="title_activity_specific_post">SpecificPostActivity</string>
+    <string name="title_activity_specific_post">View Post</string>
     <string name="title_activity_explore_bubbles">ExploreBubblesActivity</string>
     <string name="title_activity_explore_bubbles_open_gl">ExploreBubblesOpenGLActivity</string>
     <string name="title_activity_main">MainActivity</string>
@@ -84,15 +84,78 @@
     <string name="genericFail">Oops, something went wrong.</string>
     <string name="genericSuccess">Operation Succeeded!</string>
     <!-- Strings for onboarding -->
-    <string name="title_activity_pick_onboarding_status">PickOnboardingStatusActivity</string>
-    <string name="title_activity_onboard">OnboardActivity</string>
+    <string name="title_activity_pick_onboarding_status">Status Picker (For Testing)</string>
+    <string name="title_activity_onboard">Welcome!</string>
     <string name="welcome">Welcome!</string>
     <string name="cultureMesh_description">CultureMesh helps you connect with nearby people who
         speak your language or come from where you do."</string>
     <string name="networks_explain">Join networks to learn about events and people near you.</string>
-    <string name="networks">Networks</string>
     <string name="ready_question">Ready?</string>
     <string name="lets_start">Let\'s get Started!</string>
     <string name="logIn_signUp">Log In or Sign Up</string>
+    <string name="exit">Exit</string>
+
     <string name="view_more_comments">View More Comments &#8230;</string>
+    <string name="write_comments">Write a Comment &#8230; </string>
+    <string name="post">Post</string>
+    <string name="cannot_write_empty">Cannot write an empty comment.</string>
+    <string name="title_activity_view_profile">View Profile</string>
+    <string name="posts">Posts</string>
+    <string name="events">Events</string>
+    <string name="networks">Networks</string>
+    <string name="no_networks">No Networks</string>
+    <string name="no_posts">No Posts</string>
+    <string name="no_events">No Events</string>
+    <string name="no_users">No Users</string>
+    <!-- Strings for help and about pages -->
+    <string name="about">About</string>
+    <string name="join_success">You successfully joined the network!</string>
+    <string name="are_you_sure">Are You Sure?</string>
+    <string name="leave_network_question">Are you sure you want to leave this network?</string>
+    <string name="update_profile">Update Profile</string>
+    <string name="updated_profile">Updated Profile!</string>
+    <string name="culturemesh_mission">
+
+        "CultureMesh's Mission\n\n"
+
+        "CultureMesh is building networks to match the real-world dynamics of people living, working "
+        and traveling outside of their home countries to knit the diverse fabrics of our world together."
+
+    </string>
+    <string name="about_body" tools:ignore="TypographyOther">
+
+        "Copyright (c) 2017-2018 CultureMesh\n"
+        "https://culturemesh.com\n\n"
+        <!-- TODO: The cultureMesh website link should be clickable -->
+
+        "Attributions for Third-Party Libraries:\n\n"
+
+        "BubblePicker Copyright (c) 2017 Irina Galata\n\n"
+        "Permission is hereby granted, free of charge, to any person obtaining a copy of this "
+        "software and associated documentation files (the "Software"), to deal in the Software without "
+        "restriction, including without limitation the rights to use, copy, modify, merge, publish, "
+        "distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom "
+        "the Software is furnished to do so, subject to the following conditions:\n\n"
+        "The above copyright notice and this permission notice shall be included in all copies or "
+        "substantial portions of the Software.\n\n"
+        "THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, "
+        "INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR "
+        "PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE "
+        "FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR "
+        "OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER "
+        "DEALINGS IN THE SOFTWARE.\n\n"
+
+        "Ahoy Onboarder Copyright (C) 2016 Code My Brains Out\n\n"
+        "Licensed under the Apache License, Version 2.0 (the "License"); "
+        "you may not use this file except in compliance with the License. "
+        "You may obtain a copy of the License at\n\n"
+        "http://www.apache.org/licenses/LICENSE-2.0\n\n"
+        "Unless required by applicable law or agreed to in writing, software "
+        "distributed under the License is distributed on an "AS IS" BASIS, "
+        "WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. "
+        "See the License for the specific language governing permissions and "
+        "limitations under the License.\n\n"
+
+    </string>
+    <string name="title_activity_settings">Edit Profile</string>
 </resources>

@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".CultureMeshApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -12,11 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:largeHeap = "true"
-        android:name=".CultureMeshApplication">
+        android:windowSoftInputMode="adjustNothing">
         <activity
             android:name=".TimelineActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ExploreBubblesOpenGLActivity"
             android:label="@string/title_activity_explore_bubbles_open_gl"
@@ -95,14 +96,33 @@
         <activity
             android:name=".SpecificPostActivity"
             android:label="@string/title_activity_specific_post"
-            android:parentActivityName=".TimelineActivity">
+            android:parentActivityName=".TimelineActivity"
+            android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.codethechange.culturemesh.TimelineActivity" />
         </activity>
+        <activity
+            android:name=".HelpActivity"
+            android:label="@string/help"
+            android:theme="@style/AppTheme.NoActionBar" />
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="264409e41fc2e4073f71bd98485d3b60f90b0dcf" />
+
+        <activity
+            android:name=".AboutActivity"
+            android:label="@string/about"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ViewProfileActivity"
+            android:label="@string/title_activity_view_profile"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

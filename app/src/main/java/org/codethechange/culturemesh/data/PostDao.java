@@ -7,6 +7,7 @@ import android.arch.persistence.room.Query;
 
 import org.codethechange.culturemesh.models.Post;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,6 +25,6 @@ public interface PostDao {
     public List<Post> getNetworkPosts(int id);
 
     @Query("SELECT * FROM post WHERE userId=:id")
-    public List<Post> getUserPosts(int id);
+    public List<Post> getUserPosts(long id);
 
 }
