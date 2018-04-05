@@ -90,6 +90,7 @@ public class TimelineActivity extends DrawerActivity {
         population = findViewById(R.id.network_population);
         fromLocation = findViewById(R.id.fromLocation);
         nearLocation = findViewById(R.id.nearLocation);
+        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
         API.loadAppDatabase(getApplicationContext());
         if (API.NO_JOINED_NETWORKS) {
             createNoNetwork();
