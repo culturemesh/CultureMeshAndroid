@@ -256,30 +256,17 @@
     <fragment
         android:id="@+id/commentFrag"
         android:name="org.codethechange.culturemesh.CommentsFrag"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout="@layout/fragment_comments"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/write_reply_view"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cv"
-        app:layout_constraintVertical_bias="0.0"
         tools:layout="@layout/fragment_comments" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/write_comment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="@dimen/fab_margin"
-        android:layout_marginEnd="@dimen/fab_margin"
-        android:clickable="true"
-        android:focusable="true"
-        app:backgroundTint="@color/colorAccent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/commentFrag"
-        app:srcCompat="@drawable/ic_create_white_24px" />
+
     <!-- app:rippleColor="@color/colorPrimaryDark"-->
     <!--    <fragment
             android:id="@+id/commentFrag"
