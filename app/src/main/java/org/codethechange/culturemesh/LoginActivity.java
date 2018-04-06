@@ -3,9 +3,11 @@ package org.codethechange.culturemesh;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
@@ -15,6 +17,8 @@ import android.view.animation.Transformation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import org.codethechange.culturemesh.models.User;
 
 
 public class LoginActivity extends RedirectableAppCompatActivity {
@@ -61,16 +65,12 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         signInButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                //TODO: Handle sign in.
-                Intent returnIntent = new Intent();
-                // TODO: Change result returned to RESULT_CANCELLED for no login
-
-                // TODO: Update the "1" here with the correct user ID
-                SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-                setLoggedIn(settings, 1);
-
-                setResult(Activity.RESULT_OK, returnIntent);
-                finish();
+                EditText userNameField = findViewById(R.id.user_name_field);
+                EditText passwordField = findViewById(R.id.password_field);
+                String userName = userNameField.getText().toString();
+                String password = passwordField.getText().toString();
+                Credential cred = new Credential(userName, password);
+                new ValidateCredentials().execute(cred);
             }
         });
         firstNameText = findViewById(R.id.first_name_field);
@@ -200,4 +200,60 @@ public class LoginActivity extends RedirectableAppCompatActivity {
             }
         });
     }
+
+    private class Credential {
+        private String userName;
+        private String password;
+
+        public Credential(String userName, String password) {
+            this.userName = userName;
+            this.password = password;
+        }
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+    }
+
+    private class ValidateCredentials extends AsyncTask<Credential, Void, NetworkResponse<User>> {
+        @Override
+        protected NetworkResponse<User> doInBackground(Credential... credentials) {
+            super.onPreExecute();
+
+            API.loadAppDatabase(getApplicationContext());
+            NetworkResponse<User> res;
+            try {
+                // TODO: Replace this with actually processing username and password
+                //TODO: Handle sign in.
+                long id = Long.parseLong(credentials[0].userName);
+                res = API.Get.user(id);
+            } catch (NumberFormatException e) {
+                res = new NetworkResponse<>(true, R.string.loginFailed);
+            }
+
+            API.closeDatabase();
+            return res;
+        }
+
+        @Override
+        protected void onPostExecute(NetworkResponse<User> userNetworkResponse) {
+            super.onPostExecute(userNetworkResponse);
+            if (userNetworkResponse.fail()) {
+                userNetworkResponse.showErrorDialog(getApplicationContext());
+            } else {
+                SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+                setLoggedIn(settings, userNetworkResponse.getPayload().id);
+
+                Intent returnIntent = new Intent();
+                // TODO: Change result returned to RESULT_CANCELLED for no login
+                setResult(Activity.RESULT_OK, returnIntent);
+                finish();
+            }
+        }
+    }
+
 }
