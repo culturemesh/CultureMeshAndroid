@@ -35,6 +35,10 @@ public class PostReply {
         this.replyText = replyText;
     }
 
+    public User getAuthor() {
+        return author;
+    }
+
     public PostReply() {
 
     }

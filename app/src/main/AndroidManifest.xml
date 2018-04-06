@@ -12,6 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:largeHeap = "true"
         android:windowSoftInputMode="adjustNothing">
         <activity
             android:name=".TimelineActivity"
@@ -105,15 +106,6 @@
             android:name=".HelpActivity"
             android:label="@string/help"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".SpecificPostActivity"
-            android:label="@string/title_activity_specific_post"
-            android:parentActivityName=".TimelineActivity"
-            android:theme="@style/AppTheme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.codethechange.culturemesh.TimelineActivity" />
-        </activity>
 
         <meta-data
             android:name="io.fabric.ApiKey"

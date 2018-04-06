@@ -2,11 +2,18 @@ package org.codethechange.culturemesh;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentActivity;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -27,6 +34,7 @@ import com.squareup.picasso.Picasso;
 
 import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
+import org.w3c.dom.Comment;
 
 import java.util.Date;
 import java.util.List;
@@ -40,11 +48,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
     TextView timestamp;
     ImageView personPhoto;
     ImageView postTypePhoto;
-    TextView eventTitle;
-    LinearLayout eventDetailsLL;
-    TextView eventTime;
-    TextView eventLocation;
-    TextView eventDescription;
     ImageView[] images;
     ListenableEditText commentField;
     Button postButton;
@@ -55,6 +58,9 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
     FormatManager formatManager;
     SparseArray<ImageButton> toggleButtons;
     ProgressBar progressBar;
+
+    private RecyclerView commentsRV;
+    private LinearLayoutManager mLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,11 +80,33 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         images[0] = findViewById(R.id.attachedImage1);
         images[1] = findViewById(R.id.attachedImage2);
         images[2] = findViewById(R.id.attachedImage3);
-        eventTitle = findViewById(R.id.event_title);
-        eventDetailsLL = findViewById(R.id.event_details_linear_layout);
-        eventTime = findViewById(R.id.event_time);
-        eventLocation = findViewById(R.id.event_location);
-        eventDescription = findViewById(R.id.event_description);
+
+        commentsRV = findViewById(R.id.commentsRV);
+        mLayoutManager = (LinearLayoutManager) commentsRV.getLayoutManager();
+        commentsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            private boolean loading = true;
+            int pastVisiblesItems, visibleItemCount, totalItemCount;
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if(dy > 0) {
+                    visibleItemCount = mLayoutManager.getChildCount();
+                    totalItemCount = mLayoutManager.getItemCount();
+                    pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
+                    if (loading)
+                    {
+                        if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
+                        {
+                            loading = false;
+                            Log.v("...", "Last Item");
+                            fetchCommentsAtEnd(pastVisiblesItems);
+                            loading = true;
+                        }
+                    }
+                }
+            }
+        });
+
+
         commentField = findViewById(R.id.write_comment_text);
         commentLV = findViewById(R.id.commentList);
         boldButton = findViewById(R.id.comment_bold);
@@ -179,6 +207,22 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
     }
 
 
+    public void fetchCommentsAtEnd(int currItem) {
+        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+
+        //TODO: load extra posts by loadSize amount
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+            }
+        }, 1000);
+
+
+    }
+
     class PostBundleWrapper {
         Post post;
         List<PostReply> replies;
@@ -232,13 +276,12 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
             int r = getResources().getIdentifier("commentColor", "color", "org.codethechange.culturemesh");
             commentLV.setBackgroundResource(r);
 
-            String[] comments = {"test comment 1", "test comment 2", "this is good content", "this is, uh, not good content",
-                    "this is a really long comment to see how comments will work if someone has a lot to say about someone's content, which is very (very) possible"};
-            //TODO populate ListView with comments
+      //      String[] comments = {"test comment 1", "test comment 2", "this is good content", "this is, uh, not good content",
+      //              "this is a really long comment to see how comments will work if someone has a lot to say about someone's content, which is very (very) possible"};
 
-            ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, comments);
-            commentLV.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
+      //      ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, comments);
+      //      commentLV.setAdapter(adapter);
+      //      adapter.notifyDataSetChanged();
         }
     }
 

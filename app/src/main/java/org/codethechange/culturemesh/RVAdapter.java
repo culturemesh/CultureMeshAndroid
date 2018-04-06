@@ -41,12 +41,15 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             return post;
         }
         CardView cv;
-        TextView personName, username, content, timestamp, eventTitle, eventTime, eventLocation,
-                eventDescription, comment1Name, comment1Text, comment2Name, comment2Text,
-                viewMoreComments;
+        TextView personName, username, content, timestamp, eventTitle, comment1Name,
+                 comment1Text, comment2Name, comment2Text, viewMoreComments;
         ImageView personPhoto, postTypePhoto;
         ImageView[] images;
         LinearLayout eventDetailsLL;
+        TextView eventTime;
+        TextView eventLocation;
+        TextView eventDescription;
+
         ConstraintLayout layout;
         RelativeLayout comment1Layout, comment2Layout;
 
@@ -216,6 +219,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                     pvh.viewMoreComments.setVisibility(View.GONE);
                 }
             }
+            Log.i("Image Link", post.getAuthor().getImgURL());
         } catch(ClassCastException e) {
             //It's an event.
             Event event = (Event) item;
