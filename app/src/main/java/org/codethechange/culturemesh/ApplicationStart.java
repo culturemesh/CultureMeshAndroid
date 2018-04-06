@@ -11,8 +11,13 @@ public class ApplicationStart extends Application {
         super.onCreate();
         SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         if (LoginActivity.isLoggedIn(settings)) {
-            Intent start = new Intent(getApplicationContext(), TimelineActivity.class);
-            startActivity(start);
+            if (settings.contains(API.SELECTED_NETWORK)) {
+                Intent start = new Intent(getApplicationContext(), TimelineActivity.class);
+                startActivity(start);
+            } else {
+                Intent start = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
+                startActivity(start);
+            }
         } else {
             Intent start = new Intent(getApplicationContext(), OnboardActivity.class);
             startActivity(start);
