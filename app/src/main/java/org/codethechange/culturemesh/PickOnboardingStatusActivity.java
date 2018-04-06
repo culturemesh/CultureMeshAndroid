@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -38,6 +39,8 @@ public class PickOnboardingStatusActivity extends AppCompatActivity {
      * @param v View the user tapped the button on
      */
     public void tapNew(View v) {
+        SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+        LoginActivity.setLoggedOut(settings);
         Intent start = new Intent(getApplicationContext(), OnboardActivity.class);
         startActivity(start);
     }
@@ -47,6 +50,8 @@ public class PickOnboardingStatusActivity extends AppCompatActivity {
      * @param v View the user tapped the button on
      */
     public void tapNoNetworks(View v) {
+        SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+        LoginActivity.setLoggedIn(settings, 5);
         Intent start = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
         startActivity(start);
     }
