@@ -25,6 +25,31 @@ public class LoginActivity extends RedirectableAppCompatActivity {
     EditText passwordText;
     TextView needAccountText;
 
+    /**
+     * Largely for testing, this public method can be used to set which user is currently logged in
+     * This is useful for PickOnboardingStatusActivity because different login states correspond
+     * to different users. No logged-in user is signalled by a missing SharedPreferences entry.
+     * @param settings The SharedPreferences storing user login state
+     * @param userID ID of the user to make logged-in
+     */
+    public static void setLoggedIn(SharedPreferences settings, long userID) {
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putLong(API.CURRENT_USER, userID);
+        editor.apply();
+    }
+
+    public static boolean isLoggedIn(SharedPreferences settings) {
+        return settings.contains(API.CURRENT_USER);
+    }
+
+    public static void setLoggedOut(SharedPreferences settings) {
+        if (isLoggedIn(settings)) {
+            SharedPreferences.Editor editor = settings.edit();
+            editor.remove(API.CURRENT_USER);
+            editor.apply();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,12 +64,10 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                 //TODO: Handle sign in.
                 Intent returnIntent = new Intent();
                 // TODO: Change result returned to RESULT_CANCELLED for no login
-                // Set the current user in the SharedPreferences settings to the user that just logged in
-                SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-                SharedPreferences.Editor editor = settings.edit();
+
                 // TODO: Update the "1" here with the correct user ID
-                editor.putLong(API.CURRENT_USER, 1);
-                editor.apply();
+                SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+                setLoggedIn(settings, 1);
 
                 setResult(Activity.RESULT_OK, returnIntent);
                 finish();
