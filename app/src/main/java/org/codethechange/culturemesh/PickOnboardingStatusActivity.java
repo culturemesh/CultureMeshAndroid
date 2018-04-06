@@ -30,6 +30,8 @@ public class PickOnboardingStatusActivity extends AppCompatActivity {
      * @param v View the user tapped the button on
      */
     public void tapReturning(View v) {
+        SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+        LoginActivity.setLoggedIn(settings, 1);
         Intent start = new Intent(getApplicationContext(), TimelineActivity.class);
         startActivity(start);
     }
