@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh;
 
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -67,7 +68,9 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
         picker.setListener(new BubblePickerListener() {
             @Override
             public void onBubbleSelected(@NotNull PickerItem item) {
-
+                thisActivity.getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
+                        .putLong(API.SELECTED_NETWORK, 1).apply();
+                startActivity(new Intent(thisActivity, TimelineActivity.class));
             }
 
             @Override
