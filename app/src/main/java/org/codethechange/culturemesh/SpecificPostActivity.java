@@ -54,7 +54,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
     ConstraintLayout writeReplyView;
     boolean editTextOpened = false;
     ImageButton boldButton, italicButton, linkButton;
-    ListView commentLV;
     FormatManager formatManager;
     SparseArray<ImageButton> toggleButtons;
     ProgressBar progressBar;
@@ -108,7 +107,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
 
 
         commentField = findViewById(R.id.write_comment_text);
-        commentLV = findViewById(R.id.commentList);
         boldButton = findViewById(R.id.comment_bold);
         italicButton = findViewById(R.id.comment_italic);
         linkButton = findViewById(R.id.comment_link);
@@ -135,12 +133,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         cv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                closeEditTextView();
-            }
-        });
-        commentLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 closeEditTextView();
             }
         });
@@ -208,7 +200,9 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
 
 
     public void fetchCommentsAtEnd(int currItem) {
-        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+        //TODO: @Dylan: this causes nullpointer because
+        // this view is no where to be found...
+        // findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
 
         //TODO: load extra posts by loadSize amount
 
@@ -216,7 +210,9 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                //TODO: @Dylan: this causes nullpointer because
+                // this view is no where to be found...
+                //findViewById(R.id.loadingPanel).setVisibility(View.GONE);
             }
         }, 1000);
 
@@ -274,7 +270,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
             username.setOnClickListener(viewUserProfile);
             personName.setOnClickListener(viewUserProfile);
             int r = getResources().getIdentifier("commentColor", "color", "org.codethechange.culturemesh");
-            commentLV.setBackgroundResource(r);
 
       //      String[] comments = {"test comment 1", "test comment 2", "this is good content", "this is, uh, not good content",
       //              "this is a really long comment to see how comments will work if someone has a lot to say about someone's content, which is very (very) possible"};

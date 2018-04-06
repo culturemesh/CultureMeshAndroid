@@ -99,7 +99,7 @@ public class RVCommentAdapter extends RecyclerView.Adapter<RVCommentAdapter.Post
         try{
             String name = comment.author.getFirstName() + " " + comment.author.getLastName();
             pvh.personName.setText(name);
-            pvh.content.setText(comment.replyText);
+            pvh.content.setText(FormatManager.parseText(comment.replyText));
             pvh.postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
             pvh.timestamp.setText(comment.replyDate);
             pvh.username.setText(comment.author.getUsername());
