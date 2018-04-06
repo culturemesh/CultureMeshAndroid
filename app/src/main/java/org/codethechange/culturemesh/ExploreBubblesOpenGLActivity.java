@@ -63,7 +63,7 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
         images.recycle();
 
         picker.setBubbleSize(70);
-        picker.setBackground(0x000000);
+        picker.setBackground(0x8BC34A);
         picker.setListener(new BubblePickerListener() {
             @Override
             public void onBubbleSelected(@NotNull PickerItem item) {
