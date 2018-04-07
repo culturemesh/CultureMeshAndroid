@@ -3,9 +3,11 @@ package org.codethechange.culturemesh;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
@@ -16,6 +18,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.codethechange.culturemesh.models.User;
+
 
 public class LoginActivity extends RedirectableAppCompatActivity {
     private boolean signInToggle = true;
@@ -24,6 +28,31 @@ public class LoginActivity extends RedirectableAppCompatActivity {
     EditText confirmPassword;
     EditText passwordText;
     TextView needAccountText;
+
+    /**
+     * Largely for testing, this public method can be used to set which user is currently logged in
+     * This is useful for PickOnboardingStatusActivity because different login states correspond
+     * to different users. No logged-in user is signalled by a missing SharedPreferences entry.
+     * @param settings The SharedPreferences storing user login state
+     * @param userID ID of the user to make logged-in
+     */
+    public static void setLoggedIn(SharedPreferences settings, long userID) {
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putLong(API.CURRENT_USER, userID);
+        editor.apply();
+    }
+
+    public static boolean isLoggedIn(SharedPreferences settings) {
+        return settings.contains(API.CURRENT_USER);
+    }
+
+    public static void setLoggedOut(SharedPreferences settings) {
+        if (isLoggedIn(settings)) {
+            SharedPreferences.Editor editor = settings.edit();
+            editor.remove(API.CURRENT_USER);
+            editor.apply();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,18 +65,12 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         signInButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                //TODO: Handle sign in.
-                Intent returnIntent = new Intent();
-                // TODO: Change result returned to RESULT_CANCELLED for no login
-                // Set the current user in the SharedPreferences settings to the user that just logged in
-                SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-                SharedPreferences.Editor editor = settings.edit();
-                // TODO: Update the "1" here with the correct user ID
-                editor.putLong(API.CURRENT_USER, 1);
-                editor.apply();
-
-                setResult(Activity.RESULT_OK, returnIntent);
-                finish();
+                EditText userNameField = findViewById(R.id.user_name_field);
+                EditText passwordField = findViewById(R.id.password_field);
+                String userName = userNameField.getText().toString();
+                String password = passwordField.getText().toString();
+                Credential cred = new Credential(userName, password);
+                new ValidateCredentials().execute(cred);
             }
         });
         firstNameText = findViewById(R.id.first_name_field);
@@ -177,4 +200,60 @@ public class LoginActivity extends RedirectableAppCompatActivity {
             }
         });
     }
+
+    private class Credential {
+        private String userName;
+        private String password;
+
+        public Credential(String userName, String password) {
+            this.userName = userName;
+            this.password = password;
+        }
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+    }
+
+    private class ValidateCredentials extends AsyncTask<Credential, Void, NetworkResponse<User>> {
+        @Override
+        protected NetworkResponse<User> doInBackground(Credential... credentials) {
+            super.onPreExecute();
+
+            API.loadAppDatabase(getApplicationContext());
+            NetworkResponse<User> res;
+            try {
+                // TODO: Replace this with actually processing username and password
+                //TODO: Handle sign in.
+                long id = Long.parseLong(credentials[0].userName);
+                res = API.Get.user(id);
+            } catch (NumberFormatException e) {
+                res = new NetworkResponse<>(true, R.string.loginFailed);
+            }
+
+            API.closeDatabase();
+            return res;
+        }
+
+        @Override
+        protected void onPostExecute(NetworkResponse<User> userNetworkResponse) {
+            super.onPostExecute(userNetworkResponse);
+            if (userNetworkResponse.fail()) {
+                userNetworkResponse.showErrorDialog(getApplicationContext());
+            } else {
+                SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+                setLoggedIn(settings, userNetworkResponse.getPayload().id);
+
+                Intent returnIntent = new Intent();
+                // TODO: Change result returned to RESULT_CANCELLED for no login
+                setResult(Activity.RESULT_OK, returnIntent);
+                finish();
+            }
+        }
+    }
+
 }
