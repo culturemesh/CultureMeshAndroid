@@ -1,22 +1,52 @@
 package org.codethechange.culturemesh.models;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.util.ArrayList;
+
 /**
  * Created by nathaniel on 11/10/17.
  */
+@Entity
+public class User implements Serializable{
+    @PrimaryKey
+    public long id;
 
-public class User {
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String username;
-    private Network[] enrolledNetworks;
+    public String firstName;
 
-    public User(String firstName, String lastName, String email, String username, Network[] enrolledNetworks) {
+    public String lastName;
+
+    public String email;
+
+    public String username;
+
+    public String aboutMe;
+
+    public int role;
+
+    public String imgURL;
+
+    public String getImgURL() {
+        return imgURL;
+    }
+
+
+    public User(long id, String firstName, String lastName, String email, String username,
+                String imgURL, String aboutMe) {
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.username = username;
-        this.enrolledNetworks = enrolledNetworks;
+        this.imgURL = imgURL;
+        this.aboutMe = aboutMe;
+    }
+
+    public User(){
+
     }
 
     public String getFirstName() {
@@ -35,10 +65,6 @@ public class User {
         return username;
     }
 
-    public Network[] getEnrolledNetworks() {
-        return enrolledNetworks;
-    }
-
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -55,7 +81,4 @@ public class User {
         this.username = username;
     }
 
-    public void setEnrolledNetworks(Network[] enrolledNetworks) {
-        this.enrolledNetworks = enrolledNetworks;
-    }
 }
