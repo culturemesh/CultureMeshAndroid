@@ -243,7 +243,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         protected void onPostExecute(NetworkResponse<User> userNetworkResponse) {
             super.onPostExecute(userNetworkResponse);
             if (userNetworkResponse.fail()) {
-                userNetworkResponse.showErrorDialog(getApplicationContext());
+                userNetworkResponse.showErrorDialog(LoginActivity.this);
             } else {
                 SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
                 setLoggedIn(settings, userNetworkResponse.getPayload().id);

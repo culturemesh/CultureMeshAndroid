@@ -13,10 +13,10 @@ public class AboutActivity extends DrawerActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        getSupportActionBar().setLogo(R.drawable.logo_header);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        /*
+        I cut out the setSupportActionBar(toolbar) stuff because
+        DrawerActivity handles all of that for you (NOTE: The toolbar MUST have an id of
+        action_bar.
+        */
     }
 }
