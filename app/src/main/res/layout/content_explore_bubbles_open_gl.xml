@@ -12,7 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@android:color/white"
-        android:backgroundTint="@color/black"
+        android:backgroundTint="@color/colorPrimary"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -28,7 +28,7 @@
             android:gravity="center"
             android:text="Explore"
             android:textAllCaps="true"
-            android:textColor="@color/aqua"
+            android:textColor="@color/blue"
             android:textSize="49sp" />
 
         <TextView
@@ -39,7 +39,7 @@
             android:layout_marginTop="-7dp"
             android:gravity="center"
             android:text="Nearby Networks"
-            android:textColor="@color/aqua"
+            android:textColor="@color/blue"
             android:textSize="16sp" />
 
         <TextView
@@ -51,7 +51,7 @@
             android:gravity="center"
             android:lineSpacingMultiplier="1"
             android:text="Tap to discover new networks in your area!"
-            android:textColor="#9b9b9b"
+            android:textColor="@android:color/black"
             android:textSize="14sp" />
 
         <org.codethechange.bubblepicker.rendering.BubblePicker
