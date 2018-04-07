@@ -30,4 +30,8 @@
     <color name="darkBackground">#424242</color>
     <color name="black">#000000</color>'
     <color name="commentColor">#96318A</color>
+    <color name="triad1">#3277B5</color>
+    <color name="triad2">#4989C1</color>
+    <color name="triad3">#C14989</color>
+    <color name="triad4">#B53277</color>
 </resources>
