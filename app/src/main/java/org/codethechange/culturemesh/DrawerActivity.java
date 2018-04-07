@@ -169,6 +169,10 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         } else if (id == R.id.nav_settings) {
             Intent startHelp = new Intent(getApplicationContext(), SettingsActivity.class);
             startActivity(startHelp);
+        } else if (id == R.id.nav_logout) {
+            SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+            LoginActivity.setLoggedOut(settings);
+            finish();
         }
 
         mDrawerLayout.closeDrawer(GravityCompat.START);

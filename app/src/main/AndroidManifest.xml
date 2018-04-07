@@ -75,23 +75,13 @@
             android:parentActivityName=".TimelineActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".PickOnboardingStatusActivity"
-            android:label="@string/title_activity_pick_onboarding_status"
+            android:name=".OnboardActivity"
+            android:label="@string/title_activity_onboard"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".OnboardActivity"
-            android:label="@string/title_activity_onboard"
-            android:parentActivityName=".PickOnboardingStatusActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.codethechange.culturemesh.PickOnboardingStatusActivity" />
         </activity>
         <activity
             android:name=".SpecificPostActivity"
