@@ -4,12 +4,12 @@
     android:shape="rectangle"   >
 
     <solid
-        android:color="@color/commentColor" >
+        android:color="@color/triad2" >
     </solid>
 
     <stroke
         android:width="2dp"
-        android:color="@color/commentColor" >
+        android:color="@color/triad2" >
     </stroke>
 
     <padding
