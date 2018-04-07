@@ -35,11 +35,11 @@ public class OnboardActivity extends AhoyOnboarderActivity {
 
         List<AhoyOnboarderCard> pages = new ArrayList<>();
         pages.add(makeCard(getString(R.string.welcome), getString(R.string.cultureMesh_description),
-                R.drawable.logo_header, 1000, 1000));
+                R.drawable.logo_header, 500, 500));
         pages.add(makeCard(getString(R.string.networks), getString(R.string.networks_explain),
-                R.drawable.ic_people_outline_white_24px, 1000, 1000));
+                R.drawable.ic_people_outline_white_24px, 500, 500));
         pages.add(makeCard(getString(R.string.ready_question), getString(R.string.lets_start),
-                R.drawable.ic_public_black_24dp, 1000, 1000));
+                R.drawable.ic_public_black_24dp, 500, 500));
 
         setGradientBackground();
 
