@@ -66,7 +66,23 @@ public class NetworkResponse<E> {
     public NetworkResponse(boolean inFail, E inPayload) {
         payload = inPayload;
         fail = inFail;
+        if (inFail)
+            messageID = R.string.genericFail;
+        else
+            messageID = R.string.genericSuccess;
     }
+
+    /**
+     * Constructor that both stores a payload and sets the failure state from parameters
+     * @param inFail Whether or not the network operation failed
+     * @param inPayload Payload returned by networking request
+     */
+    public NetworkResponse(boolean inFail, E inPayload, int messageID) {
+        payload = inPayload;
+        fail = inFail;
+        this.messageID = messageID;
+    }
+
 
     /**
      * Check whether the network request failed
