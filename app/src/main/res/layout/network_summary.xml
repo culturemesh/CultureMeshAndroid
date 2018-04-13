@@ -1,0 +1,100 @@
+
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cv"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/activity_vertical_margin"
+    card_view:cardBackgroundColor="@color/colorPrimaryDark"
+    card_view:cardCornerRadius="12dp"
+    card_view:cardElevation="8dp">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/from_location"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="@string/from_location_search_hint"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            card_view:layout_constraintEnd_toStartOf="@+id/arrow"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            card_view:layout_constraintBottom_toTopOf="@+id/posts_image"
+            card_view:layout_constraintEnd_toEndOf="parent"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toTopOf="@+id/from_location"
+            card_view:srcCompat="@drawable/ic_arrow_forward_white_24px" />
+
+        <TextView
+            android:id="@+id/near_location"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/title_activity_choose_near_location"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            card_view:layout_constraintEnd_toEndOf="parent"
+            card_view:layout_constraintHorizontal_bias="0.0"
+            card_view:layout_constraintStart_toEndOf="@+id/arrow"
+            card_view:layout_constraintTop_toTopOf="@+id/from_location" />
+
+        <ImageView
+            android:id="@+id/population_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            card_view:layout_constraintBottom_toBottomOf="@+id/population_number"
+            card_view:layout_constraintStart_toEndOf="@+id/population_number"
+            card_view:layout_constraintTop_toTopOf="@+id/population_number"
+            card_view:srcCompat="@drawable/ic_people_outline_white_24px" />
+
+        <TextView
+            android:id="@+id/population_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="100K"
+            android:textColor="@color/white"
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toBottomOf="@+id/from_location" />
+
+        <TextView
+            android:id="@+id/posts_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:text="100K"
+            android:textColor="@color/white"
+            card_view:layout_constraintBottom_toBottomOf="@+id/population_image"
+            card_view:layout_constraintStart_toEndOf="@+id/population_image"
+            card_view:layout_constraintTop_toTopOf="@+id/population_image" />
+
+        <ImageView
+            android:id="@+id/posts_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            card_view:layout_constraintBottom_toBottomOf="@+id/posts_number"
+            card_view:layout_constraintStart_toEndOf="@+id/posts_number"
+            card_view:layout_constraintTop_toTopOf="@+id/posts_number"
+            card_view:srcCompat="@drawable/ic_forum_white_24px" />
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.v7.widget.CardView>
