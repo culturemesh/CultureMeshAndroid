@@ -4,6 +4,9 @@ import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
+import org.codethechange.culturemesh.Listable;
+import org.codethechange.culturemesh.Searchable;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 
@@ -13,7 +16,7 @@ import java.math.BigInteger;
  */
 
 @Entity
-public class Language implements Serializable {
+public class Language implements Serializable, Listable, Searchable {
     @PrimaryKey
     public long language_id;
 
@@ -32,6 +35,18 @@ public class Language implements Serializable {
     }
 
     public String toString() {
+        return name;
+    }
+
+    public boolean matches(CharSequence constraint) {
+        return name.contains(constraint);
+    }
+
+    public int getNumUsers() {
+        return numSpeakers;
+    }
+
+    public String getListableName() {
         return name;
     }
 }
