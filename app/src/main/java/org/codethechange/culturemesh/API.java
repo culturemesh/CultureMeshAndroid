@@ -10,6 +10,7 @@ import org.codethechange.culturemesh.data.CountryDao;
 import org.codethechange.culturemesh.data.EventDao;
 import org.codethechange.culturemesh.data.EventSubscription;
 import org.codethechange.culturemesh.data.EventSubscriptionDao;
+import org.codethechange.culturemesh.data.LanguageDao;
 import org.codethechange.culturemesh.data.NetworkDao;
 import org.codethechange.culturemesh.data.NetworkSubscription;
 import org.codethechange.culturemesh.data.NetworkSubscriptionDao;
@@ -832,7 +833,8 @@ class API {
             return new NetworkResponse<>(replies == null, replies);
         }
 
-        static NetworkResponse<List<Place>> autocomplete(String text) {
+        static NetworkResponse<List<Place>> autocompletePlace(String text) {
+            // TODO: Take argument for maximum number of locations to return?
             List<Place> locations = new ArrayList<>();
             //Get any related cities, countries, or regions.
             CityDao cityDao = mDb.cityDao();
@@ -842,6 +844,13 @@ class API {
             CountryDao countryDao = mDb.countryDao();
             locations.addAll(countryDao.autoCompleteCountries(text));
             return new NetworkResponse<List<Place>>(locations == null, locations);
+        }
+
+        static NetworkResponse<List<Language>> autocompleteLanguage(String text) {
+            // TODO: Take argument for maximum number of languages to return?
+            List<Language> matches = new ArrayList<Language>();
+            matches.add(new Language(0, "Sample Language 0", 10));
+            return new NetworkResponse(matches);
         }
     }
 
