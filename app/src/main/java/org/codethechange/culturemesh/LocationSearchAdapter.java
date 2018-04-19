@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import android.widget.Filter;
 import android.widget.TextView;
 
+import org.codethechange.culturemesh.models.Location;
+
 import java.util.List;
 import java.util.logging.LogRecord;
 
@@ -24,10 +26,10 @@ import java.util.logging.LogRecord;
  * Created by Drew Gregory (drewgreg@stanford.edu) on 11/7/17.
  */
 
-public class LocationSearchAdapter extends ArrayAdapter<String> implements Filterable {
+public class LocationSearchAdapter extends ArrayAdapter<Location> implements Filterable {
 
-    private ArrayList<String> locations;
-    private ArrayList<String> filteredLocations;
+    private ArrayList<Location> locations;
+    private ArrayList<Location> filteredLocations;
     private LocationFilter filter;
     private Context context;
 
@@ -39,14 +41,23 @@ public class LocationSearchAdapter extends ArrayAdapter<String> implements Filte
      * @param locations string list of locations
      */
     LocationSearchAdapter(@NonNull Context context, @LayoutRes int resource,
-                                 @NonNull List<String> locations) {
+                                 @NonNull List<Location> locations) {
         //TODO: Use Set instead of ArrayList for total list.
         //TODO: Ignore case for filter.
         super(context, resource, locations);
         this.context = context;
-        this.locations = new ArrayList<String>(locations);
-        filteredLocations = (ArrayList<String>) locations;
+        this.locations = new ArrayList<>(locations);
+        filteredLocations = new ArrayList<>(locations);
         getFilter();
+    }
+
+    /**
+     * Initialize context variables without a starting list
+     * @param context application context
+     * @param resource int resource layout id
+     */
+    LocationSearchAdapter(@NonNull Context context, @LayoutRes int resource) {
+        super(context, resource);
     }
 
     @NonNull
@@ -59,8 +70,8 @@ public class LocationSearchAdapter extends ArrayAdapter<String> implements Filte
     }
 
     @Override
-    public String getItem(int position) {
-        Log.i("Hello", filteredLocations.get(position));
+    public Location getItem(int position) {
+        Log.i("Hello", filteredLocations.get(position).toString());
         return filteredLocations.get(position);
     }
 
@@ -82,7 +93,7 @@ public class LocationSearchAdapter extends ArrayAdapter<String> implements Filte
                     false);
         }
         TextView locationName = convertView.findViewById(R.id.location_language_name_list_view);
-        locationName.setText(filteredLocations.get(position));
+        locationName.setText(filteredLocations.get(position).shortName());
         //TODO: Set number of people.
         return convertView;
     }
@@ -92,10 +103,10 @@ public class LocationSearchAdapter extends ArrayAdapter<String> implements Filte
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             FilterResults filterResults = new FilterResults();
-            ArrayList<String> tempList = new ArrayList<String>();
+            ArrayList<Location> tempList = new ArrayList<>();
             if (constraint!=null && constraint.length()>0) {
-                for (String location : locations) {
-                    if (location.toLowerCase().contains(constraint.toString().toLowerCase())) {
+                for (Location location : locations) {
+                    if (location.toString().toLowerCase().contains(constraint.toString().toLowerCase())) {
                         //Log.i("Comparison", location + " contains? " + constraint );
                         tempList.add(location);
                     }
@@ -111,7 +122,7 @@ public class LocationSearchAdapter extends ArrayAdapter<String> implements Filte
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
             Log.i("Results" , results.values.toString());
-            filteredLocations = (ArrayList<String>) results.values;
+            filteredLocations = (ArrayList<Location>) results.values;
             notifyDataSetChanged();
         }
     }
