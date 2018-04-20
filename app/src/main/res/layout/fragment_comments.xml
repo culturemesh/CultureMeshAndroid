@@ -5,7 +5,7 @@
     android:orientation="vertical"
     tools:context="org.codethechange.culturemesh.CommentsFrag">
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <android.support.v4.widget.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/commentsRefresh"
         android:layout_width="match_parent"
@@ -17,5 +17,5 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
         </android.support.v7.widget.RecyclerView>
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </android.support.v4.widget.ConstraintLayout>
 </LinearLayout>

@@ -29,6 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -36,6 +37,7 @@ import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
 import org.w3c.dom.Comment;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -57,9 +59,12 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
     FormatManager formatManager;
     SparseArray<ImageButton> toggleButtons;
     ProgressBar progressBar;
+    ConstraintLayout contentLayout;
 
     private RecyclerView commentsRV;
     private LinearLayoutManager mLayoutManager;
+    private RVCommentAdapter mAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +73,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         Intent intent = getIntent();
         final long postID = intent.getLongExtra("postID", 0);
         final long networkID = intent.getLongExtra("networkID", 0);
+        contentLayout = findViewById(R.id.specific_post_scene_root);
         cv = findViewById(R.id.cv);
         personName = findViewById(R.id.person_name);
         username = findViewById(R.id.username);
@@ -82,6 +88,12 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
 
         commentsRV = findViewById(R.id.commentsRV);
         mLayoutManager = (LinearLayoutManager) commentsRV.getLayoutManager();
+        commentsRV.setHasFixedSize(true);
+
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(this);
+        commentsRV.setLayoutManager(mLayoutManager);
+
         commentsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
             private boolean loading = true;
             int pastVisiblesItems, visibleItemCount, totalItemCount;
@@ -104,8 +116,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                 }
             }
         });
-
-
+        new LoadComments().execute(postID);
         commentField = findViewById(R.id.write_comment_text);
         boldButton = findViewById(R.id.comment_bold);
         italicButton = findViewById(R.id.comment_italic);
@@ -130,7 +141,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                 openEditTextView();
             }
         });
-        cv.setOnClickListener(new View.OnClickListener() {
+        contentLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 closeEditTextView();
@@ -271,16 +282,43 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
             personName.setOnClickListener(viewUserProfile);
             int r = getResources().getIdentifier("commentColor", "color", "org.codethechange.culturemesh");
 
-      //      String[] comments = {"test comment 1", "test comment 2", "this is good content", "this is, uh, not good content",
-      //              "this is a really long comment to see how comments will work if someone has a lot to say about someone's content, which is very (very) possible"};
-
-      //      ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, comments);
-      //      commentLV.setAdapter(adapter);
-      //      adapter.notifyDataSetChanged();
         }
     }
 
+    private class LoadComments extends AsyncTask<Long,Void,ArrayList<PostReply>> {
 
+        /**
+         * This is the asynchronous part. It calls the client API, which can make network requests
+         * and read from the cache database.
+         * @param longs This should be the network id.
+         * @return a collection of feed items to be displayed in the feed.
+         */
+        @Override
+        protected ArrayList<PostReply> doInBackground(Long... longs) {
+            API.loadAppDatabase(getApplicationContext());
+
+            //TODO: Consider error checking for when getPayload is null.
+            ArrayList<PostReply> comments = (ArrayList<PostReply>) API.Get.postReplies(longs[0]).getPayload();
+            return comments;
+        }
+
+        @Override
+        protected void onPostExecute(final ArrayList<PostReply> comments) {
+            mAdapter = new RVCommentAdapter(comments, new RVCommentAdapter.OnItemClickListener() {
+                @Override
+                public void onCommentClick(PostReply comment) {
+                    //to add comment click/long click functionality
+                    Toast.makeText(getApplicationContext(), "Comment by " + comment.author + " clicked!", Toast.LENGTH_LONG).show();
+                }
+            }, getApplicationContext());
+            commentsRV.setAdapter(mAdapter);
+//            getFragmentManager().beginTransaction()
+//                    .detach(CommentsFrag.this)
+//                    .attach(CommentsFrag.this)
+//                    .commit();
+            API.closeDatabase();
+        }
+    }
     /**
      * This function animates the bottom view to expand up, allowing for a greater text field
      * as well as toggle buttons.
