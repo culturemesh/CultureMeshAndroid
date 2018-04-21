@@ -1,6 +1,5 @@
 package org.codethechange.culturemesh;
 
-import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
@@ -10,26 +9,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Filterable;
-
 import java.util.ArrayList;
 import android.widget.Filter;
 import android.widget.TextView;
-
-import org.codethechange.culturemesh.models.Location;
-
 import java.util.List;
-import java.util.logging.LogRecord;
 
 /**
  * Created by Drew Gregory (drewgreg@stanford.edu) on 11/7/17.
  */
 
-public class LocationSearchAdapter extends ArrayAdapter<Location> implements Filterable {
+public class LocationSearchAdapter extends ArrayAdapter<String> implements Filterable {
 
-    private ArrayList<Location> locations;
-    private ArrayList<Location> filteredLocations;
+    private ArrayList<String> locations;
+    private ArrayList<String> filteredLocations;
     private LocationFilter filter;
     private Context context;
 
@@ -41,7 +34,7 @@ public class LocationSearchAdapter extends ArrayAdapter<Location> implements Fil
      * @param locations string list of locations
      */
     LocationSearchAdapter(@NonNull Context context, @LayoutRes int resource,
-                                 @NonNull List<Location> locations) {
+                                 @NonNull List<String> locations) {
         //TODO: Use Set instead of ArrayList for total list.
         //TODO: Ignore case for filter.
         super(context, resource, locations);
@@ -70,7 +63,7 @@ public class LocationSearchAdapter extends ArrayAdapter<Location> implements Fil
     }
 
     @Override
-    public Location getItem(int position) {
+    public String getItem(int position) {
         Log.i("Hello", filteredLocations.get(position).toString());
         return filteredLocations.get(position);
     }
@@ -93,7 +86,7 @@ public class LocationSearchAdapter extends ArrayAdapter<Location> implements Fil
                     false);
         }
         TextView locationName = convertView.findViewById(R.id.location_language_name_list_view);
-        locationName.setText(filteredLocations.get(position).shortName());
+        locationName.setText(filteredLocations.get(position));
         //TODO: Set number of people.
         return convertView;
     }
@@ -103,9 +96,9 @@ public class LocationSearchAdapter extends ArrayAdapter<Location> implements Fil
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             FilterResults filterResults = new FilterResults();
-            ArrayList<Location> tempList = new ArrayList<>();
+            ArrayList<String> tempList = new ArrayList<>();
             if (constraint!=null && constraint.length()>0) {
-                for (Location location : locations) {
+                for (String location : locations) {
                     if (location.toString().toLowerCase().contains(constraint.toString().toLowerCase())) {
                         //Log.i("Comparison", location + " contains? " + constraint );
                         tempList.add(location);
@@ -122,7 +115,7 @@ public class LocationSearchAdapter extends ArrayAdapter<Location> implements Fil
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
             Log.i("Results" , results.values.toString());
-            filteredLocations = (ArrayList<Location>) results.values;
+            filteredLocations = (ArrayList<String>) results.values;
             notifyDataSetChanged();
         }
     }
