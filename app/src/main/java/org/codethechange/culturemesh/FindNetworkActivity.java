@@ -1,24 +1,16 @@
 package org.codethechange.culturemesh;
 
-import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.media.Image;
 import android.os.AsyncTask;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,26 +19,14 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import org.codethechange.culturemesh.models.Language;
-import org.codethechange.culturemesh.models.Location;
-import org.codethechange.culturemesh.models.Place;
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
 
 import static android.view.View.GONE;
-
-
-import org.codethechange.culturemesh.models.User;
-
-import java.util.ArrayList;
 import java.util.List;
+
+import org.codethechange.culturemesh.models.Language;
+import org.codethechange.culturemesh.models.Place;
 
 public class FindNetworkActivity extends DrawerActivity {
 
@@ -251,6 +231,7 @@ public class FindNetworkActivity extends DrawerActivity {
                     if (searchList.getVisibility() == GONE) {
                         searchList.setVisibility(View.VISIBLE);
                     }
+                    adapter.notifyDataSetChanged();
                 }
             }
         }
@@ -265,7 +246,7 @@ public class FindNetworkActivity extends DrawerActivity {
 
 
         private ListView searchList;
-        private ArrayAdapter<Language> adapter;
+        private SearchAdapter<Language> adapter;
         private SearchView searchView;
 
         /**
@@ -344,7 +325,6 @@ public class FindNetworkActivity extends DrawerActivity {
                 NetworkResponse<List<Language>> response = API.Get.autocompleteLanguage(strings[0]);
                 API.closeDatabase();
                 return response;
-
             }
 
             @Override
@@ -358,10 +338,10 @@ public class FindNetworkActivity extends DrawerActivity {
                     if (searchList.getVisibility() == GONE) {
                         searchList.setVisibility(View.VISIBLE);
                     }
+                    adapter.notifyDataSetChanged();
                 }
             }
         }
-
     }
 
 
