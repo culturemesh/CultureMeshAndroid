@@ -5,18 +5,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.SearchView;
 import android.widget.TextView;
 
 import org.codethechange.culturemesh.models.Network;
@@ -93,17 +87,17 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
             long userId = longs[0];
             API.loadAppDatabase(getActivity());
             NetworkSummaryAdapter adapter = (NetworkSummaryAdapter) rv.getAdapter();
-            ArrayList<Network> nets = API.Get.userNetworks(userId).getPayload();
+            ArrayList<Network> nets = API.Get.userNetworks(userId, 10).getPayload();
             adapter.getNetworks().addAll(nets);
             for (Network net : nets) {
                 //TODO: size() is limited to int....
                 try {
-                    adapter.getUserCounts().add(API.Get.networkUsers(net.id).getPayload().size());
+                    adapter.getUserCounts().add(API.Get.networkUsers(net.id, 10).getPayload().size());
                 } catch(NullPointerException e) {
                    adapter.getUserCounts().add(0);
                 }
                 try {
-                    adapter.getPostCounts().add(API.Get.networkPosts(net.id).getPayload().size());
+                    adapter.getPostCounts().add(API.Get.networkPosts(net.id, 10).getPayload().size());
                 } catch(NullPointerException e) {
                     adapter.getPostCounts().add(0);
                 }

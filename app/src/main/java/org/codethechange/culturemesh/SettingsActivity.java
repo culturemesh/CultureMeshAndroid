@@ -4,16 +4,9 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.format.Time;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -125,17 +118,17 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
             long userId = longs[0];
             API.loadAppDatabase(SettingsActivity.this);
             NetworkSummaryAdapter adapter = (NetworkSummaryAdapter) rv.getAdapter();
-            ArrayList<Network> nets = API.Get.userNetworks(userId).getPayload();
+            ArrayList<Network> nets = API.Get.userNetworks(userId, 10).getPayload();
             adapter.getNetworks().addAll(nets);
             for (Network net : nets) {
                 //TODO: size() is limited to int....
                 try {
-                    adapter.getUserCounts().add(API.Get.networkUsers(net.id).getPayload().size());
+                    adapter.getUserCounts().add(API.Get.networkUsers(net.id, 10).getPayload().size());
                 } catch(NullPointerException e) {
                     adapter.getUserCounts().add(0);
                 }
                 try {
-                    adapter.getPostCounts().add(API.Get.networkPosts(net.id).getPayload().size());
+                    adapter.getPostCounts().add(API.Get.networkPosts(net.id, 10).getPayload().size());
                 } catch(NullPointerException e) {
                     adapter.getPostCounts().add(0);
                 }

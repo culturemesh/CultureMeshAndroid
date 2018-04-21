@@ -14,7 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.codethechange.culturemesh.models.FeedItem;
-import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
 
 import java.util.ArrayList;
@@ -84,7 +83,7 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
             API.loadAppDatabase(getActivity());
             RVAdapter adapter = (RVAdapter) rv.getAdapter();
 
-            List<Post> posts = API.Get.userPosts(userId).getPayload();
+            List<Post> posts = API.Get.userPosts(userId, 10).getPayload();
             for (Post post : posts) {
                 post.comments = API.Get.postReplies(post.id).getPayload();
             }

@@ -22,7 +22,6 @@ import org.codethechange.culturemesh.models.Country;
 import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FromLocation;
 import org.codethechange.culturemesh.models.Language;
-import org.codethechange.culturemesh.models.Location;
 import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Place;
@@ -696,6 +695,9 @@ class API {
          * The protocol for GET requests is as follows...
          * 1. Check if cache has relevant data. If so, return it.
          * 2. Send network request to update data.
+         *
+         * Note: without start, we assume latest.
+         * TODO: Add ordering parameter if API supports this.
          */
 
         static NetworkResponse<User> user(long id) {
@@ -705,7 +707,11 @@ class API {
             return new NetworkResponse<>(user == null, user);
         }
 
-        static NetworkResponse<ArrayList<Network>> userNetworks(long id) {
+        static NetworkResponse<ArrayList<Network>> userNetworks(long id, int limit) {
+            userNetworks(id, limit, 0);
+        }
+
+        static NetworkResponse<ArrayList<Network>> userNetworks(long id, int limit, int start) {
             //TODO: Send network request for all subscriptions.
             NetworkSubscriptionDao nSDao  = mDb.networkSubscriptionDao();
             List<Long> netIds = nSDao.getUserNetworks(id);
@@ -722,14 +728,22 @@ class API {
         /*
             When will we ever use this? Perhaps viewing a user profile?
          */
-        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> userPosts(long id) {
+        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> userPosts(long id, int limit) {
+            userPosts(id, limit, 0);
+        }
+
+        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> userPosts(long id, int limit, int start) {
             PostDao pDao = mDb.postDao();
             List<org.codethechange.culturemesh.models.Post> posts = pDao.getUserPosts(id);
             instantiatePosts(posts);
             return new NetworkResponse<>(posts);
         }
 
-        static NetworkResponse<ArrayList<Event>> userEvents(long id) {
+        static NetworkResponse<ArrayList<Event>> userEvents(long id, int limit) {
+            return userEvents(id, limit, 0);
+        }
+
+        static NetworkResponse<ArrayList<Event>> userEvents(long id, int limit, int start) {
             //TODO: Check for event subscriptions with network request.
             EventSubscriptionDao eSDao = mDb.eventSubscriptionDao();
             List<Long> eventIds = eSDao.getUserEventSubscriptions(id);
@@ -770,7 +784,11 @@ class API {
             return new NetworkResponse<>(net == null, net);
         }
 
-        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> networkPosts(long id) {
+        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> networkPosts(long id, int limit) {
+            return networkPosts(id, limit, 0);
+        }
+
+        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> networkPosts(long id, int limit, int start) {
             //TODO: Send network request.
             PostDao pDao = mDb.postDao();
             List<org.codethechange.culturemesh.models.Post> posts = pDao.getNetworkPosts((int) id);
@@ -778,7 +796,11 @@ class API {
             return new NetworkResponse<>(posts);
         }
 
-        static NetworkResponse<List<Event>> networkEvents(long id) {
+        static NetworkResponse<List<Event>> networkEvents(long id, int limit) {
+            return networkEvents(id, limit, 0);
+        }
+
+        static NetworkResponse<List<Event>> networkEvents(long id, int limit, int start) {
             //TODO:Send network request.... Applies to subsequent methods too.
             EventDao eDao = mDb.eventDao();
             List<Event> events = eDao.getNetworkEvents(id);
@@ -786,7 +808,11 @@ class API {
             return new NetworkResponse<>(events == null, events);
         }
 
-        static NetworkResponse<ArrayList<User>> networkUsers(long id) {
+        static NetworkResponse<ArrayList<User>> networkUsers(long id, int limit) {
+            return networkUsers(id, limit, 0);
+        }
+
+        static NetworkResponse<ArrayList<User>> networkUsers(long id, int limit, int start) {
             NetworkSubscriptionDao nSDao = mDb.networkSubscriptionDao();
             List<Long> userIds = nSDao.getNetworkUsers(id);
             ArrayList<User> users = new ArrayList<>();
@@ -812,7 +838,7 @@ class API {
             return new NetworkResponse<>(event == null, event);
         }
 
-        static NetworkResponse<ArrayList<User>> eventAttendance(long id) {
+        static NetworkResponse<ArrayList<User>> eventAttendance(long id) { // Probably should not paginate this
             EventSubscriptionDao eSDao = mDb.eventSubscriptionDao();
             List<Long> uIds = eSDao.getEventUsers(id);
             ArrayList<User> users = new ArrayList<>();
@@ -825,14 +851,14 @@ class API {
             return new NetworkResponse<>(users);
         }
 
-        static NetworkResponse<List<PostReply>> postReplies(long id){
+        static NetworkResponse<List<PostReply>> postReplies(long id){ // Probably should not paginate this
             PostReplyDao dao = mDb.postReplyDao();
             List<PostReply> replies = dao.getPostReplies(id);
             instantiatePostReplies(replies);
             return new NetworkResponse<>(replies == null, replies);
         }
 
-        static NetworkResponse<List<Place>> autocomplete(String text) {
+        static NetworkResponse<List<Place>> autocomplete(String text, int suggestions) {
             List<Place> locations = new ArrayList<>();
             //Get any related cities, countries, or regions.
             CityDao cityDao = mDb.cityDao();

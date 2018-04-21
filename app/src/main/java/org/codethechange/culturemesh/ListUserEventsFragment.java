@@ -80,7 +80,7 @@ public class ListUserEventsFragment extends Fragment implements RVAdapter.OnItem
             long userId = longs[0];
             API.loadAppDatabase(getActivity());
             RVAdapter adapter = (RVAdapter) rv.getAdapter();
-            adapter.getNetPosts().addAll(API.Get.userEvents(userId).getPayload());
+            adapter.getNetPosts().addAll(API.Get.userEvents(userId, 10).getPayload());
             API.closeDatabase();
             return null;
         }
