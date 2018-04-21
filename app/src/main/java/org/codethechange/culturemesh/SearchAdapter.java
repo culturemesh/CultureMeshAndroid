@@ -36,6 +36,7 @@ public class SearchAdapter<T extends Searchable & Listable> extends ArrayAdapter
     SearchAdapter(@NonNull Context context, @LayoutRes int resource, int listViewID) {
         super(context, resource);
         this.listViewID = listViewID;
+        this.context = context;
     }
 
 
