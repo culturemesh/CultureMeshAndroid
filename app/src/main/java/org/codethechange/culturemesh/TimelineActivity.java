@@ -391,7 +391,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         @Override
         protected Void doInBackground(Void... voids) {
             API.loadAppDatabase(getApplicationContext());
-            if (API.Get.network(1).getPayload() == null) {
+            //if (API.Get.network(1).getPayload() == null) {
                 API.addReplies();
                 API.addUsers();
                 API.addCities();
@@ -402,7 +402,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                 API.addEvents();
                 API.subscribeUsers();
                 settings.edit().putLong(API.CURRENT_USER, 1).apply();
-            }
+            //}
             API.closeDatabase();
             return null;
         }

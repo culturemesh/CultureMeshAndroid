@@ -451,7 +451,7 @@ class API {
         String rawDummy = "[\n" +
                 "  {\n" +
                 "    \"user_id\": 4,\n" +
-                "    \"post_text\": \"Ex excepturi quos vero nesciunt autem. Ipsum voluptates quaerat rerum praesentium modi.\\nEos culpa fuga maxime atque exercitationem nemo. Repellendus officiis et. Explicabo eveniet quibusdam magnam minima.\",\n" +
+                "    \"post_text\": \"Ex ex AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA cepturi quos vero nesciunt autem. Ipsum voluptates quaerat rerum praesentium modi.\\nEos culpa fuga maxime atque exercitationem nemo. Repellendus officiis et. Explicabo eveniet quibusdam magnam minima.\",\n" +
                 "    \"network_id\": 1,\n" +
                 "    \"img_link\": \"https://www.lorempixel.com/370/965\",\n" +
                 "    \"vid_link\": \"https://dummyimage.com/803x720\",\n" +
@@ -641,6 +641,13 @@ class API {
                 "    \"reply_date\": \"2017-04-04 18:27:27\",\n" +
                 "    \"reply_text\": \"Test reply 3.\"\n" +
                 "  }\n" +
+                "    \"id\": 4,\n" +
+                "    \"parent_id\": 1,\n" +
+                "    \"user_id\": 4,\n" +
+                "    \"network_id\": 1,\n" +
+                "    \"reply_date\": \"2017-03-12 08:53:43\",\n" +
+                "    \"reply_text\": \"Test reply 1 TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST.\"\n" +
+                "  },\n" +
                 "]";
         PostReplyDao postReplyDao = mDb.postReplyDao();
         try {
