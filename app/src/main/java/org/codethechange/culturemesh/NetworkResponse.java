@@ -44,7 +44,7 @@ public class NetworkResponse<E> {
      * @param inFail Failure state provided by user (true if failed)
      * @param inMessageID ID for string resource containing message
      */
-    public NetworkResponse(boolean inFail, int inMessageID) {
+    public NetworkResponse(int inFail, int inMessageID) {
         fail = inFail;
         messageID = inMessageID;
     }

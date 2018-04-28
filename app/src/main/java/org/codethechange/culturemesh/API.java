@@ -915,6 +915,17 @@ class API {
             return new NetworkResponse<User>(user == null, user);
         }
 
+        static NetworkResponse<Integer> changePassword(User user, String op, String np){
+            //TODO: actually get the password so we can compare and change it
+            String rp = "";
+            if(rp.equals(op)){
+                //TODO: allow for changing of the password
+                return new NetworkResponse<Integer>(0, 2);
+            }
+
+            return new NetworkResponse<Integer>(0, 1);
+        }
+
         static NetworkResponse event(Event event) {
             return new NetworkResponse();
         }

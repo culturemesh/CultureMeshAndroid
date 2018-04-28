@@ -2,6 +2,7 @@ package org.codethechange.culturemesh;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -116,6 +117,12 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
     @Override
     public void onItemClick(View v, Network network) {
         //If the
+    }
+
+    public void changePasswordClick(View view) {
+        Intent intent = new Intent(getApplicationContext(), ChangePasswordActivity.class);
+        intent.putExtra("userID", user.id);
+        startActivity(intent);
     }
 
     class LoadSubscribedNetworks extends AsyncTask<Long, Void, Void> {
