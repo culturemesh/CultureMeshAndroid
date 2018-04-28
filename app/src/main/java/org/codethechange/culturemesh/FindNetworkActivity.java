@@ -294,7 +294,6 @@ public class FindNetworkActivity extends DrawerActivity {
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
                             .putLong(API.SELECTED_NETWORK, 1).apply();
-                    // TODO: Send user to timeline for that network without changing their preferred network
                     startActivity(new Intent(getActivity(), TimelineActivity.class));
                 }
             });
