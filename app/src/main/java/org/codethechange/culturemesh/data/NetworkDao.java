@@ -31,4 +31,13 @@ public interface NetworkDao {
     @Query("SELECT * FROM network WHERE id=:id")
     public List<Network> getNetwork(long id);
 
+    @Query("SELECT * FROM network WHERE language_id=:langID AND near_city_id=:nearCityID AND " +
+            "near_region_id=:nearRegionID AND near_country_id=:nearCountryID")
+    public Network netFromLangAndHome(long langID, long nearCityID, long nearRegionID, long nearCountryID);
+
+    @Query("SELECT * FROM network WHERE from_city_id=:fromCityID AND from_region_id=:fromRegionID AND " +
+            "from_country_id=:fromCountryID AND near_city_id=:nearCityID AND " +
+            "near_region_id=:nearRegionID AND near_country_id=:nearCountryID")
+    public Network netFromLocAndHome(long fromCityID, long fromRegionID, long fromCountryID,
+                                     long nearCityID, long nearRegionID, long nearCountryID);
 }

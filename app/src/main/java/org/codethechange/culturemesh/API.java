@@ -852,6 +852,20 @@ class API {
             matches.add(new Language(0, "Sample Language 0", 10));
             return new NetworkResponse(matches);
         }
+
+        static NetworkResponse<Network> netFromLangAndNear(Language lang, NearLocation near) {
+            NetworkDao netDao = mDb.networkDao();
+            Network n = netDao.netFromLangAndHome(lang.language_id, near.near_city_id, near.near_region_id,
+                    near.near_country_id);
+            return new NetworkResponse<>(n);
+        }
+
+        static NetworkResponse<Network> netFromFromAndNear(FromLocation from, NearLocation near) {
+            NetworkDao netDao = mDb.networkDao();
+            Network n = netDao.netFromLocAndHome(from.from_city_id, from.from_region_id,
+                    from.from_country_id, near.near_city_id, near.near_region_id, near.near_country_id);
+            return new NetworkResponse<>(n);
+        }
     }
 
     static class Post {
