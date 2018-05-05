@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -121,7 +122,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
 
     public void changePasswordClick(View view) {
         Intent intent = new Intent(getApplicationContext(), ChangePasswordActivity.class);
-        intent.putExtra("userID", user.id);
+        intent.putExtra("userID", currentUser);
         startActivity(intent);
     }
 

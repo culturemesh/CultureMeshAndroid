@@ -14,14 +14,11 @@ public class ChangePasswordActivity extends AppCompatActivity {
     private int PASSWORD_CHANGE_SUCCESS = 2;
     private int PASSWORD_CHANGE_FAILURE = 1;
     private int NETWORK_FAILURE = 0;
-    private User user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         API.loadAppDatabase(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_password);
-        long userID = getIntent().getLongExtra("userID", 0);
-        user = API.Get.user(userID).getPayload();
         API.closeDatabase();
     }
 
@@ -35,16 +32,24 @@ public class ChangePasswordActivity extends AppCompatActivity {
         String confirmPassword = cp.getText().toString();
 
         API.loadAppDatabase(getApplicationContext());
+
         if (newPassword.equals(confirmPassword)) {
-            int response = API.Put.changePassword(user, oldPassword, newPassword).getPayload();
-            if(response == PASSWORD_CHANGE_SUCCESS) {
-                Toast.makeText(this, "Password updated!", Toast.LENGTH_SHORT).show();
-            } else {
-                if(response == PASSWORD_CHANGE_FAILURE){
-                    Toast.makeText(this, "Old Password Incorrect", Toast.LENGTH_SHORT).show();
-                } else if (response == NETWORK_FAILURE) {
-                    Toast.makeText(this, "Network Failure", Toast.LENGTH_SHORT).show();
+            if(!newPassword.isEmpty() && !oldPassword.isEmpty() && !confirmPassword.isEmpty()) {
+                long userID = getIntent().getLongExtra("userID", 0);
+                //TODO: uncomment when API is updated to reflect password changes
+                // int response = API.Put.changePassword(userID, oldPassword, newPassword).getPayload();
+                int response = PASSWORD_CHANGE_FAILURE;
+                if(response == PASSWORD_CHANGE_SUCCESS) {
+                    Toast.makeText(this, "Password updated!", Toast.LENGTH_SHORT).show();
+                } else {
+                    if(response == PASSWORD_CHANGE_FAILURE){
+                        Toast.makeText(this, "Old Password Incorrect", Toast.LENGTH_SHORT).show();
+                    } else if (response == NETWORK_FAILURE) {
+                        Toast.makeText(this, "Network Failure", Toast.LENGTH_SHORT).show();
+                    }
                 }
+            } else {
+                Toast.makeText(this, "Fill out all fields!", Toast.LENGTH_SHORT).show();
             }
         } else {
             Toast.makeText(this, "Make sure your new passwords match!", Toast.LENGTH_SHORT).show();
