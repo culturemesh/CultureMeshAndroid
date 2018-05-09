@@ -84,6 +84,7 @@
     <string name="error">Error</string>
     <string name="genericFail">Oops, something went wrong.</string>
     <string name="genericSuccess">Operation Succeeded!</string>
+    <string name ="noNetworkExist">It looks like that network does not exist. You can create one at culturemesh.com.</string>
     <string name="logout">Log Out</string>
     <!-- Strings for onboarding -->
     <string name="title_activity_pick_onboarding_status">Status Picker (For Testing)</string>
