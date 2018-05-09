@@ -2,12 +2,14 @@ package org.codethechange.culturemesh.models;
 
 import android.arch.persistence.room.Ignore;
 
+import org.codethechange.culturemesh.Listable;
+
 /**
  * Created by Drew Gregory on 2/19/18.
  * Exact copy of Location, but used as Embedded Entity in SQLite Database.
  */
 
-public class FromLocation {
+public class FromLocation implements Listable {
     /**
      * When stored in the Database, we will store just the id's. The object returned from the API
      * will have the country, region, and city updated.
@@ -48,6 +50,10 @@ public class FromLocation {
 
 
     public String toString() {
+        if (this.from_city == null && this.from_region == null && this.from_country == null) {
+            // TODO: Replace with API call to get names from IDs
+            return this.from_city_id + "," + this.from_region_id + "," + this.from_country_id;
+        }
         String string = "";
         string += from_country;
         String region = this.from_region;
@@ -67,8 +73,15 @@ public class FromLocation {
         String region = this.from_region;
         if (region != null) return region;
         return this.from_country;
+    }
 
+    public String getListableName() {
+        return shortName();
+    }
 
+    public int getNumUsers() {
+        // TODO: Store number of members in Location or query API
+        return 0;
     }
 
 }
