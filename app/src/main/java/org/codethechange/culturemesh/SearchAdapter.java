@@ -14,7 +14,7 @@ import android.widget.Filterable;
 import android.widget.TextView;
 import java.util.List;
 
-public class SearchAdapter<T extends Searchable & Listable> extends ArrayAdapter<T> implements Filterable {
+public class SearchAdapter<T extends Listable> extends ArrayAdapter<T> implements Filterable {
     private Context context;
     // R.id.location_language_name_list_view
     private int listViewID;
