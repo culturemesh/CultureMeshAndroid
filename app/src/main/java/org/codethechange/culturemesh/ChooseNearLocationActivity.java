@@ -50,7 +50,7 @@ public class ChooseNearLocationActivity extends AppCompatActivity implements Sea
         nearLocations.add(new NearLocation(1,1,1));
         nearLocations.add(new NearLocation(2,2,2));
         adapter = new SearchAdapter<>(this, android.R.layout.simple_list_item_1,
-                R.id.near_location_search_results_list_view, nearLocations);
+                R.id.location_language_name_list_view, nearLocations);
         searchList.setTextFilterEnabled(true);
         searchList.setAdapter(adapter);
         searchList.setOnItemClickListener(new ListView.OnItemClickListener() {
