@@ -14,16 +14,20 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import org.codethechange.culturemesh.models.NearLocation;
+
 import java.util.ArrayList;
 
 import static android.view.View.GONE;
 
 public class ChooseNearLocationActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
-    LocationSearchAdapter adapter;
+    SearchAdapter<NearLocation> adapter;
     ListView searchList;
-    ArrayList<String> dummy;
-    public static final String CHOSEN_LOCATION = "chosen_location";
+    ArrayList<NearLocation> nearLocations;
+    public static final String CHOSEN_CITY = "chosen_city";
+    public static final String CHOSEN_REGION = "chosen_region";
+    public static final String CHOSEN_COUNTRY = "chosen_country";
     public final int RESULT_OK = 1;
 
     @Override
@@ -41,21 +45,23 @@ public class ChooseNearLocationActivity extends AppCompatActivity implements Sea
         searchView.setSearchableInfo(mSearchManager.
                 getSearchableInfo(getComponentName()));
         searchList = (ListView) findViewById(R.id.near_location_search_results_list_view);
-        //TODO:Remove dummy
-        dummy = new ArrayList<String>();
-        dummy.add("Marseille, Provence, France");
-        dummy.add("London, Britain, United Kingdom");
-        dummy.add("Chicago, Illinois, United States");
-        adapter = new LocationSearchAdapter(this,
-                android.R.layout.simple_list_item_1, dummy);
+        nearLocations = new ArrayList<>();
+        // TODO: Remove these dummy locations and replace with querying API when user submits (see FindNetworkActivity)
+        nearLocations.add(new NearLocation(1,1,1));
+        nearLocations.add(new NearLocation(2,2,2));
+        adapter = new SearchAdapter<>(this, android.R.layout.simple_list_item_1,
+                R.id.near_location_search_results_list_view, nearLocations);
         searchList.setTextFilterEnabled(true);
         searchList.setAdapter(adapter);
         searchList.setOnItemClickListener(new ListView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                NearLocation near = nearLocations.get(position);
                 Intent result = new Intent();
-                result.putExtra(CHOSEN_LOCATION, dummy.get(position));
+                result.putExtra(CHOSEN_CITY, near.near_city_id);
+                result.putExtra(CHOSEN_REGION, near.near_region_id);
+                result.putExtra(CHOSEN_COUNTRY, near.near_country_id);
                 setResult(RESULT_OK, result);
                 finish();
             }
