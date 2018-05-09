@@ -843,12 +843,13 @@ class API {
             locations.addAll(regionDao.autoCompleteRegions(text));
             CountryDao countryDao = mDb.countryDao();
             locations.addAll(countryDao.autoCompleteCountries(text));
-            return new NetworkResponse<List<Place>>(locations == null, locations);
+            return new NetworkResponse<>(locations == null, locations);
         }
 
         static NetworkResponse<List<Language>> autocompleteLanguage(String text) {
             // TODO: Take argument for maximum number of languages to return?
-            List<Language> matches = new ArrayList<Language>();
+            // TODO: Use Database for autocompleteLanguage and use instead of dummy data
+            List<Language> matches = new ArrayList<>();
             matches.add(new Language(0, "Sample Language 0", 10));
             return new NetworkResponse(matches);
         }
@@ -857,14 +858,23 @@ class API {
             NetworkDao netDao = mDb.networkDao();
             Network n = netDao.netFromLangAndHome(lang.language_id, near.near_city_id, near.near_region_id,
                     near.near_country_id);
-            return new NetworkResponse<>(n);
+            // TODO: Distinguish between the network not existing and the lookup failing
+            NetworkResponse<Network> resp = new NetworkResponse<>(n == null, n, R.string.noNetworkExist);
+            return resp;
         }
 
         static NetworkResponse<Network> netFromFromAndNear(FromLocation from, NearLocation near) {
             NetworkDao netDao = mDb.networkDao();
             Network n = netDao.netFromLocAndHome(from.from_city_id, from.from_region_id,
                     from.from_country_id, near.near_city_id, near.near_region_id, near.near_country_id);
+            // TODO: Distinguish between the network not existing and the lookup failing
+            NetworkResponse<Network> resp = new NetworkResponse<>(n == null, n, R.string.noNetworkExist);
             return new NetworkResponse<>(n);
+        }
+
+        static NetworkResponse<FromLocation> PlaceToFromLocation(Place place) {
+            // TODO: Convert Place to a FromLocation (probably by parsing JSON)
+            return new NetworkResponse<>(new FromLocation(1,1,1));
         }
     }
 
