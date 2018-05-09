@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh.models;
 
 import android.arch.persistence.room.Ignore;
+import android.support.annotation.NonNull;
 
 import org.codethechange.culturemesh.Listable;
 
@@ -64,16 +65,15 @@ public class NearLocation implements Listable {
     }
 
     public String shortName() {
-        if (this.near_city == null && this.near_region == null && this.near_country == null) {
-            // TODO: Replace with API call to get names from IDs
+        if (this.near_city != null) {
+            return this.near_city;
+        } else if (this.near_region != null) {
+            return this.near_region;
+        } else if (this.near_country != null) {
+            return this.near_country;
+        } else {
             return this.near_city_id + "," + this.near_region_id + "," + this.near_country_id;
         }
-        //We'll return the lowest level location.
-        String city = this.near_city;
-        if (city != null) return city;
-        String region = this.near_region;
-        if (region != null) return region;
-        return this.near_country;
     }
 
     public String getListableName() {

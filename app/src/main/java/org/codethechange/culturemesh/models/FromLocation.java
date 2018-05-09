@@ -67,12 +67,15 @@ public class FromLocation implements Listable {
     }
 
     public String shortName() {
-        //We'll return the lowest level location.
-        String city = this.from_city;
-        if (city != null) return city;
-        String region = this.from_region;
-        if (region != null) return region;
-        return this.from_country;
+        if (this.from_city != null) {
+            return this.from_city;
+        } else if (this.from_region != null) {
+            return this.from_region;
+        } else if (this.from_country != null) {
+            return this.from_country;
+        } else {
+            return this.from_city_id + "," + this.from_region_id + "," + this.from_country_id;
+        }
     }
 
     public String getListableName() {
