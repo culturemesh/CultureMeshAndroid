@@ -218,6 +218,29 @@ class API {
                 "      \"date_added\": \"1995-11-23 15:31:51\",\n" +
                 "      \"img_link\": \"img2.png\"\n" +
                 "    }\n" +
+                "\n" +
+                "    {\n" +
+                "      \"id\": 2,\n" +
+                "      \"location_cur\": {\n" +
+                "        \"country_id\": 2,\n" +
+                "        \"region_id\": null,\n" +
+                "        \"city_id\": null\n" +
+                "      },\n" +
+                "      \"location_origin\": {\n" +
+                "        \"country_id\": 1,\n" +
+                "        \"region_id\": null,\n" +
+                "        \"city_id\": null\n" +
+                "      },\n" +
+                "      \"language_origin\": {\n" +
+                "        \"id\": 3,\n" +
+                "        \"name\": \"valarin\",\n" +
+                "        \"num_speakers\": 1000,\n" +
+                "        \"added\": 0\n" +
+                "      },\n" +
+                "      \"network_class\": 0,\n" +
+                "      \"date_added\": \"1995-11-23 15:31:51\",\n" +
+                "      \"img_link\": \"img2.png\"\n" +
+                "    }\n" +
                 "]\n";
         try {
             NetworkDao nDAo = mDb.networkDao();
