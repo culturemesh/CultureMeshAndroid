@@ -229,7 +229,7 @@ class API {
                 "      \"location_origin\": {\n" +
                 "        \"country_id\": 1,\n" +
                 "        \"region_id\": null,\n" +
-                "        \"city_id\": null\n" +
+                "        \"city_id\": 1\n" +
                 "      },\n" +
                 "      \"language_origin\": {\n" +
                 "        \"id\": 3,\n" +
