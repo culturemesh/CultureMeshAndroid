@@ -3,6 +3,7 @@ package org.codethechange.culturemesh;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -50,6 +51,12 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         email = findViewById(R.id.email);
         userName = findViewById(R.id.user_name);
         profilePicture = findViewById(R.id.user_profile);
+        profilePicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onPickImage(v);
+            }
+        });
         updateProfile = findViewById(R.id.update_profile_button);
         //TODO: Add ability to change profile picture.
         updateProfile.setOnClickListener(new View.OnClickListener() {
@@ -113,6 +120,26 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         itemTouchHelper.attachToRecyclerView(rv);
 
 
+    }
+
+    private static final int PICK_IMAGE_ID = 234; // the number doesn't matter
+
+    public void onPickImage(View view) {
+        Intent chooseImageIntent = ImagePicker.getPickImageIntent(this);
+        startActivityForResult(chooseImageIntent, PICK_IMAGE_ID);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch(requestCode) {
+            case PICK_IMAGE_ID:
+                Bitmap bitmap = ImagePicker.getImageFromResult(this, resultCode, data);
+
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+                break;
+        }
     }
 
     @Override
