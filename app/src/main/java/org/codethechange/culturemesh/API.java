@@ -319,12 +319,7 @@ class API {
             JSONArray regionsJSON = new JSONArray(rawDummy);
             for (int i = 0; i < regionsJSON.length(); i++) {
                 JSONObject regionJSON = regionsJSON.getJSONObject(i);
-                Point coords = new Point();
-                coords.latitude = regionJSON.getLong("latitude");
-                coords.longitude = regionJSON.getLong("longitude");
-                Region region = new Region(regionJSON.getLong("id"), regionJSON.getString("name"),
-                        coords, regionJSON.getLong("population"), regionJSON.getLong("country_id"),
-                        regionJSON.getString("country_name"));
+                Region region = new Region(regionJSON);
                 rDao.insertRegions(region);
             }
         } catch (JSONException e) {
@@ -419,13 +414,7 @@ class API {
             JSONArray citiesJSON = new JSONArray(rawDummy);
             for (int i = 0; i < citiesJSON.length(); i++) {
                 JSONObject cityJSON = citiesJSON.getJSONObject(i);
-                Point coords = new Point();
-                coords.latitude = cityJSON.getLong("latitude");
-                coords.longitude = cityJSON.getLong("longitude");
-                City city = new City(cityJSON.getLong("id"), cityJSON.getString("name"),
-                        coords, cityJSON.getLong("population"), cityJSON.getLong("country_id"),
-                        cityJSON.getString("country_name"), cityJSON.getLong("region_id"),
-                        cityJSON.getString("region_name"));
+                City city = new City(cityJSON);
                 cDao.insertCities(city);
             }
         } catch (JSONException e) {
@@ -459,11 +448,7 @@ class API {
             JSONArray countriesJSON = new JSONArray(rawDummy);
             for (int i = 0; i < countriesJSON.length(); i++) {
                 JSONObject countryJSON = countriesJSON.getJSONObject(i);
-                Point coords = new Point();
-                coords.latitude = countryJSON.getLong("latitude");
-                coords.longitude = countryJSON.getLong("longitude");
-                Country country = new Country(countryJSON.getLong("id"), countryJSON.getString("name"),
-                        coords, countryJSON.getLong("population"));
+                Country country = new Country(countryJSON);
                 cDao.insertCountries(country);
             }
         } catch (JSONException e) {
@@ -783,13 +768,13 @@ class API {
                 //Let's instantiate the location fields!
                 if (net.networkClass) {
                     //We need to instantiate from location.
-                    net.fromLocation.from_city = cityDao.getCity(net.fromLocation.from_city_id).name;
-                    net.fromLocation.from_region = regionDao.getRegion(net.fromLocation.from_region_id).name;
-                    net.fromLocation.from_country = countryDao.getCountry(net.fromLocation.from_country_id).name;
+                    net.fromLocation.from_city = cityDao.getCity(net.fromLocation.from_city_id).getName();
+                    net.fromLocation.from_region = regionDao.getRegion(net.fromLocation.from_region_id).getName();
+                    net.fromLocation.from_country = countryDao.getCountry(net.fromLocation.from_country_id).getName();
                 }
-                net.nearLocation.near_city = cityDao.getCity(net.nearLocation.near_city_id).name;
-                net.nearLocation.near_region = regionDao.getRegion(net.nearLocation.near_region_id).name;
-                net.nearLocation.near_country = countryDao.getCountry(net.nearLocation.near_country_id).name;
+                net.nearLocation.near_city = cityDao.getCity(net.nearLocation.near_city_id).getName();
+                net.nearLocation.near_region = regionDao.getRegion(net.nearLocation.near_region_id).getName();
+                net.nearLocation.near_country = countryDao.getCountry(net.nearLocation.near_country_id).getName();
             }
             return new NetworkResponse<>(net == null, net);
         }

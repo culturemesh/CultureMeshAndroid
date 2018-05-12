@@ -2,6 +2,9 @@ package org.codethechange.culturemesh.models;
 
 import android.arch.persistence.room.Entity;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by Drew Gregory on 2/23/18.
  */
@@ -33,6 +36,22 @@ public class City extends Place {
         this.cityName = cityName;
         this.regionName = Place.NOWHERE;
         this.countryName = Place.NOWHERE;
+    }
+
+    public City(JSONObject json) throws JSONException {
+        super(json);
+
+        if (json.has("country_name") && ! json.isNull("country_name")) {
+            countryName = json.getString("country_name");
+        } else {
+            countryName = Place.NOWHERE;
+        }
+
+        if (json.has("region_name") && ! json.isNull("region_name")) {
+            regionName = json.getString("region_name");
+        } else {
+            regionName = Place.NOWHERE;
+        }
     }
 
     public static City newOnlyMissingRegion(long cityId, long countryId, String cityName,
