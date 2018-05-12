@@ -13,6 +13,7 @@ import java.io.Serializable;
  * all equal to {@code NOWHERE}. This should only be possible by mis-using the JSON constructor
  * or by supplying {@code -1} as an ID. Neither should ever be done.
  *
+ * <pre>
  * {@code
  *                       Location
  *                      (IDs only)
@@ -27,6 +28,7 @@ import java.io.Serializable;
  *       City  Region  Country  (Wrappers for DatabaseLocation)
  *    (Specific cases of Place)
  * }
+ * </pre>
  */
 public class Location implements Serializable {
 
