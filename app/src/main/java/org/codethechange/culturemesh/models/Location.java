@@ -10,6 +10,7 @@ public class Location implements Serializable {
      * will have the country, region, and city updated.
      */
 
+    protected static final int NOWHERE = -1;
     public static final int COUNTRY = 0;
     public static final int REGION = 1;
     public static final int CITY = 2;
