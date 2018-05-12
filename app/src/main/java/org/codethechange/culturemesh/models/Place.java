@@ -12,22 +12,23 @@ import org.codethechange.culturemesh.Listable;
  * This is the superclass for cities, regions, and countries.
  */
 @Entity
-public class Place extends Location implements Listable {
+public abstract class Place extends Location implements Listable {
+
+    protected static final String NOWHERE = "nowhere";
+
     @PrimaryKey
     public long databaseId;
-    public String name;
     @Embedded
     public Point latLng;
     public long population;
     public String featureCode;
 
-    public Place(long countryId, long regionId, long cityId, String name, Point latLng,
-                 long population, String featureCode) {
+    public Place(long countryId, long regionId, long cityId, Point latLng, long population,
+                 String featureCode) {
         super(countryId, regionId, cityId);
         this.latLng = latLng;
         this.population = population;
         this.featureCode = featureCode;
-        this.name = name;
         databaseId = getDatabaseId();
     }
 
@@ -35,7 +36,5 @@ public class Place extends Location implements Listable {
         return population;
     }
 
-    public String getListableName() {
-        return name;
-    }
+    public abstract String getListableName();
 }
