@@ -9,7 +9,7 @@ import android.arch.persistence.room.Entity;
 public class Country extends Place {
     // TODO: What is isoA2?
     public long isoA2;
-    public String name;
+    private String name;
 
     public Country(long id, String name, Point latLng, long population, String featureCode) {
         super(id, Location.NOWHERE, Location.NOWHERE, latLng, population, featureCode);

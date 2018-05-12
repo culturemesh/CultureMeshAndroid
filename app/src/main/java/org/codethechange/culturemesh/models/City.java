@@ -8,9 +8,9 @@ import android.arch.persistence.room.Entity;
 @Entity
 public class City extends Place {
 
-    public String countryName;
-    public String regionName;
-    public String cityName;
+    private String countryName;
+    private String regionName;
+    private String cityName;
 
     public City(long cityId, long regionId, long countryId, String cityName, String regionName,
                 String countryName, Point latLng, long population, String featureCode) {
