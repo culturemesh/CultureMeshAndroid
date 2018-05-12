@@ -7,12 +7,16 @@ import android.arch.persistence.room.Entity;
  */
 @Entity
 public class Country extends Place {
+    // TODO: What is isoA2?
     public long isoA2;
-    public Country() {
+    public String name;
 
+    public Country(long id, String name, Point latLng, long population, String featureCode) {
+        super(id, Location.NOWHERE, Location.NOWHERE, latLng, population, featureCode);
+        this.name = name;
     }
 
-    public Country(long id, String name, Point latLng, long pop) {
-        super(id, name, latLng, pop);
+    public String getListableName() {
+        return name;
     }
 }
