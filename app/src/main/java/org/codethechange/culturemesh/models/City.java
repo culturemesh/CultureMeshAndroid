@@ -53,4 +53,8 @@ public class City extends Place {
         }
         return listable;
     }
+
+    public String getName() {
+        return cityName;
+    }
 }

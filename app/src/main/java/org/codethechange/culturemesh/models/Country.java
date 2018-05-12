@@ -19,4 +19,8 @@ public class Country extends Place {
     public String getListableName() {
         return name;
     }
+
+    public String getName() {
+        return name;
+    }
 }

@@ -31,4 +31,8 @@ public class Region extends Place {
             return regionName;
         }
     }
+
+    public String getName() {
+        return regionName;
+    }
 }
