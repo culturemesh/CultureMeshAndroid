@@ -30,6 +30,10 @@ public class Location implements Serializable {
 
     public Location(JSONObject json) throws JSONException {
 
+        cityId = NOWHERE;
+        regionId = NOWHERE;
+        countryId = NOWHERE;
+
         if (json.has("id") && ! json.isNull("id")) {
             int type = getJsonType(json);
             if (type == CITY) {
