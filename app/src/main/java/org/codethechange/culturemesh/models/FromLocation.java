@@ -25,19 +25,20 @@ public class FromLocation extends DatabaseLocation {
 
     public long from_population;
 
-    public FromLocation(long cityId, long regionId,long countryId, long population) {
+    public FromLocation(long cityId, long regionId,long countryId, String cityName,
+                        String regionName, String countryName, long population) {
         super(cityId, regionId, countryId);
-        initialize(population);
+        initialize(cityName, regionName, countryName, population);
     }
 
-    private void initialize(long population) {
+    private void initialize(String cityName, String regionName, String countryName, long population) {
         from_country_id = getCountryId();
         from_region_id = getRegionId();
         from_city_id = getCityId();
 
-        from_country = getCountryName();
-        from_region = getRegionName();
-        from_city = getCityName();
+        from_country = countryName;
+        from_region = regionName;
+        from_city = cityName;
 
         from_population = population;
     }

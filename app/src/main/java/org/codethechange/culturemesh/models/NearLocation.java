@@ -21,19 +21,20 @@ public class NearLocation extends DatabaseLocation {
 
     public long near_population;
 
-    public NearLocation(long cityId, long regionId,long countryId, long population) {
+    public NearLocation(long cityId, long regionId,long countryId, String cityName,
+                        String regionName, String countryName, long population) {
         super(cityId, regionId, countryId);
-        initialize(population);
+        initialize(cityName, regionName, countryName, population);
     }
 
-    private void initialize(long population) {
+    private void initialize(String cityName, String regionName, String countryName, long population) {
         near_country_id = getCountryId();
         near_region_id = getRegionId();
         near_city_id = getCityId();
 
-        near_country = getCountryName();
-        near_region = getRegionName();
-        near_city = getCityName();
+        near_country = countryName;
+        near_region = regionName;
+        near_city = cityName;
 
         near_population = population;
     }
