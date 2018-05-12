@@ -17,10 +17,10 @@ public class Network implements Serializable{
     public long id;
 
     @Embedded
-    public NearLocation nearLocation;
+    public Location nearLocation;
 
     @Embedded
-    public FromLocation fromLocation;
+    public Location fromLocation;
 
     @Embedded
     public Language language;
@@ -38,19 +38,14 @@ public class Network implements Serializable{
      * or API.networkPosts() (asynchronously of course) to get these fields.
      * */
 
-    public Network() {
-
-    }
-    public Network(NearLocation nearLocation,
-                   FromLocation fromLocation, long id) {
+    public Network(Location nearLocation, Location fromLocation, long id) {
         this.fromLocation = fromLocation;
         this.nearLocation = nearLocation;
         networkClass = true;
         this.id = id;
     }
 
-    public Network(NearLocation nearLocation,
-                   Language lang, long id) {
+    public Network(Location nearLocation, Language lang, long id) {
         this.language = lang;
         this.nearLocation = nearLocation;
         networkClass = false;
