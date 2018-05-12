@@ -8,13 +8,15 @@ import org.codethechange.culturemesh.Listable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
+
 /**
  * Created by Drew Gregory on 2/23/18.
  *
  * This is the superclass for cities, regions, and countries.
  */
 @Entity
-public abstract class Place extends Location implements Listable {
+public abstract class Place extends Location implements Listable, Serializable {
 
     protected static final String NOWHERE = "nowhere";
 
