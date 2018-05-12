@@ -141,7 +141,7 @@ public class Location implements Serializable {
      * @return {@code true} if the country ID is specified, {@code false} otherwise
      */
     public boolean hasCountryId() {
-        return countryId != -1;
+        return countryId != NOWHERE;
     }
 
     /**
@@ -149,7 +149,7 @@ public class Location implements Serializable {
      * @return {@code true} if the region ID is specified, {@code false} otherwise
      */
     public boolean hasRegionId() {
-        return regionId != -1;
+        return regionId != NOWHERE;
     }
 
     /**
@@ -157,7 +157,7 @@ public class Location implements Serializable {
      * @return {@code true} if the city ID is specified, {@code false} otherwise
      */
     public boolean hasCityId() {
-        return cityId != -1;
+        return cityId != NOWHERE;
     }
 
     /**
