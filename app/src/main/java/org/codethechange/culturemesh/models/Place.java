@@ -21,11 +21,11 @@ public abstract class Place extends Location implements Listable, Serializable {
     protected static final String NOWHERE = "nowhere";
 
     @PrimaryKey
-    public long databaseId;
+    private long databaseId;
     @Embedded
-    public Point latLng;
-    public long population;
-    public String featureCode;
+    private Point latLng;
+    private long population;
+    private String featureCode;
 
     public Place(long countryId, long regionId, long cityId, Point latLng, long population,
                  String featureCode) {
@@ -55,4 +55,16 @@ public abstract class Place extends Location implements Listable, Serializable {
     }
 
     public abstract String getListableName();
+
+    public Point getLatLng() {
+        return latLng;
+    }
+
+    public long getPopulation() {
+        return population;
+    }
+
+    public String getFeatureCode() {
+        return featureCode;
+    }
 }
