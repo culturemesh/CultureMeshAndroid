@@ -1,79 +1,70 @@
 package org.codethechange.culturemesh.models;
-
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
-
-import org.codethechange.culturemesh.Listable;
-import org.codethechange.culturemesh.Searchable;
-
 import java.io.Serializable;
-import java.math.BigInteger;
 
 /**
  * Created by nathaniel on 11/10/17.
  */
-public class Location implements Serializable, Searchable, Listable {
-    public long location_id;
+public class Location implements Serializable {
     /**
      * When stored in the Database, we will store just the id's. The object returned from the API
      * will have the country, region, and city updated.
      */
-    public long country_id;
-    public long region_id;
-    public long city_id;
-    public String country;
-    public String region;
-    public String city;
 
-    //TODO: private Point[] points;
+    public static  final int NOWHERE = -1;
+    public static final int COUNTRY = 0;
+    public static final int REGION = 1;
+    public static final int CITY = 2;
 
-    public Location(String country, String region, String city, Point[] points) {
-        this.country = country;
-        this.region = region;
-        this.city = city;
-        //TODO: this.points = points
+    private long countryId;
+    private long regionId;
+    private long cityId;
+
+    public Location(long countryId, long regionId, long cityId) {
+        this.countryId = countryId;
+        this.regionId = regionId;
+        this.cityId = cityId;
     }
 
     public Location() {
-        this.country = "";
-        this.region = "";
-        this.city = "";
+        this.countryId = -1;
+        this.regionId = -1;
+        this.cityId = -1;
     }
 
-
-    public String toString() {
-        String string = "";
-        string += country;
-        String region  = this.region;
-        if (region != null) {
-            string += ", " + region;
+    public int getType() {
+        if (hasCityId()) {
+            return CITY;
+        } else if (hasRegionId()) {
+            return REGION;
+        } else if (hasCountryId()) {
+            return COUNTRY;
+        } else {
+            return NOWHERE;
         }
-        if (city != null) {
-            string += ", " + city;
-        }
-        return string;
     }
 
-    public String shortName() {
-        //We'll return the lowest level location.
-        String city = this.city;
-        if (city != null) return city;
-        String region = this.region;
-        if (region != null) return region;
-        return this.country;
+    public boolean hasCountryId() {
+        return countryId != -1;
     }
 
-    public boolean matches(CharSequence constraint) {
-        return country.contains(constraint) || region.contains(constraint) || city.contains(constraint);
+    public boolean hasRegionId() {
+        return regionId != -1;
     }
 
-    public int getNumUsers() {
-        // TODO: Store number of members in Location or query API
-        return 0;
+    public boolean hasCityId() {
+        return cityId != -1;
     }
 
-    public String getListableName() {
-        return shortName();
+    public long getCountryId() {
+        return countryId;
+    }
+
+    public long getRegionId() {
+        return regionId;
+    }
+
+    public long getCityId() {
+        return cityId;
     }
 }
 
