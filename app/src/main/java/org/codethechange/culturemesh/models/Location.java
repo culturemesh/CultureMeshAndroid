@@ -10,7 +10,6 @@ public class Location implements Serializable {
      * will have the country, region, and city updated.
      */
 
-    public static  final int NOWHERE = -1;
     public static final int COUNTRY = 0;
     public static final int REGION = 1;
     public static final int CITY = 2;
@@ -25,21 +24,23 @@ public class Location implements Serializable {
         this.cityId = cityId;
     }
 
-    public Location() {
-        this.countryId = -1;
-        this.regionId = -1;
-        this.cityId = -1;
-    }
-
     public int getType() {
         if (hasCityId()) {
             return CITY;
         } else if (hasRegionId()) {
             return REGION;
-        } else if (hasCountryId()) {
-            return COUNTRY;
         } else {
-            return NOWHERE;
+            return COUNTRY;
+        }
+    }
+
+    protected long getDatabaseId() {
+        if (hasCityId()) {
+            return cityId;
+        } else if (hasRegionId()) {
+            return regionId;
+        } else {
+            return countryId;
         }
     }
 
