@@ -1,16 +1,11 @@
 package org.codethechange.culturemesh.models;
 
-import android.arch.persistence.room.Ignore;
-import android.support.annotation.NonNull;
-
-import org.codethechange.culturemesh.Listable;
-
 /**
  * Created by Drew Gregory on 2/19/18.
  * Exact copy of Location, but used as Embedded Entity in SQLite Database.
  */
 
-public class NearLocation implements Listable {
+public class NearLocation extends DatabaseLocation {
     /**
      * When stored in the Database, we will store just the id's. The object returned near the API
      * will have the country, region, and city updated.
@@ -20,69 +15,43 @@ public class NearLocation implements Listable {
     public long near_region_id;
     public long near_city_id;
 
-    @Ignore
     public String near_country;
-    @Ignore
     public String near_region;
-    @Ignore
     public String near_city;
 
-    //TODO: private Point[] points;
+    public long near_population;
 
-    public NearLocation() {
-
+    public NearLocation(long cityId, long regionId,long countryId, long population) {
+        super(cityId, regionId, countryId);
+        initialize(population);
     }
 
-    public NearLocation(String near_country, String near_region, String near_city, Point[] points) {
-        this.near_country = near_country;
-        this.near_region = near_region;
-        this.near_city = near_city;
-        //TODO: this.points = points
+    private void initialize(long population) {
+        near_country_id = getCountryId();
+        near_region_id = getRegionId();
+        near_city_id = getCityId();
+
+        near_country = getCountryName();
+        near_region = getRegionName();
+        near_city = getCityName();
+
+        near_population = population;
     }
 
-    public NearLocation(long cityId, long regionId, long countryId) {
-        this.near_country = "";
-        this.near_region = "";
-        this.near_city = "";
-        this.near_city_id = cityId;
-        this.near_country_id = countryId;
-        this.near_region_id = regionId;
+    public String getCityName() {
+        return near_city;
     }
 
-
-
-    public String toString() {
-        String string = "";
-        string += near_country;
-        String region = this.near_region;
-        if (region != null) {
-            string += ", " + region;
-        }
-        if (near_city != null) {
-            string += ", " + near_city;
-        }
-        return string;
+    public String getRegionName() {
+        return near_region;
     }
 
-    public String shortName() {
-        if (this.near_city != null) {
-            return this.near_city;
-        } else if (this.near_region != null) {
-            return this.near_region;
-        } else if (this.near_country != null) {
-            return this.near_country;
-        } else {
-            return this.near_city_id + "," + this.near_region_id + "," + this.near_country_id;
-        }
+    public String getCountryName() {
+        return near_country;
     }
 
-    public String getListableName() {
-        return shortName();
-    }
-
-    public int getNumUsers() {
-        // TODO: Store number of members in Location or query API
-        return 0;
+    public long getNumUsers() {
+        return near_population;
     }
 
 }
