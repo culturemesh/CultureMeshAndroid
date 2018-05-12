@@ -65,16 +65,23 @@ public abstract class DatabaseLocation extends Location implements Listable {
      */
     public String toString() {
         String string = "";
-        string += getCountryName();
-        String region = getRegionName();
-        if (! region.equals(Place.NOWHERE)) {
-            string += ", " + region;
-        }
+
         String city = getCityName();
         if (! city.equals(Place.NOWHERE)) {
             string += ", " + city;
         }
-        return string;
+
+        String region = getRegionName();
+        if (! region.equals(Place.NOWHERE)) {
+            string += ", " + region;
+        }
+
+        String country = getCountryName();
+        if (! country.equals(Place.NOWHERE)) {
+            string += ", " + country;
+        }
+
+        return string.substring(2); // Remove initial comma and space
     }
 
     /**
