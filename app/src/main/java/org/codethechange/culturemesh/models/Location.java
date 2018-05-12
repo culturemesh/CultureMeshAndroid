@@ -12,6 +12,21 @@ import java.io.Serializable;
  * No instance of this class should have {@code countryId}, {@code regionId}, and {@code cityId}
  * all equal to {@code NOWHERE}. This should only be possible by mis-using the JSON constructor
  * or by supplying {@code -1} as an ID. Neither should ever be done.
+ *
+ * {@code
+ *                       Location
+ *                      (IDs only)
+ *                      /        \
+ *                     /          \
+ *                    /            \
+ *                   /              \
+ *          Place (Abstract)    DatabaseLocation (Abstract)
+ *           (Full Info)         (IDs, names, population)
+ *             /  |  \                   /      \
+ *            /   |   \           NearLocation  FromLocation
+ *       City  Region  Country  (Wrappers for DatabaseLocation)
+ *    (Specific cases of Place)
+ * }
  */
 public class Location implements Serializable {
 
