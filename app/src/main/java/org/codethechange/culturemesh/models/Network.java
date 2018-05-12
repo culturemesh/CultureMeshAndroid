@@ -11,16 +11,16 @@ import java.io.Serializable;
  */
 
 @Entity
-public class Network implements Serializable{
+public class Network implements Serializable {
     //TODO: Figure out Room deals with bigints.
     @PrimaryKey
     public long id;
 
     @Embedded
-    public Location nearLocation;
+    public Place nearLocation;
 
     @Embedded
-    public Location fromLocation;
+    public Place fromLocation;
 
     @Embedded
     public Language language;
@@ -38,14 +38,14 @@ public class Network implements Serializable{
      * or API.networkPosts() (asynchronously of course) to get these fields.
      * */
 
-    public Network(Location nearLocation, Location fromLocation, long id) {
+    public Network(Place nearLocation, Place fromLocation, long id) {
         this.fromLocation = fromLocation;
         this.nearLocation = nearLocation;
         networkClass = true;
         this.id = id;
     }
 
-    public Network(Location nearLocation, Language lang, long id) {
+    public Network(Place nearLocation, Language lang, long id) {
         this.language = lang;
         this.nearLocation = nearLocation;
         networkClass = false;
