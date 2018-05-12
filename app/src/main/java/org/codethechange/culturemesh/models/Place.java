@@ -5,7 +5,6 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
 import org.codethechange.culturemesh.Listable;
-import org.codethechange.culturemesh.Searchable;
 
 /**
  * Created by Drew Gregory on 2/23/18.
@@ -13,33 +12,27 @@ import org.codethechange.culturemesh.Searchable;
  * This is the superclass for cities, regions, and countries.
  */
 @Entity
-public class Place implements Listable, Searchable {
+public class Place extends Location implements Listable {
     @PrimaryKey
-    public long id;
+    public long databaseId;
     public String name;
     @Embedded
     public Point latLng;
     public long population;
     public String featureCode;
 
-    public Place() {
-
-    }
-
-    public Place(long id, String name, Point latLng, long pop) {
-        this.id = id;
-        this.name = name;
+    public Place(long countryId, long regionId, long cityId, String name, Point latLng,
+                 long population, String featureCode) {
+        super(countryId, regionId, cityId);
         this.latLng = latLng;
-        this.population = pop;
+        this.population = population;
+        this.featureCode = featureCode;
+        this.name = name;
+        databaseId = getDatabaseId();
     }
 
-    public boolean matches(CharSequence constraint) {
-        return name.contains(constraint);
-    }
-
-    public int getNumUsers() {
-        // TODO: Store number of members in Location or query API
-        return 0;
+    public long getNumUsers() {
+        return population;
     }
 
     public String getListableName() {
