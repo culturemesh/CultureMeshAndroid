@@ -4,5 +4,5 @@ import android.view.View;
 
 public interface Listable {
     String getListableName();
-    int getNumUsers();
+    long getNumUsers();
 }
