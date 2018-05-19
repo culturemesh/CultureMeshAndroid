@@ -141,6 +141,13 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                     listener.onItemClick(item);
                 }
             });
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    listener.onEventClick(item);
+                    return false;
+                }
+            });
         }
 
     }
@@ -243,6 +250,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
 
     public interface OnItemClickListener {
         void onItemClick(FeedItem item);
+        void onEventClick(FeedItem item);
         //add more custom click functions here e.g. long click
     }
 

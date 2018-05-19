@@ -1,8 +1,11 @@
 package org.codethechange.culturemesh;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -160,6 +164,35 @@ public class PostsFrag extends Fragment {
                         //I don't think we have commenting support for events??
                     } catch (NullPointerException e) {
                         Toast.makeText(getActivity(), "Cannot open post", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onEventClick(FeedItem item) {
+                    if(item instanceof Event) {
+                        final long eventID = ((Event) item).id;
+                        final long userID = settings.getLong(API.CURRENT_USER, -1);
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        builder.setTitle("Would you like to join this event?");
+                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                NetworkResponse response = API.Post.addUserToEvent(userID, eventID);
+                                if(response.fail()) {
+                                    Toast.makeText(getActivity(), "Network Error.", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(getActivity(), "You have been added to this event!", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //do nothing...
+                            }
+                        });
+                        builder.show();
                     }
                 }
             }, getActivity().getApplicationContext());

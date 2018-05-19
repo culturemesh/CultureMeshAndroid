@@ -2,8 +2,21 @@ package org.codethechange.culturemesh;
 
 import android.arch.persistence.room.Room;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.codethechange.culturemesh.data.CMDatabase;
 import org.codethechange.culturemesh.data.CityDao;
 import org.codethechange.culturemesh.data.CountryDao;
@@ -34,6 +47,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -930,6 +948,38 @@ class API {
             return new NetworkResponse();
         }
 
+        static NetworkResponse uploadProfilePicture(User user, Bitmap ppBitmap) {
+            //TODO: upload new profile picture
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpPost httpPost = new HttpPost();
+            int sc = -1;
+
+            try {
+                ByteArrayOutputStream bao = new ByteArrayOutputStream();
+                MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+                builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+                File profPicFile = new File("currProfPic");
+                ppBitmap.compress(Bitmap.CompressFormat.PNG, 0, bao);
+                try(OutputStream outputStream = new FileOutputStream("profPic")) {
+                    bao.writeTo(outputStream);
+                }
+                FileBody fb = new FileBody(profPicFile);
+                builder.addPart("ppUpload", fb);
+
+
+//                MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+//                        // If the key equals to "image", we use FileBody to transfer the data
+//                entity.addPart("ppUpload", new FileBody(new File(ppBitmap.compress(Bitmap.CompressFormat.JPEG, 100, ))));
+//                httpPost.setEntity(builder.build());
+                HttpResponse response = httpClient.execute(httpPost);
+                StatusLine sl = response.getStatusLine();
+                sc = sl.getStatusCode();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new NetworkResponse<Integer>(ppBitmap == null || user == null, sc);
+        }
+
     }
 
     public static void loadAppDatabase(Context context) {
@@ -946,4 +996,5 @@ class API {
             mDb = null;
         }
     }
+
 }

@@ -38,6 +38,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
     ImageView profilePicture;
     Button updateProfile;
     User user;
+    final int SUCCESS_CODE = 200;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +59,6 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
             }
         });
         updateProfile = findViewById(R.id.update_profile_button);
-        //TODO: Add ability to change profile picture.
         updateProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -133,8 +133,35 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
             case PICK_IMAGE_ID:
-                Bitmap bitmap = ImagePicker.getImageFromResult(this, resultCode, data);
+                final Bitmap bitmap = ImagePicker.getImageFromResult(this, resultCode, data);
+                AlertDialog.Builder ImageDialog = new AlertDialog.Builder(this);
+                ImageDialog.setTitle("Are you sure you want this to be your new profile picture?");
+                ImageView showImage = new ImageView(this);
+                showImage.setImageBitmap(bitmap);
+                ImageDialog.setView(showImage);
 
+                ImageDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(SettingsActivity.this, "OKAY YOU HAVE A NEW PROF PICTURE", Toast.LENGTH_SHORT).show();
+                        profilePicture.setImageBitmap(bitmap);
+                        NetworkResponse<Integer> response = API.Put.uploadProfilePicture(API.Get.user(currentUser).getPayload(), bitmap);
+                        int statusCode = response.getPayload();
+                        if(response.fail() || statusCode != SUCCESS_CODE) {
+                            String errorStr = "";
+                            if(statusCode != SUCCESS_CODE) errorStr = "Error Code " + statusCode +". Please re-upload";
+                            else errorStr = "Network Error. Please re-upload";
+                            Toast.makeText(SettingsActivity.this, errorStr, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+                ImageDialog.setNegativeButton("Never Mind", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //do nothing...
+                    }
+                });
+                if(bitmap != null) ImageDialog.show();
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
