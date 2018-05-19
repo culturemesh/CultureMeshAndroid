@@ -34,7 +34,7 @@ public abstract class Place extends Location implements Listable, Serializable {
      * Crucially <strong>it is NOT guaranteed to be unique.</strong>
      */
     @PrimaryKey
-    private long databaseId;
+    private long id;
 
     /**
      * Latitude and longitude
@@ -58,7 +58,7 @@ public abstract class Place extends Location implements Listable, Serializable {
     /**
      * Initialize instance fields with provided parameters. Also calls
      * {@link Location#Location(long, long, long)} with the provided IDs
-     * Postcondition: {@link Place#databaseId} is initialized using {@link Place#getDatabaseId()}
+     * Postcondition: {@link Place#id} is initialized using {@link Place#getDatabaseId()}
      * @param countryId ID of country
      * @param regionId ID of region
      * @param cityId ID of city
@@ -72,7 +72,7 @@ public abstract class Place extends Location implements Listable, Serializable {
         this.latLng = latLng;
         this.population = population;
         this.featureCode = featureCode;
-        databaseId = getDatabaseId();
+        id = getDatabaseId();
     }
 
     /**
@@ -80,7 +80,7 @@ public abstract class Place extends Location implements Listable, Serializable {
      * The following keys must be present and are used to fill the relevant instance fields:
      * {@code latitude}, {@code longitude}, {@code population}, {@code feature_code}. In addition,
      * the JSON object is passed to {@link Location#Location(JSONObject)}. See its documentation
-     * for details on its requirements. {@link Place#databaseId} is initialized using
+     * for details on its requirements. {@link Place#id} is initialized using
      * {@link Place#getDatabaseId()}.
      * Precondition: The JSON must be validly formatted, with examples in
      * {@link org.codethechange.culturemesh.API}
@@ -98,7 +98,7 @@ public abstract class Place extends Location implements Listable, Serializable {
         population = json.getLong("population");
         featureCode = json.getString("feature_code");
 
-        databaseId = getDatabaseId();
+        id = getDatabaseId();
     }
 
     /**
