@@ -18,12 +18,12 @@ public class Region extends Place {
     /**
      * Name of the country (may store {@link Place#NOWHERE}
      */
-    private String countryName;
+    public String countryName;
 
     /**
      * Name of the region (should always be specified and not as {@link Place#NOWHERE}
      */
-    private String regionName;
+    public String regionName;
 
     /**
      * Initialize instance fields and those of superclass with provided parameters

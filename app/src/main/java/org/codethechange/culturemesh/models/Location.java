@@ -48,9 +48,9 @@ public class Location implements Serializable {
      * They can be {@code private} because a plain {@code Location} object should not need to be
      * stored in the database.
      */
-    private long countryId;
-    private long regionId;
-    private long cityId;
+    public long countryId;
+    public long regionId;
+    public long cityId;
 
     /**
      * Initializes ID instance fields using the provided IDs

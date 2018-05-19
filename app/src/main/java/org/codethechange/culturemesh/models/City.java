@@ -18,17 +18,17 @@ public class City extends Place {
     /**
      * Name of country.
      */
-    private String countryName;
+    public String countryName;
 
     /**
      * Name of region
      */
-    private String regionName;
+    public String regionName;
 
     /**
      * Name of city
      */
-    private String cityName;
+    public String cityName;
 
     /**
      * Initialize instance fields and instance fields of superclasses based on provided arguments

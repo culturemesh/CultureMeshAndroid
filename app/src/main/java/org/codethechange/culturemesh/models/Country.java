@@ -21,7 +21,7 @@ public class Country extends Place {
     /**
      * Name of country
      */
-    private String name;
+    public String name;
 
     /**
      * Initialize instance fields and those of superclass with provided parameters

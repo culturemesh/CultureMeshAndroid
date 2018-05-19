@@ -34,26 +34,26 @@ public abstract class Place extends Location implements Listable, Serializable {
      * Crucially <strong>it is NOT guaranteed to be unique.</strong>
      */
     @PrimaryKey
-    private long id;
+    public long id;
 
     /**
      * Latitude and longitude
      */
     @Embedded
-    private Point latLng;
+    public Point latLng;
 
     /**
      * The population of the described area. This is for display under the "people" icon when areas
      * are listed.
      */
-    private long population;
+    public long population;
 
     /**
      * Feature code, which is a string describing the type of place represented (e.g. a capital,
      * a religiously important area, an abandoned populated area). See
      * http://www.geonames.org/export/codes.html for more examples.
      */
-    private String featureCode;
+    public String featureCode;
 
     /**
      * Initialize instance fields with provided parameters. Also calls
