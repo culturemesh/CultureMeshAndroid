@@ -25,10 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.crashlytics.android.Crashlytics;
 import com.squareup.picasso.Picasso;
-
-import io.fabric.sdk.android.Fabric;
 
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;

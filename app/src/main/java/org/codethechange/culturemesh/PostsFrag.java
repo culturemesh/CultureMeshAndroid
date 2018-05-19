@@ -6,33 +6,19 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FeedItem;
-import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
-import org.codethechange.culturemesh.models.User;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.math.BigInteger;
-import java.sql.Time;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
