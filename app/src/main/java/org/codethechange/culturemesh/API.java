@@ -880,20 +880,26 @@ class API {
 
         static NetworkResponse<Network> netFromLangAndNear(Language lang, NearLocation near) {
             NetworkDao netDao = mDb.networkDao();
-            Network n = netDao.netFromLangAndHome(lang.language_id, near.near_city_id, near.near_region_id,
+            DatabaseNetwork dn = netDao.netFromLangAndHome(lang.language_id, near.near_city_id, near.near_region_id,
                     near.near_country_id);
-            // TODO: Distinguish between the network not existing and the lookup failing
-            NetworkResponse<Network> resp = new NetworkResponse<>(n == null, n, R.string.noNetworkExist);
-            return resp;
+            if (dn == null) {
+                // TODO: Distinguish between the network not existing and the lookup failing
+                return new NetworkResponse<>(true, R.string.noNetworkExist);
+            } else {
+                return network(dn.id);
+            }
         }
 
         static NetworkResponse<Network> netFromFromAndNear(FromLocation from, NearLocation near) {
             NetworkDao netDao = mDb.networkDao();
-            Network n = netDao.netFromLocAndHome(from.from_city_id, from.from_region_id,
+            DatabaseNetwork dn = netDao.netFromLocAndHome(from.from_city_id, from.from_region_id,
                     from.from_country_id, near.near_city_id, near.near_region_id, near.near_country_id);
-            // TODO: Distinguish between the network not existing and the lookup failing
-            NetworkResponse<Network> resp = new NetworkResponse<>(n == null, n, R.string.noNetworkExist);
-            return new NetworkResponse<>(n);
+            if (dn == null) {
+                // TODO: Distinguish between the network not existing and the lookup failing
+                return new NetworkResponse<>(true, R.string.noNetworkExist);
+            } else {
+                return network(dn.id);
+            }
         }
     }
 
