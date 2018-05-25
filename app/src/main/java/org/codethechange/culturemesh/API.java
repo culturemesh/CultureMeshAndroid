@@ -948,7 +948,7 @@ class API {
             return new NetworkResponse();
         }
 
-        static NetworkResponse uploadProfilePicture(User user, Bitmap ppBitmap) {
+        static NetworkResponse<Integer> uploadProfilePicture(User user, Bitmap ppBitmap) {
             //TODO: upload new profile picture
             HttpClient httpClient = new DefaultHttpClient();
             HttpPost httpPost = new HttpPost();

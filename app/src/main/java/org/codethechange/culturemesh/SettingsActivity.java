@@ -146,10 +146,11 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                         Toast.makeText(SettingsActivity.this, "OKAY YOU HAVE A NEW PROF PICTURE", Toast.LENGTH_SHORT).show();
                         profilePicture.setImageBitmap(bitmap);
                         NetworkResponse<Integer> response = API.Put.uploadProfilePicture(API.Get.user(currentUser).getPayload(), bitmap);
-                        int statusCode = response.getPayload();
-                        if(response.fail() || statusCode != SUCCESS_CODE) {
+                        int statusCode = (int) response.getPayload();
+                        if (response.fail() || statusCode != SUCCESS_CODE) {
                             String errorStr = "";
-                            if(statusCode != SUCCESS_CODE) errorStr = "Error Code " + statusCode +". Please re-upload";
+                            if (statusCode != SUCCESS_CODE)
+                                errorStr = "Error Code " + statusCode + ". Please re-upload";
                             else errorStr = "Network Error. Please re-upload";
                             Toast.makeText(SettingsActivity.this, errorStr, Toast.LENGTH_SHORT).show();
                         }

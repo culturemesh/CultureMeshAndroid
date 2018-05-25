@@ -76,6 +76,11 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
         }
     }
 
+    @Override
+    public void onEventClick(FeedItem item) {
+
+    }
+
     class LoadUserPosts extends AsyncTask<Long, Void, Void> {
 
         @Override
