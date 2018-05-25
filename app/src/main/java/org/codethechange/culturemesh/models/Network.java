@@ -1,43 +1,54 @@
 package org.codethechange.culturemesh.models;
 
-import android.arch.persistence.room.Embedded;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
-
 import java.io.Serializable;
 
-@Entity
 public class Network implements Serializable {
-    @PrimaryKey
     public long id;
 
-    @Embedded
-    public Location nearLocation;
+    public Place nearLocation;
 
-    @Embedded
-    public Location fromLocation;
+    public Place fromLocation;
 
-    @Embedded
     public Language language;
 
     /**
-     * networkClass is a boolean determining if a network is fromloc->nearLoc or language->nearLoc.
-     * true: fromLoc->nearLoc
-     * false: lang->nearLoc
+     * Denotes whether this network's <em>from</em> attribute is based on where an individual is
+     * from or on what language they speak.
+     *
+     * {@code true}: Based on what language they speak
+     *
+     * {@code false}: Based on what location they are from
      */
-    public boolean networkClass;
+    private boolean isLanguageBased;
 
-    public Network(Location nearLocation, Location fromLocation, long id) {
+    public Network(Place nearLocation, Place fromLocation, long id) {
         this.fromLocation = fromLocation;
         this.nearLocation = nearLocation;
-        networkClass = true;
+        isLanguageBased = true;
         this.id = id;
     }
 
-    public Network(Location nearLocation, Language lang, long id) {
+    public Network(Place nearLocation, Language lang, long id) {
         this.language = lang;
         this.nearLocation = nearLocation;
-        networkClass = false;
+        isLanguageBased = false;
         this.id = id;
+    }
+
+    /**
+     * Check whether this network is of people who speak the same language
+     * @return {@code true} if the network is defined in terms of language, {@code false} otherwise
+     */
+    public boolean isLanguageBased() {
+        return isLanguageBased;
+    }
+
+    /**
+     * Check whether this network is of people who come from the same place
+     * @return {@code true} if the network is defined by where members are from, {@code false}
+     * otherwise
+     */
+    public boolean isLocationBased() {
+        return ! isLanguageBased;
     }
 }
