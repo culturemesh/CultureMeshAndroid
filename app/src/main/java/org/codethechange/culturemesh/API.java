@@ -936,7 +936,7 @@ class API {
 
         static NetworkResponse network(Network network) {
             NetworkDao nDao = mDb.networkDao();
-            nDao.insertNetworks(network);
+            nDao.insertNetworks(network.getDatabaseNetwork());
             return new NetworkResponse<>(network);
         }
 
