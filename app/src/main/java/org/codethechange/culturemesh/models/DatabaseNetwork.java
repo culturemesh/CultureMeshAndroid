@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh.models;
 
 import android.arch.persistence.room.Embedded;
+import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
 /**
@@ -12,6 +13,7 @@ import android.arch.persistence.room.PrimaryKey;
  * to database entries with more information. This reduces the risk of conflicting information
  * and reduces the overhead of updating data in more than one spot in the database.
  */
+@Entity
 public class DatabaseNetwork {
     /**
      * The network's ID. This is used as its unique identifier in the database.
