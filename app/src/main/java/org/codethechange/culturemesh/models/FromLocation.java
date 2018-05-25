@@ -1,5 +1,8 @@
 package org.codethechange.culturemesh.models;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Wrapper for {@code DatabaseLocation} that is for From locations. See the documentation for
  * {@code DatabaseLocation} for information as to why this redundancy is necessary. All of these
@@ -23,6 +26,17 @@ public class FromLocation extends DatabaseLocation {
      */
     public FromLocation(long cityId, long regionId,long countryId) {
         super(cityId, regionId, countryId);
+        initialize();
+    }
+
+    /**
+     * Initializes instance fields by passing JSON to {@link Location#Location(JSONObject)} and then
+     * initializing instance fields using {@link FromLocation#initialize()}
+     * @param json JSON object describing the location
+     * @throws JSONException May be thrown in response to improperly formatted JSON
+     */
+    public FromLocation(JSONObject json) throws JSONException {
+        super(json);
         initialize();
     }
 

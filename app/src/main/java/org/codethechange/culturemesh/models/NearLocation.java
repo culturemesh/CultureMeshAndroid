@@ -1,5 +1,8 @@
 package org.codethechange.culturemesh.models;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Wrapper for {@code DatabaseLocation} that is for Near locations. See the documentation for
  * {@code DatabaseLocation} for information as to why this redundancy is necessary. All of these
@@ -23,6 +26,17 @@ public class NearLocation extends DatabaseLocation {
      */
     public NearLocation(long cityId, long regionId, long countryId) {
         super(cityId, regionId, countryId);
+        initialize();
+    }
+
+    /**
+     * Initializes instance fields by passing JSON to {@link Location#Location(JSONObject)} and then
+     * initializing instance fields using {@link NearLocation#initialize()}
+     * @param json JSON object describing the location
+     * @throws JSONException May be thrown in response to improperly formatted JSON
+     */
+    public NearLocation(JSONObject json) throws JSONException {
+        super(json);
         initialize();
     }
 
