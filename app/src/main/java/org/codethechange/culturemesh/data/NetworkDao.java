@@ -7,7 +7,7 @@ import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
-import org.codethechange.culturemesh.models.Network;
+import org.codethechange.culturemesh.models.DatabaseNetwork;
 
 import java.util.List;
 
@@ -20,24 +20,24 @@ import java.util.List;
 @Dao
 public interface NetworkDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void insertNetworks(Network... networks);
+    public void insertNetworks(DatabaseNetwork... networks);
 
     @Update
-    public void updateNetworks(Network... networks);
+    public void updateNetworks(DatabaseNetwork... networks);
 
     @Delete
-    public void deleteNetworks(Network... networks);
+    public void deleteNetworks(DatabaseNetwork... networks);
 
-    @Query("SELECT * FROM network WHERE id=:id")
-    public List<Network> getNetwork(long id);
+    @Query("SELECT * FROM  WHERE id=:id")
+    public List<DatabaseNetwork> getNetwork(long id);
 
-    @Query("SELECT * FROM network WHERE language_id=:langID AND cityId=:nearCityID AND " +
+    @Query("SELECT * FROM DatabaseNetwork WHERE languageId=:langID AND cityId=:nearCityID AND " +
             "regionId=:nearRegionID AND countryId=:nearCountryID")
-    public Network netFromLangAndHome(long langID, long nearCityID, long nearRegionID, long nearCountryID);
+    public DatabaseNetwork netFromLangAndHome(long langID, long nearCityID, long nearRegionID, long nearCountryID);
 
-    @Query("SELECT * FROM network WHERE cityId=:fromCityID AND regionId=:fromRegionID AND " +
+    @Query("SELECT * FROM DatabaseNetwork WHERE cityId=:fromCityID AND regionId=:fromRegionID AND " +
             "countryId=:fromCountryID AND cityId=:nearCityID AND " +
             "regionId=:nearRegionID AND countryId=:nearCountryID")
-    public Network netFromLocAndHome(long fromCityID, long fromRegionID, long fromCountryID,
+    public DatabaseNetwork netFromLocAndHome(long fromCityID, long fromRegionID, long fromCountryID,
                                      long nearCityID, long nearRegionID, long nearCountryID);
 }
