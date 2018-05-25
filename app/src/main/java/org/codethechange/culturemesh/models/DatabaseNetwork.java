@@ -48,7 +48,7 @@ public class DatabaseNetwork {
      *
      * {@code false}: Based on what location they are from
      */
-    private boolean isLanguageBased;
+    public boolean isLanguageBased;
 
     /**
      * Create a new {@link DatabaseNetwork} for a network of people who come from the same area
