@@ -42,7 +42,7 @@ public class Language implements Serializable, Listable, Searchable {
         return name.contains(constraint);
     }
 
-    public int getNumUsers() {
+    public long getNumUsers() {
         return numSpeakers;
     }
 
