@@ -20,6 +20,7 @@ import org.codethechange.culturemesh.data.RegionDao;
 import org.codethechange.culturemesh.data.UserDao;
 import org.codethechange.culturemesh.models.City;
 import org.codethechange.culturemesh.models.Country;
+import org.codethechange.culturemesh.models.DatabaseNetwork;
 import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FromLocation;
 import org.codethechange.culturemesh.models.Language;
@@ -27,7 +28,6 @@ import org.codethechange.culturemesh.models.Location;
 import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Place;
-import org.codethechange.culturemesh.models.Point;
 import org.codethechange.culturemesh.models.PostReply;
 import org.codethechange.culturemesh.models.Region;
 import org.codethechange.culturemesh.models.User;
@@ -755,28 +755,44 @@ class API {
         static NetworkResponse<Network> network(long id) {
             //TODO: Send network request if not found.
             NetworkDao netDao = mDb.networkDao();
-            List<Network> nets = netDao.getNetwork(id);
-            Network net = null;
-            if (nets != null && nets.size() > 0) {
-                net = nets.get(0);
-            }
-            //Instantiate locations.
-            CountryDao countryDao = mDb.countryDao();
-            RegionDao regionDao = mDb.regionDao();
-            CityDao cityDao = mDb.cityDao();
-            if (net != null) {
-                //Let's instantiate the location fields!
-                if (net.networkClass) {
-                    //We need to instantiate from location.
-                    net.fromLocation.from_city = cityDao.getCity(net.fromLocation.from_city_id).getName();
-                    net.fromLocation.from_region = regionDao.getRegion(net.fromLocation.from_region_id).getName();
-                    net.fromLocation.from_country = countryDao.getCountry(net.fromLocation.from_country_id).getName();
+            List<DatabaseNetwork> nets = netDao.getNetwork(id);
+
+            if (nets == null || nets.size() == 0 || nets.get(0) == null) {
+                return new NetworkResponse<>(true);
+            } else {
+                DatabaseNetwork dn = nets.get(0);
+
+                Place near = locationToPlace(dn.nearLocation);
+
+                if (dn.isLanguageBased()) {
+                    LanguageDao langDao = mDb.languageDao();
+                    Language lang =langDao.getLanguage(dn.languageId);
+                    Network net = new Network(near, lang, id);
+                    return new NetworkResponse<>(net);
+                } else {
+                    Place from = locationToPlace(dn.fromLocation);
+                    Network net = new Network(near, from, id);
+                    return new NetworkResponse<>(net);
                 }
-                net.nearLocation.near_city = cityDao.getCity(net.nearLocation.near_city_id).getName();
-                net.nearLocation.near_region = regionDao.getRegion(net.nearLocation.near_region_id).getName();
-                net.nearLocation.near_country = countryDao.getCountry(net.nearLocation.near_country_id).getName();
             }
-            return new NetworkResponse<>(net == null, net);
+        }
+
+        private static Place locationToPlace(Location loc) {
+            CityDao cityDao = mDb.cityDao();
+            RegionDao regionDao = mDb.regionDao();
+            CountryDao countryDao = mDb.countryDao();
+
+            Place place;
+            // TODO: Is this right? If so, DatabaseLocation only really needs to store type and ID
+            if (loc.getType() == Location.CITY) {
+                place = cityDao.getCity(loc.getCityId());
+            } else if (loc.getType() == Location.REGION) {
+                place = regionDao.getRegion(loc.getRegionId());
+            } else {
+                place = countryDao.getCountry(loc.getCountryId());
+            }
+
+            return place;
         }
 
         static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> networkPosts(long id) {
