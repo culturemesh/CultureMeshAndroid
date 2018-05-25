@@ -51,4 +51,13 @@ public class Network implements Serializable {
     public boolean isLocationBased() {
         return ! isLanguageBased;
     }
+
+    public DatabaseNetwork getDatabaseNetwork() {
+        if (isLanguageBased()) {
+            return new DatabaseNetwork(nearLocation.getNearLocation(), language.language_id, id);
+        } else {
+            return new DatabaseNetwork(nearLocation.getNearLocation(),
+                    fromLocation.getFromLocation(), id);
+        }
+    }
 }
