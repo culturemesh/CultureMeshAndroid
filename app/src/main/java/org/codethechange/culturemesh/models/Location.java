@@ -138,6 +138,24 @@ public class Location implements Serializable {
     }
 
     /**
+     * Transform a {@link Location} into a {@link NearLocation}
+     * @return A {@link NearLocation} with the same IDs as the {@link Location} object whose method
+     * was called
+     */
+    public NearLocation getNearLocation() {
+        return new NearLocation(cityId, regionId, countryId);
+    }
+
+    /**
+     * Transform a {@link Location} into a {@link FromLocation}
+     * @return A {@link FromLocation} with the same IDs as the {@link Location} object whose method
+     * was called
+     */
+    public FromLocation getFromLocation() {
+        return new FromLocation(cityId, regionId, countryId);
+    }
+
+    /**
      * Find the ID that should be used as the {@code PrimaryKey} for a database. It is the ID of the
      * most specific geographical descriptor with an ID that is not {@code NOWHERE}.
      * <strong>WARNING: The returned ID is NOT guaranteed to be unique</strong>
