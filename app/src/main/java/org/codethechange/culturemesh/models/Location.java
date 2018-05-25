@@ -22,7 +22,7 @@ import java.io.Serializable;
  *                    /            \
  *                   /              \
  *          Place (Abstract)    DatabaseLocation (Abstract)
- *           (Full Info)         (IDs, names, population)
+ *           (Full Info)                   (IDs)
  *             /  |  \                   /      \
  *            /   |   \           NearLocation  FromLocation
  *       City  Region  Country  (Wrappers for DatabaseLocation)
