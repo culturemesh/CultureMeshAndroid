@@ -895,11 +895,6 @@ class API {
             NetworkResponse<Network> resp = new NetworkResponse<>(n == null, n, R.string.noNetworkExist);
             return new NetworkResponse<>(n);
         }
-
-        static NetworkResponse<FromLocation> PlaceToFromLocation(Place place) {
-            // TODO: Convert Place to a FromLocation (probably by parsing JSON)
-            return new NetworkResponse<>(new FromLocation(1,1,1));
-        }
     }
 
     static class Post {
