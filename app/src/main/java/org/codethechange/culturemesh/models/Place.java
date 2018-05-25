@@ -8,7 +8,6 @@ import kotlin.internal.HidesMembers;
 
 /**
  * Created by Drew Gregory on 2/23/18.
- *
  * This is the superclass for cities, regions, and countries.
  */
 @Entity
