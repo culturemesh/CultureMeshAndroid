@@ -107,4 +107,13 @@ public class Region extends Place {
     public String getName() {
         return regionName;
     }
+
+    /**
+     * Represent the object as a string suitable for debugging, but not for display to user.
+     * @return String representation of the form {@code Class[var=value, var=value, var=value, ...]}
+     */
+    public String toString() {
+        return "Region[regionName=" + regionName + ", countryName=" + countryName +
+                ", super=" + super.toString() + "]";
+    }
 }

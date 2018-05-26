@@ -164,4 +164,13 @@ public class City extends Place {
     public String getName() {
         return cityName;
     }
+
+    /**
+     * Represent the object as a string suitable for debugging, but not for display to user.
+     * @return String representation of the form {@code Class[var=value, var=value, var=value, ...]}
+     */
+    public String toString() {
+        return "City[cityName=" + cityName + ", regionName=" + regionName + ", countryName=" +
+                countryName + ", super=" + super.toString() + "]";
+    }
 }
