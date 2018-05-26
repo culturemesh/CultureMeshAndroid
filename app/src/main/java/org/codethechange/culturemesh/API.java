@@ -217,7 +217,7 @@ class API {
                 "      \"network_class\": 0,\n" +
                 "      \"date_added\": \"1995-11-23 15:31:51\",\n" +
                 "      \"img_link\": \"img2.png\"\n" +
-                "    }\n" +
+                "    },\n" +
                 "\n" +
                 "    {\n" +
                 "      \"id\": 2,\n" +
