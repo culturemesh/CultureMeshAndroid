@@ -478,13 +478,13 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                 //Manipulate string of number to have magnitude suffix (K,M,etc.)
                 population.setText(FormatManager.abbreviateNumber(wrapper.netUserIds.length));
                 //Update from location/language
-                if (network.networkClass) {
-                    fromLocation.setText(network.fromLocation.shortName());
+                if (network.isLocationBased()) {
+                    fromLocation.setText(network.fromLocation.getListableName());
                 } else {
                     fromLocation.setText(network.language.name);
                 }
                 //Update near location
-                nearLocation.setText(network.nearLocation.shortName());
+                nearLocation.setText(network.nearLocation.getListableName());
                 View.OnClickListener showUsersListener = new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

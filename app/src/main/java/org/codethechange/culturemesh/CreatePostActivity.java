@@ -190,15 +190,15 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
         protected void onPostExecute(Network network) {
             //Update text with network name.
             if (network != null) {
-                if (network.networkClass) {
+                if (network.isLocationBased()) {
                     networkLabel.setText(getResources().getString(R.string.from) + " " +
-                            network.fromLocation.shortName() + " " +
+                            network.fromLocation.getListableName() + " " +
                             getResources().getString(R.string.near) + " " +
-                            network.nearLocation.shortName());
+                            network.nearLocation.getListableName());
                 } else {
                     networkLabel.setText(network.language.toString() + " " +
                             getResources().getString(R.string.speakers_in).toString() + " " +
-                            network.nearLocation.shortName());
+                            network.nearLocation.getListableName());
                 }
             }
             API.closeDatabase();
