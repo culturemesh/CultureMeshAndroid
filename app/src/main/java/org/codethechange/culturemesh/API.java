@@ -38,20 +38,29 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+TODO: USE ALARMS FOR UPDATING DATA ON SUBSCRIBED NETWORKS
+TODO: Figure out how we can handle trying to update data.
+TODO: Figure out alternative to id's other than longs and ints, which cannot represent all numbers. (Maybe just use strings?)
+     - Perhaps check if it comes from subscribed network, if not do network request instead of cache?
+ */
+
 /**
- * Created by Drew Gregory on 11/14/17.
+ * This API serves as the interface between the rest of the app and both the local database and the
+ * CultureMesh servers. When another part of the app needs to request information, it calls API
+ * methods to obtain it. Similarly, API methods should be used to store, send, and update
+ * information. The API then handles searching local caches for the information, requesting it from
+ * the CultureMesh servers, and updating the local cache. The local cache allows for offline access
+ * to limited information.
+ *
+ * For simplicity, we store the id's of other model objects in the database, not the objects
+ * themselves. Thus, when we return these objects, we need to instantiate them with the methods
+ * provided in this class.
  *
  * IMPORTANT: If you want to use this class in your activity, make sure you run API.loadAppDatabase()
  * at the beginning of onPreExecute()/doInBackground(), and API.closeDatabase() in onPostExecute().
  * The app will crash otherwise.
- *
- *
- * TODO: USE ALARMS FOR UPDATING DATA ON SUBSCRIBED NETWORKS
- * TODO: Figure out how we can handle trying to update data.
- * TODO: Figure out alternative to id's other than longs and ints, which cannot represent all numbers. (Maybe just use strings?)
- *      - Perhaps check if it comes from subscribed network, if not do network request instead of cache?
  */
-
 class API {
     static final String SETTINGS_IDENTIFIER = "acmsi";
     static final String PERSONAL_NETWORKS = "pernet";
@@ -65,10 +74,9 @@ class API {
     static int reqCounter;
 
 
-
     /**
-     *This next section is code that parses JSON dummy data and adds it to the database. We can reuse
-     * some of this code later.
+     * Add users to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console.
      */
     static void addUsers(){
         String rawDummy = "\n" +
@@ -165,12 +173,19 @@ class API {
                         userJSON.getString("about_me"));
                 uDAo.addUser(user);
             }
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Add networks to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console. The JSON is split apart into the JSON
+     * fragments for each city. Each of those JSONs are then passed to a {@link City}
+     * constructor (specifically {@link DatabaseNetwork#DatabaseNetwork(JSONObject)}), which
+     * extracts the necessary information and initializes itself. Those objects are then added to
+     * the database via {@link NetworkDao}.
+     */
     static void addNetworks() {
         String rawDummy = "[\n" +
                 "    {\n" +
@@ -255,6 +270,14 @@ class API {
         }
     }
 
+    /**
+     * Add regions to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console. The JSON is split apart into the JSON
+     * fragments for each region. Each of those JSONs are then passed to a {@link Region}
+     * constructor (specifically {@link Region#Region(JSONObject)}), which extracts the necessary
+     * information and initializes itself. Those objects are then added to the database via
+     * {@link RegionDao}.
+     */
     static void addRegions(){
         String rawDummy = "[\n" +
                 "  {\n" +
@@ -309,9 +332,16 @@ class API {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Add cities to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console. The JSON is split apart into the JSON
+     * fragments for each city. Each of those JSONs are then passed to a {@link City}
+     * constructor (specifically {@link City#City(JSONObject)}), which extracts the necessary
+     * information and initializes itself. Those objects are then added to the database via
+     * {@link CityDao}.
+     */
     static void addCities() {
         String rawDummy = "[\n" +
                 "  {\n" +
@@ -406,6 +436,14 @@ class API {
         }
     }
 
+    /**
+     * Add countries to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console. The JSON is split apart into the JSON
+     * fragments for each country. Each of those JSONs are then passed to a {@link Country}
+     * constructor (specifically {@link Country#Country(JSONObject)}), which extracts the necessary
+     * information and initializes itself. Those objects are then added to the database via
+     * {@link CountryDao}.
+     */
     static void addCountries() {
         String rawDummy = "[\n" +
                 "  {\n" +
@@ -440,6 +478,12 @@ class API {
         }
     }
 
+    /**
+     * Add posts to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console. The JSON is interpreted, and its values
+     * are used to instantiate {@link Post} objects. Those objects are then added to the database via
+     * {@link PostDao}.
+     */
     static void addPosts(){
         String rawDummy = "[\n" +
                 "  {\n" +
@@ -515,6 +559,12 @@ class API {
         }
     }
 
+    /**
+     * Add events to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console. The JSON is interpreted, and its values
+     * are used to instantiate {@link Event} objects. Those objects are then added to the database via
+     * {@link EventDao}.
+     */
     static void addEvents() {
         String rawDummy = "[\n" +
                 "  {\n" +
@@ -597,6 +647,10 @@ class API {
         }
     }
 
+    /**
+     * Store user subscriptions to networks in the database by adding {@link NetworkSubscription}
+     * objects to the {@link NetworkSubscriptionDao}
+     */
     static void subscribeUsers() {
         NetworkSubscription networkSubscription1 = new NetworkSubscription(3,1);
         NetworkSubscription networkSubscription2 = new NetworkSubscription(1,1);
@@ -608,6 +662,12 @@ class API {
                 networkSubscription4, networkSubscription5);
     }
 
+    /**
+     * Add replies to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console. The JSON is interpreted, and its values
+     * are used to instantiate {@link PostReply} objects. Those objects are then added to the database via
+     * {@link PostReplyDao}.
+     */
     static void addReplies() {
         String rawDummy = "[\n" +
                 "  {\n" +
@@ -650,10 +710,12 @@ class API {
         }
     }
 
+    // TODO: These two methods seem really redundant. Why not have instantiatePosts use instantiatePost?
     /**
-     * For simplicity, we store the id's of other model objects in the database, not the objects
-     * themselves. Thus, when we return these objects, we need to instantiate them.
-     * @param posts
+     * Instantiates the posts in the provided list. Instantiation is done by getting
+     * the author of each post as a User object via an API call and then setting the post's author
+     * to that object.
+     * @param posts Posts to instantiate
      */
     static void instantiatePosts(List<org.codethechange.culturemesh.models.Post> posts) {
         for (org.codethechange.culturemesh.models.Post post : posts) {
@@ -663,9 +725,9 @@ class API {
     }
 
     /**
-     * For simplicity, we store the id's of other model objects in the database, not the objects
-     * themselves. Thus, when we return these objects, we need to instantiate them.
-     * @param post
+     * Instantiates the provided post by getting the author from the author ID as a {@link User}
+     * object and storing that in {@link org.codethechange.culturemesh.models.Post#author}
+     * @param post Post to instantiate
      */
     static void instantiatePost(org.codethechange.culturemesh.models.Post post) {
             //Get the user
@@ -673,9 +735,9 @@ class API {
     }
 
     /**
-     * For simplicity, we store the id's of other model objects in the database, not the objects
-     * themselves. Thus, when we return these objects, we need to instantiate them.
-     * @param comments List of PostReplies with which we will get comments for.
+     * Instantiates the {@link PostReply} objects in the provided list by getting the authors
+     * of each comment and storing it in {@link PostReply#author}
+     * @param comments List of PostReplies with which we will get comment authors for
      */
     static void instantiatePostReplies(List<PostReply> comments) {
         for (PostReply comment : comments) {
@@ -684,13 +746,19 @@ class API {
         }
     }
 
+    /**
+     * The protocol for GET requests is as follows...
+     *      1. Check if cache has relevant data. If so, return it.
+     *      2. Send network request to update data.
+     */
     static class Get {
-        /**
-         * The protocol for GET requests is as follows...
-         * 1. Check if cache has relevant data. If so, return it.
-         * 2. Send network request to update data.
-         */
 
+        /**
+         * Get a {@link User} object from it's ID
+         * @param id ID of user to find
+         * @return If such a user was found, it will be the payload. Otherwise, the request will be
+         * marked as failed.
+         */
         static NetworkResponse<User> user(long id) {
             UserDao uDao = mDb.userDao();
             User user = uDao.getUser(id);
@@ -698,12 +766,19 @@ class API {
             return new NetworkResponse<>(user == null, user);
         }
 
+        /**
+         * Get the networks a user belongs to by searching all subscriptions in
+         * {@link NetworkSubscriptionDao} and then getting {@link Network} objects for each ID found
+         * in those subscriptions.
+         * @param id ID of {@link User} whose networks are being requested
+         * @return List of {@link Network}s the user is in
+         */
         static NetworkResponse<ArrayList<Network>> userNetworks(long id) {
             //TODO: Send network request for all subscriptions.
             NetworkSubscriptionDao nSDao  = mDb.networkSubscriptionDao();
             List<Long> netIds = nSDao.getUserNetworks(id);
             ArrayList<Network> nets = new ArrayList<>();
-            for (Long netId : netIds ) {
+            for (Long netId : netIds) {
                 NetworkResponse res = network(netId);
                 if (!res.fail()) {
                     nets.add((Network) res.getPayload());
@@ -712,9 +787,15 @@ class API {
             return new NetworkResponse<>(nets);
         }
 
-        /*
-            When will we ever use this? Perhaps viewing a user profile?
+        /**
+         * Get the {@link org.codethechange.culturemesh.models.Post}s a {@link User} has made. This
+         * is done by asking {@link PostDao} for all posts with the user's ID, as performed by
+         * {@link PostDao#getUserPosts(long)}.
+         * @param id ID of the {@link User} whose {@link org.codethechange.culturemesh.models.Post}s
+         *           are being requested
+         * @return List of the {@link org.codethechange.culturemesh.models.Post}s the user has made
          */
+        // TODO: When will we ever use this? Perhaps viewing a user profile?
         static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> userPosts(long id) {
             PostDao pDao = mDb.postDao();
             List<org.codethechange.culturemesh.models.Post> posts = pDao.getUserPosts(id);
@@ -722,6 +803,14 @@ class API {
             return new NetworkResponse<>(posts);
         }
 
+        /**
+         * Get the {@link Event}s a {@link User} is subscribed to. This is done by searching for
+         * {@link EventSubscription}s with the user's ID (via
+         * {@link EventSubscriptionDao#getUserEventSubscriptions(long)}) and then inflating each
+         * event from it's ID into a full {@link Event} object using {@link API.Get#event(long)}.
+         * @param id ID of the {@link User} whose events are being searched for
+         * @return List of {@link Event}s to which the user is subscribed
+         */
         static NetworkResponse<ArrayList<Event>> userEvents(long id) {
             //TODO: Check for event subscriptions with network request.
             EventSubscriptionDao eSDao = mDb.eventSubscriptionDao();
