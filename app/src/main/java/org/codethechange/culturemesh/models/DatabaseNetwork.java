@@ -106,6 +106,8 @@ public class DatabaseNetwork {
         JSONObject nearJSON = json.getJSONObject("location_cur");
         nearLocation = new NearLocation(nearJSON);
 
+        id = json.getLong("id");
+
         isLanguageBased = json.getInt("network_class") == 0;
         if (isLanguageBased) {
             JSONObject langJSON = json.getJSONObject("language_origin");
