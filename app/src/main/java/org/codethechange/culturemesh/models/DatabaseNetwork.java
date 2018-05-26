@@ -4,6 +4,9 @@ import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * This class is solely for storing the bare, ID-only form of a network in the database. After
  * being retrieved from the database or received from a network request, it should immediately be
@@ -76,6 +79,34 @@ public class DatabaseNetwork {
         this.nearLocation = nearLocation;
         isLanguageBased = false;
         this.id = id;
+    }
+
+    /**
+     * Initialize instance fields with the data in the provided JSON. The following keys are
+     * mandatory and used: {@code location_cur}, whose value is expected to be a JSON describing
+     * a {@link NearLocation} object and can be passed to
+     * {@link NearLocation#NearLocation(JSONObject)}, and {@code network_class}, whose value is
+     * expected to be either {@code 0}, indicating a location-based network, or {@code 1},
+     * indicating a language-based network. If the network is language-based, they key
+     * {@code language_origin} must exist with a value of a JSON object containing a key
+     * {@code id} whose value is the ID of a {@link Language}. If the network is location-based,
+     * the key {@code location_origin} must exist and have a value of a JSON object representing
+     * a {@link FromLocation} that can be passed to {@link FromLocation#FromLocation(JSONObject)}.
+     * @param json JSON object describing the network in terms of IDs
+     * @throws JSONException May be thrown in response to improperly formatted JSON
+     */
+    public DatabaseNetwork(JSONObject json) throws JSONException {
+        JSONObject nearJSON = json.getJSONObject("location_cur");
+        nearLocation = new NearLocation(nearJSON);
+
+        isLanguageBased = json.getInt("network_class") == 0;
+        if (isLanguageBased) {
+            JSONObject langJSON = json.getJSONObject("language_origin");
+            languageId = langJSON.getLong("id");
+        } else {
+            JSONObject fromJSON = json.getJSONObject("location_origin");
+            fromLocation = new FromLocation(fromJSON);
+        }
     }
 
     /**
