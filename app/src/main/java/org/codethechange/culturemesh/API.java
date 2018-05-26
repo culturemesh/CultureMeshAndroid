@@ -812,10 +812,12 @@ class API {
             org.codethechange.culturemesh.models.Post post = pDao.getPost((int) id);
             instantiatePost(post);*/
             final RequestQueue queue = Volley.newRequestQueue(context);
+            queue.start();
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, "https://www.culturemesh.com/api-dev/v1/post/100?count=3&key=2YoMFGGgKlmzrOd3qCSXiSicCvgEz0Jo",
                     null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject res) {
+                    Log.i("NetReq","Made in first onResponse");
                     org.codethechange.culturemesh.models.Post post = null;
                     try {
                         post = new org.codethechange.culturemesh.models.Post(res.getInt("id"), res.getInt("id_user"),
@@ -828,6 +830,7 @@ class API {
                                 null, new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject res) {
+                                Log.i("NetReq","Made in second onResponse");
                                 try {
                                     finalPost.author = new User(res.getInt("id"),
                                             res.getString("first_name"),
@@ -858,6 +861,7 @@ class API {
                         Log.i("Req error", "we're in error listener.");
                     }
             });
+            queue.add(req);
         }
 
         static NetworkResponse<Event> event(long id) {

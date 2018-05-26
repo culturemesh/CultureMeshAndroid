@@ -191,72 +191,28 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         //time to navigate to this activity with an event.
         Log.i("Before start the queue", "...");
         //TODO: Commented out AsyncTask: new loadPostReplies().execute(postID);
-        final RequestQueue queue = Volley.newRequestQueue(this);
-        JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, "https://www.culturemesh.com/api-dev/v1/post/100?count=3&key=2YoMFGGgKlmzrOd3qCSXiSicCvgEz0Jo",
-                null, new Response.Listener<JSONObject>() {
+        API.Get.post(getApplicationContext(), postID, new Response.Listener<Post>() {
             @Override
-            public void onResponse(JSONObject res) {
-
-                Post post = null;
-                try {
-                    post = new Post(res.getInt("id"), res.getInt("id_user"),
-                            res.getInt("id_network"), res.getString("post_text"),
-                            res.getString("img_link"), res.getString("vid_link"),
-                            res.getString("post_date"));
-                    // Now, get author.
-                    final Post finalPost = post;
-                    JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET, "https://www.culturemesh.com/api-dev/v1/user/54?key=2YoMFGGgKlmzrOd3qCSXiSicCvgEz0Jo",
-                            null, new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject res) {
-                            try {
-                                finalPost.author = new User(res.getInt("id"),
-                                        res.getString("first_name"),
-                                        res.getString("last_name"),
-                                        res.getString("email"), res.getString("username"),
-                                        "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
-                                        res.getString("about_me"));
-                                String name = finalPost.getAuthor().getFirstName() + " " + finalPost.getAuthor().getLastName();
-                                personName.setText(name);
-                                content.setText(finalPost.getContent());
-                                postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
-                                timestamp.setText(finalPost.getDatePosted());
-                                username.setText(finalPost.getAuthor().getUsername());
-                                if (finalPost.getImageLink() != null || finalPost.getVideoLink() != null ) {
-                                    //TODO: Figure out how to display videos
-                                    //TODO: Figure out format for multiple pictures. Assuming separated by commas.
-                                    String[] links = finalPost.getImageLink().split(",");
-                                    for (int j = 0;  j < links.length; j++) {
-                                        if (links[j] != null && links[j].length() > 0)
-                                            Picasso.with(images[j].getContext()).load(links[j]).into(images[j]);
-                                    }
-                                }
-                                Picasso.with(personPhoto.getContext()).load(finalPost.getAuthor().getImgURL()).
-                                        into(personPhoto);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.i("Req error", "we're in error listener.");
-                        }
-                    });
-                    queue.add(authReq);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.i("THIS HAPPENED", "oops");
+            public void onResponse(Post response) {
+                String name = response.getAuthor().getFirstName() + " " + response.getAuthor().getLastName();
+                personName.setText(name);
+                content.setText(response.getContent());
+                postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
+                timestamp.setText(response.getDatePosted());
+                username.setText(response.getAuthor().getUsername());
+                if (response.getImageLink() != null || response.getVideoLink() != null ) {
+                    //TODO: Figure out how to display videos
+                    //TODO: Figure out format for multiple pictures. Assuming separated by commas.
+                    String[] links = response.getImageLink().split(",");
+                    for (int j = 0;  j < links.length; j++) {
+                        if (links[j] != null && links[j].length() > 0)
+                            Picasso.with(images[j].getContext()).load(links[j]).into(images[j]);
+                    }
                 }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.i("Req error", "we're in error listener.");
+                Picasso.with(personPhoto.getContext()).load(response.getAuthor().getImgURL()).
+                        into(personPhoto);
             }
         });
-        queue.add(req);
-        Log.i("Should have startequeue", "...");
     }
 
     @Override
@@ -310,7 +266,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         protected PostBundleWrapper doInBackground(Long... longs) {
             API.loadAppDatabase(getApplicationContext());
             PostBundleWrapper wrapper = new PostBundleWrapper();
-            wrapper.post = API.Get.post(longs[0]).getPayload();
+            //wrapper.post = API.Get.post(longs[0]).getPayload();
             wrapper.replies = API.Get.postReplies(longs[0]).getPayload();
             API.closeDatabase();
             return wrapper;
