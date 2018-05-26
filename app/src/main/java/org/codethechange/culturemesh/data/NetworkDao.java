@@ -31,13 +31,13 @@ public interface NetworkDao {
     @Query("SELECT * FROM DatabaseNetwork WHERE id=:id")
     public List<DatabaseNetwork> getNetwork(long id);
 
-    @Query("SELECT * FROM DatabaseNetwork WHERE languageId=:langID AND cityId=:nearCityID AND " +
-            "regionId=:nearRegionID AND countryId=:nearCountryID")
+    @Query("SELECT * FROM DatabaseNetwork WHERE languageId=:langID AND near_city_id=:nearCityID AND " +
+            "near_region_id=:nearRegionID AND near_country_id=:nearCountryID")
     public DatabaseNetwork netFromLangAndHome(long langID, long nearCityID, long nearRegionID, long nearCountryID);
 
-    @Query("SELECT * FROM DatabaseNetwork WHERE cityId=:fromCityID AND regionId=:fromRegionID AND " +
-            "countryId=:fromCountryID AND cityId=:nearCityID AND " +
-            "regionId=:nearRegionID AND countryId=:nearCountryID")
+    @Query("SELECT * FROM DatabaseNetwork WHERE near_city_id=:fromCityID AND near_region_id=:fromRegionID AND " +
+            "near_country_id=:fromCountryID AND near_city_id=:nearCityID AND " +
+            "near_region_id=:nearRegionID AND near_country_id=:nearCountryID")
     public DatabaseNetwork netFromLocAndHome(long fromCityID, long fromRegionID, long fromCountryID,
                                      long nearCityID, long nearRegionID, long nearCountryID);
 }
