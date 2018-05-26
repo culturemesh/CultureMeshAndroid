@@ -819,7 +819,7 @@ class API {
          * We'll try to tackle that later.
          *
          * Link: https://developer.android.com/training/volley/simple
-         * 
+         *
          * Migration Workflow:
          * - Figure out how to do network request independent of Android client. First, look at the
          * swagger documentation by going to https://editor.swagger.io/ and copying and pasting
@@ -850,7 +850,7 @@ class API {
          */
         static void post(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<org.codethechange.culturemesh.models.Post>> callback) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET,
-                    "https://www.culturemesh.com/api-dev/v1/post/" + id + "?key=" + Credentials.APIKey,
+                    "https://www.culturemesh.com/api-dev/v1/post/" + id + getCredentials(),
                     null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject res) {
@@ -864,7 +864,7 @@ class API {
                         // Now, get author.
                         final org.codethechange.culturemesh.models.Post finalPost = post;
                         JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET,
-                                "https://www.culturemesh.com/api-dev/v1/user/" + finalPost.userId +"?key=" + Credentials.APIKey,
+                                "https://www.culturemesh.com/api-dev/v1/user/" + finalPost.userId + getCredentials(),
                                 null, new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject res) {
@@ -1023,5 +1023,14 @@ class API {
             mDb.close();
             mDb = null;
         }
+    }
+
+    /**
+     * Use this method to append our credentials to our server requests. For now, we are using a
+     * static API key. In the future, we are going to want to pass session tokens.
+     * @return credentials string to be appended to request url as a param.
+     */
+    static String getCredentials(){
+        return "?key=" + Credentials.APIKey;
     }
 }
