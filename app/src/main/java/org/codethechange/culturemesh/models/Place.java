@@ -102,6 +102,13 @@ public abstract class Place extends Location implements Listable, Serializable {
     }
 
     /**
+     * Empty constructor for database use only. This should never be called by our code.
+     */
+    public Place() {
+
+    }
+
+    /**
      * Get the number of users (population) to display in conjunction with the location
      * @return Population of the location
      */

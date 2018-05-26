@@ -113,6 +113,13 @@ public class City extends Place {
     }
 
     /**
+     * Empty constructor for database use only. This should never be called by our code.
+     */
+    public City() {
+
+    }
+
+    /**
      * Return {@link City} object with fields initialized with provided parameters
      * For creating cities that are only missing the region descriptor
      * This unusual pseudo-constructor is required to avoid ambiguity between constructors

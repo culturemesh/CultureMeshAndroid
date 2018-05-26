@@ -51,6 +51,12 @@ public class Country extends Place {
     }
 
     /**
+     * Empty constructor for database use only. This should never be called by our code.
+     */
+    public Country() {}
+
+
+    /**
      * Get name of country, which is suitable for display in UI. Equivalent to
      * {@link Country#getName()}, but required to implement
      * {@link org.codethechange.culturemesh.Listable}

@@ -80,6 +80,13 @@ public class Region extends Place {
     }
 
     /**
+     * Empty constructor for database use only. This should never be called by our code.
+     */
+    public Region() {
+
+    }
+
+    /**
      * Get a name for the region that lists all available geographic descriptor names. For example,
      * {@code Washington, D.C.} would be expressed as {@code Washington, D.C., United States}, while
      * {@code San Francisco} would be expressed as {@code San Francisco, California, United States}.
