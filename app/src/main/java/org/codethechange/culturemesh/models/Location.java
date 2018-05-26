@@ -232,5 +232,14 @@ public class Location implements Serializable {
     public long getCityId() {
         return cityId;
     }
-}
 
+    /**
+     * Represent the object as a string suitable for debugging, but not for display to user.
+     * @return String representation of the form {@code Class[var=value, var=value, var=value, ...]}
+     */
+    @Override
+    public String toString() {
+        return "Location[cityId=" + cityId + ", regionId=" + regionId + ", countryId=" +
+                countryId + "]";
+    }
+}

@@ -132,4 +132,14 @@ public class DatabaseNetwork {
     public boolean isLocationBased() {
         return ! isLanguageBased;
     }
+
+    /**
+     * Represent the object as a string suitable for debugging, but not for display to user.
+     * @return String representation of the form {@code Class[var=value, var=value, var=value, ...]}
+     */
+    public String toString() {
+        return "DatabaseNetwork[id=" + id + ", nearLocation=" + nearLocation + ", fromLocation=" +
+                fromLocation + ", languageId=" + languageId + ", isLanguageBased=" + isLanguageBased +
+                "]";
+    }
 }
