@@ -1,4 +1,6 @@
 package org.codethechange.culturemesh.models;
+import android.arch.persistence.room.Ignore;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -48,8 +50,11 @@ public class Location implements Serializable {
      * They can be {@code private} because a plain {@code Location} object should not need to be
      * stored in the database.
      */
+    @Ignore
     public long countryId;
+    @Ignore
     public long regionId;
+    @Ignore
     public long cityId;
 
     /**
@@ -101,6 +106,9 @@ public class Location implements Serializable {
             this.countryId = json.getLong("country_id");
         }
     }
+
+    public Location() {}
+
 
     /**
      * Determine the type of location described by the JSON using the presence or absence of the

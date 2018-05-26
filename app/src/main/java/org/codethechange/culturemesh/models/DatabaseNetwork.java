@@ -55,6 +55,10 @@ public class DatabaseNetwork {
      */
     public boolean isLanguageBased;
 
+    public DatabaseNetwork() {
+
+    }
+
     /**
      * Create a new {@link DatabaseNetwork} for a network of people who come from the same area
      * @param nearLocation Where the network's members currently reside

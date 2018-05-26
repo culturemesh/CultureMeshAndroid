@@ -32,4 +32,9 @@ public abstract class DatabaseLocation extends Location {
     public DatabaseLocation(JSONObject json) throws JSONException {
         super(json);
     }
+
+    public DatabaseLocation() {
+
+    }
+
 }

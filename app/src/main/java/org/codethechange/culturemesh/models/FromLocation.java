@@ -40,6 +40,10 @@ public class FromLocation extends DatabaseLocation {
         initialize();
     }
 
+    public FromLocation() {
+
+    }
+
     /**
      * Initialize this class's instance fields based on those provided and those from superclass
      * methods. This is what keeps the instance fields in sync with those of Location.
