@@ -208,6 +208,8 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
          * the new onPostExecute() for ASync Tasks.
          * Notice that we now pass the Activity's RequestQueue for EVERY method call as the first
          * parameter. I made the id # 100 only so you can see a valid post id (1 is null). It should be postID.
+         * Also notice that we are not handling caching or working with the database AT ALL.
+         * We'll try to tackle that later.
          *
          * Migration Workflow:
          * - Figure out how to do network request independent of Android client. First, look at the
@@ -215,13 +217,27 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
          * the code from https://github.com/alanefl/culturemesh-api/blob/master/spec_swagger.yaml.
          * Notice that you will have to prefix each of your endpoints with "https://www.culturemesh.com/api-dev/v1"
          * Also notice that you will have to suffix each of your endpoints with a key parameter:
-         * "key=" + Credentials.APIKey
+         * "key=" + Credentials.APIKey (off of source control, check Slack channel for file to
+         * manually import into your project)
          * - Test that you can do the request properly on your own. For most GET requests, you can
          * test within your own browser, or you can Postman [https://www.getpostman.com/]
          * (which I personally recommend, esp. if you need a JSON request body i.e. POST requests)
          * - Write the new API method with this signature:
          * API.[GET/POST/PUT].[method_name] ([RequestQueue], [original params], [Response.Listener<NetworkResponse<[Object_You_Want_To_Return]>>])
-         * -
+         * - The general format will be making a request. They will either be a JsonObjectRequest
+         * (if you get an object returned from API) or JsonArrayRequest (if you get array of
+         * json objects returned from API). Follow this example for the parameters. The meat of the
+         * task will be in the Response.Listener<> parameter for the constructor.
+         * - In this listener, you will have to convert the JSON object into our Java objects. Make
+         * sure you handle errors with JSON formats. If you get stuck on this part, make sure your keys
+         * conform to the actual keys returned on your manual requests tests with Postman.
+         * - If the API returns an ERROR status code (somewhere in the 400's), the Response.ErrorListener()
+         * will be called. I still call the passed callback function, but set NetworkResponse's 'fail'
+         * param to true.
+         * - Sometimes you will need to have multiple requests. For example, we need to get user data
+         * for each post, but we only get user id's from the first post request. Thus, just nest
+         * another request inside the listener of the first one if you need data from the first to pass
+         * into the second (i.e. id_user from post to get user)
          */
 
         API.Get.post(queue, 100, new Response.Listener<NetworkResponse<Post>>() {
