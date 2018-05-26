@@ -55,6 +55,9 @@ public class DatabaseNetwork {
      */
     public boolean isLanguageBased;
 
+    /**
+     * Empty constructor for database use only. This should never be called by our code.
+     */
     public DatabaseNetwork() {
 
     }

@@ -33,6 +33,9 @@ public abstract class DatabaseLocation extends Location {
         super(json);
     }
 
+    /**
+     * Empty constructor for database use only. This should never be called by our code.
+     */
     public DatabaseLocation() {
 
     }

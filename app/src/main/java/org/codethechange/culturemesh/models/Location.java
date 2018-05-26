@@ -107,6 +107,9 @@ public class Location implements Serializable {
         }
     }
 
+    /**
+     * Empty constructor for database use only. This should never be called by our code.
+     */
     public Location() {}
 
 

@@ -40,6 +40,9 @@ public class NearLocation extends DatabaseLocation {
         initialize();
     }
 
+    /**
+     * Empty constructor for database use only. This should never be called by our code.
+     */
     public NearLocation() {
 
     }
