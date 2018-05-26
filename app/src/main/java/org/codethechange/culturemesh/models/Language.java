@@ -1,14 +1,11 @@
 package org.codethechange.culturemesh.models;
 
-import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
 import org.codethechange.culturemesh.Listable;
-import org.codethechange.culturemesh.Searchable;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 
 
 /**
@@ -16,7 +13,7 @@ import java.math.BigInteger;
  */
 
 @Entity
-public class Language implements Serializable, Listable, Searchable {
+public class Language implements Serializable, Listable {
     @PrimaryKey
     public long language_id;
 
@@ -36,10 +33,6 @@ public class Language implements Serializable, Listable, Searchable {
 
     public String toString() {
         return name;
-    }
-
-    public boolean matches(CharSequence constraint) {
-        return name.contains(constraint);
     }
 
     public long getNumUsers() {
