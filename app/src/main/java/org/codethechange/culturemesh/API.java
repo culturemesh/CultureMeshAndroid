@@ -4,6 +4,13 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
 import org.codethechange.culturemesh.data.CMDatabase;
 import org.codethechange.culturemesh.data.CityDao;
 import org.codethechange.culturemesh.data.CountryDao;
@@ -27,6 +34,7 @@ import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Place;
 import org.codethechange.culturemesh.models.Point;
+import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
 import org.codethechange.culturemesh.models.Region;
 import org.codethechange.culturemesh.models.User;
@@ -799,11 +807,57 @@ class API {
             return new NetworkResponse<>(users);
         }
 
-        static NetworkResponse<org.codethechange.culturemesh.models.Post> post(long id) {
-            PostDao pDao = mDb.postDao();
+        static void post(Context context, long id, final Response.Listener<org.codethechange.culturemesh.models.Post> callback) {
+            /*PostDao pDao = mDb.postDao();
             org.codethechange.culturemesh.models.Post post = pDao.getPost((int) id);
-            instantiatePost(post);
-            return new NetworkResponse<>(post == null, post);
+            instantiatePost(post);*/
+            final RequestQueue queue = Volley.newRequestQueue(context);
+            JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, "https://www.culturemesh.com/api-dev/v1/post/100?count=3&key=2YoMFGGgKlmzrOd3qCSXiSicCvgEz0Jo",
+                    null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject res) {
+                    org.codethechange.culturemesh.models.Post post = null;
+                    try {
+                        post = new org.codethechange.culturemesh.models.Post(res.getInt("id"), res.getInt("id_user"),
+                                res.getInt("id_network"), res.getString("post_text"),
+                                res.getString("img_link"), res.getString("vid_link"),
+                                res.getString("post_date"));
+                        // Now, get author.
+                        final org.codethechange.culturemesh.models.Post finalPost = post;
+                        JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET, "https://www.culturemesh.com/api-dev/v1/user/54?key=2YoMFGGgKlmzrOd3qCSXiSicCvgEz0Jo",
+                                null, new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject res) {
+                                try {
+                                    finalPost.author = new User(res.getInt("id"),
+                                            res.getString("first_name"),
+                                            res.getString("last_name"),
+                                            res.getString("email"), res.getString("username"),
+                                            "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
+                                            res.getString("about_me"));
+                                    callback.onResponse(finalPost);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.i("Req error", "we're in error listener.");
+                            }
+                        });
+                        queue.add(authReq);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.i("Req error", "we're in error listener.");
+                    }
+            });
         }
 
         static NetworkResponse<Event> event(long id) {

@@ -272,7 +272,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
             Log.i("Toggle","Toggle selected!");
             return true;
         }
-        //noinspection SimplifiableIfStatement
+        // noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }

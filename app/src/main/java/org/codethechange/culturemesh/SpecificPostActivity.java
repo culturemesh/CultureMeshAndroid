@@ -30,10 +30,22 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.Volley;
 import com.squareup.picasso.Picasso;
 
 import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
+import org.codethechange.culturemesh.models.User;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Comment;
 
 import java.util.Date;
@@ -69,6 +81,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         final long postID = intent.getLongExtra("postID", 0);
         final long networkID = intent.getLongExtra("networkID", 0);
         cv = findViewById(R.id.cv);
+        Log.i("Before start the queue", "...");
         personName = findViewById(R.id.person_name);
         username = findViewById(R.id.username);
         content = findViewById(R.id.content);
@@ -176,7 +189,74 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         });
         //For now, since I believe events cannot take comments, I don't think it is worth the user's
         //time to navigate to this activity with an event.
-        new loadPostReplies().execute(postID);
+        Log.i("Before start the queue", "...");
+        //TODO: Commented out AsyncTask: new loadPostReplies().execute(postID);
+        final RequestQueue queue = Volley.newRequestQueue(this);
+        JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, "https://www.culturemesh.com/api-dev/v1/post/100?count=3&key=2YoMFGGgKlmzrOd3qCSXiSicCvgEz0Jo",
+                null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject res) {
+
+                Post post = null;
+                try {
+                    post = new Post(res.getInt("id"), res.getInt("id_user"),
+                            res.getInt("id_network"), res.getString("post_text"),
+                            res.getString("img_link"), res.getString("vid_link"),
+                            res.getString("post_date"));
+                    // Now, get author.
+                    final Post finalPost = post;
+                    JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET, "https://www.culturemesh.com/api-dev/v1/user/54?key=2YoMFGGgKlmzrOd3qCSXiSicCvgEz0Jo",
+                            null, new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject res) {
+                            try {
+                                finalPost.author = new User(res.getInt("id"),
+                                        res.getString("first_name"),
+                                        res.getString("last_name"),
+                                        res.getString("email"), res.getString("username"),
+                                        "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
+                                        res.getString("about_me"));
+                                String name = finalPost.getAuthor().getFirstName() + " " + finalPost.getAuthor().getLastName();
+                                personName.setText(name);
+                                content.setText(finalPost.getContent());
+                                postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
+                                timestamp.setText(finalPost.getDatePosted());
+                                username.setText(finalPost.getAuthor().getUsername());
+                                if (finalPost.getImageLink() != null || finalPost.getVideoLink() != null ) {
+                                    //TODO: Figure out how to display videos
+                                    //TODO: Figure out format for multiple pictures. Assuming separated by commas.
+                                    String[] links = finalPost.getImageLink().split(",");
+                                    for (int j = 0;  j < links.length; j++) {
+                                        if (links[j] != null && links[j].length() > 0)
+                                            Picasso.with(images[j].getContext()).load(links[j]).into(images[j]);
+                                    }
+                                }
+                                Picasso.with(personPhoto.getContext()).load(finalPost.getAuthor().getImgURL()).
+                                        into(personPhoto);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.i("Req error", "we're in error listener.");
+                        }
+                    });
+                    queue.add(authReq);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.i("THIS HAPPENED", "oops");
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.i("Req error", "we're in error listener.");
+            }
+        });
+        queue.add(req);
+        Log.i("Should have startequeue", "...");
     }
 
     @Override
