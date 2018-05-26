@@ -818,6 +818,8 @@ class API {
          * Also notice that we are not handling caching or working with the database AT ALL.
          * We'll try to tackle that later.
          *
+         * Link: https://developer.android.com/training/volley/simple
+         * 
          * Migration Workflow:
          * - Figure out how to do network request independent of Android client. First, look at the
          * swagger documentation by going to https://editor.swagger.io/ and copying and pasting

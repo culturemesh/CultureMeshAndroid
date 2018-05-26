@@ -211,6 +211,8 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
          * Also notice that we are not handling caching or working with the database AT ALL.
          * We'll try to tackle that later.
          *
+         * Link: https://developer.android.com/training/volley/simple
+         *
          * Migration Workflow:
          * - Figure out how to do network request independent of Android client. First, look at the
          * swagger documentation by going to https://editor.swagger.io/ and copying and pasting
@@ -239,7 +241,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
          * another request inside the listener of the first one if you need data from the first to pass
          * into the second (i.e. id_user from post to get user)
          */
-
         API.Get.post(queue, 100, new Response.Listener<NetworkResponse<Post>>() {
             @Override
             public void onResponse(NetworkResponse<Post> response) {
