@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,7 +24,6 @@ import android.widget.SearchView;
 import static android.view.View.GONE;
 import java.util.List;
 
-import org.codethechange.culturemesh.models.FromLocation;
 import org.codethechange.culturemesh.models.Language;
 import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
@@ -35,7 +33,7 @@ public class FindNetworkActivity extends DrawerActivity {
 
     //TODO: Replace these with Location Objects.
     // TODO: Let user change their near location and setup appropriate API utilities to achieve this
-    static NearLocation nearLocation;
+    static Place near;
 
     public final int REQUEST_NEW_NEAR_LOCATION = 1;
 
@@ -100,12 +98,8 @@ public class FindNetworkActivity extends DrawerActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //TODO: Implement how I receive data. Replace dummy stuff with legit stuff.
-        long near_city_id = data.getLongExtra(ChooseNearLocationActivity.CHOSEN_CITY, -1);
-        long near_region_id = data.getLongExtra(ChooseNearLocationActivity.CHOSEN_REGION, -1);
-        long near_country_id = data.getLongExtra(ChooseNearLocationActivity.CHOSEN_COUNTRY, -1);
-
-        nearLocation = new NearLocation(near_city_id, near_region_id, near_country_id);
-        nearButton.setText(nearLocation.shortName());
+        near = (Place) data.getSerializableExtra(ChooseNearLocationActivity.CHOSEN_PLACE);
+        nearButton.setText(near.getListableName());
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -202,7 +196,7 @@ public class FindNetworkActivity extends DrawerActivity {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Place from = adapter.getItem(position);
-                    (new launchNetworkFromFromAndNear()).execute(new ProtoNetwork(from, nearLocation));
+                    (new launchNetworkFromFromAndNear()).execute(new Network(near, from, -1));
                 }
             });
             return rootView;
@@ -251,14 +245,14 @@ public class FindNetworkActivity extends DrawerActivity {
             }
         }
 
-        class launchNetworkFromFromAndNear extends AsyncTask<ProtoNetwork, Void, NetworkResponse<Network>> {
+        class launchNetworkFromFromAndNear extends AsyncTask<Network, Void, NetworkResponse<Network>> {
             @Override
-            protected NetworkResponse<Network> doInBackground(ProtoNetwork... networks) {
-                ProtoNetwork net = networks[0];
+            protected NetworkResponse<Network> doInBackground(Network... networks) {
+                Network net = networks[0];
                 API.loadAppDatabase(getContext());
                 // TODO: Handle Errors
-                FromLocation from = API.Get.PlaceToFromLocation(net.from).getPayload();
-                NetworkResponse<Network> response = API.Get.netFromFromAndNear(from, net.near);
+                NetworkResponse<Network> response = API.Get.netFromFromAndNear(
+                        net.fromLocation.getFromLocation(), net.nearLocation.getNearLocation());
                 API.closeDatabase();
                 return response;
             }
@@ -336,7 +330,7 @@ public class FindNetworkActivity extends DrawerActivity {
                     // TODO: If network doesn't exist, offer to create it
                     Language l = adapter.getItem(position);
                     // TODO: near should be the user's currently selected home network
-                    (new launchNetworkFromLangAndNear()).execute(new Network(nearLocation, l, -1));
+                    (new launchNetworkFromLangAndNear()).execute(new Network(near, l, -1));
                 }
             });
             return rootView;
@@ -389,7 +383,8 @@ public class FindNetworkActivity extends DrawerActivity {
             protected NetworkResponse<Network> doInBackground(Network... networks) {
                 Network net = networks[0];
                 API.loadAppDatabase(getContext());
-                NetworkResponse<Network> response = API.Get.netFromLangAndNear(net.language, net.nearLocation);
+                NetworkResponse<Network> response = API.Get.netFromLangAndNear(net.language,
+                        net.nearLocation.getNearLocation());
                 API.closeDatabase();
                 return response;
             }
