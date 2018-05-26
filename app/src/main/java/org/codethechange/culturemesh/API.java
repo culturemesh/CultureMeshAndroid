@@ -247,28 +247,12 @@ class API {
             JSONArray usersJSON = new JSONArray(rawDummy);
             for (int i = 0; i < usersJSON.length(); i++) {
                 JSONObject netJSON = usersJSON.getJSONObject(i);
-                Network network;
-                JSONObject nearLocObj = netJSON.getJSONObject("location_cur");
-                NearLocation nearLocation = new NearLocation(nearLocObj.getLong("city_id"),
-                        nearLocObj.getLong("region_id"), nearLocObj.getLong("country_id"));
-                if (netJSON.getInt("network_class") == 0) { //This means that it is a language?
-                    JSONObject langJSON = netJSON.getJSONObject("language_origin");
-                    Language lang = new Language(langJSON.getLong("id"),
-                            langJSON.getString("name"), langJSON.getInt("num_speakers"));
-                    network = new Network(nearLocation, lang, netJSON.getLong("id"));
-                } else {//Location network.
-                    JSONObject fromLocJSON = netJSON.getJSONObject("location_origin");
-                    FromLocation fromLoc = new FromLocation(fromLocJSON.getLong("city_id"),
-                            fromLocJSON.getLong("region_id"),fromLocJSON.getLong("country_id"));
-                    network = new Network(nearLocation,fromLoc, netJSON.getLong("id"));
-                }
-                nDAo.insertNetworks(network);
+                DatabaseNetwork dn = new DatabaseNetwork(netJSON);
+                nDAo.insertNetworks(dn);
             }
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
     }
 
     static void addRegions(){
@@ -761,38 +745,9 @@ class API {
                 return new NetworkResponse<>(true);
             } else {
                 DatabaseNetwork dn = nets.get(0);
-
-                Place near = locationToPlace(dn.nearLocation);
-
-                if (dn.isLanguageBased()) {
-                    LanguageDao langDao = mDb.languageDao();
-                    Language lang =langDao.getLanguage(dn.languageId);
-                    Network net = new Network(near, lang, id);
-                    return new NetworkResponse<>(net);
-                } else {
-                    Place from = locationToPlace(dn.fromLocation);
-                    Network net = new Network(near, from, id);
-                    return new NetworkResponse<>(net);
-                }
+                Network net = expandDatabaseNetwork(dn);
+                return new NetworkResponse<>(net);
             }
-        }
-
-        private static Place locationToPlace(Location loc) {
-            CityDao cityDao = mDb.cityDao();
-            RegionDao regionDao = mDb.regionDao();
-            CountryDao countryDao = mDb.countryDao();
-
-            Place place;
-            // TODO: Is this right? If so, DatabaseLocation only really needs to store type and ID
-            if (loc.getType() == Location.CITY) {
-                place = cityDao.getCity(loc.getCityId());
-            } else if (loc.getType() == Location.REGION) {
-                place = regionDao.getRegion(loc.getRegionId());
-            } else {
-                place = countryDao.getCountry(loc.getCountryId());
-            }
-
-            return place;
         }
 
         static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> networkPosts(long id) {
@@ -969,7 +924,39 @@ class API {
         static NetworkResponse event(Event event) {
             return new NetworkResponse();
         }
+    }
 
+    private static Network expandDatabaseNetwork(DatabaseNetwork dn) {
+        Place near = locationToPlace(dn.nearLocation);
+
+        if (dn.isLanguageBased()) {
+            LanguageDao langDao = mDb.languageDao();
+            Language lang =langDao.getLanguage(dn.languageId);
+            Network net = new Network(near, lang, dn.id);
+            return net;
+        } else {
+            Place from = locationToPlace(dn.fromLocation);
+            Network net = new Network(near, from, dn.id);
+            return net;
+        }
+    }
+
+    private static Place locationToPlace(Location loc) {
+        CityDao cityDao = mDb.cityDao();
+        RegionDao regionDao = mDb.regionDao();
+        CountryDao countryDao = mDb.countryDao();
+
+        Place place;
+        // TODO: Is this right? If so, DatabaseLocation only really needs to store type and ID
+        if (loc.getType() == Location.CITY) {
+            place = cityDao.getCity(loc.getCityId());
+        } else if (loc.getType() == Location.REGION) {
+            place = regionDao.getRegion(loc.getRegionId());
+        } else {
+            place = countryDao.getCountry(loc.getCountryId());
+        }
+
+        return place;
     }
 
     public static void loadAppDatabase(Context context) {
