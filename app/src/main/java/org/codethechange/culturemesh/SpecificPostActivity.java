@@ -69,6 +69,12 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
     FormatManager formatManager;
     SparseArray<ImageButton> toggleButtons;
     ProgressBar progressBar;
+    /**
+     * IMPORTANT: GUIDE FOR NETWORK REQUESTS
+     * Every activity will have its own RequestQueue that it will pass on to EVERY API method call.
+     * The RequestQueue handles all the dirty work of multithreading and dispatching. neat!
+     */
+    RequestQueue queue;
 
     private RecyclerView commentsRV;
     private LinearLayoutManager mLayoutManager;
@@ -81,7 +87,9 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         final long postID = intent.getLongExtra("postID", 0);
         final long networkID = intent.getLongExtra("networkID", 0);
         cv = findViewById(R.id.cv);
-        Log.i("Before start the queue", "...");
+        // IMPORTANT: GUIDE FOR NET REQ: Use Volley.newRequestQueue(getApplicationContext())
+        // for a quick and easy qay to instantiate RequestQueues.
+        queue = Volley.newRequestQueue(this);
         personName = findViewById(R.id.person_name);
         username = findViewById(R.id.username);
         content = findViewById(R.id.content);
@@ -189,28 +197,56 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         });
         //For now, since I believe events cannot take comments, I don't think it is worth the user's
         //time to navigate to this activity with an event.
-        Log.i("Before start the queue", "...");
-        //TODO: Commented out AsyncTask: new loadPostReplies().execute(postID);
-        API.Get.post(getApplicationContext(), postID, new Response.Listener<Post>() {
+        //we are loading the post this way!!
+        // Commented out AsyncTask: new loadPostReplies().execute(postID);
+        // TODO: Instead of lostPostReplies(), setup API.Get.postReplies() callback method.
+        /**
+         * IMPORTANT: GUIDE TO NETWORK REQUESTS
+         * EXAMPLE NETWORK REQUEST CALL -- IMPORTANT!!
+         * The format for API method calls will mimic more of a callback. We are basically
+         * abstracting out doInBackground in the API methods now. View the Response.Listener<> as
+         * the new onPostExecute() for ASync Tasks.
+         * Notice that we now pass the Activity's RequestQueue for EVERY method call as the first
+         * parameter. I made the id # 100 only so you can see a valid post id (1 is null). It should be postID.
+         *
+         * Migration Workflow:
+         * - Figure out how to do network request independent of Android client. First, look at the
+         * swagger documentation by going to https://editor.swagger.io/ and copying and pasting
+         * the code from https://github.com/alanefl/culturemesh-api/blob/master/spec_swagger.yaml.
+         * Notice that you will have to prefix each of your endpoints with "https://www.culturemesh.com/api-dev/v1"
+         * Also notice that you will have to suffix each of your endpoints with a key parameter:
+         * "key=" + Credentials.APIKey
+         * - Test that you can do the request properly on your own. For most GET requests, you can
+         * test within your own browser, or you can Postman [https://www.getpostman.com/]
+         * (which I personally recommend, esp. if you need a JSON request body i.e. POST requests)
+         * - Write the new API method with this signature:
+         * API.[GET/POST/PUT].[method_name] ([RequestQueue], [original params], [Response.Listener<NetworkResponse<[Object_You_Want_To_Return]>>])
+         * -
+         */
+
+        API.Get.post(queue, 100, new Response.Listener<NetworkResponse<Post>>() {
             @Override
-            public void onResponse(Post response) {
-                String name = response.getAuthor().getFirstName() + " " + response.getAuthor().getLastName();
-                personName.setText(name);
-                content.setText(response.getContent());
-                postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
-                timestamp.setText(response.getDatePosted());
-                username.setText(response.getAuthor().getUsername());
-                if (response.getImageLink() != null || response.getVideoLink() != null ) {
-                    //TODO: Figure out how to display videos
-                    //TODO: Figure out format for multiple pictures. Assuming separated by commas.
-                    String[] links = response.getImageLink().split(",");
-                    for (int j = 0;  j < links.length; j++) {
-                        if (links[j] != null && links[j].length() > 0)
-                            Picasso.with(images[j].getContext()).load(links[j]).into(images[j]);
+            public void onResponse(NetworkResponse<Post> response) {
+                if (!response.fail()) {
+                    Post post = response.getPayload();
+                    String name = post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName();
+                    personName.setText(name);
+                    content.setText(post.getContent());
+                    postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
+                    timestamp.setText(post.getDatePosted());
+                    username.setText(post.getAuthor().getUsername());
+                    if (post.getImageLink() != null || post.getVideoLink() != null ) {
+                        //TODO: Figure out how to display videos
+                        //TODO: Figure out format for multiple pictures. Assuming separated by commas.
+                        String[] links = post.getImageLink().split(",");
+                        for (int j = 0;  j < links.length; j++) {
+                            if (links[j] != null && links[j].length() > 0)
+                                Picasso.with(images[j].getContext()).load(links[j]).into(images[j]);
+                        }
                     }
+                    Picasso.with(personPhoto.getContext()).load(post.getAuthor().getImgURL()).
+                            into(personPhoto);
                 }
-                Picasso.with(personPhoto.getContext()).load(response.getAuthor().getImgURL()).
-                        into(personPhoto);
             }
         });
     }
@@ -407,6 +443,23 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                 closeEditTextView();
             }
         }
+    }
+
+    /**
+     * IMPORTANT: EXAMPLE GUIDE FOR NETWORK REQUESTS
+     * This ensures that we are canceling all network requests if the user is leaving this activity.
+     * We use a RequestFilter that accepts all requests (meaning it cancels all requests)
+     */
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (queue != null)
+            queue.cancelAll(new RequestQueue.RequestFilter() {
+                @Override
+                public boolean apply(Request<?> request) {
+                    return true;
+                }
+            });
     }
 }
 

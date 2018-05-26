@@ -807,38 +807,74 @@ class API {
             return new NetworkResponse<>(users);
         }
 
-        static void post(Context context, long id, final Response.Listener<org.codethechange.culturemesh.models.Post> callback) {
-            /*PostDao pDao = mDb.postDao();
-            org.codethechange.culturemesh.models.Post post = pDao.getPost((int) id);
-            instantiatePost(post);*/
-            final RequestQueue queue = Volley.newRequestQueue(context);
-            queue.start();
-            JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, "https://www.culturemesh.com/api-dev/v1/post/100?count=3&key=2YoMFGGgKlmzrOd3qCSXiSicCvgEz0Jo",
+        /**
+         * IMPORTANT: GUIDE TO NETWORK REQUESTS
+         * EXAMPLE NETWORK REQUEST CALL -- IMPORTANT!!
+         * The format for API method calls will mimic more of a callback. We are basically
+         * abstracting out doInBackground in the API methods now. View the Response.Listener<> as
+         * the new onPostExecute() for ASync Tasks.
+         * Notice that we now pass the Activity's RequestQueue for EVERY method call as the first
+         * parameter. I made the id # 100 only so you can see a valid post id (1 is null). It should be postID.
+         * Also notice that we are not handling caching or working with the database AT ALL.
+         * We'll try to tackle that later.
+         *
+         * Migration Workflow:
+         * - Figure out how to do network request independent of Android client. First, look at the
+         * swagger documentation by going to https://editor.swagger.io/ and copying and pasting
+         * the code from https://github.com/alanefl/culturemesh-api/blob/master/spec_swagger.yaml.
+         * Notice that you will have to prefix each of your endpoints with "https://www.culturemesh.com/api-dev/v1"
+         * Also notice that you will have to suffix each of your endpoints with a key parameter:
+         * "key=" + Credentials.APIKey (off of source control, check Slack channel for file to
+         * manually import into your project)
+         * - Test that you can do the request properly on your own. For most GET requests, you can
+         * test within your own browser, or you can Postman [https://www.getpostman.com/]
+         * (which I personally recommend, esp. if you need a JSON request body i.e. POST requests)
+         * - Write the new API method with this signature:
+         * API.[GET/POST/PUT].[method_name] ([RequestQueue], [original params], [Response.Listener<NetworkResponse<[Object_You_Want_To_Return]>>])
+         * - The general format will be making a request. They will either be a JsonObjectRequest
+         * (if you get an object returned from API) or JsonArrayRequest (if you get array of
+         * json objects returned from API). Follow this example for the parameters. The meat of the
+         * task will be in the Response.Listener<> parameter for the constructor.
+         * - In this listener, you will have to convert the JSON object into our Java objects. Make
+         * sure you handle errors with JSON formats. If you get stuck on this part, make sure your keys
+         * conform to the actual keys returned on your manual requests tests with Postman.
+         * - If the API returns an ERROR status code (somewhere in the 400's), the Response.ErrorListener()
+         * will be called. I still call the passed callback function, but set NetworkResponse's 'fail'
+         * param to true.
+         * - Sometimes you will need to have multiple requests. For example, we need to get user data
+         * for each post, but we only get user id's from the first post request. Thus, just nest
+         * another request inside the listener of the first one if you need data from the first to pass
+         * into the second (i.e. id_user from post to get user)
+         */
+        static void post(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<org.codethechange.culturemesh.models.Post>> callback) {
+            JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET,
+                    "https://www.culturemesh.com/api-dev/v1/post/" + id + "?key=" + Credentials.APIKey,
                     null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject res) {
-                    Log.i("NetReq","Made in first onResponse");
                     org.codethechange.culturemesh.models.Post post = null;
                     try {
+                        //Make post object out of JSON object.
                         post = new org.codethechange.culturemesh.models.Post(res.getInt("id"), res.getInt("id_user"),
                                 res.getInt("id_network"), res.getString("post_text"),
                                 res.getString("img_link"), res.getString("vid_link"),
                                 res.getString("post_date"));
                         // Now, get author.
                         final org.codethechange.culturemesh.models.Post finalPost = post;
-                        JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET, "https://www.culturemesh.com/api-dev/v1/user/54?key=2YoMFGGgKlmzrOd3qCSXiSicCvgEz0Jo",
+                        JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET,
+                                "https://www.culturemesh.com/api-dev/v1/user/" + finalPost.userId +"?key=" + Credentials.APIKey,
                                 null, new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject res) {
-                                Log.i("NetReq","Made in second onResponse");
                                 try {
+                                    //make User object out of user JSON.
                                     finalPost.author = new User(res.getInt("id"),
                                             res.getString("first_name"),
                                             res.getString("last_name"),
                                             res.getString("email"), res.getString("username"),
                                             "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
                                             res.getString("about_me"));
-                                    callback.onResponse(finalPost);
+                                    callback.onResponse(new NetworkResponse<org.codethechange.culturemesh.models.Post>(false, finalPost));
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -847,7 +883,7 @@ class API {
                         }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                Log.i("Req error", "we're in error listener.");
+                                callback.onResponse(new NetworkResponse<org.codethechange.culturemesh.models.Post>(true, null));
                             }
                         });
                         queue.add(authReq);
@@ -858,7 +894,7 @@ class API {
             }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.i("Req error", "we're in error listener.");
+                        callback.onResponse(new NetworkResponse<org.codethechange.culturemesh.models.Post>(true, null));
                     }
             });
             queue.add(req);
