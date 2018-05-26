@@ -17,6 +17,7 @@ import org.codethechange.culturemesh.data.CountryDao;
 import org.codethechange.culturemesh.data.EventDao;
 import org.codethechange.culturemesh.data.EventSubscription;
 import org.codethechange.culturemesh.data.EventSubscriptionDao;
+import org.codethechange.culturemesh.data.LanguageDao;
 import org.codethechange.culturemesh.data.NetworkDao;
 import org.codethechange.culturemesh.data.NetworkSubscription;
 import org.codethechange.culturemesh.data.NetworkSubscriptionDao;
@@ -26,6 +27,7 @@ import org.codethechange.culturemesh.data.RegionDao;
 import org.codethechange.culturemesh.data.UserDao;
 import org.codethechange.culturemesh.models.City;
 import org.codethechange.culturemesh.models.Country;
+import org.codethechange.culturemesh.models.DatabaseNetwork;
 import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FromLocation;
 import org.codethechange.culturemesh.models.Language;
@@ -45,18 +47,29 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+TODO: USE ALARMS FOR UPDATING DATA ON SUBSCRIBED NETWORKS
+TODO: Figure out how we can handle trying to update data.
+TODO: Figure out alternative to id's other than longs and ints, which cannot represent all numbers. (Maybe just use strings?)
+     - Perhaps check if it comes from subscribed network, if not do network request instead of cache?
+ */
+
 /**
- * Created by Drew Gregory on 11/14/17.
+ * This API serves as the interface between the rest of the app and both the local database and the
+ * CultureMesh servers. When another part of the app needs to request information, it calls API
+ * methods to obtain it. Similarly, API methods should be used to store, send, and update
+ * information. The API then handles searching local caches for the information, requesting it from
+ * the CultureMesh servers, and updating the local cache. The local cache allows for offline access
+ * to limited information.
+ *
+ * For simplicity, we store the id's of other model objects in the database, not the objects
+ * themselves. Thus, when we return these objects, we need to instantiate them with the methods
+ * provided in this class.
  *
  * IMPORTANT: If you want to use this class in your activity, make sure you run API.loadAppDatabase()
  * at the beginning of onPreExecute()/doInBackground(), and API.closeDatabase() in onPostExecute().
  * The app will crash otherwise.
  *
- *
- * TODO: USE ALARMS FOR UPDATING DATA ON SUBSCRIBED NETWORKS
- * TODO: Figure out how we can handle trying to update data.
- * TODO: Figure out alternative to id's other than longs and ints, which cannot represent all numbers. (Maybe just use strings?)
- *      - Perhaps check if it comes from subscribed network, if not do network request instead of cache?
  */
 
 class API {
@@ -72,10 +85,9 @@ class API {
     static int reqCounter;
 
 
-
     /**
-     *This next section is code that parses JSON dummy data and adds it to the database. We can reuse
-     * some of this code later.
+     * Add users to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console.
      */
     static void addUsers(){
         String rawDummy = "\n" +
@@ -172,12 +184,19 @@ class API {
                         userJSON.getString("about_me"));
                 uDAo.addUser(user);
             }
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Add networks to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console. The JSON is split apart into the JSON
+     * fragments for each city. Each of those JSONs are then passed to a {@link City}
+     * constructor (specifically {@link DatabaseNetwork#DatabaseNetwork(JSONObject)}), which
+     * extracts the necessary information and initializes itself. Those objects are then added to
+     * the database via {@link NetworkDao}.
+     */
     static void addNetworks() {
         String rawDummy = "[\n" +
                 "    {\n" +
@@ -224,6 +243,29 @@ class API {
                 "      \"network_class\": 0,\n" +
                 "      \"date_added\": \"1995-11-23 15:31:51\",\n" +
                 "      \"img_link\": \"img2.png\"\n" +
+                "    },\n" +
+                "\n" +
+                "    {\n" +
+                "      \"id\": 2,\n" +
+                "      \"location_cur\": {\n" +
+                "        \"country_id\": 2,\n" +
+                "        \"region_id\": null,\n" +
+                "        \"city_id\": null\n" +
+                "      },\n" +
+                "      \"location_origin\": {\n" +
+                "        \"country_id\": 1,\n" +
+                "        \"region_id\": null,\n" +
+                "        \"city_id\": 1\n" +
+                "      },\n" +
+                "      \"language_origin\": {\n" +
+                "        \"id\": 3,\n" +
+                "        \"name\": \"valarin\",\n" +
+                "        \"num_speakers\": 1000,\n" +
+                "        \"added\": 0\n" +
+                "      },\n" +
+                "      \"network_class\": 0,\n" +
+                "      \"date_added\": \"1995-11-23 15:31:51\",\n" +
+                "      \"img_link\": \"img2.png\"\n" +
                 "    }\n" +
                 "]\n";
         try {
@@ -231,30 +273,22 @@ class API {
             JSONArray usersJSON = new JSONArray(rawDummy);
             for (int i = 0; i < usersJSON.length(); i++) {
                 JSONObject netJSON = usersJSON.getJSONObject(i);
-                Network network;
-                JSONObject nearLocObj = netJSON.getJSONObject("location_cur");
-                NearLocation nearLocation = new NearLocation(nearLocObj.getLong("city_id"),
-                        nearLocObj.getLong("region_id"), nearLocObj.getLong("country_id"));
-                if (netJSON.getInt("network_class") == 0) { //This means that it is a language?
-                    JSONObject langJSON = netJSON.getJSONObject("language_origin");
-                    Language lang = new Language(langJSON.getLong("id"),
-                            langJSON.getString("name"), langJSON.getInt("num_speakers"));
-                    network = new Network(nearLocation, lang, netJSON.getLong("id"));
-                } else {//Location network.
-                    JSONObject fromLocJSON = netJSON.getJSONObject("location_origin");
-                    FromLocation fromLoc = new FromLocation(fromLocJSON.getLong("city_id"),
-                            fromLocJSON.getLong("region_id"),fromLocJSON.getLong("country_id"));
-                    network = new Network(nearLocation,fromLoc, netJSON.getLong("id"));
-                }
-                nDAo.insertNetworks(network);
+                DatabaseNetwork dn = new DatabaseNetwork(netJSON);
+                nDAo.insertNetworks(dn);
             }
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Add regions to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console. The JSON is split apart into the JSON
+     * fragments for each region. Each of those JSONs are then passed to a {@link Region}
+     * constructor (specifically {@link Region#Region(JSONObject)}), which extracts the necessary
+     * information and initializes itself. Those objects are then added to the database via
+     * {@link RegionDao}.
+     */
     static void addRegions(){
         String rawDummy = "[\n" +
                 "  {\n" +
@@ -303,20 +337,22 @@ class API {
             JSONArray regionsJSON = new JSONArray(rawDummy);
             for (int i = 0; i < regionsJSON.length(); i++) {
                 JSONObject regionJSON = regionsJSON.getJSONObject(i);
-                Point coords = new Point();
-                coords.latitude = regionJSON.getLong("latitude");
-                coords.longitude = regionJSON.getLong("longitude");
-                Region region = new Region(regionJSON.getLong("id"), regionJSON.getString("name"),
-                        coords, regionJSON.getLong("population"), regionJSON.getLong("country_id"),
-                        regionJSON.getString("country_name"));
+                Region region = new Region(regionJSON);
                 rDao.insertRegions(region);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
     }
 
+    /**
+     * Add cities to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console. The JSON is split apart into the JSON
+     * fragments for each city. Each of those JSONs are then passed to a {@link City}
+     * constructor (specifically {@link City#City(JSONObject)}), which extracts the necessary
+     * information and initializes itself. Those objects are then added to the database via
+     * {@link CityDao}.
+     */
     static void addCities() {
         String rawDummy = "[\n" +
                 "  {\n" +
@@ -403,13 +439,7 @@ class API {
             JSONArray citiesJSON = new JSONArray(rawDummy);
             for (int i = 0; i < citiesJSON.length(); i++) {
                 JSONObject cityJSON = citiesJSON.getJSONObject(i);
-                Point coords = new Point();
-                coords.latitude = cityJSON.getLong("latitude");
-                coords.longitude = cityJSON.getLong("longitude");
-                City city = new City(cityJSON.getLong("id"), cityJSON.getString("name"),
-                        coords, cityJSON.getLong("population"), cityJSON.getLong("country_id"),
-                        cityJSON.getString("country_name"), cityJSON.getLong("region_id"),
-                        cityJSON.getString("region_name"));
+                City city = new City(cityJSON);
                 cDao.insertCities(city);
             }
         } catch (JSONException e) {
@@ -417,6 +447,14 @@ class API {
         }
     }
 
+    /**
+     * Add countries to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console. The JSON is split apart into the JSON
+     * fragments for each country. Each of those JSONs are then passed to a {@link Country}
+     * constructor (specifically {@link Country#Country(JSONObject)}), which extracts the necessary
+     * information and initializes itself. Those objects are then added to the database via
+     * {@link CountryDao}.
+     */
     static void addCountries() {
         String rawDummy = "[\n" +
                 "  {\n" +
@@ -443,11 +481,7 @@ class API {
             JSONArray countriesJSON = new JSONArray(rawDummy);
             for (int i = 0; i < countriesJSON.length(); i++) {
                 JSONObject countryJSON = countriesJSON.getJSONObject(i);
-                Point coords = new Point();
-                coords.latitude = countryJSON.getLong("latitude");
-                coords.longitude = countryJSON.getLong("longitude");
-                Country country = new Country(countryJSON.getLong("id"), countryJSON.getString("name"),
-                        coords, countryJSON.getLong("population"));
+                Country country = new Country(countryJSON);
                 cDao.insertCountries(country);
             }
         } catch (JSONException e) {
@@ -455,6 +489,12 @@ class API {
         }
     }
 
+    /**
+     * Add posts to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console. The JSON is interpreted, and its values
+     * are used to instantiate {@link Post} objects. Those objects are then added to the database via
+     * {@link PostDao}.
+     */
     static void addPosts(){
         String rawDummy = "[\n" +
                 "  {\n" +
@@ -530,6 +570,12 @@ class API {
         }
     }
 
+    /**
+     * Add events to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console. The JSON is interpreted, and its values
+     * are used to instantiate {@link Event} objects. Those objects are then added to the database via
+     * {@link EventDao}.
+     */
     static void addEvents() {
         String rawDummy = "[\n" +
                 "  {\n" +
@@ -612,6 +658,10 @@ class API {
         }
     }
 
+    /**
+     * Store user subscriptions to networks in the database by adding {@link NetworkSubscription}
+     * objects to the {@link NetworkSubscriptionDao}
+     */
     static void subscribeUsers() {
         NetworkSubscription networkSubscription1 = new NetworkSubscription(3,1);
         NetworkSubscription networkSubscription2 = new NetworkSubscription(1,1);
@@ -623,6 +673,12 @@ class API {
                 networkSubscription4, networkSubscription5);
     }
 
+    /**
+     * Add replies to the database by parsing the JSON stored in {@code rawDummy}. In case of any
+     * errors, the stack trace is printed to the console. The JSON is interpreted, and its values
+     * are used to instantiate {@link PostReply} objects. Those objects are then added to the database via
+     * {@link PostReplyDao}.
+     */
     static void addReplies() {
         String rawDummy = "[\n" +
                 "  {\n" +
@@ -665,10 +721,12 @@ class API {
         }
     }
 
+    // TODO: These two methods seem really redundant. Why not have instantiatePosts use instantiatePost?
     /**
-     * For simplicity, we store the id's of other model objects in the database, not the objects
-     * themselves. Thus, when we return these objects, we need to instantiate them.
-     * @param posts
+     * Instantiates the posts in the provided list. Instantiation is done by getting
+     * the author of each post as a User object via an API call and then setting the post's author
+     * to that object.
+     * @param posts Posts to instantiate
      */
     static void instantiatePosts(List<org.codethechange.culturemesh.models.Post> posts) {
         for (org.codethechange.culturemesh.models.Post post : posts) {
@@ -678,9 +736,9 @@ class API {
     }
 
     /**
-     * For simplicity, we store the id's of other model objects in the database, not the objects
-     * themselves. Thus, when we return these objects, we need to instantiate them.
-     * @param post
+     * Instantiates the provided post by getting the author from the author ID as a {@link User}
+     * object and storing that in {@link org.codethechange.culturemesh.models.Post#author}
+     * @param post Post to instantiate
      */
     static void instantiatePost(org.codethechange.culturemesh.models.Post post) {
             //Get the user
@@ -688,9 +746,9 @@ class API {
     }
 
     /**
-     * For simplicity, we store the id's of other model objects in the database, not the objects
-     * themselves. Thus, when we return these objects, we need to instantiate them.
-     * @param comments List of PostReplies with which we will get comments for.
+     * Instantiates the {@link PostReply} objects in the provided list by getting the authors
+     * of each comment and storing it in {@link PostReply#author}
+     * @param comments List of PostReplies with which we will get comment authors for
      */
     static void instantiatePostReplies(List<PostReply> comments) {
         for (PostReply comment : comments) {
@@ -699,13 +757,19 @@ class API {
         }
     }
 
+    /**
+     * The protocol for GET requests is as follows...
+     *      1. Check if cache has relevant data. If so, return it.
+     *      2. Send network request to update data.
+     */
     static class Get {
-        /**
-         * The protocol for GET requests is as follows...
-         * 1. Check if cache has relevant data. If so, return it.
-         * 2. Send network request to update data.
-         */
 
+        /**
+         * Get a {@link User} object from it's ID
+         * @param id ID of user to find
+         * @return If such a user was found, it will be the payload. Otherwise, the request will be
+         * marked as failed.
+         */
         static NetworkResponse<User> user(long id) {
             UserDao uDao = mDb.userDao();
             User user = uDao.getUser(id);
@@ -713,12 +777,19 @@ class API {
             return new NetworkResponse<>(user == null, user);
         }
 
+        /**
+         * Get the networks a user belongs to by searching all subscriptions in
+         * {@link NetworkSubscriptionDao} and then getting {@link Network} objects for each ID found
+         * in those subscriptions.
+         * @param id ID of {@link User} whose networks are being requested
+         * @return List of {@link Network}s the user is in
+         */
         static NetworkResponse<ArrayList<Network>> userNetworks(long id) {
             //TODO: Send network request for all subscriptions.
             NetworkSubscriptionDao nSDao  = mDb.networkSubscriptionDao();
             List<Long> netIds = nSDao.getUserNetworks(id);
             ArrayList<Network> nets = new ArrayList<>();
-            for (Long netId : netIds ) {
+            for (Long netId : netIds) {
                 NetworkResponse res = network(netId);
                 if (!res.fail()) {
                     nets.add((Network) res.getPayload());
@@ -727,9 +798,15 @@ class API {
             return new NetworkResponse<>(nets);
         }
 
-        /*
-            When will we ever use this? Perhaps viewing a user profile?
+        /**
+         * Get the {@link org.codethechange.culturemesh.models.Post}s a {@link User} has made. This
+         * is done by asking {@link PostDao} for all posts with the user's ID, as performed by
+         * {@link PostDao#getUserPosts(long)}.
+         * @param id ID of the {@link User} whose {@link org.codethechange.culturemesh.models.Post}s
+         *           are being requested
+         * @return List of the {@link org.codethechange.culturemesh.models.Post}s the user has made
          */
+        // TODO: When will we ever use this? Perhaps viewing a user profile?
         static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> userPosts(long id) {
             PostDao pDao = mDb.postDao();
             List<org.codethechange.culturemesh.models.Post> posts = pDao.getUserPosts(id);
@@ -737,6 +814,14 @@ class API {
             return new NetworkResponse<>(posts);
         }
 
+        /**
+         * Get the {@link Event}s a {@link User} is subscribed to. This is done by searching for
+         * {@link EventSubscription}s with the user's ID (via
+         * {@link EventSubscriptionDao#getUserEventSubscriptions(long)}) and then inflating each
+         * event from it's ID into a full {@link Event} object using {@link API.Get#event(long)}.
+         * @param id ID of the {@link User} whose events are being searched for
+         * @return List of {@link Event}s to which the user is subscribed
+         */
         static NetworkResponse<ArrayList<Event>> userEvents(long id) {
             //TODO: Check for event subscriptions with network request.
             EventSubscriptionDao eSDao = mDb.eventSubscriptionDao();
@@ -754,28 +839,15 @@ class API {
         static NetworkResponse<Network> network(long id) {
             //TODO: Send network request if not found.
             NetworkDao netDao = mDb.networkDao();
-            List<Network> nets = netDao.getNetwork(id);
-            Network net = null;
-            if (nets != null && nets.size() > 0) {
-                net = nets.get(0);
+            List<DatabaseNetwork> nets = netDao.getNetwork(id);
+
+            if (nets == null || nets.size() == 0 || nets.get(0) == null) {
+                return new NetworkResponse<>(true);
+            } else {
+                DatabaseNetwork dn = nets.get(0);
+                Network net = expandDatabaseNetwork(dn);
+                return new NetworkResponse<>(net);
             }
-            //Instantiate locations.
-            CountryDao countryDao = mDb.countryDao();
-            RegionDao regionDao = mDb.regionDao();
-            CityDao cityDao = mDb.cityDao();
-            if (net != null) {
-                //Let's instantiate the location fields!
-                if (net.networkClass) {
-                    //We need to instantiate from location.
-                    net.fromLocation.from_city = cityDao.getCity(net.fromLocation.from_city_id).name;
-                    net.fromLocation.from_region = regionDao.getRegion(net.fromLocation.from_region_id).name;
-                    net.fromLocation.from_country = countryDao.getCountry(net.fromLocation.from_country_id).name;
-                }
-                net.nearLocation.near_city = cityDao.getCity(net.nearLocation.near_city_id).name;
-                net.nearLocation.near_region = regionDao.getRegion(net.nearLocation.near_region_id).name;
-                net.nearLocation.near_country = countryDao.getCountry(net.nearLocation.near_country_id).name;
-            }
-            return new NetworkResponse<>(net == null, net);
         }
 
         static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> networkPosts(long id) {
@@ -928,7 +1000,8 @@ class API {
             return new NetworkResponse<>(replies == null, replies);
         }
 
-        static NetworkResponse<List<Place>> autocomplete(String text) {
+        static NetworkResponse<List<Place>> autocompletePlace(String text) {
+            // TODO: Take argument for maximum number of locations to return?
             List<Place> locations = new ArrayList<>();
             //Get any related cities, countries, or regions.
             CityDao cityDao = mDb.cityDao();
@@ -937,7 +1010,39 @@ class API {
             locations.addAll(regionDao.autoCompleteRegions(text));
             CountryDao countryDao = mDb.countryDao();
             locations.addAll(countryDao.autoCompleteCountries(text));
-            return new NetworkResponse<List<Place>>(locations == null, locations);
+            return new NetworkResponse<>(locations == null, locations);
+        }
+
+        static NetworkResponse<List<Language>> autocompleteLanguage(String text) {
+            // TODO: Take argument for maximum number of languages to return?
+            // TODO: Use Database for autocompleteLanguage and use instead of dummy data
+            List<Language> matches = new ArrayList<>();
+            matches.add(new Language(0, "Sample Language 0", 10));
+            return new NetworkResponse(matches);
+        }
+
+        static NetworkResponse<Network> netFromLangAndNear(Language lang, NearLocation near) {
+            NetworkDao netDao = mDb.networkDao();
+            DatabaseNetwork dn = netDao.netFromLangAndHome(lang.language_id, near.near_city_id, near.near_region_id,
+                    near.near_country_id);
+            if (dn == null) {
+                // TODO: Distinguish between the network not existing and the lookup failing
+                return new NetworkResponse<>(true, R.string.noNetworkExist);
+            } else {
+                return network(dn.id);
+            }
+        }
+
+        static NetworkResponse<Network> netFromFromAndNear(FromLocation from, NearLocation near) {
+            NetworkDao netDao = mDb.networkDao();
+            DatabaseNetwork dn = netDao.netFromLocAndHome(from.from_city_id, from.from_region_id,
+                    from.from_country_id, near.near_city_id, near.near_region_id, near.near_country_id);
+            if (dn == null) {
+                // TODO: Distinguish between the network not existing and the lookup failing
+                return new NetworkResponse<>(true, R.string.noNetworkExist);
+            } else {
+                return network(dn.id);
+            }
         }
     }
 
@@ -974,7 +1079,7 @@ class API {
 
         static NetworkResponse network(Network network) {
             NetworkDao nDao = mDb.networkDao();
-            nDao.insertNetworks(network);
+            nDao.insertNetworks(network.getDatabaseNetwork());
             return new NetworkResponse<>(network);
         }
 
@@ -1007,7 +1112,39 @@ class API {
         static NetworkResponse event(Event event) {
             return new NetworkResponse();
         }
+    }
 
+    private static Network expandDatabaseNetwork(DatabaseNetwork dn) {
+        Place near = locationToPlace(dn.nearLocation);
+
+        if (dn.isLanguageBased()) {
+            LanguageDao langDao = mDb.languageDao();
+            Language lang =langDao.getLanguage(dn.languageId);
+            Network net = new Network(near, lang, dn.id);
+            return net;
+        } else {
+            Place from = locationToPlace(dn.fromLocation);
+            Network net = new Network(near, from, dn.id);
+            return net;
+        }
+    }
+
+    private static Place locationToPlace(Location loc) {
+        CityDao cityDao = mDb.cityDao();
+        RegionDao regionDao = mDb.regionDao();
+        CountryDao countryDao = mDb.countryDao();
+
+        Place place;
+        // TODO: Is this right? If so, DatabaseLocation only really needs to store type and ID
+        if (loc.getType() == Location.CITY) {
+            place = cityDao.getCity(loc.getCityId());
+        } else if (loc.getType() == Location.REGION) {
+            place = regionDao.getRegion(loc.getRegionId());
+        } else {
+            place = countryDao.getCountry(loc.getCountryId());
+        }
+
+        return place;
     }
 
     public static void loadAppDatabase(Context context) {

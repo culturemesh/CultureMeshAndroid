@@ -14,7 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.codethechange.culturemesh.models.FeedItem;
-import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
 
 import java.util.ArrayList;

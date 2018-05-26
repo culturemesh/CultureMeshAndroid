@@ -1,28 +1,12 @@
 package org.codethechange.culturemesh;
 
 import android.arch.persistence.db.SupportSQLiteDatabase;
-import android.arch.persistence.room.Room;
 import android.arch.persistence.room.migration.Migration;
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.View;
 
 import org.codethechange.culturemesh.data.CMDatabase;
-import org.codethechange.culturemesh.models.FromLocation;
-import org.codethechange.culturemesh.models.Location;
-import org.codethechange.culturemesh.models.NearLocation;
-import org.codethechange.culturemesh.models.Network;
-
-import java.math.BigInteger;
-import java.util.List;
 
 public class DatabaseTest extends AppCompatActivity {
 

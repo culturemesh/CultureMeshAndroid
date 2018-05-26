@@ -7,30 +7,19 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.content.res.Configuration;
-import android.net.Uri;
-import android.os.Build;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
-import android.view.SubMenu;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -41,27 +30,13 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
-import io.fabric.sdk.android.Fabric;
-
-import org.codethechange.culturemesh.models.FromLocation;
-import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.Serializable;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/8/17.
@@ -503,13 +478,13 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                 //Manipulate string of number to have magnitude suffix (K,M,etc.)
                 population.setText(FormatManager.abbreviateNumber(wrapper.netUserIds.length));
                 //Update from location/language
-                if (network.networkClass) {
-                    fromLocation.setText(network.fromLocation.shortName());
+                if (network.isLocationBased()) {
+                    fromLocation.setText(network.fromLocation.getListableName());
                 } else {
                     fromLocation.setText(network.language.name);
                 }
                 //Update near location
-                nearLocation.setText(network.nearLocation.shortName());
+                nearLocation.setText(network.nearLocation.getListableName());
                 View.OnClickListener showUsersListener = new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

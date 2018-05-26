@@ -22,6 +22,6 @@ public interface CityDao {
     @Query("SELECT * FROM city WHERE id = :id")
     public City getCity(long id);
 
-    @Query("SELECT * FROM City WHERE NAME LIKE :query")
+    @Query("SELECT * FROM City WHERE cityName LIKE :query")
     public List<City> autoCompleteCities(String query);
 }

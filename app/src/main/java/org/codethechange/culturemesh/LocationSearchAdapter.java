@@ -1,6 +1,5 @@
 package org.codethechange.culturemesh;
 
-import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
@@ -10,15 +9,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Filterable;
-
 import java.util.ArrayList;
 import android.widget.Filter;
 import android.widget.TextView;
-
 import java.util.List;
-import java.util.logging.LogRecord;
 
 /**
  * Created by Drew Gregory (drewgreg@stanford.edu) on 11/7/17.
@@ -44,9 +39,18 @@ public class LocationSearchAdapter extends ArrayAdapter<String> implements Filte
         //TODO: Ignore case for filter.
         super(context, resource, locations);
         this.context = context;
-        this.locations = new ArrayList<String>(locations);
-        filteredLocations = (ArrayList<String>) locations;
+        this.locations = new ArrayList<>(locations);
+        filteredLocations = new ArrayList<>(locations);
         getFilter();
+    }
+
+    /**
+     * Initialize context variables without a starting list
+     * @param context application context
+     * @param resource int resource layout id
+     */
+    LocationSearchAdapter(@NonNull Context context, @LayoutRes int resource) {
+        super(context, resource);
     }
 
     @NonNull
@@ -60,7 +64,7 @@ public class LocationSearchAdapter extends ArrayAdapter<String> implements Filte
 
     @Override
     public String getItem(int position) {
-        Log.i("Hello", filteredLocations.get(position));
+        Log.i("Hello", filteredLocations.get(position).toString());
         return filteredLocations.get(position);
     }
 
@@ -92,10 +96,10 @@ public class LocationSearchAdapter extends ArrayAdapter<String> implements Filte
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             FilterResults filterResults = new FilterResults();
-            ArrayList<String> tempList = new ArrayList<String>();
+            ArrayList<String> tempList = new ArrayList<>();
             if (constraint!=null && constraint.length()>0) {
                 for (String location : locations) {
-                    if (location.toLowerCase().contains(constraint.toString().toLowerCase())) {
+                    if (location.toString().toLowerCase().contains(constraint.toString().toLowerCase())) {
                         //Log.i("Comparison", location + " contains? " + constraint );
                         tempList.add(location);
                     }
