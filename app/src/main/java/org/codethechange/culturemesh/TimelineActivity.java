@@ -200,6 +200,8 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     protected void onStart() {
         super.onStart();
         //TODO: For first run, uncomment this: new TestDatabase().execute();
+        Log.i("TimelineActivity.onStrt", "Running TestDatabase().execute() to initialize" +
+                "database with dummy data.");
         new TestDatabase().execute();
         //Check if user has selected a network to view, regardless of whether the user is subscribed
         //to any networks yet. Previously, we checked if the user joined a network, and instead
@@ -367,6 +369,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         protected Void doInBackground(Void... voids) {
             API.loadAppDatabase(getApplicationContext());
             if (API.Get.network(1).getPayload() == null) {
+                Log.i("TimelineActivity.TestDB", "Starting Database Initialization");
                 API.addReplies();
                 API.addUsers();
                 API.addCities();
@@ -376,7 +379,12 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                 API.addPosts();
                 API.addEvents();
                 API.subscribeUsers();
+                Log.i("TimelineActivity.TestDB", "Finished Database Initialization");
                 settings.edit().putLong(API.CURRENT_USER, 1).apply();
+                Log.i("TimelineActivity.TestDB", "Set Current User");
+            } else {
+                Log.i("TimelineActivity.TestDB", "Not initializing database since already" +
+                        " initialized.");
             }
             API.closeDatabase();
             return null;

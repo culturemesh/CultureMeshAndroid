@@ -261,8 +261,11 @@ class API {
             NetworkDao nDAo = mDb.networkDao();
             JSONArray usersJSON = new JSONArray(rawDummy);
             for (int i = 0; i < usersJSON.length(); i++) {
+                Log.i("API.addNetworks()", "Start adding network number (not ID) " + i +
+                        " from JSON to Dao");
                 JSONObject netJSON = usersJSON.getJSONObject(i);
                 DatabaseNetwork dn = new DatabaseNetwork(netJSON);
+                Log.i("API.addNetworks()", "Adding network " + dn + " to Dao");
                 nDAo.insertNetworks(dn);
             }
         } catch (JSONException e) {
@@ -777,13 +780,20 @@ class API {
             //TODO: Send network request for all subscriptions.
             NetworkSubscriptionDao nSDao  = mDb.networkSubscriptionDao();
             List<Long> netIds = nSDao.getUserNetworks(id);
+            Log.i("API.Get.userNetworks(" + id + ")", "Network IDs from Database: " + netIds.toString());
             ArrayList<Network> nets = new ArrayList<>();
             for (Long netId : netIds) {
                 NetworkResponse res = network(netId);
                 if (!res.fail()) {
                     nets.add((Network) res.getPayload());
+                    Log.i("API.Get.userNetworks(" + id + ")", "Received network from " +
+                            "database: " + res.getPayload());
+                } else {
+                    Log.i("API.Get.userNetworks(" + id + ")", "Failure in getting network from " +
+                            "database for ID " + netId);
                 }
             }
+            Log.i("API.Get.userNetworks(" + id + ")", "Networks from Database: " + nets.toString());
             return new NetworkResponse<>(nets);
         }
 
@@ -831,10 +841,23 @@ class API {
             List<DatabaseNetwork> nets = netDao.getNetwork(id);
 
             if (nets == null || nets.size() == 0 || nets.get(0) == null) {
+                if (nets == null) {
+                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
+                            "database because of null response.");
+                } else if (nets.size() == 0) {
+                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
+                            "database because an empty list was received: " + nets.toString());
+                } else {
+                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
+                            "database because of null first item in list: " + nets.toString());
+                }
                 return new NetworkResponse<>(true);
             } else {
+                Log.i("API.Get.network(" + id + ")", "Networks from database: " + nets.toString());
                 DatabaseNetwork dn = nets.get(0);
+                Log.i("API.Get.network(" + id + ")", "Inflating network: " + dn);
                 Network net = expandDatabaseNetwork(dn);
+                Log.i("API.Get.network(" + id + ")", "Inflated network with ID " + dn.id);
                 return new NetworkResponse<>(net);
             }
         }
@@ -1017,15 +1040,27 @@ class API {
 
     private static Network expandDatabaseNetwork(DatabaseNetwork dn) {
         Place near = locationToPlace(dn.nearLocation);
+        Log.i("API.expandDBNetwork", "Converted the DatabaseNetwork " + dn + " to" +
+                " the Place " + near + " for the near location");
 
         if (dn.isLanguageBased()) {
+            Log.i("API.expandDBNetwork", "The DatabaseNetwork " + dn + " is language based");
             LanguageDao langDao = mDb.languageDao();
             Language lang =langDao.getLanguage(dn.languageId);
+            Log.i("API.expandDBNetwork", "Converted the ID " + dn.languageId + " to" +
+                    " the Langauge " + lang + " for the language spoken");
             Network net = new Network(near, lang, dn.id);
+            Log.i("API.expandDBNetwork", "Expanded the DatabaseNetwork " + dn + " to " +
+                    "the Network " + net);
             return net;
         } else {
+            Log.i("API.expandDBNetwork", "The DatabaseNetwork " + dn + " is location based");
             Place from = locationToPlace(dn.fromLocation);
+            Log.i("API.expandDBNetwork", "Converted the FromLocation " + dn.fromLocation + " to" +
+                    " the Place " + from + " for the from location.");
             Network net = new Network(near, from, dn.id);
+            Log.i("API.expandDBNetwork", "Expanded the DatabaseNetwork " + dn + " to " +
+                    "the Network " + net);
             return net;
         }
     }
@@ -1038,12 +1073,18 @@ class API {
         Place place;
         // TODO: Is this right? If so, DatabaseLocation only really needs to store type and ID
         if (loc.getType() == Location.CITY) {
+            Log.i("API.locationToPlace", "Location " + loc + " is a city");
             place = cityDao.getCity(loc.getCityId());
         } else if (loc.getType() == Location.REGION) {
+            Log.i("API.locationToPlace", "Location " + loc + " is a region");
             place = regionDao.getRegion(loc.getRegionId());
         } else {
+            Log.i("API.locationToPlace", "Location " + loc + " is a country");
             place = countryDao.getCountry(loc.getCountryId());
         }
+
+        Log.i("API.locationToPlace", "Converted the location " + loc + " into the place " +
+                place);
 
         return place;
     }
