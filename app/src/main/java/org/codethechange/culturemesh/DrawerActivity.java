@@ -25,10 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.crashlytics.android.Crashlytics;
 import com.squareup.picasso.Picasso;
-
-import io.fabric.sdk.android.Fabric;
 
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
@@ -208,15 +205,15 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                 int id = subscribedNetworks.keyAt(i);
                 Network net = subscribedNetworks.get(id);
                 String name = "";
-                if (net.networkClass) {
+                if (net.isLocationBased()) {
                     name = getResources().getString(R.string.from) + " " +
-                            net.fromLocation.shortName() + " " +
+                            net.fromLocation.getListableName() + " " +
                             getResources().getString(R.string.near) + " " +
-                            net.nearLocation.shortName();
+                            net.nearLocation.getListableName();
                 } else {
                     name = net.language.toString() + " " +
                             getResources().getString(R.string.speakers_in) + " " +
-                            net.nearLocation.shortName();
+                            net.nearLocation.getListableName();
                 }
                 SpannableStringBuilder sb = new SpannableStringBuilder(name);
                 sb.setSpan(new RelativeSizeSpan(.8f), 0, sb.length(), 0);

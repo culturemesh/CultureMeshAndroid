@@ -11,13 +11,10 @@ import android.view.Display;
 import com.codemybrainsout.onboarder.AhoyOnboarderActivity;
 import com.codemybrainsout.onboarder.AhoyOnboarderCard;
 
-import org.codethechange.bubblepicker.rendering.BubblePicker;
 import org.codethechange.culturemesh.models.Network;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Introduce user to the app through a series of informational screens that end with a button

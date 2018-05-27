@@ -1,24 +1,15 @@
 package org.codethechange.culturemesh;
 
-import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.media.Image;
 import android.os.AsyncTask;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,33 +18,24 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
 
 import static android.view.View.GONE;
+import java.util.List;
 
-
-import org.codethechange.culturemesh.models.User;
-
-import java.util.ArrayList;
+import org.codethechange.culturemesh.models.Language;
+import org.codethechange.culturemesh.models.NearLocation;
+import org.codethechange.culturemesh.models.Network;
+import org.codethechange.culturemesh.models.Place;
 
 public class FindNetworkActivity extends DrawerActivity {
 
     //TODO: Replace these with Location Objects.
-    static String nearLocation = "Stanford";
-    static String fromLocation;
+    // TODO: Let user change their near location and setup appropriate API utilities to achieve this
+    static Place near;
 
     public final int REQUEST_NEW_NEAR_LOCATION = 1;
-
-    //TODO: Replace dummy data with real data
-    private static ArrayList<String> dummy = new ArrayList<String>();
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -70,7 +52,7 @@ public class FindNetworkActivity extends DrawerActivity {
      */
     private ViewPager mViewPager;
 
-    /*
+    /**
      * The {@link SearchManager} that will associate the SearchView with our search config.
      */
     private static SearchManager mSearchManager;
@@ -116,8 +98,8 @@ public class FindNetworkActivity extends DrawerActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //TODO: Implement how I receive data. Replace dummy stuff with legit stuff.
-        nearLocation = data.getStringExtra(ChooseNearLocationActivity.CHOSEN_LOCATION);
-        nearButton.setText(nearLocation);
+        near = (Place) data.getSerializableExtra(ChooseNearLocationActivity.CHOSEN_PLACE);
+        nearButton.setText(near.getListableName());
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -155,9 +137,19 @@ public class FindNetworkActivity extends DrawerActivity {
     public static class FindLocationFragment extends Fragment implements
             SearchView.OnQueryTextListener {
 
-
         private ListView searchList;
-        private ArrayAdapter<String> adapter;
+        private ArrayAdapter<Place> adapter;
+        private SearchView searchView;
+
+        public static class ProtoNetwork {
+            public Place from;
+            public NearLocation near;
+
+            public ProtoNetwork(Place from, NearLocation near) {
+                this.from = from;
+                this.near = near;
+            }
+        }
 
         /**
          * The fragment argument representing the section number for this
@@ -186,7 +178,8 @@ public class FindNetworkActivity extends DrawerActivity {
             // Get the intent, verify the action and get the query
             View rootView = inflater.inflate(R.layout.fragment_find_location, container,
                     false);
-            SearchView searchView = rootView.findViewById(R.id.from_location_search_view);
+
+            searchView = rootView.findViewById(R.id.from_location_search_view);
             searchView.setOnQueryTextListener(this);
             searchView.setSearchableInfo(mSearchManager.
                     getSearchableInfo(getActivity().getComponentName()));
@@ -194,38 +187,16 @@ public class FindNetworkActivity extends DrawerActivity {
             //TODO: Remove dummy data
             //TODO: Use abstracted API interface.
 
-            dummy.add("Sample Location Network 1");
-            adapter = new LocationSearchAdapter(getActivity(),
-                    android.R.layout.simple_list_item_1, dummy);
+            adapter = new SearchAdapter<>(getActivity(),
+                    android.R.layout.simple_list_item_1, R.id.location_language_name_list_view);
             searchList.setTextFilterEnabled(true);
             searchList.setAdapter(adapter);
             searchList.setOnItemClickListener(new ListView.OnItemClickListener() {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    //TODO: Replace this lame thing.
-                    getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
-                            .putLong(API.SELECTED_NETWORK, 0).apply();
-                    startActivity(new Intent(getActivity(), TimelineActivity.class));
-                    /*TODO: Do a prompt.
-                    final ConstraintLayout promptView = (ConstraintLayout)
-                            getActivity().findViewById(R.id.prompt_join_network_view);
-                    fromLocation = (String) parent.getItemAtPosition(position);
-                    TextView fromTV = (TextView)
-                            promptView.findViewById(R.id.prompt_from_location_text_view);
-                    fromTV.setText(fromLocation.split(",")[0]);
-                    TextView nearTV = (TextView)
-                            promptView.findViewById(R.id.prompt_near_location_text_view);
-                    nearTV.setText(nearLocation.split(",")[0]);
-                    promptView.setVisibility(View.VISIBLE);
-                    ImageButton cancel = (ImageButton)
-                            promptView.findViewById(R.id.cancel_prompt_button);
-                    cancel.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            promptView.setVisibility(GONE);
-                        }
-                    });*/
+                    Place from = adapter.getItem(position);
+                    (new launchNetworkFromFromAndNear()).execute(new Network(near, from, -1));
                 }
             });
             return rootView;
@@ -234,18 +205,70 @@ public class FindNetworkActivity extends DrawerActivity {
 
         @Override
         public boolean onQueryTextSubmit(String query) {
-            return false;
+            search();
+            return true;
+        }
+
+        public void search() {
+            String query = searchView.getQuery().toString();
+            new FindLocationFragment.searchPlaces().execute(query);
         }
 
         @Override
         public boolean onQueryTextChange(String newText) {
-            Toast.makeText(getActivity(), "Changing text", Toast.LENGTH_LONG).show();
-            adapter.getFilter().filter(newText);
-            if (searchList.getVisibility() == GONE) {
-                searchList.setVisibility(View.VISIBLE);
-            }
-            //searchList.setAdapter(adapter);
             return true;
+        }
+
+        class searchPlaces extends AsyncTask<String, Void, NetworkResponse<List<Place>>> {
+            @Override
+            protected NetworkResponse<List<Place>> doInBackground(String... strings) {
+                API.loadAppDatabase(getContext());
+                NetworkResponse<List<Place>> response = API.Get.autocompletePlace(strings[0]);
+                API.closeDatabase();
+                return response;
+
+            }
+
+            @Override
+            protected void onPostExecute(NetworkResponse<List<Place>> response) {
+                super.onPostExecute(response);
+                if (response.fail()) {
+                    response.showErrorDialog(getContext());
+                } else {
+                    adapter.clear();
+                    adapter.addAll(response.getPayload());
+                    if (searchList.getVisibility() == GONE) {
+                        searchList.setVisibility(View.VISIBLE);
+                    }
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        }
+
+        class launchNetworkFromFromAndNear extends AsyncTask<Network, Void, NetworkResponse<Network>> {
+            @Override
+            protected NetworkResponse<Network> doInBackground(Network... networks) {
+                Network net = networks[0];
+                API.loadAppDatabase(getContext());
+                // TODO: Handle Errors
+                NetworkResponse<Network> response = API.Get.netFromFromAndNear(
+                        net.fromLocation.getFromLocation(), net.nearLocation.getNearLocation());
+                API.closeDatabase();
+                return response;
+            }
+
+            @Override
+            protected void onPostExecute(NetworkResponse<Network> response) {
+                super.onPostExecute(response);
+                // TODO: If network doesn't exist, offer to create it
+                if (response.fail()) {
+                    response.showErrorDialog(getContext());
+                } else {
+                    getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
+                            .putLong(API.SELECTED_NETWORK, response.getPayload().id).apply();
+                    startActivity(new Intent(getActivity(), TimelineActivity.class));
+                }
+            }
         }
     }
 
@@ -258,7 +281,8 @@ public class FindNetworkActivity extends DrawerActivity {
 
 
         private ListView searchList;
-        private ArrayAdapter<String> adapter;
+        private SearchAdapter<Language> adapter;
+        private SearchView searchView;
 
         /**
          * The fragment argument representing the section number for this
@@ -287,69 +311,97 @@ public class FindNetworkActivity extends DrawerActivity {
             // Get the intent, verify the action and get the query
             View rootView = inflater.inflate(R.layout.fragment_find_language, container,
                     false);
-            ArrayList<String> dummyLanguages = new ArrayList<String>();
-            SearchView searchView = rootView.findViewById(R.id.from_language_search_view);
+            searchView = rootView.findViewById(R.id.from_language_search_view);
             searchView.setOnQueryTextListener(this);
             searchView.setSearchableInfo(mSearchManager.
                     getSearchableInfo(getActivity().getComponentName()));
             searchList = rootView.findViewById(R.id.search_suggestions_list_view);
-            //TODO: Remove dummy data
             //TODO: Use abstracted API interface.
 
-            dummyLanguages.add("Sample Language 1");
+            adapter = new SearchAdapter<>(getActivity(), android.R.layout.simple_list_item_1,
+                    R.id.location_language_name_list_view);
 
-            adapter = new LocationSearchAdapter(getActivity(),
-                    android.R.layout.simple_list_item_1, dummyLanguages);
             searchList.setTextFilterEnabled(true);
             searchList.setAdapter(adapter);
             searchList.setOnItemClickListener(new ListView.OnItemClickListener() {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
-                            .putLong(API.SELECTED_NETWORK, 1).apply();
-                    startActivity(new Intent(getActivity(), TimelineActivity.class));
-                    /**TODO: Possibly use this prompt code.
-                    final ConstraintLayout promptView = (ConstraintLayout)
-                            getActivity().findViewById(R.id.prompt_join_language_network_view);
-                    String fromLanguage = (String) parent.getItemAtPosition(position);
-                    TextView fromTV = (TextView)
-                            promptView.findViewById(R.id.prompt_from_language_text_view);
-                    fromTV.setText(fromLanguage.split(",")[0]);
-                    TextView nearTV = (TextView)
-                            promptView.findViewById(R.id.prompt_language_near_location_text_view);
-                    nearTV.setText(nearLocation.split(",")[0]);
-                    promptView.setVisibility(View.VISIBLE);
-                    ImageButton cancel = (ImageButton)
-                            promptView.findViewById(R.id.cancel_prompt_button);
-                    cancel.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            promptView.setVisibility(GONE);
-                        }
-                    });**/
+                    // TODO: If network doesn't exist, offer to create it
+                    Language l = adapter.getItem(position);
+                    // TODO: near should be the user's currently selected home network
+                    (new launchNetworkFromLangAndNear()).execute(new Network(near, l, -1));
                 }
             });
             return rootView;
 
         }
 
+        public void search() {
+            String query = searchView.getQuery().toString();
+            new searchLanguages().execute(query);
+        }
+
         @Override
         public boolean onQueryTextSubmit(String query) {
-            return false;
+            search();
+            return true;
         }
 
         @Override
         public boolean onQueryTextChange(String newText) {
-            Toast.makeText(getActivity(), "Changing text", Toast.LENGTH_LONG).show();
-            adapter.getFilter().filter(newText);
-            if (searchList.getVisibility() == GONE) {
-                searchList.setVisibility(View.VISIBLE);
-            }
-            //searchList.setAdapter(adapter);
             return true;
         }
 
+        class searchLanguages extends AsyncTask<String, Void, NetworkResponse<List<Language>>> {
+            @Override
+            protected NetworkResponse<List<Language>> doInBackground(String... strings) {
+                API.loadAppDatabase(getContext());
+                NetworkResponse<List<Language>> response = API.Get.autocompleteLanguage(strings[0]);
+                API.closeDatabase();
+                return response;
+            }
+
+            @Override
+            protected void onPostExecute(NetworkResponse<List<Language>> response) {
+                super.onPostExecute(response);
+                if (response.fail()) {
+                    response.showErrorDialog(getContext());
+                } else {
+                    adapter.clear();
+                    adapter.addAll(response.getPayload());
+                    if (searchList.getVisibility() == GONE) {
+                        searchList.setVisibility(View.VISIBLE);
+                    }
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        }
+
+        class launchNetworkFromLangAndNear extends AsyncTask<Network, Void, NetworkResponse<Network>> {
+            @Override
+            protected NetworkResponse<Network> doInBackground(Network... networks) {
+                Network net = networks[0];
+                API.loadAppDatabase(getContext());
+                NetworkResponse<Network> response = API.Get.netFromLangAndNear(net.language,
+                        net.nearLocation.getNearLocation());
+                API.closeDatabase();
+                return response;
+            }
+
+            @Override
+            protected void onPostExecute(NetworkResponse<Network> response) {
+                super.onPostExecute(response);
+                // TODO: If network doesn't exist, offer to create it
+                if (response.fail()) {
+                    response.showErrorDialog(getContext());
+                } else {
+                    getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
+                            .putLong(API.SELECTED_NETWORK, response.getPayload().id).apply();
+                    startActivity(new Intent(getActivity(), TimelineActivity.class));
+                }
+            }
+        }
     }
 
 

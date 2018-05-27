@@ -1,8 +1,5 @@
 package org.codethechange.culturemesh;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,12 +52,12 @@ public class NetworkSummaryAdapter extends RecyclerView.Adapter<NetworkSummaryAd
     public void onBindViewHolder(PostViewHolder holder, int position) {
         if (position >= networks.size() || position >= postCounts.size()) return;
         final Network network = networks.get(position);
-        if (network.networkClass) {//fromLoc
-            holder.fromLocation.setText(network.fromLocation.shortName());
+        if (network.isLocationBased()) {//fromLoc
+            holder.fromLocation.setText(network.fromLocation.getListableName());
         } else {
             holder.fromLocation.setText(network.language.name);
         }
-        holder.nearLocation.setText(network.nearLocation.shortName());
+        holder.nearLocation.setText(network.nearLocation.getListableName());
         holder.postCount.setText(FormatManager.abbreviateNumber(postCounts.get(position)));
         holder.subscribedUserCount.setText(FormatManager.abbreviateNumber(userCounts.get(position)));
         holder.itemView.setOnClickListener(new View.OnClickListener() {

@@ -22,6 +22,6 @@ public interface RegionDao {
     @Query("SELECT * FROM region WHERE id = :id")
     public Region getRegion(long id);
 
-    @Query("SELECT * FROM region WHERE NAME LIKE :query")
+    @Query("SELECT * FROM region WHERE regionName LIKE :query")
     public List<Region> autoCompleteRegions(String query);
 }

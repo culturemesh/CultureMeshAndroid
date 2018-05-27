@@ -1,57 +1,26 @@
 package org.codethechange.culturemesh;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.res.ColorStateList;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.Html;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.text.style.StyleSpan;
-import android.text.style.URLSpan;
-import android.text.style.UnderlineSpan;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
-import org.codethechange.culturemesh.models.User;
 
-import java.io.Serializable;
-import java.lang.reflect.Type;
-import java.math.BigInteger;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-
-import static android.support.v4.os.LocaleListCompat.create;
 
 public class CreatePostActivity extends AppCompatActivity implements FormatManager.IconUpdateListener {
     ListenableEditText content;
@@ -221,15 +190,15 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
         protected void onPostExecute(Network network) {
             //Update text with network name.
             if (network != null) {
-                if (network.networkClass) {
+                if (network.isLocationBased()) {
                     networkLabel.setText(getResources().getString(R.string.from) + " " +
-                            network.fromLocation.shortName() + " " +
+                            network.fromLocation.getListableName() + " " +
                             getResources().getString(R.string.near) + " " +
-                            network.nearLocation.shortName());
+                            network.nearLocation.getListableName());
                 } else {
                     networkLabel.setText(network.language.toString() + " " +
                             getResources().getString(R.string.speakers_in).toString() + " " +
-                            network.nearLocation.shortName());
+                            network.nearLocation.getListableName());
                 }
             }
             API.closeDatabase();

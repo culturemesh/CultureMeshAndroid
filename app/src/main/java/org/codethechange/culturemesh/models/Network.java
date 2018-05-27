@@ -1,64 +1,99 @@
 package org.codethechange.culturemesh.models;
 
-import android.arch.persistence.room.Embedded;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
-
 import java.io.Serializable;
 
 /**
- * Created by nathaniel on 11/10/17.
+ * This class stores all the information related to a network. It is fully expanded, meaning that
+ * its instance fields like {@link Network#nearLocation} store expanded objects (i.e. {@link Place},
+ * not the stripped-down forms for database storage.
  */
+public class Network implements Serializable {
 
-@Entity
-public class Network implements Serializable{
-    //TODO: Figure out Room deals with bigints.
-    @PrimaryKey
+    /**
+     * ID of network. Must always be specified.
+     */
     public long id;
 
-    @Embedded
-    public NearLocation nearLocation;
+    /**
+     * The current location of users in the network. Must always be specified.
+     */
+    public Place nearLocation;
 
-    @Embedded
-    public FromLocation fromLocation;
+    /**
+     * Where users of the network are from. Must be specified if the network is location-based.
+     */
+    public Place fromLocation;
 
-    @Embedded
+    /**
+     * What language the users of the network speak. Must be specified if the network is language-
+     * based.
+     */
     public Language language;
 
     /**
-     * networkClass is a boolean determining if a network is fromloc->nearLoc or language->nearLoc.
-     * true: fromLoc->nearLoc
-     * false: lang->nearLoc
+     * Denotes whether this network's <em>from</em> attribute is based on where an individual is
+     * from or on what language they speak.
+     *
+     * {@code true}: Based on what language they speak
+     *
+     * {@code false}: Based on what location they are from
      */
-    public boolean networkClass;
+    private boolean isLanguageBased;
 
     /**
-     * We don't have posts, events, and users fields because they are so large and often unnecessary.
-     * Instead, pass the id into an API.Get.networkUsers(), API.Get.networkEvents(), or
-     * or API.networkPosts() (asynchronously of course) to get these fields.
-     * */
-
-    public Network() {
-
-    }
-    public Network(NearLocation nearLocation,
-                   FromLocation fromLocation, long id) {
+     * Create a location-based network from the provided objects
+     * @param nearLocation Where the network's users currently reside
+     * @param fromLocation Where the network's users are all from
+     * @param id ID of the network
+     */
+    public Network(Place nearLocation, Place fromLocation, long id) {
         this.fromLocation = fromLocation;
         this.nearLocation = nearLocation;
-        networkClass = true;
+        isLanguageBased = true;
         this.id = id;
     }
 
-    public Network(NearLocation nearLocation,
-                   Language lang, long id) {
+    /**
+     * Create a language-based network from the provided objects
+     * @param nearLocation Where the network's users currently reside
+     * @param lang What language the network's users all speak
+     * @param id ID of the network
+     */
+    public Network(Place nearLocation, Language lang, long id) {
         this.language = lang;
         this.nearLocation = nearLocation;
-        networkClass = false;
+        isLanguageBased = false;
         this.id = id;
     }
 
-    //No override of toString() because getResources() requires an activity
-    //We want to use string xml resources for localization.
-    //For more info, check out
-    //https://developer.android.com/guide/topics/resources/providing-resources.html
+    /**
+     * Check whether this network is of people who speak the same language
+     * @return {@code true} if the network is defined in terms of language, {@code false} otherwise
+     */
+    public boolean isLanguageBased() {
+        return isLanguageBased;
+    }
+
+    /**
+     * Check whether this network is of people who come from the same place
+     * @return {@code true} if the network is defined by where members are from, {@code false}
+     * otherwise
+     */
+    public boolean isLocationBased() {
+        return ! isLanguageBased;
+    }
+
+    /**
+     * Get a {@link DatabaseNetwork} with the IDs stored by the {@link Network} from which the
+     * method is called.
+     * @return The {@link DatabaseNetwork} associated with this {@link Network}
+     */
+    public DatabaseNetwork getDatabaseNetwork() {
+        if (isLanguageBased()) {
+            return new DatabaseNetwork(nearLocation.getNearLocation(), language.language_id, id);
+        } else {
+            return new DatabaseNetwork(nearLocation.getNearLocation(),
+                    fromLocation.getFromLocation(), id);
+        }
+    }
 }

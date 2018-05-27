@@ -1,75 +1,59 @@
 package org.codethechange.culturemesh.models;
 
-import android.arch.persistence.room.Ignore;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
- * Created by Drew Gregory on 2/19/18.
- * Exact copy of Location, but used as Embedded Entity in SQLite Database.
+ * Wrapper for {@code DatabaseLocation} that is for Near locations. See the documentation for
+ * {@code DatabaseLocation} for information as to why this redundancy is necessary. All of these
+ * instance fields will be stored in the local cached database.
  */
+public class NearLocation extends DatabaseLocation {
 
-public class NearLocation {
     /**
-     * When stored in the Database, we will store just the id's. The object returned near the API
-     * will have the country, region, and city updated.
-     * The default value for country, region, city is 0.
+     * These instance fields mirror those in Location, but are needed for database storage
      */
     public long near_country_id;
     public long near_region_id;
     public long near_city_id;
 
-    @Ignore
-    public String near_country;
-    @Ignore
-    public String near_region;
-    @Ignore
-    public String near_city;
+    // TODO: Handle undefined geographical areas (e.g. no region defined)
+    /**
+     * Initialize instance fields with provided parameters
+     * @param cityId ID of city
+     * @param regionId ID of region
+     * @param countryId ID of country
+     */
+    public NearLocation(long cityId, long regionId, long countryId) {
+        super(cityId, regionId, countryId);
+        initialize();
+    }
 
-    //TODO: private Point[] points;
+    /**
+     * Initializes instance fields by passing JSON to {@link Location#Location(JSONObject)} and then
+     * initializing instance fields using {@link NearLocation#initialize()}
+     * @param json JSON object describing the location
+     * @throws JSONException May be thrown in response to improperly formatted JSON
+     */
+    public NearLocation(JSONObject json) throws JSONException {
+        super(json);
+        initialize();
+    }
 
+    /**
+     * Empty constructor for database use only. This should never be called by our code.
+     */
     public NearLocation() {
 
     }
 
-    public NearLocation(String near_country, String near_region, String near_city, Point[] points) {
-        this.near_country = near_country;
-        this.near_region = near_region;
-        this.near_city = near_city;
-        //TODO: this.points = points
+    /**
+     * Initialize this class's instance fields based on those provided and those from superclass
+     * methods. This is what keeps the instance fields in sync with those of Location.
+     */
+    private void initialize() {
+        near_country_id = getCountryId();
+        near_region_id = getRegionId();
+        near_city_id = getCityId();
     }
-
-    public NearLocation(long cityId, long regionId, long countryId) {
-        this.near_country = "";
-        this.near_region = "";
-        this.near_city = "";
-        this.near_city_id = cityId;
-        this.near_country_id = countryId;
-        this.near_region_id = regionId;
-    }
-
-
-
-    public String toString() {
-        String string = "";
-        string += near_country;
-        String region = this.near_region;
-        if (region != null) {
-            string += ", " + region;
-        }
-        if (near_city != null) {
-            string += ", " + near_city;
-        }
-        return string;
-    }
-
-    public String shortName() {
-        //We'll return the lowest level location.
-        String city = this.near_city;
-        if (city != null) return city;
-        String region = this.near_region;
-        if (region != null) return region;
-        return this.near_country;
-
-
-    }
-
 }

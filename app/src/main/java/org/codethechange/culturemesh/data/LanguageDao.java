@@ -16,6 +16,6 @@ public interface LanguageDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void insertLanguages(Language... Language);
 
-    @Query("SELECT * FROM language WHERE id = :id")
+    @Query("SELECT * FROM language WHERE language_id = :id")
     public Language getLanguage(long id);
 }
