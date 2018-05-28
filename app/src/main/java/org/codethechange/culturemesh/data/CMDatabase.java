@@ -18,7 +18,7 @@ import org.codethechange.culturemesh.models.User;
  * Created by Drew Gregory on 2/19/18.
  * TODO: Check out LiveData: https://developer.android.com/reference/android/arch/lifecycle/LiveData.html
  */
-@Database(version = 16, entities = {DatabaseNetwork.class, User.class, Post.class, Event.class,
+@Database(version = 17, entities = {DatabaseNetwork.class, User.class, Post.class, Event.class,
         EventSubscription.class, NetworkSubscription.class, Region.class, City.class, Country.class,
         Place.class, Language.class, PostReply.class})
 abstract public class CMDatabase extends RoomDatabase{

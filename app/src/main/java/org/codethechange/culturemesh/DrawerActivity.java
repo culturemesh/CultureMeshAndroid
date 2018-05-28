@@ -52,6 +52,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
 
     @Override
     public void setContentView(int layoutResID) {
+        Log.i("DrawerActivity", "Running setContentView()");
         fullLayout = (DrawerLayout) getLayoutInflater().inflate(R.layout.activity_drawer, null);
         frameLayout = fullLayout.findViewById(R.id.drawer_frame);
         getLayoutInflater().inflate(layoutResID, frameLayout, true);
@@ -102,6 +103,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         currentUser = settings.getLong(API.CURRENT_USER, -1);
         if (currentUser == -1) {
+            Log.i("DrawerActivity", "User is not logged in");
             //User is not signed in. Replace user info with sign in button
             Button button = navView.getHeaderView(0).findViewById(R.id.nav_user_sign_in_button);
             button.setVisibility(View.VISIBLE);
@@ -114,6 +116,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                 }
             });
         } else {
+            Log.i("DrawerActivity", "User is logged in as " + currentUser);
             //Load User info.
             new LoadUserInfo().execute(currentUser);
             new LoadUserSubscriptions().execute(currentUser);
@@ -180,13 +183,22 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
     private class LoadUserSubscriptions extends AsyncTask<Long, Void, Void>{
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Log.i("DrawerActivity", "Starting to load user subscriptions via AsyncTask.");
+        }
+
+        @Override
         protected Void doInBackground(Long... longs) {
             API.loadAppDatabase(getApplicationContext());
             List<Network> networks = API.Get.userNetworks(longs[0]).getPayload();
+            Log.i("DrawerActivity", "Subscribed Networks from API: " + networks.toString());
             subscribedNetworks = new SparseArray<Network>();
 
             //Instantiate map with key -> menu view id, value -> network.
             for (Network net : networks) {
+                Log.i("DrawerActivity", "Found that User with ID " + longs[0].toString()
+                        + " is subscribed to network: " + net);
                 subscribedNetworkIds.add(net.id);
                 int viewId = View.generateViewId();
                 subscribedNetworks.put(viewId, net);
@@ -197,13 +209,14 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
 
         @Override
         protected void onPostExecute(Void v) {
-
+            Log.i("DrawerActivity", "Beginning onPostExecute() of LoadUserSubscriptions");
             Menu navMenu = navView.getMenu();
             MenuItem item = navMenu.getItem(2); //Your Networks subItem
             SubMenu netMenu = item.getSubMenu();
             for (int i = 0; i < subscribedNetworks.size(); i++) {
                 int id = subscribedNetworks.keyAt(i);
                 Network net = subscribedNetworks.get(id);
+                Log.i("DrawerActivity", "Processing subscribed network: " + net);
                 String name = "";
                 if (net.isLocationBased()) {
                     name = getResources().getString(R.string.from) + " " +
@@ -225,6 +238,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                 Log.i("This happens", "Instance works!");
                 ((WaitForSubscribedList) thisActivity).onSubscribeListFinish();
             }
+            Log.i("DrawerActivity", "Finished loading user subscriptions via AsyncTask.");
         }
     }
 

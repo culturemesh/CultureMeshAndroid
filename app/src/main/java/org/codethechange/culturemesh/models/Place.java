@@ -150,4 +150,13 @@ public abstract class Place extends Location implements Listable, Serializable {
     public String getFeatureCode() {
         return featureCode;
     }
+
+    /**
+     * Represent the object as a string suitable for debugging, but not for display to user.
+     * @return String representation of the form {@code Class[var=value, var=value, var=value, ...]}
+     */
+    public String toString() {
+        return "Place[id=" + id + ", latlng=" + latLng + ", population=" + population + ", " +
+                "featureCode=" + featureCode + "super=" + super.toString() + "]";
+    }
 }
