@@ -848,7 +848,7 @@ class API {
             return new NetworkResponse<>(events);
         }
 
-        static NetworkResponse<Network> network(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<Network>> callback) {
+        static void network(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<Network>> callback) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET,
                     PREFIX + "network/" + id + getCredentials(), null,
                     new Response.Listener<JSONObject>() {
@@ -869,32 +869,6 @@ class API {
                 }
             });
             queue.add(req);
-
-
-//            //TODO: Send network request if not found.
-//            NetworkDao netDao = mDb.networkDao();
-//            List<DatabaseNetwork> nets = netDao.getNetwork(id);
-//
-//            if (nets == null || nets.size() == 0 || nets.get(0) == null) {
-//                if (nets == null) {
-//                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
-//                            "database because of null response.");
-//                } else if (nets.size() == 0) {
-//                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
-//                            "database because an empty list was received: " + nets.toString());
-//                } else {
-//                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
-//                            "database because of null first item in list: " + nets.toString());
-//                }
-//                return new NetworkResponse<>(true);
-//            } else {
-//                Log.i("API.Get.network(" + id + ")", "Networks from database: " + nets.toString());
-//                DatabaseNetwork dn = nets.get(0);
-//                Log.i("API.Get.network(" + id + ")", "Inflating network: " + dn);
-//                Network net = expandDatabaseNetwork(dn);
-//                Log.i("API.Get.network(" + id + ")", "Inflated network with ID " + dn.id);
-//                return new NetworkResponse<>(net);
-//            }
         }
 
         static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> networkPosts(long id) {
