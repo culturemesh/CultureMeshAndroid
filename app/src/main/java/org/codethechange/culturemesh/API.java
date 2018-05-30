@@ -84,6 +84,8 @@ class API {
     //reqCounter to ensure that we don't close the database while another thread is using it.
     static int reqCounter;
 
+    static final String PREFIX = "https://www.culturemesh.com/api-dev/v1/";
+
 
     /**
      * Add users to the database by parsing the JSON stored in {@code rawDummy}. In case of any
@@ -846,31 +848,53 @@ class API {
             return new NetworkResponse<>(events);
         }
 
-        static NetworkResponse<Network> network(long id) {
-            //TODO: Send network request if not found.
-            NetworkDao netDao = mDb.networkDao();
-            List<DatabaseNetwork> nets = netDao.getNetwork(id);
-
-            if (nets == null || nets.size() == 0 || nets.get(0) == null) {
-                if (nets == null) {
-                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
-                            "database because of null response.");
-                } else if (nets.size() == 0) {
-                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
-                            "database because an empty list was received: " + nets.toString());
-                } else {
-                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
-                            "database because of null first item in list: " + nets.toString());
+        static NetworkResponse<Network> network(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<Network>> callback) {
+            JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET,
+                    PREFIX + "network/" + id + getCredentials(), null,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject res) {
+                            try {
+                                DatabaseNetwork dbNet = new DatabaseNetwork(res);
+                                Network net = expandDatabaseNetwork(dbNet);
+                                callback.onResponse(new NetworkResponse<>(net));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    callback.onResponse(new NetworkResponse<Network>(true));
                 }
-                return new NetworkResponse<>(true);
-            } else {
-                Log.i("API.Get.network(" + id + ")", "Networks from database: " + nets.toString());
-                DatabaseNetwork dn = nets.get(0);
-                Log.i("API.Get.network(" + id + ")", "Inflating network: " + dn);
-                Network net = expandDatabaseNetwork(dn);
-                Log.i("API.Get.network(" + id + ")", "Inflated network with ID " + dn.id);
-                return new NetworkResponse<>(net);
-            }
+            });
+            queue.add(req);
+
+
+//            //TODO: Send network request if not found.
+//            NetworkDao netDao = mDb.networkDao();
+//            List<DatabaseNetwork> nets = netDao.getNetwork(id);
+//
+//            if (nets == null || nets.size() == 0 || nets.get(0) == null) {
+//                if (nets == null) {
+//                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
+//                            "database because of null response.");
+//                } else if (nets.size() == 0) {
+//                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
+//                            "database because an empty list was received: " + nets.toString());
+//                } else {
+//                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
+//                            "database because of null first item in list: " + nets.toString());
+//                }
+//                return new NetworkResponse<>(true);
+//            } else {
+//                Log.i("API.Get.network(" + id + ")", "Networks from database: " + nets.toString());
+//                DatabaseNetwork dn = nets.get(0);
+//                Log.i("API.Get.network(" + id + ")", "Inflating network: " + dn);
+//                Network net = expandDatabaseNetwork(dn);
+//                Log.i("API.Get.network(" + id + ")", "Inflated network with ID " + dn.id);
+//                return new NetworkResponse<>(net);
+//            }
         }
 
         static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> networkPosts(long id) {
