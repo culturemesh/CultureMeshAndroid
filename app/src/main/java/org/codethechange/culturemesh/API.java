@@ -926,12 +926,64 @@ class API {
             }
         }
 
-        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> networkPosts(long id) {
-            //TODO: Send network request.
+        /**
+         * This fetches the posts associated with the given network.
+         * @param queue The {@link RequestQueue} that will house the network requests.
+         * @param id The id of the {@link User}.
+         * @param listener The listener that the UI will call when the request is finished
+         * @return
+         */
+        static void networkPosts(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Post>>> listener) {
+            /** TODO: Add caching capability.
             PostDao pDao = mDb.postDao();
             List<org.codethechange.culturemesh.models.Post> posts = pDao.getNetworkPosts((int) id);
-            instantiatePosts(posts);
-            return new NetworkResponse<>(posts);
+            instantiatePosts(posts);*/
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/"
+                    + id + "/posts?" + getCredentials(), null, new Response.Listener<JSONArray>() {
+
+                @Override
+                public void onResponse(JSONArray response) {
+                    final ArrayList<org.codethechange.culturemesh.models.Post> posts = new ArrayList<>();
+                    // Here's the tricky part. We need to fetch user information for each post,
+                    // but we only want to call the listener once, after all the requests are
+                    // finished.
+                    // Let's make a counter (numReqFin) for the number of requests finished. This will be
+                    // a wrapper so that we can pass it by reference.
+                    final AtomicInteger numReqFin = new AtomicInteger();
+                    numReqFin.set(0);
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            JSONObject res = (JSONObject) response.get(i);
+                            posts.add(new org.codethechange.culturemesh.models.Post(res.getInt("id"), res.getInt("id_user"),
+                                    res.getInt("id_network"), res.getString("post_text"),
+                                    res.getString("img_link"), res.getString("vid_link"),
+                                    res.getString("post_date")));
+                            // Next, we will call instantiate postUser, but we will have a special
+                            // listener.
+                            instantiatePostUser(queue, posts.get(i), new Response.Listener<org.codethechange.culturemesh.models.Post>() {
+                                @Override
+                                public void onResponse(org.codethechange.culturemesh.models.Post response) {
+                                    // Update the numReqFin counter that we have another finished post
+                                    // object.
+                                    if (numReqFin.addAndGet(1) == posts.size()) {
+                                        // We finished!! Call the listener at last.
+                                        listener.onResponse(new NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Post>>(false, posts));
+                                    }
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.i("Having errors", "hello");
+                    error.printStackTrace();
+                }
+            });
+            queue.add(req);
         }
 
         static NetworkResponse<List<Event>> networkEvents(long id) {
@@ -1060,7 +1112,7 @@ class API {
             /*PostReplyDao dao = mDb.postReplyDao();
             List<PostReply> replies = dao.getPostReplies(id);
             instantiatePostReplies(replies);*/
-            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "/post/" +
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "post/" +
                     id + "/replies?"+ getCredentials(), null, new Response.Listener<JSONArray>(){
 
                 @Override
@@ -1232,6 +1284,7 @@ class API {
     }
 
 
+
     static class Post {
         /*
             TODO: During production time, we will send it off to server (as well as update locally?).
@@ -1373,6 +1426,39 @@ class API {
      */
     static String getCredentials(){
         return "&key=" + Credentials.APIKey;
+    }
+
+    //TODO: Try to revive this helper method, or delete it.
+    static void instantiateComponents(RequestQueue queue, final ArrayList list, final Response.Listener UICallback, InstantiationListener listener){
+
+        // Here's the tricky part. We need to fetch information for each element,
+        // but we only want to call the listener once, after all the requests are
+        // finished.
+        // Let's make a counter (numReqFin) for the number of requests finished. This will be
+        // a wrapper so that we can pass it by reference.
+        final AtomicInteger numReqFin = new AtomicInteger();
+        numReqFin.set(0);
+        Log.i("Do I make it in here?", "????");
+        for (int i = 0; i < list.size(); i++) {
+                // Next, we will call instantiate postUser, but we will have a special
+                // listener.
+                listener.instantiateComponent(queue, list.get(i), new Response.Listener() {
+                    @Override
+                    public void onResponse(Object response) {
+                        // Update the numReqFin counter that we have another finished post
+                        // object.
+                        Log.i("Checking out this id", numReqFin.get() + " " + list.size());
+                        if (numReqFin.addAndGet(1) == list.size()) {
+                            // We finished!! Call the listener at last.
+                            UICallback.onResponse(new NetworkResponse(false, list));
+                        }
+                    }
+                });
+        }
+    }
+
+    interface InstantiationListener {
+        public void instantiateComponent(RequestQueue queue, Object obj, Response.Listener listener);
     }
 
 }
