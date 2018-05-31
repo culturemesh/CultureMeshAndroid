@@ -245,7 +245,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
             @Override
             public void onResponse(NetworkResponse<Post> response) {
                 if (!response.fail()) {
-                    Post post = response.getPayload();
+                    final Post post = response.getPayload();
                     String name = post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName();
                     personName.setText(name);
                     content.setText(post.getContent());
@@ -263,6 +263,19 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                     }
                     Picasso.with(personPhoto.getContext()).load(post.getAuthor().getImgURL()).
                             into(personPhoto);
+                    //Now, allow redirect to ViewProfileActivity if username or profile pic is tapped.
+                    View.OnClickListener viewUserProfile = new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Log.i("Clicking username?", "Yes");
+                            Intent viewUser = new Intent(getApplicationContext(),ViewProfileActivity.class);
+                            viewUser.putExtra(ViewProfileActivity.SELECTED_USER, post.getAuthor().id);
+                            startActivity(viewUser);
+                        }
+                    };
+                    personPhoto.setOnClickListener(viewUserProfile);
+                    username.setOnClickListener(viewUserProfile);
+                    personName.setOnClickListener(viewUserProfile);
                 }
             }
         });
@@ -350,6 +363,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
             View.OnClickListener viewUserProfile = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.i("Clicking username?", "Yes");
                     Intent viewUser = new Intent(getApplicationContext(),ViewProfileActivity.class);
                     viewUser.putExtra(ViewProfileActivity.SELECTED_USER, postBundleWrapper.post.author.id);
                     startActivity(viewUser);

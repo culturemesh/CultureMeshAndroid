@@ -83,7 +83,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     }
 
     protected void createDefaultNetwork() {
-        new LoadNetworkData().execute(selectedNetwork);
+        //TODO: Fix new LoadNetworkData().execute(selectedNetwork);
 
 
 
