@@ -121,7 +121,7 @@ public class PostsFrag extends Fragment {
                 //We also need to get the post replies.
                 List<Post> posts = API.Get.networkPosts(longs[0]).getPayload();
                 for (Post post : posts) {
-                    post.comments = API.Get.postReplies(post.id).getPayload();
+                    //post.comments = API.Get.postReplies(post.id).getPayload();
                 }
                 feedItems.addAll(posts);
             }

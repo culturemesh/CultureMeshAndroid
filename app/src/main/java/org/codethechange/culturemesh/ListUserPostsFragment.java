@@ -72,7 +72,7 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
                 //However, they don't have their comments yet. Let's add their comments.
                 for (FeedItem post : adapter.getNetPosts()) {
                     //TODO: Fetch comments for this post.
-                    
+
 
                 }
                 rv.getAdapter().notifyDataSetChanged();

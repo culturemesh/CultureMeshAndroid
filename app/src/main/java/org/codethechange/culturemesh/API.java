@@ -852,12 +852,11 @@ class API {
                                     res.getString("post_date")));
                             // Next, we will call instantiate postUser, but we will have a special
                             // listener.
-                            instantiatePostUser(queue, posts.get(i), new Response.Listener<NetworkResponse<org.codethechange.culturemesh.models.Post>>() {
+                            instantiatePostUser(queue, posts.get(i), new Response.Listener<org.codethechange.culturemesh.models.Post>() {
                                 @Override
-                                public void onResponse(NetworkResponse<org.codethechange.culturemesh.models.Post> response) {
+                                public void onResponse(org.codethechange.culturemesh.models.Post response) {
                                     // Update the numReqFin counter that we have another finished post
                                     // object.
-
                                     if (numReqFin.addAndGet(1) == posts.size()) {
                                         // We finished!! Call the listener at last.
                                         listener.onResponse(new NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Post>>(false, posts));
@@ -1013,7 +1012,12 @@ class API {
                         // Now, get author.
                         // For generalizing the logic when getting multiple posts, we will have to
                         // add the post to an ArrayList to pass it onto instantiate postUsers
-                        instantiatePostUser(queue, post, callback);
+                        instantiatePostUser(queue, post, new Response.Listener<org.codethechange.culturemesh.models.Post>() {
+                            @Override
+                            public void onResponse(org.codethechange.culturemesh.models.Post response) {
+                                callback.onResponse(new NetworkResponse<org.codethechange.culturemesh.models.Post>(response == null, response));
+                            }
+                        });
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -1052,10 +1056,53 @@ class API {
          * @param id the id of the post that we want comments for.
          * @param listener the listener that we will call when the request is finished.
          */
-        static void postReplies(RequestQueue queue, long id, Response.Listener<NetworkResponse<ArrayList<PostReply>>> listener){
+        static void postReplies(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<ArrayList<PostReply>>> listener){
             /*PostReplyDao dao = mDb.postReplyDao();
             List<PostReply> replies = dao.getPostReplies(id);
             instantiatePostReplies(replies);*/
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "/post/" +
+                    id + "/replies?"+ getCredentials(), null, new Response.Listener<JSONArray>(){
+
+                @Override
+                public void onResponse(JSONArray response) {
+                    final ArrayList<PostReply> comments = new ArrayList<>();
+                    // Here's the tricky part. We need to fetch user information for each post,
+                    // but we only want to call the listener once, after all the requests are
+                    // finished.
+                    // Let's make a counter (numReqFin) for the number of requests finished. This will be
+                    // a wrapper so that we can pass it by reference.
+                    final AtomicInteger numReqFin = new AtomicInteger();
+                    numReqFin.set(0);
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            JSONObject res = (JSONObject) response.get(i);
+                            comments.add(new PostReply(res));
+                            // Next, we will call instantiate postUser, but we will have a special
+                            // listener.
+                            instantiatePostReplyUser(queue, comments.get(i), new Response.Listener<PostReply>() {
+                                @Override
+                                public void onResponse(PostReply response) {
+                                    // Update the numReqFin counter that we have another finished post
+                                    // object.
+
+                                    if (numReqFin.addAndGet(1) == comments.size()) {
+                                        // We finished!! Call the listener at last.
+                                        listener.onResponse(new NetworkResponse<ArrayList<PostReply>>(false, comments));
+                                    }
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+
+                }
+            });
+            queue.add(req);
         }
 
         static NetworkResponse<List<Place>> autocompletePlace(String text) {
@@ -1113,7 +1160,7 @@ class API {
          * @param listener the UI listener that will be called when we complete the task at hand.
          */
         static void instantiatePostUser(RequestQueue queue, final org.codethechange.culturemesh.models.Post post,
-                                         final Response.Listener<NetworkResponse<org.codethechange.culturemesh.models.Post>> listener) {
+                                         final Response.Listener<org.codethechange.culturemesh.models.Post> listener) {
             JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET,
                     "https://www.culturemesh.com/api-dev/v1/user/" + post.userId + "?" + getCredentials(),
                     null, new Response.Listener<JSONObject>() {
@@ -1127,7 +1174,7 @@ class API {
                                 res.getString("email"), res.getString("username"),
                                 "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
                                 res.getString("about_me"));
-                        listener.onResponse(new NetworkResponse<org.codethechange.culturemesh.models.Post>(false, post));
+                        listener.onResponse(post);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -1136,13 +1183,54 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    listener.onResponse(new NetworkResponse<org.codethechange.culturemesh.models.Post>(true, null));
+                    listener.onResponse(null);
+                }
+            });
+            queue.add(authReq);
+
+        }
+
+        /**
+         * The API will return Post JSON Objects with id's for the user. Often, we will want to get
+         * the user information associated with a post, such as the name and profile picture. This
+         * method allows us to instantiate this user information for each post.
+         * @param queue The Volley RequestQueue object that handles all the request queueing.
+         * @param comment An already instantiated PostReply object that has a null author field but a defined
+         *             userId field.
+         * @param listener the UI listener that will be called when we complete the task at hand.
+         */
+        static void instantiatePostReplyUser(RequestQueue queue, final PostReply comment,
+                                        final Response.Listener<PostReply> listener) {
+            JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET,
+                    "https://www.culturemesh.com/api-dev/v1/user/" + comment.userId + "?" + getCredentials(),
+                    null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject res) {
+                    try {
+                        //make User object out of user JSON.
+                        comment.author = new User(res.getInt("id"),
+                                res.getString("first_name"),
+                                res.getString("last_name"),
+                                res.getString("email"), res.getString("username"),
+                                "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
+                                res.getString("about_me"));
+                        listener.onResponse(comment);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(comment);
                 }
             });
             queue.add(authReq);
 
         }
     }
+
 
     static class Post {
         /*

@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh;
 
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +15,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.PostReply;
@@ -33,6 +39,7 @@ public class CommentsFrag extends Fragment {
     private RecyclerView mRecyclerView;
     private RVCommentAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private RequestQueue queue;
     SharedPreferences settings;
 
     public CommentsFrag() {
@@ -42,6 +49,7 @@ public class CommentsFrag extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+        queue = Volley.newRequestQueue(getContext());
         super.onCreate(savedInstanceState);
 
     }
@@ -74,7 +82,21 @@ public class CommentsFrag extends Fragment {
 
         Intent intent = getActivity().getIntent();
         long postID = intent.getLongExtra("postID", 0);
-        new CommentsFrag.LoadComments().execute(postID);
+        API.Get.postReplies(queue, 88, new Response.Listener<NetworkResponse<ArrayList<PostReply>>>() {
+
+            @Override
+            public void onResponse(NetworkResponse<ArrayList<PostReply>> response) {
+                mAdapter = new RVCommentAdapter(response.getPayload(), new RVCommentAdapter.OnItemClickListener() {
+                    @Override
+                    public void onCommentClick(PostReply comment) {
+                        //to add comment click/long click functionality
+                        Toast.makeText(getActivity(), "Comment by " + comment.author + " clicked!", Toast.LENGTH_LONG).show();
+                    }
+                }, getActivity().getApplicationContext());
+                mRecyclerView.setAdapter(mAdapter);
+                mRecyclerView.getAdapter().notifyDataSetChanged();
+            }
+        });
         return rootView;
     }
 
@@ -118,8 +140,8 @@ public class CommentsFrag extends Fragment {
             API.loadAppDatabase(getActivity().getApplicationContext());
 
             //TODO: Consider error checking for when getPayload is null.
-            ArrayList<PostReply> comments = (ArrayList<PostReply>) API.Get.postReplies(longs[0]).getPayload();
-            return comments;
+            //ArrayList<PostReply> comments = (ArrayList<PostReply>) API.Get.postReplies(longs[0]).getPayload();
+            return null;
         }
 
         @Override
@@ -138,5 +160,21 @@ public class CommentsFrag extends Fragment {
                     .commit();
             API.closeDatabase();
         }
+    }
+
+    /**
+     * This ensures that we are canceling all network requests if the user is leaving this activity.
+     * We use a RequestFilter that accepts all requests (meaning it cancels all requests)
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (queue != null)
+            queue.cancelAll(new RequestQueue.RequestFilter() {
+                @Override
+                public boolean apply(Request<?> request) {
+                    return true;
+                }
+            });
     }
 }
