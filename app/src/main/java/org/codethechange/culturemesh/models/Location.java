@@ -75,15 +75,15 @@ public class Location implements Serializable {
      * will be used automatically. Depending on the presence of those keys, the value of the key
      * {@code id} will be used to fill the instance field for the JSON type. See {@code getJsonType}
      * for more.
+     * @deprecated This JSON format is no longer used by the API. Use {@link Location#Location(long, long, long)} instead
      * Precondition: The JSON must be validly formatted, with examples in {@code API.java}
      * @param json JSON object containing the country, region, and city IDs
      * @throws JSONException May be thrown if the JSON is improperly formatted
      */
+    @Deprecated
     public Location(JSONObject json) throws JSONException {
 
-        cityId = NOWHERE;
-        regionId = NOWHERE;
-        countryId = NOWHERE;
+        nullifyIds();
 
         if (json.has("id") && ! json.isNull("id")) {
             int type = getJsonType(json);
@@ -108,9 +108,40 @@ public class Location implements Serializable {
     }
 
     /**
+     * Initializes ID instance fields using the provided JSON object.
+     * The keys extracted are provided as parameters, but those keys need not exist in the JSON. Any
+     * missing keys will be treated as if the location does not have such a geographic identifier.
+     * This may produce an invalid location, and the JSON is followed blindly.
+     * Precondition: JSON must describe a valid location
+     * @param json JSON that describes the location to create
+     * @param cityIdKey The key that, if present in the JSON, has a value of the ID of the city
+     * @param regionIdKey The key that, if present in the JSON, has a value of the ID of the region
+     * @param countryIdKey The key that, if present in the JSON, has a value of the ID of the country
+     * @throws JSONException May be thrown in the case of an invalid JSON
+     */
+    public Location(JSONObject json, String cityIdKey, String regionIdKey, String countryIdKey) throws JSONException {
+        nullifyIds();
+        if (json.has(cityIdKey) && ! json.isNull(cityIdKey)) {
+            cityId = json.getLong(cityIdKey);
+        }
+        if (json.has(regionIdKey) && ! json.isNull(regionIdKey)) {
+            regionId = json.getLong(regionIdKey);
+        }
+        if (json.has(countryIdKey) && ! json.isNull(countryIdKey)) {
+            countryId = json.getLong(countryIdKey);
+        }
+    }
+
+    /**
      * Empty constructor for database use only. This should never be called by our code.
      */
     public Location() {}
+
+    private void nullifyIds() {
+        cityId = NOWHERE;
+        regionId = NOWHERE;
+        countryId = NOWHERE;
+    }
 
 
     /**
