@@ -90,32 +90,43 @@ public class DatabaseNetwork {
 
     /**
      * Initialize instance fields with the data in the provided JSON. The following keys are
-     * mandatory and used: {@code location_cur}, whose value is expected to be a JSON describing
-     * a {@link NearLocation} object and can be passed to
-     * {@link NearLocation#NearLocation(JSONObject)}, and {@code network_class}, whose value is
-     * expected to be either {@code 0}, indicating a location-based network, or {@code 1},
-     * indicating a language-based network. If the network is language-based, they key
-     * {@code language_origin} must exist with a value of a JSON object containing a key
-     * {@code id} whose value is the ID of a {@link Language}. If the network is location-based,
-     * the key {@code location_origin} must exist and have a value of a JSON object representing
-     * a {@link FromLocation} that can be passed to {@link FromLocation#FromLocation(JSONObject)}.
+     * mandatory and used: All keys required by {@link NearLocation#NearLocation(JSONObject)}
+     * and the key {@code network_class}, whose value is expected to be either {@code _l}, indicating
+     * a language-based network, or one of {@code cc}, {@code rc}, and {@code co}, indicating a
+     * location-based network. If the network is language-based, the key
+     * {@code id_language_origin} must exist with a value of the ID of a {@link Language}. If the
+     * network is location-based, all keys required by {@link FromLocation#FromLocation(JSONObject)}
+     * must be present.
      * @param json JSON object describing the network in terms of IDs
      * @throws JSONException May be thrown in response to improperly formatted JSON
      */
     public DatabaseNetwork(JSONObject json) throws JSONException {
-        JSONObject nearJSON = json.getJSONObject("location_cur");
-        nearLocation = new NearLocation(nearJSON);
+        if (json.has("location_cur")) {
+            // Old, documentation-based JSON format
+            JSONObject nearJSON = json.getJSONObject("location_cur");
+            nearLocation = new NearLocation(nearJSON);
 
-        id = json.getLong("id");
+            id = json.getLong("id");
 
-        isLanguageBased = json.getInt("network_class") == 0;
-        if (isLanguageBased) {
-            JSONObject langJSON = json.getJSONObject("language_origin");
-            languageId = langJSON.getLong("id");
+            isLanguageBased = json.getInt("network_class") == 0;
+            if (isLanguageBased) {
+                JSONObject langJSON = json.getJSONObject("language_origin");
+                languageId = langJSON.getLong("id");
+            } else {
+                JSONObject fromJSON = json.getJSONObject("location_origin");
+                fromLocation = new FromLocation(fromJSON);
+            }
         } else {
-            JSONObject fromJSON = json.getJSONObject("location_origin");
-            fromLocation = new FromLocation(fromJSON);
+            nearLocation = new NearLocation(json);
+            id = json.getLong("id");
+            isLanguageBased = json.getString("network_class").equals("_l");
+            if (isLanguageBased) {
+                languageId = json.getLong("id_language_origin");
+            } else {
+                fromLocation = new FromLocation(json);
+            }
         }
+
     }
 
     /**
