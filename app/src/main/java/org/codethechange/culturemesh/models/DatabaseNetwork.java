@@ -100,6 +100,7 @@ public class DatabaseNetwork {
      * {@code id} whose value is the ID of a {@link Language}. If the network is location-based,
      * the key {@code location_origin} must exist and have a value of a JSON object representing
      * a {@link FromLocation} that can be passed to {@link FromLocation#FromLocation(JSONObject)}.
+     * <strong>NOTE: This JSON format is deprecated and should not be used if possible.</strong>
      * <h1>If the key <code>location_cur</code> is not present (new JSON version): </h1>
      * Initialize instance fields with the data in the provided JSON. The following keys are
      * mandatory and used: All keys required by {@link NearLocation#NearLocation(JSONObject)}
@@ -116,7 +117,7 @@ public class DatabaseNetwork {
         if (json.has("location_cur")) {
             // Old, documentation-based JSON format
             JSONObject nearJSON = json.getJSONObject("location_cur");
-            nearLocation = new NearLocation(nearJSON);
+            nearLocation = new NearLocation(nearJSON, true);
 
             id = json.getLong("id");
 
@@ -126,9 +127,10 @@ public class DatabaseNetwork {
                 languageId = langJSON.getLong("id");
             } else {
                 JSONObject fromJSON = json.getJSONObject("location_origin");
-                fromLocation = new FromLocation(fromJSON);
+                fromLocation = new FromLocation(fromJSON, true);
             }
         } else {
+            // New JSON format that reflects actual API response
             nearLocation = new NearLocation(json);
             id = json.getLong("id");
             isLanguageBased = json.getString("network_class").equals("_l");

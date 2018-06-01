@@ -34,13 +34,26 @@ public class FromLocation extends DatabaseLocation {
     }
 
     /**
-     * Initializes instance fields by passing JSON to {@link Location#Location(long, long, long)}
+     * Initializes instance fields by passing JSON to {@link Location#Location(JSONObject, String, String, String)}
      * and then initializing instance fields using {@link FromLocation#initialize()}
      * @param json JSON object describing the location
      * @throws JSONException May be thrown in response to improperly formatted JSON
      */
     public FromLocation(JSONObject json) throws JSONException {
         super(json, CITY_ID_KEY, REGION_ID_KEY, COUNTRY_ID_KEY);
+        initialize();
+    }
+
+    /**
+     * Initializes instance fields by passing JSON to {@link Location#Location(JSONObject)} )}
+     * and then initializing instance fields using {@link FromLocation#initialize()}
+     * @param json JSON object describing the location
+     * @throws JSONException May be thrown in response to improperly formatted JSON
+     * @deprecated This is for the old JSON format. Use {@link FromLocation#FromLocation(JSONObject)} instead
+     */
+    @Deprecated
+    public FromLocation(JSONObject json, boolean distinguisher) throws JSONException {
+        super(json);
         initialize();
     }
 

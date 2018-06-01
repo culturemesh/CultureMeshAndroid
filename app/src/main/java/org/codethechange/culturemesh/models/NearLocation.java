@@ -36,13 +36,26 @@ public class NearLocation extends DatabaseLocation {
     }
 
     /**
-     * Initializes instance fields by passing JSON to {@link Location#Location(long, long, long)}
+     * Initializes instance fields by passing JSON to {@link Location#Location(JSONObject, String, String, String)}
      * and then initializing instance fields using {@link NearLocation#initialize()}
      * @param json JSON object describing the location
      * @throws JSONException May be thrown in response to improperly formatted JSON
      */
     public NearLocation(JSONObject json) throws JSONException {
         super(json, CITY_ID_KEY, REGION_ID_KEY, COUNTRY_ID_KEY);
+        initialize();
+    }
+
+    /**
+     * Initializes instance fields by passing JSON to {@link Location#Location(JSONObject)}
+     * and then initializing instance fields using {@link NearLocation#initialize()}
+     * @param json JSON object describing the location
+     * @param distinguisher Useless value used to distinguish from {@link NearLocation#NearLocation(JSONObject)}
+     * @throws JSONException May be thrown in response to improperly formatted JSON
+     */
+    @Deprecated
+    public NearLocation(JSONObject json, boolean distinguisher) throws JSONException {
+        super(json);
         initialize();
     }
 
