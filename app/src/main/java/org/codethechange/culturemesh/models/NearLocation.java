@@ -3,6 +3,8 @@ package org.codethechange.culturemesh.models;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+
 /**
  * Wrapper for {@code DatabaseLocation} that is for Near locations. See the documentation for
  * {@code DatabaseLocation} for information as to why this redundancy is necessary. All of these
@@ -17,6 +19,10 @@ public class NearLocation extends DatabaseLocation {
     public long near_region_id;
     public long near_city_id;
 
+    public static final String CITY_ID_KEY = "id_city_cur";
+    public static final String REGION_ID_KEY = "id_region_cur";
+    public static final String COUNTRY_ID_KEY = "id_country_cur";
+
     // TODO: Handle undefined geographical areas (e.g. no region defined)
     /**
      * Initialize instance fields with provided parameters
@@ -30,13 +36,13 @@ public class NearLocation extends DatabaseLocation {
     }
 
     /**
-     * Initializes instance fields by passing JSON to {@link Location#Location(JSONObject)} and then
-     * initializing instance fields using {@link NearLocation#initialize()}
+     * Initializes instance fields by passing JSON to {@link Location#Location(long, long, long)}
+     * and then initializing instance fields using {@link NearLocation#initialize()}
      * @param json JSON object describing the location
      * @throws JSONException May be thrown in response to improperly formatted JSON
      */
     public NearLocation(JSONObject json) throws JSONException {
-        super(json);
+        super(json, CITY_ID_KEY, REGION_ID_KEY, COUNTRY_ID_KEY);
         initialize();
     }
 

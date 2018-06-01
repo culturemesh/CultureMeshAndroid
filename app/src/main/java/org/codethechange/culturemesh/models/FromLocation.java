@@ -17,6 +17,10 @@ public class FromLocation extends DatabaseLocation {
     public long from_region_id;
     public long from_city_id;
 
+    public static final String CITY_ID_KEY = "id_city_origin";
+    public static final String REGION_ID_KEY = "id_region_origin";
+    public static final String COUNTRY_ID_KEY = "id_country_origin";
+
     // TODO: Handle undefined geographical areas (e.g. no region defined)
     /**
      * Initialize instance fields with provided parameters
@@ -30,13 +34,13 @@ public class FromLocation extends DatabaseLocation {
     }
 
     /**
-     * Initializes instance fields by passing JSON to {@link Location#Location(JSONObject)} and then
-     * initializing instance fields using {@link FromLocation#initialize()}
+     * Initializes instance fields by passing JSON to {@link Location#Location(long, long, long)}
+     * and then initializing instance fields using {@link FromLocation#initialize()}
      * @param json JSON object describing the location
      * @throws JSONException May be thrown in response to improperly formatted JSON
      */
     public FromLocation(JSONObject json) throws JSONException {
-        super(json);
+        super(json, CITY_ID_KEY, REGION_ID_KEY, COUNTRY_ID_KEY);
         initialize();
     }
 
