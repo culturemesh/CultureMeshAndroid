@@ -89,6 +89,18 @@ public class DatabaseNetwork {
     }
 
     /**
+     * <h1>If the key <code>location_cur</code> is present (old JSON version): </h1>
+     * Initialize instance fields with the data in the provided JSON. The following keys are
+     * mandatory and used: {@code location_cur}, whose value is expected to be a JSON describing
+     * a {@link NearLocation} object and can be passed to
+     * {@link NearLocation#NearLocation(JSONObject)}, and {@code network_class}, whose value is
+     * expected to be either {@code 0}, indicating a location-based network, or {@code 1},
+     * indicating a language-based network. If the network is language-based, they key
+     * {@code language_origin} must exist with a value of a JSON object containing a key
+     * {@code id} whose value is the ID of a {@link Language}. If the network is location-based,
+     * the key {@code location_origin} must exist and have a value of a JSON object representing
+     * a {@link FromLocation} that can be passed to {@link FromLocation#FromLocation(JSONObject)}.
+     * <h1>If the key <code>location_cur</code> is not present (new JSON version): </h1>
      * Initialize instance fields with the data in the provided JSON. The following keys are
      * mandatory and used: All keys required by {@link NearLocation#NearLocation(JSONObject)}
      * and the key {@code network_class}, whose value is expected to be either {@code _l}, indicating
