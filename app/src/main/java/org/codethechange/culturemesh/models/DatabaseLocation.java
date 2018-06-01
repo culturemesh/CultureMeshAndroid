@@ -28,9 +28,14 @@ public abstract class DatabaseLocation extends Location {
      * Constructor that passes all parameters to superclass constructor
      * @param json JSON object that defines the location. See superclass constructor documentation.
      * @throws JSONException May be thrown for improperly formatted JSON
+     * @deprecated This JSON format is no longer used by the API. Use {@link DatabaseLocation#DatabaseLocation(long, long, long)} instead
      */
     public DatabaseLocation(JSONObject json) throws JSONException {
         super(json);
+    }
+
+    public DatabaseLocation(JSONObject json, String cityIdKey, String regionIdKey, String countryIdKey) throws JSONException {
+        super(json, cityIdKey, regionIdKey, countryIdKey);
     }
 
     /**
