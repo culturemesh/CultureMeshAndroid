@@ -103,37 +103,7 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
         }
     }
 
-    class LoadUserPosts extends AsyncTask<Long, Void, Void> {
 
-        @Override
-        protected Void doInBackground(Long... longs) {
-            long userId = longs[0];
-            API.loadAppDatabase(getActivity());
-            RVAdapter adapter = (RVAdapter) rv.getAdapter();
-
-            //TODO: Delete this. List<Post> posts = API.Get.userPosts(userId).getPayload();
-            /*for (Post post : posts) {
-                post.comments = API.Get.postReplies(post.id).getPayload();
-            }
-            adapter.getNetPosts().addAll(posts);
-            API.closeDatabase();*/
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(Void v) {
-            rv.getAdapter().notifyDataSetChanged();
-            if (rv.getAdapter().getItemCount() > 0) {
-                //Hide empty text.
-                emptyText.setVisibility(View.GONE);
-            }
-        }
-    }
 
 
     /**

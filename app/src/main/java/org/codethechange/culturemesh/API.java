@@ -10,6 +10,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.codethechange.culturemesh.data.CMDatabase;
@@ -1322,10 +1324,16 @@ class API {
             return new NetworkResponse<>(network);
         }
 
-        static NetworkResponse post(org.codethechange.culturemesh.models.Post post) {
-            PostDao pDao = mDb.postDao();
+        static void post(final RequestQueue queue, org.codethechange.culturemesh.models.Post post,
+                                    Response.Listener<String> success,
+                                    Response.ErrorListener fail) {
+            /** TODO: For caching
+             * PostDao pDao = mDb.postDao();
             pDao.insertPosts(post);
-            return new NetworkResponse<>(false, post);
+            */
+            StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "post/new?" +
+                    getCredentials(), success, fail);
+            queue.add(req);
         }
 
         static NetworkResponse reply(PostReply comment) {
