@@ -8,8 +8,10 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.JsonArray;
 
 import org.codethechange.culturemesh.data.CMDatabase;
 import org.codethechange.culturemesh.data.CityDao;
@@ -783,31 +785,45 @@ class API {
         }
 
         /**
-         * Get the networks a user belongs to by searching all subscriptions in
-         * {@link NetworkSubscriptionDao} and then getting {@link Network} objects for each ID found
-         * in those subscriptions.
-         * @param id ID of {@link User} whose networks are being requested
-         * @return List of {@link Network}s the user is in
+         * Get the networks a user belongs to
+         * @param queue RequestQueue to which the asynchronous job will be added
+         * @param id ID of the user whose networks will be fetched
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with a {@link NetworkResponse} of an {@link ArrayList} of
+         *                 {@link Network}s
          */
-        static NetworkResponse<ArrayList<Network>> userNetworks(long id) {
-            //TODO: Send network request for all subscriptions.
-            NetworkSubscriptionDao nSDao  = mDb.networkSubscriptionDao();
-            List<Long> netIds = nSDao.getUserNetworks(id);
-            Log.i("API.Get.userNetworks(" + id + ")", "Network IDs from Database: " + netIds.toString());
-            ArrayList<Network> nets = new ArrayList<>();
-            for (Long netId : netIds) {
-                NetworkResponse res = network(netId);
-                if (!res.fail()) {
-                    nets.add((Network) res.getPayload());
-                    Log.i("API.Get.userNetworks(" + id + ")", "Received network from " +
-                            "database: " + res.getPayload());
-                } else {
-                    Log.i("API.Get.userNetworks(" + id + ")", "Failure in getting network from " +
-                            "database for ID " + netId);
+        static void userNetworks(final RequestQueue queue, final long id, final Response.Listener<NetworkResponse<ArrayList<Network>>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX + "user/" +
+                    id + "/networks" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray res) {
+                    ArrayList<Network> nets = new ArrayList<>();
+                    for (int i = 0; i < res.length(); i ++) {
+                        try {
+                            // TODO: How should we handle errors when parsing JSON array elements?
+                            DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(i));
+                            nets.add(expandDatabaseNetwork(dnet));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.e("API.Get.userNetworks", "Error parsing " + i + "th network of user " + id);
+                            /*
+                            Right now, this takes a "hard-fail" approach and returns a failed
+                            NetworkResponse object whenever any JSON parsing error occurs. This may
+                            not be the best approach.
+                             */
+                            listener.onResponse(new NetworkResponse<ArrayList<Network>>(true));
+                            return;
+                        }
+                    }
+                    listener.onResponse(new NetworkResponse<>(nets));
                 }
-            }
-            Log.i("API.Get.userNetworks(" + id + ")", "Networks from Database: " + nets.toString());
-            return new NetworkResponse<>(nets);
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<ArrayList<Network>>(true));
+                }
+            });
+            queue.add(req);
         }
 
         /**
