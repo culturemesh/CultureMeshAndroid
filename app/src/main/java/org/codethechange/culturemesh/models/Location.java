@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh.models;
 import android.arch.persistence.room.Ignore;
+import android.net.Uri;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,6 +45,11 @@ public class Location implements Serializable {
     public static final int COUNTRY = 0;
     public static final int REGION = 1;
     public static final int CITY = 2;
+
+    /**
+     * The value to be transmitted to the API in place of a missing country, region, or city ID
+     */
+    public static final int URL_NULL_ID = -1;
 
     /**
      * These instance fields store the IDs of the city, region, and country defining the location
@@ -272,5 +278,35 @@ public class Location implements Serializable {
     public String toString() {
         return "Location[cityId=" + cityId + ", regionId=" + regionId + ", countryId=" +
                 countryId + "]";
+    }
+
+    /**
+     * Represent the {@link Location} in a form suitable for use as the value of a key passed in
+     * a URL parameter to the API. Specifically, it returns the country, region, and city IDs
+     * separated by commas and in that order. The commas are escaped with the UTF-8 scheme and any
+     * missing IDs are replaced with the {@link Location#URL_NULL_ID} constant, which is understood
+     * by the API as signifying {@code null}.
+     * @return An API-compatible representation suitable for use as the value in a URL parameter
+     */
+    public String urlParam() {
+        String url = "";
+        if (hasCountryId()) {
+            url += countryId;
+        } else {
+            url += URL_NULL_ID;
+        }
+        url += ",";
+        if (hasRegionId()) {
+            url += regionId;
+        } else {
+            url += URL_NULL_ID;
+        }
+        url += ",";
+        if (hasCityId()) {
+            url += cityId;
+        } else {
+            url += URL_NULL_ID;
+        }
+        return Uri.encode(url);
     }
 }
