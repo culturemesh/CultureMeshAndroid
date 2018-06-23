@@ -4,9 +4,14 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkError;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -941,6 +946,8 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+
+
                     Log.e("API.Get.networkEvents", error.getMessage());
                     error.printStackTrace();
                     listener.onResponse(new NetworkResponse<List<Event>>(true, R.string.noConnection));
@@ -1286,6 +1293,38 @@ class API {
             mDb.close();
             mDb = null;
         }
+    }
+
+    /**
+     * Process errors that could be returned in the form of a {@link VolleyError} the Response.Listener
+     * @param tag Tag to include in log messages
+     * @param task Description of the task being attempted. This will be included in log entries.
+     * @param error The error returned.
+     * @return The resource ID of the error message that should be displayed to the user
+     */
+    private static long processNetworkError(String tag, String task, VolleyError error) {
+        if (error instanceof ServerError) {
+            Log.e(tag, task + ": A ServerError occurred with code " + error.networkResponse.statusCode);
+            error.printStackTrace();
+            return R.string.noConnection;
+        } else if (error instanceof NetworkError) {
+            // NoConnectionError is a subclass of NetworkError
+            Log.e(tag, task + ": A NetworkError occurred.");
+            error.printStackTrace();
+            return R.string.noConnection;
+        } else if (error instanceof AuthFailureError) {
+            Log.e(tag, task + ": An AuthFailureError occurred.");
+            error.printStackTrace();
+        } else if (error instanceof ParseError) {
+            Log.e(tag, task + ": A ParseError occurred.");
+            error.printStackTrace();
+        } else if (error instanceof TimeoutError) {
+            Log.e(tag, task + ": A TimeoutError occurred.");
+            error.printStackTrace();
+            return R.string.timeout;
+        }
+
+        return R.string.genericFail;
     }
 
     /**
