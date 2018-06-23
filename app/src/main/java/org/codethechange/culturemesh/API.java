@@ -887,12 +887,36 @@ class API {
             queue.add(req);
         }
 
-        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> networkPosts(long id) {
-            //TODO: Send network request.
-            PostDao pDao = mDb.postDao();
-            List<org.codethechange.culturemesh.models.Post> posts = pDao.getNetworkPosts((int) id);
-            instantiatePosts(posts);
-            return new NetworkResponse<>(posts);
+        static void networkPosts(final RequestQueue queue, final long id,
+                                 final Response.Listener<NetworkResponse<List<org.codethechange.culturemesh.models.Post>>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX + "network/" +
+                    id + "/posts?" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray res) {
+                    ArrayList<org.codethechange.culturemesh.models.Post> posts = new ArrayList<>();
+                    try {
+                        for (int i = 0; i < res.length(); i++) {
+                            org.codethechange.culturemesh.models.Post p =
+                                    new org.codethechange.culturemesh.models.Post((JSONObject) res.get(i));
+                            posts.add(p);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        listener.onResponse(new NetworkResponse<List<org.codethechange.culturemesh.models.Post>>(true));
+                        Log.e("API.Get.networkPosts", "Could not parse JSON of post: " + e.getMessage());
+                    }
+                    instantiatePosts(posts);
+                    listener.onResponse(new NetworkResponse<List<org.codethechange.culturemesh.models.Post>>(posts));
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e("API.Get.networkPosts", error.getMessage());
+                    error.printStackTrace();
+                    listener.onResponse(new NetworkResponse<List<org.codethechange.culturemesh.models.Post>>(true, R.string.noConnection));
+                }
+            });
+            queue.add(req);
         }
 
         static NetworkResponse<List<Event>> networkEvents(long id) {
