@@ -1079,7 +1079,6 @@ class API {
                     getCredentials(), null, new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray res) {
-                    // TODO: Distinguish between the network not existing and the lookup failing
                     try {
                         if (res.length() == 0) {
                             // No network was found
