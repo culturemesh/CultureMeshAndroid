@@ -83,7 +83,8 @@
 
     <string name="error">Error</string>
     <string name="genericFail">Oops, something went wrong.</string>
-    <string name="noConnection">There was a problem processing your request. Your internet connection may have failed.</string>
+    <string name="noConnection">There was a problem connecting to Culturemesh. There may be a problem with your internet connection.</string>
+    <string name="timeout">The network request timed out. There may be a problem with your internet connection.</string>
     <string name="genericSuccess">Operation Succeeded!</string>
     <string name ="noNetworkExist">It looks like that network does not exist. You can create one at culturemesh.com.</string>
     <string name="logout">Log Out</string>
