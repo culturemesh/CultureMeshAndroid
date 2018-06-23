@@ -1302,7 +1302,7 @@ class API {
      * @param error The error returned
      * @return The resource ID of the error message that should be displayed to the user
      */
-    private static long processNetworkError(String tag, String task, VolleyError error) {
+    private static int processNetworkError(String tag, String task, VolleyError error) {
         error.printStackTrace();
         if (error instanceof ServerError) {
             Log.e(tag, task + ": A ServerError occurred with code " + error.networkResponse.statusCode);
