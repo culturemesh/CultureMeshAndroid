@@ -2,6 +2,7 @@ package org.codethechange.culturemesh.models;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.net.Uri;
 
 import org.codethechange.culturemesh.Listable;
 
@@ -41,5 +42,9 @@ public class Language implements Serializable, Listable {
 
     public String getListableName() {
         return name;
+    }
+
+    public String urlParam() {
+        return Uri.encode(name);
     }
 }
