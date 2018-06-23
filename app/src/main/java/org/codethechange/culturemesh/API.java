@@ -794,7 +794,7 @@ class API {
          */
         static void userNetworks(final RequestQueue queue, final long id, final Response.Listener<NetworkResponse<ArrayList<Network>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX + "user/" +
-                    id + "/networks" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                    id + "/networks?" + getCredentials(), null, new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray res) {
                     ArrayList<Network> nets = new ArrayList<>();
@@ -866,7 +866,7 @@ class API {
 
         static void network(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<Network>> callback) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET,
-                    PREFIX + "network/" + id + getCredentials(), null,
+                    PREFIX + "network/" + id + "?" + getCredentials(), null,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject res) {
@@ -959,7 +959,7 @@ class API {
          */
         static void post(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<org.codethechange.culturemesh.models.Post>> callback) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET,
-                    "https://www.culturemesh.com/api-dev/v1/post/" + id + getCredentials(),
+                    "https://www.culturemesh.com/api-dev/v1/post/" + id + "?" + getCredentials(),
                     null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject res) {
@@ -973,8 +973,9 @@ class API {
                         // Now, get author.
                         final org.codethechange.culturemesh.models.Post finalPost = post;
                         JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET,
-                                "https://www.culturemesh.com/api-dev/v1/user/" + finalPost.userId + getCredentials(),
-                                null, new Response.Listener<JSONObject>() {
+                                "https://www.culturemesh.com/api-dev/v1/user/" + finalPost.userId
+                                        + "?" + getCredentials(), null,
+                                new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject res) {
                                 try {
@@ -1058,28 +1059,56 @@ class API {
             return new NetworkResponse(matches);
         }
 
-        static NetworkResponse<Network> netFromLangAndNear(Language lang, NearLocation near) {
-            NetworkDao netDao = mDb.networkDao();
-            DatabaseNetwork dn = netDao.netFromLangAndHome(lang.language_id, near.near_city_id, near.near_region_id,
-                    near.near_country_id);
-            if (dn == null) {
-                // TODO: Distinguish between the network not existing and the lookup failing
-                return new NetworkResponse<>(true, R.string.noNetworkExist);
-            } else {
-                return network(dn.id);
-            }
+        static void netFromLangAndNear(final RequestQueue queue, Language lang, NearLocation near,
+                                  final Response.Listener<NetworkResponse<Network>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX +
+                    "network/networks?near_location=" + near.urlParam() + "&language=" +
+                    lang.urlParam() + "&" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray res) {
+                    // TODO: Distinguish between the network not existing and the lookup failing
+                    try {
+                        DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(0));
+                        Network net = expandDatabaseNetwork(dnet);
+                        listener.onResponse(new NetworkResponse<>(net));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        listener.onResponse(new NetworkResponse<Network>(true));
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<Network>(true));
+                }
+            });
+            queue.add(req);
         }
 
-        static NetworkResponse<Network> netFromFromAndNear(FromLocation from, NearLocation near) {
-            NetworkDao netDao = mDb.networkDao();
-            DatabaseNetwork dn = netDao.netFromLocAndHome(from.from_city_id, from.from_region_id,
-                    from.from_country_id, near.near_city_id, near.near_region_id, near.near_country_id);
-            if (dn == null) {
-                // TODO: Distinguish between the network not existing and the lookup failing
-                return new NetworkResponse<>(true, R.string.noNetworkExist);
-            } else {
-                return network(dn.id);
-            }
+        static void netFromFromAndNear(final RequestQueue queue, FromLocation from, NearLocation near,
+                                       final Response.Listener<NetworkResponse<Network>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX +
+                    "network/networks?near_location=" + near.urlParam() + "&from_location=" +
+                    from.urlParam() + "&" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray res) {
+                    // TODO: Distinguish between the network not existing and the lookup failing
+                    try {
+                        DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(0));
+                        Network net = expandDatabaseNetwork(dnet);
+                        listener.onResponse(new NetworkResponse<>(net));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        listener.onResponse(new NetworkResponse<Network>(true));
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<Network>(true));
+                }
+            });
+            queue.add(req);
         }
     }
 
@@ -1223,6 +1252,6 @@ class API {
      * @return credentials string to be appended to request url as a param.
      */
     static String getCredentials(){
-        return "?key=" + Credentials.APIKey;
+        return "key=" + Credentials.APIKey;
     }
 }
