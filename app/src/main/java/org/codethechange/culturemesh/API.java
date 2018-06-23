@@ -1061,35 +1061,22 @@ class API {
 
         static void netFromLangAndNear(final RequestQueue queue, Language lang, NearLocation near,
                                   final Response.Listener<NetworkResponse<Network>> listener) {
-            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX +
-                    "network/networks?near_location=" + near.urlParam() + "&language=" +
-                    lang.urlParam() + "&" + getCredentials(), null, new Response.Listener<JSONArray>() {
-                @Override
-                public void onResponse(JSONArray res) {
-                    // TODO: Distinguish between the network not existing and the lookup failing
-                    try {
-                        DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(0));
-                        Network net = expandDatabaseNetwork(dnet);
-                        listener.onResponse(new NetworkResponse<>(net));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        listener.onResponse(new NetworkResponse<Network>(true));
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    listener.onResponse(new NetworkResponse<Network>(true));
-                }
-            });
-            queue.add(req);
+            netFromTwoParams(queue, "near_location", near.urlParam(), "language",
+                    lang.urlParam(), listener);
         }
 
         static void netFromFromAndNear(final RequestQueue queue, FromLocation from, NearLocation near,
                                        final Response.Listener<NetworkResponse<Network>> listener) {
+            netFromTwoParams(queue, "near_location", near.urlParam(), "from_location",
+                    from.urlParam(), listener);
+        }
+
+        private static void netFromTwoParams(final RequestQueue queue, String key1, String val1,
+                                             String key2, String val2,
+                                             final Response.Listener<NetworkResponse<Network>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX +
-                    "network/networks?near_location=" + near.urlParam() + "&from_location=" +
-                    from.urlParam() + "&" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                    "network/networks?" + key1 + "=" + val1 + "&" + key2 + "=" + val2 + "&" +
+                    getCredentials(), null, new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray res) {
                     // TODO: Distinguish between the network not existing and the lookup failing
