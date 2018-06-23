@@ -1071,8 +1071,8 @@ class API {
                     from.urlParam(), listener);
         }
 
-        private static void netFromTwoParams(final RequestQueue queue, String key1, String val1,
-                                             String key2, String val2,
+        private static void netFromTwoParams(final RequestQueue queue, final String key1, final String val1,
+                                             final String key2, final String val2,
                                              final Response.Listener<NetworkResponse<Network>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX +
                     "network/networks?" + key1 + "=" + val1 + "&" + key2 + "=" + val2 + "&" +
@@ -1081,6 +1081,14 @@ class API {
                 public void onResponse(JSONArray res) {
                     // TODO: Distinguish between the network not existing and the lookup failing
                     try {
+                        if (res.length() == 0) {
+                            // No network was found
+                            listener.onResponse(new NetworkResponse<Network>(true, R.string.noNetworkExist));
+                        } else if (res.length() > 1) {
+                            listener.onResponse(new NetworkResponse<Network>(true));
+                            Log.e("API.Get.netFromTwoParam", "Multiple networks matched this: " +
+                                    key1 + ":" + val1 + "," + key2 + ":" + val2);
+                        }
                         DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(0));
                         Network net = expandDatabaseNetwork(dnet);
                         listener.onResponse(new NetworkResponse<>(net));
@@ -1092,7 +1100,9 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    listener.onResponse(new NetworkResponse<Network>(true));
+                    listener.onResponse(new NetworkResponse<Network>(true, R.string.noConnection));
+                    Log.e("API.Get.netFromTwoParam", error.getMessage());
+                    error.printStackTrace();
                 }
             });
             queue.add(req);
