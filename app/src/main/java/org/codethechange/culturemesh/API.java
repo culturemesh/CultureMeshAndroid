@@ -919,12 +919,34 @@ class API {
             queue.add(req);
         }
 
-        static NetworkResponse<List<Event>> networkEvents(long id) {
-            //TODO:Send network request.... Applies to subsequent methods too.
-            EventDao eDao = mDb.eventDao();
-            List<Event> events = eDao.getNetworkEvents(id);
-            Log.i("Getting events" , events.size() + "");
-            return new NetworkResponse<>(events == null, events);
+        static void networkEvents(final RequestQueue queue, final long id,
+                                                          final Response.Listener<NetworkResponse<List<Event>>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX + "network/" +
+                    id + "/events?" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray res) {
+                    ArrayList<Event> events = new ArrayList<>();
+                    try {
+                        for (int i = 0; i < res.length(); i++) {
+                            Event e = new Event((JSONObject) res.get(i));
+                            events.add(e);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        listener.onResponse(new NetworkResponse<List<Event>>(true));
+                        Log.e("API.Get.networkEvents", "Could not parse JSON of event: " + e.getMessage());
+                    }
+                    listener.onResponse(new NetworkResponse<List<Event>>(events));
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e("API.Get.networkEvents", error.getMessage());
+                    error.printStackTrace();
+                    listener.onResponse(new NetworkResponse<List<Event>>(true, R.string.noConnection));
+                }
+            });
+            queue.add(req);
         }
 
         static NetworkResponse<ArrayList<User>> networkUsers(long id) {
