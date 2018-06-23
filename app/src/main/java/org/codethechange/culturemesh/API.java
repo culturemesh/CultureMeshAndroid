@@ -805,7 +805,6 @@ class API {
                     ArrayList<Network> nets = new ArrayList<>();
                     for (int i = 0; i < res.length(); i ++) {
                         try {
-                            // TODO: How should we handle errors when parsing JSON array elements?
                             DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(i));
                             nets.add(expandDatabaseNetwork(dnet));
                         } catch (JSONException e) {
@@ -825,7 +824,9 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    listener.onResponse(new NetworkResponse<ArrayList<Network>>(true));
+                    int messageID = processNetworkError("API.Get.userNetworks",
+                            "ErrorListener for id=" + id, error);
+                    listener.onResponse(new NetworkResponse<ArrayList<Network>>(true, messageID));
                 }
             });
             queue.add(req);
@@ -869,7 +870,7 @@ class API {
             return new NetworkResponse<>(events);
         }
 
-        static void network(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<Network>> callback) {
+        static void network(final RequestQueue queue, final long id, final Response.Listener<NetworkResponse<Network>> callback) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET,
                     PREFIX + "network/" + id + "?" + getCredentials(), null,
                     new Response.Listener<JSONObject>() {
@@ -880,13 +881,17 @@ class API {
                                 Network net = expandDatabaseNetwork(dbNet);
                                 callback.onResponse(new NetworkResponse<>(net));
                             } catch (JSONException e) {
+                                Log.e("API.Get.network", "Could not parse JSON of network: " + id);
                                 e.printStackTrace();
+                                callback.onResponse(new NetworkResponse<Network>(true));
                             }
                         }
                     }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    callback.onResponse(new NetworkResponse<Network>(true));
+                    int messageID = processNetworkError("API.Get.network",
+                            "ErrorListener for id=" + id, error);
+                    callback.onResponse(new NetworkResponse<Network>(true, messageID));
                 }
             });
             queue.add(req);
@@ -916,9 +921,9 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.e("API.Get.networkPosts", error.getMessage());
-                    error.printStackTrace();
-                    listener.onResponse(new NetworkResponse<List<org.codethechange.culturemesh.models.Post>>(true, R.string.noConnection));
+                    int messageID = processNetworkError("API.Get.networkPosts",
+                            "ErrorListener for id=" + id, error);
+                    listener.onResponse(new NetworkResponse<List<org.codethechange.culturemesh.models.Post>>(true, messageID));
                 }
             });
             queue.add(req);
@@ -946,11 +951,9 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-
-
-                    Log.e("API.Get.networkEvents", error.getMessage());
-                    error.printStackTrace();
-                    listener.onResponse(new NetworkResponse<List<Event>>(true, R.string.noConnection));
+                    int messageID = processNetworkError("API.Get.networkEvents",
+                            "ErrorListener with id=" + id, error);
+                    listener.onResponse(new NetworkResponse<List<Event>>(true, messageID));
                 }
             });
             queue.add(req);
@@ -1152,9 +1155,10 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    listener.onResponse(new NetworkResponse<Network>(true, R.string.noConnection));
-                    Log.e("API.Get.netFromTwoParam", error.getMessage());
-                    error.printStackTrace();
+                    int messageID = processNetworkError("API.Get.netFromTwoParam",
+                            "ErrorListener from [" + key1 + ":" + val1 + "," + key2 + ":" +
+                                    val2 + "]", error);
+                    listener.onResponse(new NetworkResponse<Network>(true, messageID));
                 }
             });
             queue.add(req);
