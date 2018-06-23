@@ -1299,28 +1299,24 @@ class API {
      * Process errors that could be returned in the form of a {@link VolleyError} the Response.Listener
      * @param tag Tag to include in log messages
      * @param task Description of the task being attempted. This will be included in log entries.
-     * @param error The error returned.
+     * @param error The error returned
      * @return The resource ID of the error message that should be displayed to the user
      */
     private static long processNetworkError(String tag, String task, VolleyError error) {
+        error.printStackTrace();
         if (error instanceof ServerError) {
             Log.e(tag, task + ": A ServerError occurred with code " + error.networkResponse.statusCode);
-            error.printStackTrace();
             return R.string.noConnection;
         } else if (error instanceof NetworkError) {
             // NoConnectionError is a subclass of NetworkError
             Log.e(tag, task + ": A NetworkError occurred.");
-            error.printStackTrace();
             return R.string.noConnection;
         } else if (error instanceof AuthFailureError) {
             Log.e(tag, task + ": An AuthFailureError occurred.");
-            error.printStackTrace();
         } else if (error instanceof ParseError) {
             Log.e(tag, task + ": A ParseError occurred.");
-            error.printStackTrace();
         } else if (error instanceof TimeoutError) {
             Log.e(tag, task + ": A TimeoutError occurred.");
-            error.printStackTrace();
             return R.string.timeout;
         }
 
