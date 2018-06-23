@@ -4,6 +4,9 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 
@@ -89,5 +92,35 @@ public class Post extends FeedItem implements Serializable{
 
     public Post(){
 
+    }
+
+    /**
+     * Creates a bare (uninstantiated) {@link Post} from a JSON that conforms to the below format:
+     * <pre>
+     * {@code
+     * {
+         "id": 0,
+         "id_user": 0,
+         "id_network": 0,
+         "post_date": "string",
+         "post_text": "string",
+         "post_class": 0,
+         "post_original": "string",
+         "vid_link": "string",
+         "img_link": "string"
+        }
+       }
+     </pre>
+     * @param json JSON representation of the {@link Post} to construct
+     * @throws JSONException May be thrown in response to an improperly formatted JSON
+     */
+    public Post(JSONObject json) throws JSONException {
+        id = json.getLong("id");
+        userId = json.getLong("id_user");
+        networkId = json.getLong("id_network");
+        content = json.getString("post_text");
+        imgLink = json.getString("img_link");
+        vidLink = json.getString("vid_link");
+        datePosted = json.getString("post_date");
     }
 }
