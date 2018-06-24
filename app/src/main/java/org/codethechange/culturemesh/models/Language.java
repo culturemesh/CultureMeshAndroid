@@ -5,6 +5,8 @@ import android.arch.persistence.room.PrimaryKey;
 import android.net.Uri;
 
 import org.codethechange.culturemesh.Listable;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 
@@ -43,6 +45,29 @@ public class Language implements Serializable, Listable {
         this.name = name;
         this.numSpeakers = numSpeakers;
         this.language_id = id;
+    }
+
+    /**
+     * Create a new {@link Language} from the JSON produced by an API call. The JSON must conform to
+     * the following format:
+     * <pre>
+     *     {@code
+     *       {
+               "lang_id": 0,
+               "name": "string",
+               "num_speakers": 0,
+               "added": 0
+             }
+           }
+     * </pre>
+     * Note that the {@code added} key is not used and therefore optional.
+     * @param json JSON representation of the language to create.
+     * @throws JSONException May be thrown for an improperly formatted JSON
+     */
+    public Language(JSONObject json) throws JSONException {
+        language_id = json.getLong("lang_id");
+        name = json.getString("name");
+        numSpeakers = json.getInt("num_speakers");
     }
 
     /**
