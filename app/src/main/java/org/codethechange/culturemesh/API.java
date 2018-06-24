@@ -1260,28 +1260,53 @@ class API {
         }
     }
 
-    private static Place locationToPlace(Location loc) {
-        CityDao cityDao = mDb.cityDao();
-        RegionDao regionDao = mDb.regionDao();
-        CountryDao countryDao = mDb.countryDao();
-
-        Place place;
-        // TODO: Is this right? If so, DatabaseLocation only really needs to store type and ID
+    private static void locationToPlace(final RequestQueue queue, final Location loc,
+                                         final Response.Listener<NetworkResponse<Place>> listener) {
+        String category;
+        long id;
         if (loc.getType() == Location.CITY) {
             Log.i("API.locationToPlace", "Location " + loc + " is a city");
-            place = cityDao.getCity(loc.getCityId());
+            category = "cities";
+            id = loc.getCityId();
         } else if (loc.getType() == Location.REGION) {
             Log.i("API.locationToPlace", "Location " + loc + " is a region");
-            place = regionDao.getRegion(loc.getRegionId());
+            category = "regions";
+            id = loc.getRegionId();
         } else {
             Log.i("API.locationToPlace", "Location " + loc + " is a country");
-            place = countryDao.getCountry(loc.getCountryId());
+            category = "countries";
+            id = loc.getCountryId();
         }
 
-        Log.i("API.locationToPlace", "Converted the location " + loc + " into the place " +
-                place);
-
-        return place;
+        JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, PREFIX +
+                "location/" + category + "/" + id + "?" + getCredentials(), null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject res) {
+                        Place p;
+                        try {
+                            if (loc.getType() == Location.CITY) {
+                                p = new City(res);
+                            } else if (loc.getType() == Location.REGION) {
+                                p = new Region(res);
+                            } else {
+                                p = new Country(res);
+                            }
+                            listener.onResponse(new NetworkResponse<>(p));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            listener.onResponse(new NetworkResponse<Place>(true));
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                int messageID = processNetworkError("API.locationToPlace",
+                        "ErrorResponse for loc=" + loc, error);
+                listener.onResponse(new NetworkResponse<Place>(true, messageID));
+            }
+        });
+        queue.add(req);
     }
 
     public static void loadAppDatabase(Context context) {
