@@ -1163,6 +1163,32 @@ class API {
             });
             queue.add(req);
         }
+
+        static void language(final RequestQueue queue, final long id,
+                             final Response.Listener<NetworkResponse<Language>> listener) {
+            JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, PREFIX + "language/" +
+                    id + "?" + getCredentials(), null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject res) {
+                    try {
+                        Language lang = new Language(res);
+                        listener.onResponse(new NetworkResponse<>(lang));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        listener.onResponse(new NetworkResponse<Language>(true));
+                        Log.e("API.Get.language", "Failure parsing JSON for ID=" + id);
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    int messageID = processNetworkError("API.Get.language",
+                            "ErrorListener", error);
+                    listener.onResponse(new NetworkResponse<Language>(true, messageID));
+                }
+            });
+            queue.add(req);
+        }
     }
 
     static class Post {
