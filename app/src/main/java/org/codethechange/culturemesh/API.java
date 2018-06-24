@@ -53,6 +53,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /*
 TODO: USE ALARMS FOR UPDATING DATA ON SUBSCRIBED NETWORKS
@@ -797,16 +798,37 @@ class API {
          *                 is called with a {@link NetworkResponse} of an {@link ArrayList} of
          *                 {@link Network}s
          */
-        static void userNetworks(final RequestQueue queue, final long id, final Response.Listener<NetworkResponse<ArrayList<Network>>> listener) {
+        static void userNetworks(final RequestQueue queue, final long id,
+                                 final Response.Listener<NetworkResponse<ArrayList<Network>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX + "user/" +
                     id + "/networks?" + getCredentials(), null, new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray res) {
-                    ArrayList<Network> nets = new ArrayList<>();
+                    final ArrayList<Network> nets = new ArrayList<>();
+                    final AtomicInteger counter = new AtomicInteger();
+                    counter.set(0);
+                    final int numNets = res.length();
                     for (int i = 0; i < res.length(); i ++) {
                         try {
-                            DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(i));
-                            nets.add(expandDatabaseNetwork(dnet));
+                            final DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(i));
+                            expandDatabaseNetwork(queue, dnet, new Response.Listener<NetworkResponse<Network>>() {
+                                @Override
+                                public void onResponse(NetworkResponse<Network> res) {
+                                    if (!res.fail()) {
+                                        Network net = res.getPayload();
+                                        nets.add(net);
+                                        counter.incrementAndGet();
+                                        if (counter.get() == numNets) {
+                                            listener.onResponse(new NetworkResponse<>(nets));
+                                        }
+                                    } else {
+                                        Log.e("API.Get.userNetworks", "Error expanding " +
+                                                dnet);
+                                        listener.onResponse(new NetworkResponse<ArrayList<Network>>(
+                                                true, res.getMessageID()));
+                                    }
+                                }
+                            });
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Log.e("API.Get.userNetworks", "Error parsing " + i + "th network of user " + id);
