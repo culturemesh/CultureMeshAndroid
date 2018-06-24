@@ -877,9 +877,19 @@ class API {
                         @Override
                         public void onResponse(JSONObject res) {
                             try {
-                                DatabaseNetwork dbNet = new DatabaseNetwork(res);
-                                Network net = expandDatabaseNetwork(dbNet);
-                                callback.onResponse(new NetworkResponse<>(net));
+                                final DatabaseNetwork dbNet = new DatabaseNetwork(res);
+                                expandDatabaseNetwork(queue, dbNet, new Response.Listener<NetworkResponse<Network>>() {
+                                    @Override
+                                    public void onResponse(NetworkResponse<Network> res) {
+                                        if (!res.fail()) {
+                                            Network net = res.getPayload();
+                                            callback.onResponse(new NetworkResponse<>(net));
+                                        } else {
+                                            Log.e("API.Get.network", "Error expanding " + dbNet);
+                                            callback.onResponse(new NetworkResponse<Network>(true, res.getMessageID()));
+                                        }
+                                    }
+                                });
                             } catch (JSONException e) {
                                 Log.e("API.Get.network", "Could not parse JSON of network: " + id);
                                 e.printStackTrace();
