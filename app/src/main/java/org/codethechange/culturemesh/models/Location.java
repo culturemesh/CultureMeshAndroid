@@ -80,13 +80,11 @@ public class Location implements Serializable {
      * If present, the values of the keys {@code city_id}, {@code region_id}, and {@code country_id}
      * will be used automatically. Depending on the presence of those keys, the value of the key
      * {@code id} will be used to fill the instance field for the JSON type. See {@code getJsonType}
-     * for more.
-     * @deprecated This JSON format is no longer used by the API. Use {@link Location#Location(long, long, long)} instead
+     * for more. This constructor is designed to be used when creating {@link Place}s.
      * Precondition: The JSON must be validly formatted, with examples in {@code API.java}
      * @param json JSON object containing the country, region, and city IDs
      * @throws JSONException May be thrown if the JSON is improperly formatted
      */
-    @Deprecated
     public Location(JSONObject json) throws JSONException {
 
         nullifyIds();
