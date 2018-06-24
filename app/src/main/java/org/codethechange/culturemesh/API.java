@@ -1259,31 +1259,65 @@ class API {
         }
     }
 
-    private static Network expandDatabaseNetwork(DatabaseNetwork dn) {
-        Place near = locationToPlace(dn.nearLocation);
-        Log.i("API.expandDBNetwork", "Converted the DatabaseNetwork " + dn + " to" +
-                " the Place " + near + " for the near location");
-
-        if (dn.isLanguageBased()) {
-            Log.i("API.expandDBNetwork", "The DatabaseNetwork " + dn + " is language based");
-            LanguageDao langDao = mDb.languageDao();
-            Language lang =langDao.getLanguage(dn.languageId);
-            Log.i("API.expandDBNetwork", "Converted the ID " + dn.languageId + " to" +
-                    " the Langauge " + lang + " for the language spoken");
-            Network net = new Network(near, lang, dn.id);
-            Log.i("API.expandDBNetwork", "Expanded the DatabaseNetwork " + dn + " to " +
-                    "the Network " + net);
-            return net;
-        } else {
-            Log.i("API.expandDBNetwork", "The DatabaseNetwork " + dn + " is location based");
-            Place from = locationToPlace(dn.fromLocation);
-            Log.i("API.expandDBNetwork", "Converted the FromLocation " + dn.fromLocation + " to" +
-                    " the Place " + from + " for the from location.");
-            Network net = new Network(near, from, dn.id);
-            Log.i("API.expandDBNetwork", "Expanded the DatabaseNetwork " + dn + " to " +
-                    "the Network " + net);
-            return net;
-        }
+    private static void expandDatabaseNetwork(final RequestQueue queue, final DatabaseNetwork dn,
+                                                 final Response.Listener<NetworkResponse<Network>> listener) {
+        locationToPlace(queue, dn.nearLocation, new Response.Listener<NetworkResponse<Place>>() {
+            @Override
+            public void onResponse(NetworkResponse<Place> res) {
+                if (!res.fail()) {
+                    final Place near = res.getPayload();
+                    Log.i("API.expandDBNetwork", "Converted the DatabaseNetwork " + dn + " to" +
+                            " the Place " + near + " for the near location");
+                    if (dn.isLanguageBased()) {
+                        Log.i("API.expandDBNetwork", "The DatabaseNetwork " + dn + " is language based");
+                        Get.language(queue, dn.languageId, new Response.Listener<NetworkResponse<Language>>() {
+                            @Override
+                            public void onResponse(NetworkResponse<Language> res) {
+                                if (!res.fail()) {
+                                    Language lang = res.getPayload();
+                                    Log.i("API.expandDBNetwork", "Converted the ID " + dn.languageId + " to" +
+                                            " the Langauge " + lang + " for the language spoken");
+                                    Network net = new Network(near, lang, dn.id);
+                                    Log.i("API.expandDBNetwork", "Expanded the DatabaseNetwork " + dn + " to " +
+                                            "the Network " + net);
+                                    listener.onResponse(new NetworkResponse<>(net));
+                                } else {
+                                    listener.onResponse(new NetworkResponse<Network>(true,
+                                            res.getMessageID()));
+                                    Log.e("API.expandDBNetwork", "Failure expanding Language " +
+                                            dn.languageId + " from ID");
+                                }
+                            }
+                        });
+                    } else {
+                        Log.i("API.expandDBNetwork", "The DatabaseNetwork " + dn + " is location based");
+                        locationToPlace(queue, dn.fromLocation, new Response.Listener<NetworkResponse<Place>>() {
+                            @Override
+                            public void onResponse(NetworkResponse<Place> res) {
+                                if (!res.fail()) {
+                                    Place from = res.getPayload();
+                                    Log.i("API.expandDBNetwork", "Converted the FromLocation " + dn.fromLocation + " to" +
+                                            " the Place " + from + " for the from location.");
+                                    Network net = new Network(near, from, dn.id);
+                                    Log.i("API.expandDBNetwork", "Expanded the DatabaseNetwork " + dn + " to " +
+                                            "the Network " + net);
+                                    listener.onResponse(new NetworkResponse<>(net));
+                                } else {
+                                    listener.onResponse(new NetworkResponse<Network>(true,
+                                            res.getMessageID()));
+                                    Log.e("API.expandDBNetwork", "Failure expanding FromLocation " +
+                                            dn.fromLocation + " from ID");
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    listener.onResponse(new NetworkResponse<Network>(true, res.getMessageID()));
+                    Log.e("API.expandDBNetwork", "Failure expanding NearLocation " +
+                            dn.nearLocation + " from ID");
+                }
+            }
+        });
     }
 
     private static void locationToPlace(final RequestQueue queue, final Location loc,
