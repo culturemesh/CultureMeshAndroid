@@ -1144,9 +1144,19 @@ class API {
                             Log.e("API.Get.netFromTwoParam", "Multiple networks matched this: " +
                                     key1 + ":" + val1 + "," + key2 + ":" + val2);
                         }
-                        DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(0));
-                        Network net = expandDatabaseNetwork(dnet);
-                        listener.onResponse(new NetworkResponse<>(net));
+                        final DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(0));
+                        expandDatabaseNetwork(queue, dnet, new Response.Listener<NetworkResponse<Network>>() {
+                            @Override
+                            public void onResponse(NetworkResponse<Network> res) {
+                                if (!res.fail()) {
+                                    Network net = res.getPayload();
+                                    listener.onResponse(new NetworkResponse<>(net));
+                                } else {
+                                    Log.e("API.Get.netFromTwoparam", "Failure expanding DatabaseNetwork " + dnet);
+                                    listener.onResponse(new NetworkResponse<Network>(true, res.getMessageID()));
+                                }
+                            }
+                        });
                     } catch (JSONException e) {
                         e.printStackTrace();
                         listener.onResponse(new NetworkResponse<Network>(true));
