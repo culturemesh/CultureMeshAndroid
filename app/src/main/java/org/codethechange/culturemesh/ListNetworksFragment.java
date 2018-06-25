@@ -98,7 +98,7 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
                    adapter.getUserCounts().add(0);
                 }
                 try {
-                    adapter.getPostCounts().add(API.Get.networkPosts(net.id).getPayload().size());
+                    //adapter.getPostCounts().add(API.Get.networkPosts(net.id).getPayload().size());
                 } catch(NullPointerException e) {
                     adapter.getPostCounts().add(0);
                 }

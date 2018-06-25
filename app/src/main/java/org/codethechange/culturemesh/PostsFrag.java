@@ -10,13 +10,20 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
+
 import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Post;
+import org.codethechange.culturemesh.models.PostReply;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +42,7 @@ public class PostsFrag extends Fragment {
     private RecyclerView.LayoutManager mLayoutManager;
     long selectedNetwork;
     SharedPreferences settings;
+    RequestQueue queue;
     //To figure out params that would be passed in
 
     public PostsFrag() {
@@ -44,6 +52,7 @@ public class PostsFrag extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+        queue = Volley.newRequestQueue(getContext());
         super.onCreate(savedInstanceState);
 
     }
@@ -65,7 +74,59 @@ public class PostsFrag extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
         //Get network id
         selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
-        new LoadFeedItems().execute(selectedNetwork);
+        SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
+                MODE_PRIVATE);
+        //We generalize posts/events to be feed items for polymorphism.
+        //TODO: Consider error checking for when getPayload is null.
+        final ArrayList<FeedItem> feedItems = new ArrayList<FeedItem>();
+        mAdapter = new RVAdapter(feedItems, new RVAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(FeedItem item) {
+                Intent intent = new Intent(getActivity(), SpecificPostActivity.class);
+                long id;
+                try {
+                    id = ((Post) item).id;
+                    intent.putExtra("postID", id);
+                    intent.putExtra("networkID", selectedNetwork);
+                    getActivity().startActivity(intent);
+                } catch(ClassCastException e) {
+                    //I don't think we have commenting support for events??
+                } catch (NullPointerException e) {
+                    Toast.makeText(getActivity(), "Cannot open post", Toast.LENGTH_LONG).show();
+                }
+            }
+        }, getActivity().getApplicationContext());
+        mRecyclerView.setAdapter(mAdapter);
+        if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_EVENTS, true)) {
+            //If events aren't filtered out, add them to arraylist.
+            //feedItems.addAll(API.Get.networkEvents(longs[0]).getPayload());
+        }
+        if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_NATIVE, true)) {
+            //If posts aren't filtered out, add them to arraylist.
+            //We also need to get the post replies.
+            Log.i("Try this!", "About to run getnetposts");
+            API.Get.networkPosts(queue, 388, new Response.Listener<NetworkResponse<ArrayList<Post>>>() {
+                @Override
+                public void onResponse(NetworkResponse<ArrayList<Post>> response) {
+                    for (final Post post : response.getPayload()) {
+                        Log.i("Caught posts","in response listen");
+                        //Get comments
+                        API.Get.postReplies(queue, post.id, new Response.Listener<NetworkResponse<ArrayList<PostReply>>>() {
+                            @Override
+                            public void onResponse(NetworkResponse<ArrayList<PostReply>> response) {
+                                Log.i("Adding comments", "Hello");
+                                post.comments = response.getPayload();
+                                feedItems.add(post);
+                                mRecyclerView.getAdapter().notifyDataSetChanged();
+                            }
+                        });
+
+                    }
+                }
+            });
+
+        }
+        //new LoadFeedItems().execute(selectedNetwork);
         return rootView;
     }
 
@@ -119,11 +180,11 @@ public class PostsFrag extends Fragment {
             if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_NATIVE, true)) {
                 //If posts aren't filtered out, add them to arraylist.
                 //We also need to get the post replies.
-                List<Post> posts = API.Get.networkPosts(longs[0]).getPayload();
-                for (Post post : posts) {
-                    post.comments = API.Get.postReplies(post.id).getPayload();
-                }
-                feedItems.addAll(posts);
+                //List<Post> posts = API.Get.networkPosts(longs[0]).getPayload();
+                //for (Post post : posts) {
+                    //post.comments = API.Get.postReplies(post.id).getPayload();
+                //}
+                //feedItems.addAll(posts);
             }
             API.closeDatabase();
             //TODO: Add ability check out twitter posts.
@@ -159,5 +220,19 @@ public class PostsFrag extends Fragment {
         }
     }
 
-
+    /**
+     * This ensures that we are canceling all network requests if the user is leaving this activity.
+     * We use a RequestFilter that accepts all requests (meaning it cancels all requests)
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (queue != null)
+            queue.cancelAll(new RequestQueue.RequestFilter() {
+                @Override
+                public boolean apply(Request<?> request) {
+                    return true;
+                }
+            });
+    }
 }
