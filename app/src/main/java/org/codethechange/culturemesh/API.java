@@ -990,7 +990,6 @@ class API {
                 @Override
                 public void onResponse(JSONArray res) {
                     ArrayList<Event> events = new ArrayList<>();
-                    // TODO: Counter needed here
                     try {
                         for (int i = 0; i < res.length(); i++) {
                             Event e = new Event((JSONObject) res.get(i));
