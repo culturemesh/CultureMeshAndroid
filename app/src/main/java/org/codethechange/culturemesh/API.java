@@ -892,6 +892,13 @@ class API {
             return new NetworkResponse<>(events);
         }
 
+        /**
+         * Get the {@link Network} corresponding to the provided ID
+         * @param queue Queue to which the asynchronous task to get the {@link Network} will be added
+         * @param id ID of the {@link Network} to get
+         * @param callback Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
         static void network(final RequestQueue queue, final long id, final Response.Listener<NetworkResponse<Network>> callback) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET,
                     PREFIX + "network/" + id + "?" + getCredentials(), null,
@@ -929,6 +936,14 @@ class API {
             queue.add(req);
         }
 
+        /**
+         * Get the {@link org.codethechange.culturemesh.models.Post}s of a {@link Network}
+         * @param queue Queue to which the asynchronous task will be added
+         * @param id ID of the {@link Network} whose
+         * {@link org.codethechange.culturemesh.models.Post}s will be returned
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
         static void networkPosts(final RequestQueue queue, final long id,
                                  final Response.Listener<NetworkResponse<List<org.codethechange.culturemesh.models.Post>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX + "network/" +
@@ -936,6 +951,7 @@ class API {
                 @Override
                 public void onResponse(JSONArray res) {
                     ArrayList<org.codethechange.culturemesh.models.Post> posts = new ArrayList<>();
+                    // TODO: Counter needed here
                     try {
                         for (int i = 0; i < res.length(); i++) {
                             org.codethechange.culturemesh.models.Post p =
@@ -961,6 +977,13 @@ class API {
             queue.add(req);
         }
 
+        /**
+         * Get the {@link Event}s corresponding to a {@link Network}
+         * @param queue Queue to which the asynchronous task will be added
+         * @param id ID of the {@link Network} whose {@link Event}s will be fetched
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
         static void networkEvents(final RequestQueue queue, final long id,
                                                           final Response.Listener<NetworkResponse<List<Event>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX + "network/" +
@@ -968,6 +991,7 @@ class API {
                 @Override
                 public void onResponse(JSONArray res) {
                     ArrayList<Event> events = new ArrayList<>();
+                    // TODO: Counter needed here
                     try {
                         for (int i = 0; i < res.length(); i++) {
                             Event e = new Event((JSONObject) res.get(i));
@@ -1147,18 +1171,44 @@ class API {
             return new NetworkResponse(matches);
         }
 
+        /**
+         * Get the {@link Network} that has the provided {@link Language} and {@link NearLocation}
+         * @param queue Queue to which the asynchronous task will be added
+         * @param lang {@link Language} of the {@link Network} to find
+         * @param near {@link NearLocation} of the {@link Network} to find
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
         static void netFromLangAndNear(final RequestQueue queue, Language lang, NearLocation near,
                                   final Response.Listener<NetworkResponse<Network>> listener) {
             netFromTwoParams(queue, "near_location", near.urlParam(), "language",
                     lang.urlParam(), listener);
         }
 
+        /**
+         * Get the {@link Network} that has the provided {@link FromLocation} and {@link NearLocation}
+         * @param queue Queue to which the asynchronous task will be added
+         * @param from {@link FromLocation} of the {@link Network} to find
+         * @param near {@link NearLocation} of the {@link Network} to find
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
         static void netFromFromAndNear(final RequestQueue queue, FromLocation from, NearLocation near,
                                        final Response.Listener<NetworkResponse<Network>> listener) {
             netFromTwoParams(queue, "near_location", near.urlParam(), "from_location",
                     from.urlParam(), listener);
         }
 
+        /**
+         * Get the {@link Network} that is defined by the two parameters provided
+         * @param queue Queue to which the asynchronous task will be added
+         * @param key1 Key for a parameter defining the {@link Network}
+         * @param val1 Value associated with {@code key1}
+         * @param key2 Key for a parameter defining the {@link Network}
+         * @param val2 Value associated with {@code key2}
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
         private static void netFromTwoParams(final RequestQueue queue, final String key1, final String val1,
                                              final String key2, final String val2,
                                              final Response.Listener<NetworkResponse<Network>> listener) {
@@ -1206,6 +1256,14 @@ class API {
             queue.add(req);
         }
 
+        /**
+         * Get the {@link Language} that has the provided ID
+         * @param queue Queue to which the asynchronous task will be added
+         * @param id ID of the {@link Language} to find. Must be unique, and the same ID must be
+         *           used throughout.
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
         static void language(final RequestQueue queue, final long id,
                              final Response.Listener<NetworkResponse<Language>> listener) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, PREFIX + "language/" +
@@ -1301,6 +1359,19 @@ class API {
         }
     }
 
+    /**
+     * {@link DatabaseNetwork}s do not store all the information associated with a {@link Network}.
+     * Instead, a {@link DatabaseNetwork} is like a bundle of pointers to the parts of the
+     * {@link Network} it represents. This method "expands" a {@link DatabaseNetwork} into a
+     * {@link Network} by resolving those "pointers" and combining the results. The objects referred
+     * to by IDs in the {@link DatabaseNetwork} are fetched with API calls and re-bundled into a
+     * {@link Network}. See the documentation for {@link Location} for more information on this
+     * inheritance hierarchy.
+     * @param queue Queue to which the asynchronous task will be added
+     * @param dn {@link DatabaseNetwork} to expand into a {@link Network}
+     * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+     *                 is called with the {@link NetworkResponse} created by the query.
+     */
     private static void expandDatabaseNetwork(final RequestQueue queue, final DatabaseNetwork dn,
                                                  final Response.Listener<NetworkResponse<Network>> listener) {
         locationToPlace(queue, dn.nearLocation, new Response.Listener<NetworkResponse<Place>>() {
@@ -1362,6 +1433,19 @@ class API {
         });
     }
 
+    /**
+     * {@link Location}s do not store all the information associated with a {@link Place}.
+     * Instead, a {@link Location} is like a bundle of pointers to the parts of the
+     * {@link Place} it represents. This method "expands" a {@link Location} into a
+     * {@link Place} by resolving those "pointers" and combining the results. The objects referred
+     * to by IDs in the {@link Location} are fetched with API calls and re-bundled into a
+     * {@link Place}. See the documentation for {@link Location} for more information on this
+     * inheritance hierarchy.
+     * @param queue Queue to which the asynchronous task will be added
+     * @param loc {@link Location} to expand into a {@link Place}
+     * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+     *                 is called with the {@link NetworkResponse} created by the query.
+     */
     private static void locationToPlace(final RequestQueue queue, final Location loc,
                                          final Response.Listener<NetworkResponse<Place>> listener) {
         String category;
