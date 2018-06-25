@@ -1,5 +1,6 @@
 package org.codethechange.culturemesh.models;
 import android.arch.persistence.room.Ignore;
+import android.net.Uri;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,6 +47,11 @@ public class Location implements Serializable {
     public static final int CITY = 2;
 
     /**
+     * The value to be transmitted to the API in place of a missing country, region, or city ID
+     */
+    public static final int URL_NULL_ID = -1;
+
+    /**
      * These instance fields store the IDs of the city, region, and country defining the location
      * They can be {@code private} because a plain {@code Location} object should not need to be
      * stored in the database.
@@ -74,16 +80,14 @@ public class Location implements Serializable {
      * If present, the values of the keys {@code city_id}, {@code region_id}, and {@code country_id}
      * will be used automatically. Depending on the presence of those keys, the value of the key
      * {@code id} will be used to fill the instance field for the JSON type. See {@code getJsonType}
-     * for more.
+     * for more. This constructor is designed to be used when creating {@link Place}s.
      * Precondition: The JSON must be validly formatted, with examples in {@code API.java}
      * @param json JSON object containing the country, region, and city IDs
      * @throws JSONException May be thrown if the JSON is improperly formatted
      */
     public Location(JSONObject json) throws JSONException {
 
-        cityId = NOWHERE;
-        regionId = NOWHERE;
-        countryId = NOWHERE;
+        nullifyIds();
 
         if (json.has("id") && ! json.isNull("id")) {
             int type = getJsonType(json);
@@ -108,9 +112,40 @@ public class Location implements Serializable {
     }
 
     /**
+     * Initializes ID instance fields using the provided JSON object.
+     * The keys extracted are provided as parameters, but those keys need not exist in the JSON. Any
+     * missing keys will be treated as if the location does not have such a geographic identifier.
+     * This may produce an invalid location, and the JSON is followed blindly.
+     * Precondition: JSON must describe a valid location
+     * @param json JSON that describes the location to create
+     * @param cityIdKey The key that, if present in the JSON, has a value of the ID of the city
+     * @param regionIdKey The key that, if present in the JSON, has a value of the ID of the region
+     * @param countryIdKey The key that, if present in the JSON, has a value of the ID of the country
+     * @throws JSONException May be thrown in the case of an invalid JSON
+     */
+    public Location(JSONObject json, String cityIdKey, String regionIdKey, String countryIdKey) throws JSONException {
+        nullifyIds();
+        if (json.has(cityIdKey) && ! json.isNull(cityIdKey)) {
+            cityId = json.getLong(cityIdKey);
+        }
+        if (json.has(regionIdKey) && ! json.isNull(regionIdKey)) {
+            regionId = json.getLong(regionIdKey);
+        }
+        if (json.has(countryIdKey) && ! json.isNull(countryIdKey)) {
+            countryId = json.getLong(countryIdKey);
+        }
+    }
+
+    /**
      * Empty constructor for database use only. This should never be called by our code.
      */
     public Location() {}
+
+    private void nullifyIds() {
+        cityId = NOWHERE;
+        regionId = NOWHERE;
+        countryId = NOWHERE;
+    }
 
 
     /**
@@ -241,5 +276,35 @@ public class Location implements Serializable {
     public String toString() {
         return "Location[cityId=" + cityId + ", regionId=" + regionId + ", countryId=" +
                 countryId + "]";
+    }
+
+    /**
+     * Represent the {@link Location} in a form suitable for use as the value of a key passed in
+     * a URL parameter to the API. Specifically, it returns the country, region, and city IDs
+     * separated by commas and in that order. The commas are escaped with the UTF-8 scheme and any
+     * missing IDs are replaced with the {@link Location#URL_NULL_ID} constant, which is understood
+     * by the API as signifying {@code null}.
+     * @return An API-compatible representation suitable for use as the value in a URL parameter
+     */
+    public String urlParam() {
+        String url = "";
+        if (hasCountryId()) {
+            url += countryId;
+        } else {
+            url += URL_NULL_ID;
+        }
+        url += ",";
+        if (hasRegionId()) {
+            url += regionId;
+        } else {
+            url += URL_NULL_ID;
+        }
+        url += ",";
+        if (hasCityId()) {
+            url += cityId;
+        } else {
+            url += URL_NULL_ID;
+        }
+        return Uri.encode(url);
     }
 }

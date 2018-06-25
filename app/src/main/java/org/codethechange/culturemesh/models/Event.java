@@ -6,6 +6,9 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 
@@ -83,6 +86,48 @@ public class Event extends FeedItem implements Serializable{
 
     public Event () {
 
+    }
+
+    /**
+     * Create a new Event object from a JSON representation that conforms to the following format:
+     * <pre>
+     *     {@code
+     *      {
+              "id": 0,
+              "id_network": 0,
+              "id_host": 0,
+              "date_created": "string",
+              "event_date": "2018-06-23T04:39:42.600Z",
+              "title": "string",
+              "address_1": "string",
+              "address_2": "string",
+              "country": "string",
+              "city": "string",
+              "region": "string",
+              "description": "string"
+             }
+     *     }
+     * </pre>
+     * Note that {@code date_created} is not used and may be omitted. {@code address_2} is optional
+     * and used only if provided.
+     * @param json JSON representation of the {@link Event} to be created
+     * @throws JSONException May be thrown if an improperly formatted JSON is provided
+     */
+    public Event(JSONObject json) throws JSONException {
+        id = json.getLong("id");
+        networkId = json.getLong("id_network");
+        title = json.getString("title");
+        description = json.getString("description");
+        timeOfEvent = json.getString("event_date");
+        authorId = json.getLong("id_host");
+
+        address = json.getString("address_1");
+        // TODO: Confirm this treatment of missing second address line
+        if (json.has("address_2")) {
+            address += "\n" + json.getString("address_2");
+        }
+        address += "\n" + json.getString("city") + "," + json.getString("region") +
+                "," + json.getString("country");
     }
 
 }

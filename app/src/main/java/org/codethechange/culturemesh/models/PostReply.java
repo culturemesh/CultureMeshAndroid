@@ -4,6 +4,9 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by Drew Gregory on 3/4/18.
  */
@@ -35,6 +38,14 @@ public class PostReply {
         this.replyText = replyText;
     }
 
+    public PostReply(JSONObject replyObj) throws JSONException {
+        this.id = replyObj.getInt("id");
+        this.parentId = replyObj.getInt("id_parent");
+        this.networkId = replyObj.getInt("id_network");
+        this.replyDate = replyObj.getString("reply_date");
+        this.replyText = replyObj.getString("reply_text");
+        this.userId = replyObj.getInt("id_user");
+    }
     public User getAuthor() {
         return author;
     }

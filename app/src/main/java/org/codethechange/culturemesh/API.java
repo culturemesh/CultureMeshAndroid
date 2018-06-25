@@ -4,12 +4,21 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkError;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.JsonArray;
 
 import org.codethechange.culturemesh.data.CMDatabase;
 import org.codethechange.culturemesh.data.CityDao;
@@ -46,6 +55,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /*
 TODO: USE ALARMS FOR UPDATING DATA ON SUBSCRIBED NETWORKS
@@ -80,10 +90,10 @@ class API {
     final static String FIRST_TIME = "firsttime";
     static final boolean NO_JOINED_NETWORKS = false;
     static final String CURRENT_USER = "curruser";
+    static final String API_URL_BASE = "https://www.culturemesh.com/api-dev/v1/";
     static CMDatabase mDb;
     //reqCounter to ensure that we don't close the database while another thread is using it.
     static int reqCounter;
-
 
     /**
      * Add users to the database by parsing the JSON stored in {@code rawDummy}. In case of any
@@ -781,31 +791,67 @@ class API {
         }
 
         /**
-         * Get the networks a user belongs to by searching all subscriptions in
-         * {@link NetworkSubscriptionDao} and then getting {@link Network} objects for each ID found
-         * in those subscriptions.
-         * @param id ID of {@link User} whose networks are being requested
-         * @return List of {@link Network}s the user is in
+         * Get the networks a user belongs to
+         * @param queue RequestQueue to which the asynchronous job will be added
+         * @param id ID of the user whose networks will be fetched
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with a {@link NetworkResponse} of an {@link ArrayList} of
+         *                 {@link Network}s
          */
-        static NetworkResponse<ArrayList<Network>> userNetworks(long id) {
-            //TODO: Send network request for all subscriptions.
-            NetworkSubscriptionDao nSDao  = mDb.networkSubscriptionDao();
-            List<Long> netIds = nSDao.getUserNetworks(id);
-            Log.i("API.Get.userNetworks(" + id + ")", "Network IDs from Database: " + netIds.toString());
-            ArrayList<Network> nets = new ArrayList<>();
-            for (Long netId : netIds) {
-                NetworkResponse res = network(netId);
-                if (!res.fail()) {
-                    nets.add((Network) res.getPayload());
-                    Log.i("API.Get.userNetworks(" + id + ")", "Received network from " +
-                            "database: " + res.getPayload());
-                } else {
-                    Log.i("API.Get.userNetworks(" + id + ")", "Failure in getting network from " +
-                            "database for ID " + netId);
+        static void userNetworks(final RequestQueue queue, final long id,
+                                 final Response.Listener<NetworkResponse<ArrayList<Network>>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "user/" +
+                    id + "/networks?" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray res) {
+                    final ArrayList<Network> nets = new ArrayList<>();
+                    final AtomicInteger counter = new AtomicInteger();
+                    counter.set(0);
+                    final int numNets = res.length();
+                    for (int i = 0; i < res.length(); i ++) {
+                        try {
+                            final DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(i));
+                            expandDatabaseNetwork(queue, dnet, new Response.Listener<NetworkResponse<Network>>() {
+                                @Override
+                                public void onResponse(NetworkResponse<Network> res) {
+                                    if (!res.fail()) {
+                                        Network net = res.getPayload();
+                                        nets.add(net);
+                                        counter.incrementAndGet();
+                                        if (counter.get() == numNets) {
+                                            listener.onResponse(new NetworkResponse<>(nets));
+                                        }
+                                    } else {
+                                        Log.e("API.Get.userNetworks", "Error expanding " +
+                                                dnet);
+                                        listener.onResponse(new NetworkResponse<ArrayList<Network>>(
+                                                true, res.getMessageID()));
+                                    }
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.e("API.Get.userNetworks", "Error parsing " + i + "th network of user " + id);
+                            /*
+                            Right now, this takes a "hard-fail" approach and returns a failed
+                            NetworkResponse object whenever any JSON parsing error occurs. This may
+                            not be the best approach.
+                             */
+                            listener.onResponse(new NetworkResponse<ArrayList<Network>>(true));
+                            return;
+                        }
+                    }
+                    listener.onResponse(new NetworkResponse<>(nets));
                 }
-            }
-            Log.i("API.Get.userNetworks(" + id + ")", "Networks from Database: " + nets.toString());
-            return new NetworkResponse<>(nets);
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    int messageID = processNetworkError("API.Get.userNetworks",
+                            "ErrorListener for id=" + id, error);
+                    listener.onResponse(new NetworkResponse<ArrayList<Network>>(true, messageID));
+                }
+            });
+            queue.add(req);
         }
 
         /**
@@ -817,11 +863,61 @@ class API {
          * @return List of the {@link org.codethechange.culturemesh.models.Post}s the user has made
          */
         // TODO: When will we ever use this? Perhaps viewing a user profile?
-        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> userPosts(long id) {
-            PostDao pDao = mDb.postDao();
+
+        /**
+         * Get the {@link org.codethechange.culturemesh.models.Post}s a {@link User} has made.
+         * @param queue The {@link RequestQueue} that will house the network requests.
+         * @param id The id of the {@link User}.
+         * @param listener The listener that the UI will call when the request is finished.
+         */
+        static void userPosts(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Post>>> listener) {
+            /* OLD DB CODE: PostDao pDao = mDb.postDao();
             List<org.codethechange.culturemesh.models.Post> posts = pDao.getUserPosts(id);
-            instantiatePosts(posts);
-            return new NetworkResponse<>(posts);
+            instantiatePosts(posts);*/
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "user/" +
+                    id + "/posts?" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    final ArrayList<org.codethechange.culturemesh.models.Post> posts = new ArrayList<>();
+                    // Here's the tricky part. We need to fetch user information for each post,
+                    // but we only want to call the listener once, after all the requests are
+                    // finished.
+                    // Let's make a counter (numReqFin) for the number of requests finished. This will be
+                    // a wrapper so that we can pass it by reference.
+                    final AtomicInteger numReqFin = new AtomicInteger();
+                    numReqFin.set(0);
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            JSONObject res = (JSONObject) response.get(i);
+                            posts.add(new org.codethechange.culturemesh.models.Post(res.getInt("id"), res.getInt("id_user"),
+                                    res.getInt("id_network"), res.getString("post_text"),
+                                    res.getString("img_link"), res.getString("vid_link"),
+                                    res.getString("post_date")));
+                            // Next, we will call instantiate postUser, but we will have a special
+                            // listener.
+                            instantiatePostUser(queue, posts.get(i), new Response.Listener<org.codethechange.culturemesh.models.Post>() {
+                                @Override
+                                public void onResponse(org.codethechange.culturemesh.models.Post response) {
+                                    // Update the numReqFin counter that we have another finished post
+                                    // object.
+                                    if (numReqFin.addAndGet(1) == posts.size()) {
+                                        // We finished!! Call the listener at last.
+                                        listener.onResponse(new NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Post>>(false, posts));
+                                    }
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+
+                }
+            });
+            queue.add(req);
         }
 
         /**
@@ -846,47 +942,149 @@ class API {
             return new NetworkResponse<>(events);
         }
 
-        static NetworkResponse<Network> network(long id) {
-            //TODO: Send network request if not found.
-            NetworkDao netDao = mDb.networkDao();
-            List<DatabaseNetwork> nets = netDao.getNetwork(id);
-
-            if (nets == null || nets.size() == 0 || nets.get(0) == null) {
-                if (nets == null) {
-                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
-                            "database because of null response.");
-                } else if (nets.size() == 0) {
-                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
-                            "database because an empty list was received: " + nets.toString());
-                } else {
-                    Log.i("API.Get.network(" + id + ")", "Failure getting network IDs from " +
-                            "database because of null first item in list: " + nets.toString());
+        /**
+         * Get the {@link Network} corresponding to the provided ID
+         * @param queue Queue to which the asynchronous task to get the {@link Network} will be added
+         * @param id ID of the {@link Network} to get
+         * @param callback Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
+        static void network(final RequestQueue queue, final long id, final Response.Listener<NetworkResponse<Network>> callback) {
+            JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET,
+                    API_URL_BASE + "network/" + id + "?" + getCredentials(), null,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject res) {
+                            try {
+                                final DatabaseNetwork dbNet = new DatabaseNetwork(res);
+                                expandDatabaseNetwork(queue, dbNet, new Response.Listener<NetworkResponse<Network>>() {
+                                    @Override
+                                    public void onResponse(NetworkResponse<Network> res) {
+                                        if (!res.fail()) {
+                                            Network net = res.getPayload();
+                                            callback.onResponse(new NetworkResponse<>(net));
+                                        } else {
+                                            Log.e("API.Get.network", "Error expanding " + dbNet);
+                                            callback.onResponse(new NetworkResponse<Network>(true, res.getMessageID()));
+                                        }
+                                    }
+                                });
+                            } catch (JSONException e) {
+                                Log.e("API.Get.network", "Could not parse JSON of network: " + id);
+                                e.printStackTrace();
+                                callback.onResponse(new NetworkResponse<Network>(true));
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    int messageID = processNetworkError("API.Get.network",
+                            "ErrorListener for id=" + id, error);
+                    callback.onResponse(new NetworkResponse<Network>(true, messageID));
                 }
-                return new NetworkResponse<>(true);
-            } else {
-                Log.i("API.Get.network(" + id + ")", "Networks from database: " + nets.toString());
-                DatabaseNetwork dn = nets.get(0);
-                Log.i("API.Get.network(" + id + ")", "Inflating network: " + dn);
-                Network net = expandDatabaseNetwork(dn);
-                Log.i("API.Get.network(" + id + ")", "Inflated network with ID " + dn.id);
-                return new NetworkResponse<>(net);
-            }
+            });
+            queue.add(req);
         }
 
-        static NetworkResponse<List<org.codethechange.culturemesh.models.Post>> networkPosts(long id) {
-            //TODO: Send network request.
+        /**
+         * Get the {@link org.codethechange.culturemesh.models.Post}s of a {@link Network}
+         * @param queue Queue to which the asynchronous task will be added
+         * @param id ID of the {@link Network} whose
+         * {@link org.codethechange.culturemesh.models.Post}s will be returned
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
+        static void networkPosts(final RequestQueue queue, final long id, final Response.Listener<NetworkResponse<List<org.codethechange.culturemesh.models.Post>>> listener) {
+            /* TODO: Add caching capability.
             PostDao pDao = mDb.postDao();
             List<org.codethechange.culturemesh.models.Post> posts = pDao.getNetworkPosts((int) id);
-            instantiatePosts(posts);
-            return new NetworkResponse<>(posts);
+            instantiatePosts(posts);*/
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/"
+                    + id + "/posts?" + getCredentials(), null, new Response.Listener<JSONArray>() {
+
+                @Override
+                public void onResponse(JSONArray response) {
+                    final ArrayList<org.codethechange.culturemesh.models.Post> posts = new ArrayList<>();
+                    // Here's the tricky part. We need to fetch user information for each post,
+                    // but we only want to call the listener once, after all the requests are
+                    // finished.
+                    // Let's make a counter (numReqFin) for the number of requests finished. This will be
+                    // a wrapper so that we can pass it by reference.
+                    final AtomicInteger numReqFin = new AtomicInteger();
+                    numReqFin.set(0);
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            JSONObject res = (JSONObject) response.get(i);
+                            posts.add(new org.codethechange.culturemesh.models.Post(res.getInt("id"), res.getInt("id_user"),
+                                    res.getInt("id_network"), res.getString("post_text"),
+                                    res.getString("img_link"), res.getString("vid_link"),
+                                    res.getString("post_date")));
+                            // Next, we will call instantiate postUser, but we will have a special
+                            // listener.
+                            instantiatePostUser(queue, posts.get(i), new Response.Listener<org.codethechange.culturemesh.models.Post>() {
+                                @Override
+                                public void onResponse(org.codethechange.culturemesh.models.Post response) {
+                                    // Update the numReqFin counter that we have another finished post
+                                    // object.
+                                    if (numReqFin.addAndGet(1) == posts.size()) {
+                                        // We finished!! Call the listener at last.
+                                        listener.onResponse(new NetworkResponse<List<org.codethechange.culturemesh.models.Post>>(false, posts));
+                                    }
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            listener.onResponse(new NetworkResponse<List<org.codethechange.culturemesh.models.Post>>(true));
+                            Log.e("API.Get.networkPosts", "Could not parse JSON of post: " + e.getMessage());
+                        }
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    int messageID = processNetworkError("API.Get.networkPosts",
+                            "ErrorListener for id=" + id, error);
+                    listener.onResponse(new NetworkResponse<List<org.codethechange.culturemesh.models.Post>>(true, messageID));
+                }
+            });
+            queue.add(req);
         }
 
-        static NetworkResponse<List<Event>> networkEvents(long id) {
-            //TODO:Send network request.... Applies to subsequent methods too.
-            EventDao eDao = mDb.eventDao();
-            List<Event> events = eDao.getNetworkEvents(id);
-            Log.i("Getting events" , events.size() + "");
-            return new NetworkResponse<>(events == null, events);
+        /**
+         * Get the {@link Event}s corresponding to a {@link Network}
+         * @param queue Queue to which the asynchronous task will be added
+         * @param id ID of the {@link Network} whose {@link Event}s will be fetched
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
+        static void networkEvents(final RequestQueue queue, final long id,
+                                                          final Response.Listener<NetworkResponse<List<Event>>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/" +
+                    id + "/events?" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray res) {
+                    ArrayList<Event> events = new ArrayList<>();
+                    try {
+                        for (int i = 0; i < res.length(); i++) {
+                            Event e = new Event((JSONObject) res.get(i));
+                            events.add(e);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        listener.onResponse(new NetworkResponse<List<Event>>(true));
+                        Log.e("API.Get.networkEvents", "Could not parse JSON of event: " + e.getMessage());
+                    }
+                    listener.onResponse(new NetworkResponse<List<Event>>(events));
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    int messageID = processNetworkError("API.Get.networkEvents",
+                            "ErrorListener with id=" + id, error);
+                    listener.onResponse(new NetworkResponse<List<Event>>(true, messageID));
+                }
+            });
+            queue.add(req);
         }
 
         static NetworkResponse<ArrayList<User>> networkUsers(long id) {
@@ -945,7 +1143,7 @@ class API {
          */
         static void post(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<org.codethechange.culturemesh.models.Post>> callback) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET,
-                    "https://www.culturemesh.com/api-dev/v1/post/" + id + getCredentials(),
+                    API_URL_BASE + "post/" + id + "?" + getCredentials(),
                     null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject res) {
@@ -957,33 +1155,14 @@ class API {
                                 res.getString("img_link"), res.getString("vid_link"),
                                 res.getString("post_date"));
                         // Now, get author.
-                        final org.codethechange.culturemesh.models.Post finalPost = post;
-                        JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET,
-                                "https://www.culturemesh.com/api-dev/v1/user/" + finalPost.userId + getCredentials(),
-                                null, new Response.Listener<JSONObject>() {
+                        // For generalizing the logic when getting multiple posts, we will have to
+                        // add the post to an ArrayList to pass it onto instantiate postUsers
+                        instantiatePostUser(queue, post, new Response.Listener<org.codethechange.culturemesh.models.Post>() {
                             @Override
-                            public void onResponse(JSONObject res) {
-                                try {
-                                    //make User object out of user JSON.
-                                    finalPost.author = new User(res.getInt("id"),
-                                            res.getString("first_name"),
-                                            res.getString("last_name"),
-                                            res.getString("email"), res.getString("username"),
-                                            "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
-                                            res.getString("about_me"));
-                                    callback.onResponse(new NetworkResponse<org.codethechange.culturemesh.models.Post>(false, finalPost));
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-
-                            }
-                        }, new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                callback.onResponse(new NetworkResponse<org.codethechange.culturemesh.models.Post>(true, null));
+                            public void onResponse(org.codethechange.culturemesh.models.Post response) {
+                                callback.onResponse(new NetworkResponse<org.codethechange.culturemesh.models.Post>(response == null, response));
                             }
                         });
-                        queue.add(authReq);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -1016,11 +1195,59 @@ class API {
             return new NetworkResponse<>(users);
         }
 
-        static NetworkResponse<List<PostReply>> postReplies(long id){
-            PostReplyDao dao = mDb.postReplyDao();
+        /**
+         * Fetch the comments of a post.
+         * @param queue The {@link RequestQueue} to house the network requests.
+         * @param id the id of the post that we want comments for.
+         * @param listener the listener that we will call when the request is finished.
+         */
+        static void postReplies(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<ArrayList<PostReply>>> listener){
+            /*PostReplyDao dao = mDb.postReplyDao();
             List<PostReply> replies = dao.getPostReplies(id);
-            instantiatePostReplies(replies);
-            return new NetworkResponse<>(replies == null, replies);
+            instantiatePostReplies(replies);*/
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "post/" +
+                    id + "/replies?"+ getCredentials(), null, new Response.Listener<JSONArray>(){
+
+                @Override
+                public void onResponse(JSONArray response) {
+                    final ArrayList<PostReply> comments = new ArrayList<>();
+                    // Here's the tricky part. We need to fetch user information for each post,
+                    // but we only want to call the listener once, after all the requests are
+                    // finished.
+                    // Let's make a counter (numReqFin) for the number of requests finished. This will be
+                    // a wrapper so that we can pass it by reference.
+                    final AtomicInteger numReqFin = new AtomicInteger();
+                    numReqFin.set(0);
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            JSONObject res = (JSONObject) response.get(i);
+                            comments.add(new PostReply(res));
+                            // Next, we will call instantiate postUser, but we will have a special
+                            // listener.
+                            instantiatePostReplyUser(queue, comments.get(i), new Response.Listener<PostReply>() {
+                                @Override
+                                public void onResponse(PostReply response) {
+                                    // Update the numReqFin counter that we have another finished post
+                                    // object.
+
+                                    if (numReqFin.addAndGet(1) == comments.size()) {
+                                        // We finished!! Call the listener at last.
+                                        listener.onResponse(new NetworkResponse<ArrayList<PostReply>>(false, comments));
+                                    }
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+
+                }
+            });
+            queue.add(req);
         }
 
         static NetworkResponse<List<Place>> autocompletePlace(String text) {
@@ -1044,30 +1271,207 @@ class API {
             return new NetworkResponse(matches);
         }
 
-        static NetworkResponse<Network> netFromLangAndNear(Language lang, NearLocation near) {
-            NetworkDao netDao = mDb.networkDao();
-            DatabaseNetwork dn = netDao.netFromLangAndHome(lang.language_id, near.near_city_id, near.near_region_id,
-                    near.near_country_id);
-            if (dn == null) {
-                // TODO: Distinguish between the network not existing and the lookup failing
-                return new NetworkResponse<>(true, R.string.noNetworkExist);
-            } else {
-                return network(dn.id);
-            }
+        /**
+         * Get the {@link Network} that has the provided {@link Language} and {@link NearLocation}
+         * @param queue Queue to which the asynchronous task will be added
+         * @param lang {@link Language} of the {@link Network} to find
+         * @param near {@link NearLocation} of the {@link Network} to find
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
+        static void netFromLangAndNear(final RequestQueue queue, Language lang, NearLocation near,
+                                  final Response.Listener<NetworkResponse<Network>> listener) {
+            netFromTwoParams(queue, "near_location", near.urlParam(), "language",
+                    lang.urlParam(), listener);
         }
 
-        static NetworkResponse<Network> netFromFromAndNear(FromLocation from, NearLocation near) {
-            NetworkDao netDao = mDb.networkDao();
-            DatabaseNetwork dn = netDao.netFromLocAndHome(from.from_city_id, from.from_region_id,
-                    from.from_country_id, near.near_city_id, near.near_region_id, near.near_country_id);
-            if (dn == null) {
-                // TODO: Distinguish between the network not existing and the lookup failing
-                return new NetworkResponse<>(true, R.string.noNetworkExist);
-            } else {
-                return network(dn.id);
-            }
+        /**
+         * Get the {@link Network} that has the provided {@link FromLocation} and {@link NearLocation}
+         * @param queue Queue to which the asynchronous task will be added
+         * @param from {@link FromLocation} of the {@link Network} to find
+         * @param near {@link NearLocation} of the {@link Network} to find
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
+        static void netFromFromAndNear(final RequestQueue queue, FromLocation from, NearLocation near,
+                                       final Response.Listener<NetworkResponse<Network>> listener) {
+            netFromTwoParams(queue, "near_location", near.urlParam(), "from_location",
+                    from.urlParam(), listener);
+        }
+
+        /**
+         * Get the {@link Network} that is defined by the two parameters provided
+         * @param queue Queue to which the asynchronous task will be added
+         * @param key1 Key for a parameter defining the {@link Network}
+         * @param val1 Value associated with {@code key1}
+         * @param key2 Key for a parameter defining the {@link Network}
+         * @param val2 Value associated with {@code key2}
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
+        private static void netFromTwoParams(final RequestQueue queue, final String key1, final String val1,
+                                             final String key2, final String val2,
+                                             final Response.Listener<NetworkResponse<Network>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE +
+                    "network/networks?" + key1 + "=" + val1 + "&" + key2 + "=" + val2 + "&" +
+                    getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray res) {
+                    try {
+                        if (res.length() == 0) {
+                            // No network was found
+                            listener.onResponse(new NetworkResponse<Network>(true, R.string.noNetworkExist));
+                        } else if (res.length() > 1) {
+                            listener.onResponse(new NetworkResponse<Network>(true));
+                            Log.e("API.Get.netFromTwoParam", "Multiple networks matched this: " +
+                                    key1 + ":" + val1 + "," + key2 + ":" + val2);
+                        }
+                        final DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(0));
+                        expandDatabaseNetwork(queue, dnet, new Response.Listener<NetworkResponse<Network>>() {
+                            @Override
+                            public void onResponse(NetworkResponse<Network> res) {
+                                if (!res.fail()) {
+                                    Network net = res.getPayload();
+                                    listener.onResponse(new NetworkResponse<>(net));
+                                } else {
+                                    Log.e("API.Get.netFromTwoparam", "Failure expanding DatabaseNetwork " + dnet);
+                                    listener.onResponse(new NetworkResponse<Network>(true, res.getMessageID()));
+                                }
+                            }
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        listener.onResponse(new NetworkResponse<Network>(true));
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    int messageID = processNetworkError("API.Get.netFromTwoParam",
+                            "ErrorListener from [" + key1 + ":" + val1 + "," + key2 + ":" +
+                                    val2 + "]", error);
+                    listener.onResponse(new NetworkResponse<Network>(true, messageID));
+                }
+            });
+            queue.add(req);
+        }
+
+        /**
+         * Get the {@link Language} that has the provided ID
+         * @param queue Queue to which the asynchronous task will be added
+         * @param id ID of the {@link Language} to find. Must be unique, and the same ID must be
+         *           used throughout.
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
+        static void language(final RequestQueue queue, final long id,
+                             final Response.Listener<NetworkResponse<Language>> listener) {
+            JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE + "language/" +
+                    id + "?" + getCredentials(), null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject res) {
+                    try {
+                        Language lang = new Language(res);
+                        listener.onResponse(new NetworkResponse<>(lang));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        listener.onResponse(new NetworkResponse<Language>(true));
+                        Log.e("API.Get.language", "Failure parsing JSON for ID=" + id);
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    int messageID = processNetworkError("API.Get.language",
+                            "ErrorListener", error);
+                    listener.onResponse(new NetworkResponse<Language>(true, messageID));
+                }
+            });
+            queue.add(req);
+        }
+
+        /**
+         * The API will return Post JSON Objects with id's for the user. Often, we will want to get
+         * the user information associated with a post, such as the name and profile picture. This
+         * method allows us to instantiate this user information for each post.
+         * @param queue The Volley RequestQueue object that handles all the request queueing.
+         * @param post An already instantiated Post object that has a null author field but a defined
+         *             userId field.
+         * @param listener the UI listener that will be called when we complete the task at hand.
+         */
+        static void instantiatePostUser(RequestQueue queue, final org.codethechange.culturemesh.models.Post post,
+                                         final Response.Listener<org.codethechange.culturemesh.models.Post> listener) {
+            JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET,
+                    "https://www.culturemesh.com/api-dev/v1/user/" + post.userId + "?" + getCredentials(),
+                    null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject res) {
+                    try {
+                        //make User object out of user JSON.
+                        post.author = new User(res.getInt("id"),
+                                res.getString("first_name"),
+                                res.getString("last_name"),
+                                res.getString("email"), res.getString("username"),
+                                "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
+                                res.getString("about_me"));
+                        listener.onResponse(post);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(null);
+                }
+            });
+            queue.add(authReq);
+
+        }
+
+        /**
+         * The API will return Post JSON Objects with id's for the user. Often, we will want to get
+         * the user information associated with a post, such as the name and profile picture. This
+         * method allows us to instantiate this user information for each post.
+         * @param queue The Volley RequestQueue object that handles all the request queueing.
+         * @param comment An already instantiated PostReply object that has a null author field but a defined
+         *             userId field.
+         * @param listener the UI listener that will be called when we complete the task at hand.
+         */
+        static void instantiatePostReplyUser(RequestQueue queue, final PostReply comment,
+                                        final Response.Listener<PostReply> listener) {
+            JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET,
+                    "https://www.culturemesh.com/api-dev/v1/user/" + comment.userId + "?" + getCredentials(),
+                    null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject res) {
+                    try {
+                        //make User object out of user JSON.
+                        comment.author = new User(res.getInt("id"),
+                                res.getString("first_name"),
+                                res.getString("last_name"),
+                                res.getString("email"), res.getString("username"),
+                                "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
+                                res.getString("about_me"));
+                        listener.onResponse(comment);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(comment);
+                }
+            });
+            queue.add(authReq);
+
         }
     }
+
+
 
     static class Post {
         /*
@@ -1106,10 +1510,16 @@ class API {
             return new NetworkResponse<>(network);
         }
 
-        static NetworkResponse post(org.codethechange.culturemesh.models.Post post) {
-            PostDao pDao = mDb.postDao();
+        static void post(final RequestQueue queue, org.codethechange.culturemesh.models.Post post,
+                                    Response.Listener<String> success,
+                                    Response.ErrorListener fail) {
+            /** TODO: For caching
+             * PostDao pDao = mDb.postDao();
             pDao.insertPosts(post);
-            return new NetworkResponse<>(false, post);
+            */
+            StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "post/new?" +
+                    getCredentials(), success, fail);
+            queue.add(req);
         }
 
         static NetworkResponse reply(PostReply comment) {
@@ -1137,55 +1547,140 @@ class API {
         }
     }
 
-    private static Network expandDatabaseNetwork(DatabaseNetwork dn) {
-        Place near = locationToPlace(dn.nearLocation);
-        Log.i("API.expandDBNetwork", "Converted the DatabaseNetwork " + dn + " to" +
-                " the Place " + near + " for the near location");
-
-        if (dn.isLanguageBased()) {
-            Log.i("API.expandDBNetwork", "The DatabaseNetwork " + dn + " is language based");
-            LanguageDao langDao = mDb.languageDao();
-            Language lang =langDao.getLanguage(dn.languageId);
-            Log.i("API.expandDBNetwork", "Converted the ID " + dn.languageId + " to" +
-                    " the Langauge " + lang + " for the language spoken");
-            Network net = new Network(near, lang, dn.id);
-            Log.i("API.expandDBNetwork", "Expanded the DatabaseNetwork " + dn + " to " +
-                    "the Network " + net);
-            return net;
-        } else {
-            Log.i("API.expandDBNetwork", "The DatabaseNetwork " + dn + " is location based");
-            Place from = locationToPlace(dn.fromLocation);
-            Log.i("API.expandDBNetwork", "Converted the FromLocation " + dn.fromLocation + " to" +
-                    " the Place " + from + " for the from location.");
-            Network net = new Network(near, from, dn.id);
-            Log.i("API.expandDBNetwork", "Expanded the DatabaseNetwork " + dn + " to " +
-                    "the Network " + net);
-            return net;
-        }
+    /**
+     * {@link DatabaseNetwork}s do not store all the information associated with a {@link Network}.
+     * Instead, a {@link DatabaseNetwork} is like a bundle of pointers to the parts of the
+     * {@link Network} it represents. This method "expands" a {@link DatabaseNetwork} into a
+     * {@link Network} by resolving those "pointers" and combining the results. The objects referred
+     * to by IDs in the {@link DatabaseNetwork} are fetched with API calls and re-bundled into a
+     * {@link Network}. See the documentation for {@link Location} for more information on this
+     * inheritance hierarchy.
+     * @param queue Queue to which the asynchronous task will be added
+     * @param dn {@link DatabaseNetwork} to expand into a {@link Network}
+     * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+     *                 is called with the {@link NetworkResponse} created by the query.
+     */
+    private static void expandDatabaseNetwork(final RequestQueue queue, final DatabaseNetwork dn,
+                                                 final Response.Listener<NetworkResponse<Network>> listener) {
+        locationToPlace(queue, dn.nearLocation, new Response.Listener<NetworkResponse<Place>>() {
+            @Override
+            public void onResponse(NetworkResponse<Place> res) {
+                if (!res.fail()) {
+                    final Place near = res.getPayload();
+                    Log.i("API.expandDBNetwork", "Converted the DatabaseNetwork " + dn + " to" +
+                            " the Place " + near + " for the near location");
+                    if (dn.isLanguageBased()) {
+                        Log.i("API.expandDBNetwork", "The DatabaseNetwork " + dn + " is language based");
+                        Get.language(queue, dn.languageId, new Response.Listener<NetworkResponse<Language>>() {
+                            @Override
+                            public void onResponse(NetworkResponse<Language> res) {
+                                if (!res.fail()) {
+                                    Language lang = res.getPayload();
+                                    Log.i("API.expandDBNetwork", "Converted the ID " + dn.languageId + " to" +
+                                            " the Langauge " + lang + " for the language spoken");
+                                    Network net = new Network(near, lang, dn.id);
+                                    Log.i("API.expandDBNetwork", "Expanded the DatabaseNetwork " + dn + " to " +
+                                            "the Network " + net);
+                                    listener.onResponse(new NetworkResponse<>(net));
+                                } else {
+                                    listener.onResponse(new NetworkResponse<Network>(true,
+                                            res.getMessageID()));
+                                    Log.e("API.expandDBNetwork", "Failure expanding Language " +
+                                            dn.languageId + " from ID");
+                                }
+                            }
+                        });
+                    } else {
+                        Log.i("API.expandDBNetwork", "The DatabaseNetwork " + dn + " is location based");
+                        locationToPlace(queue, dn.fromLocation, new Response.Listener<NetworkResponse<Place>>() {
+                            @Override
+                            public void onResponse(NetworkResponse<Place> res) {
+                                if (!res.fail()) {
+                                    Place from = res.getPayload();
+                                    Log.i("API.expandDBNetwork", "Converted the FromLocation " + dn.fromLocation + " to" +
+                                            " the Place " + from + " for the from location.");
+                                    Network net = new Network(near, from, dn.id);
+                                    Log.i("API.expandDBNetwork", "Expanded the DatabaseNetwork " + dn + " to " +
+                                            "the Network " + net);
+                                    listener.onResponse(new NetworkResponse<>(net));
+                                } else {
+                                    listener.onResponse(new NetworkResponse<Network>(true,
+                                            res.getMessageID()));
+                                    Log.e("API.expandDBNetwork", "Failure expanding FromLocation " +
+                                            dn.fromLocation + " from ID");
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    listener.onResponse(new NetworkResponse<Network>(true, res.getMessageID()));
+                    Log.e("API.expandDBNetwork", "Failure expanding NearLocation " +
+                            dn.nearLocation + " from ID");
+                }
+            }
+        });
     }
 
-    private static Place locationToPlace(Location loc) {
-        CityDao cityDao = mDb.cityDao();
-        RegionDao regionDao = mDb.regionDao();
-        CountryDao countryDao = mDb.countryDao();
-
-        Place place;
-        // TODO: Is this right? If so, DatabaseLocation only really needs to store type and ID
+    /**
+     * {@link Location}s do not store all the information associated with a {@link Place}.
+     * Instead, a {@link Location} is like a bundle of pointers to the parts of the
+     * {@link Place} it represents. This method "expands" a {@link Location} into a
+     * {@link Place} by resolving those "pointers" and combining the results. The objects referred
+     * to by IDs in the {@link Location} are fetched with API calls and re-bundled into a
+     * {@link Place}. See the documentation for {@link Location} for more information on this
+     * inheritance hierarchy.
+     * @param queue Queue to which the asynchronous task will be added
+     * @param loc {@link Location} to expand into a {@link Place}
+     * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+     *                 is called with the {@link NetworkResponse} created by the query.
+     */
+    private static void locationToPlace(final RequestQueue queue, final Location loc,
+                                         final Response.Listener<NetworkResponse<Place>> listener) {
+        String category;
+        long id;
         if (loc.getType() == Location.CITY) {
             Log.i("API.locationToPlace", "Location " + loc + " is a city");
-            place = cityDao.getCity(loc.getCityId());
+            category = "cities";
+            id = loc.getCityId();
         } else if (loc.getType() == Location.REGION) {
             Log.i("API.locationToPlace", "Location " + loc + " is a region");
-            place = regionDao.getRegion(loc.getRegionId());
+            category = "regions";
+            id = loc.getRegionId();
         } else {
             Log.i("API.locationToPlace", "Location " + loc + " is a country");
-            place = countryDao.getCountry(loc.getCountryId());
+            category = "countries";
+            id = loc.getCountryId();
         }
 
-        Log.i("API.locationToPlace", "Converted the location " + loc + " into the place " +
-                place);
-
-        return place;
+        JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE +
+                "location/" + category + "/" + id + "?" + getCredentials(), null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject res) {
+                        Place p;
+                        try {
+                            if (loc.getType() == Location.CITY) {
+                                p = new City(res);
+                            } else if (loc.getType() == Location.REGION) {
+                                p = new Region(res);
+                            } else {
+                                p = new Country(res);
+                            }
+                            listener.onResponse(new NetworkResponse<>(p));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            listener.onResponse(new NetworkResponse<Place>(true));
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                int messageID = processNetworkError("API.locationToPlace",
+                        "ErrorResponse for loc=" + loc, error);
+                listener.onResponse(new NetworkResponse<Place>(true, messageID));
+            }
+        });
+        queue.add(req);
     }
 
     public static void loadAppDatabase(Context context) {
@@ -1204,11 +1699,73 @@ class API {
     }
 
     /**
+     * Process errors that could be returned in the form of a {@link VolleyError} the Response.Listener
+     * @param tag Tag to include in log messages
+     * @param task Description of the task being attempted. This will be included in log entries.
+     * @param error The error returned
+     * @return The resource ID of the error message that should be displayed to the user
+     */
+    private static int processNetworkError(String tag, String task, VolleyError error) {
+        error.printStackTrace();
+        if (error instanceof ServerError) {
+            Log.e(tag, task + ": A ServerError occurred with code " + error.networkResponse.statusCode);
+            return R.string.noConnection;
+        } else if (error instanceof NetworkError) {
+            // NoConnectionError is a subclass of NetworkError
+            Log.e(tag, task + ": A NetworkError occurred.");
+            return R.string.noConnection;
+        } else if (error instanceof AuthFailureError) {
+            Log.e(tag, task + ": An AuthFailureError occurred.");
+        } else if (error instanceof ParseError) {
+            Log.e(tag, task + ": A ParseError occurred.");
+        } else if (error instanceof TimeoutError) {
+            Log.e(tag, task + ": A TimeoutError occurred.");
+            return R.string.timeout;
+        }
+
+        return R.string.genericFail;
+    }
+
+    /**
      * Use this method to append our credentials to our server requests. For now, we are using a
      * static API key. In the future, we are going to want to pass session tokens.
      * @return credentials string to be appended to request url as a param.
      */
     static String getCredentials(){
-        return "?key=" + Credentials.APIKey;
+        return "key=" + Credentials.APIKey;
     }
+
+    //TODO: Try to revive this helper method, or delete it.
+    static void instantiateComponents(RequestQueue queue, final ArrayList list, final Response.Listener UICallback, InstantiationListener listener){
+
+        // Here's the tricky part. We need to fetch information for each element,
+        // but we only want to call the listener once, after all the requests are
+        // finished.
+        // Let's make a counter (numReqFin) for the number of requests finished. This will be
+        // a wrapper so that we can pass it by reference.
+        final AtomicInteger numReqFin = new AtomicInteger();
+        numReqFin.set(0);
+        Log.i("Do I make it in here?", "????");
+        for (int i = 0; i < list.size(); i++) {
+                // Next, we will call instantiate postUser, but we will have a special
+                // listener.
+                listener.instantiateComponent(queue, list.get(i), new Response.Listener() {
+                    @Override
+                    public void onResponse(Object response) {
+                        // Update the numReqFin counter that we have another finished post
+                        // object.
+                        Log.i("Checking out this id", numReqFin.get() + " " + list.size());
+                        if (numReqFin.addAndGet(1) == list.size()) {
+                            // We finished!! Call the listener at last.
+                            UICallback.onResponse(new NetworkResponse(false, list));
+                        }
+                    }
+                });
+        }
+    }
+
+    interface InstantiationListener {
+        public void instantiateComponent(RequestQueue queue, Object obj, Response.Listener listener);
+    }
+
 }

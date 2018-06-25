@@ -128,7 +128,8 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                     adapter.getUserCounts().add(0);
                 }
                 try {
-                    adapter.getPostCounts().add(API.Get.networkPosts(net.id).getPayload().size());
+                    //TODO: Replace this with RequestQueue. Also, Alan just added a count endpoint.
+                    // adapter.getPostCounts().add(API.Get.networkPosts(net.id).getPayload().size());
                 } catch(NullPointerException e) {
                     adapter.getPostCounts().add(0);
                 }

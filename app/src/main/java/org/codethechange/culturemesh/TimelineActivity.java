@@ -73,6 +73,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         create = findViewById(R.id.create);
         createPost = findViewById(R.id.create_post);
         createEvent = findViewById(R.id.create_event);
+        animateFAB();
         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
     }
 
@@ -83,7 +84,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     }
 
     protected void createDefaultNetwork() {
-        new LoadNetworkData().execute(selectedNetwork);
+        //TODO: Fix new LoadNetworkData().execute(selectedNetwork);
 
 
 

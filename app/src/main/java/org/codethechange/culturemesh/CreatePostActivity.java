@@ -1,8 +1,10 @@
 package org.codethechange.culturemesh;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableStringBuilder;
@@ -17,6 +19,12 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
+
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
 
@@ -27,11 +35,14 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
     SparseArray<MenuItem> menuItems;
     TextView networkLabel;
     private Activity myActivity = this;
+    private RequestQueue queue;
+    ProgressBar progressBar;
     FormatManager formatManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        queue = Volley.newRequestQueue(getApplicationContext());
         setContentView(R.layout.activity_create_post);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -39,6 +50,7 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
         //This hashmap-like object helps us keep track of the settings of the format buttons.
         content = findViewById(R.id.postContent);
         networkLabel= findViewById(R.id.network_label);
+        progressBar = findViewById(R.id.postPostProgressBar);
         //Allow links to redirect to browser.
         content.setMovementMethod(LinkMovementMethod.getInstance());
         new LoadNetworkData().execute(Long.valueOf(1));
@@ -51,17 +63,36 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
         menuItems = new SparseArray<MenuItem>();
         formatManager = new FormatManager(content, this, R.id.comment_bold, R.id.comment_italic,
                 R.id.comment_link);
+
+
         //Set onClick for Post button.
         Button postButton = findViewById(R.id.create_post_button);
         postButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: Replace user with logged in user
+                //Get the HTML content!
                 String contentHTML = formatManager.toString();
                 String datePosted = new Date().toString();
+                progressBar.setIndeterminate(true); // Only because cannot get status from API
                 //TODO: Replace random with user id.
+                //TOOD: Allow for attaching images/videos.
                 Post newPost = new Post((int) (Math.random() * 100000), 1, 1, contentHTML, "", "", datePosted );
-                new PostPost().execute(newPost);
+                //Now let's send it off to the CultureMesh site!!
+                API.Post.post(queue, newPost, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Everything went well, so the activity will close.
+                        finish();
+                    }
+                }, new Response.ErrorListener(){
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //Some error happened with the network request. We will need to alert the user.
+                        new NetworkResponse<Object>(true, R.string.error_writing_post)
+                                .showErrorDialog(getApplicationContext());
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
             }
         });
 
@@ -130,54 +161,6 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
         }
     }
 
-    /**
-     * AsyncTask class to handle network latency when POSTing post
-     */
-    private class PostPost extends AsyncTask<Post, Integer, NetworkResponse> {
-
-        private ProgressBar progressBar;
-
-        /**
-         * In the background, POST the provided post
-         * @param posts List of posts, the first of which will be POSTed
-         * @return Result from network operation
-         */
-        @Override
-        protected NetworkResponse doInBackground(Post... posts) {
-            API.loadAppDatabase(getApplicationContext());
-            NetworkResponse res =  API.Post.post(posts[0]);
-            API.closeDatabase();
-            return res;
-        }
-
-        /**
-         * Makes the progress bar indeterminate
-         */
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressBar = findViewById(R.id.postPostProgressBar);
-            progressBar.setIndeterminate(true); // Only because cannot get status from API
-        }
-
-        /**
-         * If POSTing succeeded: Closes the activity and returns the user to the previous screen
-         * If POSTing failed: Displays error message and returns uer to composition screen
-         * @param response Status of doInBackground method that represents whether POSTing succeeded
-         */
-        @Override
-        protected void onPostExecute(NetworkResponse response) {
-            super.onPostExecute(response);
-            if (response.fail()) {
-                response.showErrorDialog(myActivity);
-                progressBar.setIndeterminate(false);
-            } else {
-
-                finish();
-            }
-        }
-    }
-
     private class LoadNetworkData extends AsyncTask<Long, Void, Network>{
 
         @Override
@@ -205,4 +188,19 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
         }
     }
 
+    /**
+     * This ensures that we are canceling all network requests if the user is leaving this activity.
+     * We use a RequestFilter that accepts all requests (meaning it cancels all requests)
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (queue != null)
+            queue.cancelAll(new RequestQueue.RequestFilter() {
+                @Override
+                public boolean apply(Request<?> request) {
+                    return true;
+                }
+            });
+    }
 }

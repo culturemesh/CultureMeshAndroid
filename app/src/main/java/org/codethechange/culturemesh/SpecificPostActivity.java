@@ -48,6 +48,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Comment;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -241,11 +242,11 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
          * another request inside the listener of the first one if you need data from the first to pass
          * into the second (i.e. id_user from post to get user)
          */
-        API.Get.post(queue, 100, new Response.Listener<NetworkResponse<Post>>() {
+        API.Get.post(queue, 527, new Response.Listener<NetworkResponse<Post>>() {
             @Override
             public void onResponse(NetworkResponse<Post> response) {
                 if (!response.fail()) {
-                    Post post = response.getPayload();
+                    final Post post = response.getPayload();
                     String name = post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName();
                     personName.setText(name);
                     content.setText(post.getContent());
@@ -263,7 +264,25 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                     }
                     Picasso.with(personPhoto.getContext()).load(post.getAuthor().getImgURL()).
                             into(personPhoto);
+                    //Now, allow redirect to ViewProfileActivity if username or profile pic is tapped.
+                    View.OnClickListener viewUserProfile = new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent viewUser = new Intent(getApplicationContext(),ViewProfileActivity.class);
+                            viewUser.putExtra(ViewProfileActivity.SELECTED_USER, post.getAuthor().id);
+                            startActivity(viewUser);
+                        }
+                    };
+                    personPhoto.setOnClickListener(viewUserProfile);
+                    username.setOnClickListener(viewUserProfile);
+                    personName.setOnClickListener(viewUserProfile);
                 }
+            }
+        });
+        API.Get.postReplies(queue, 88, new Response.Listener<NetworkResponse<ArrayList<PostReply>>>() {
+            @Override
+            public void onResponse(NetworkResponse<ArrayList<PostReply>> response) {
+
             }
         });
     }
@@ -320,7 +339,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
             API.loadAppDatabase(getApplicationContext());
             PostBundleWrapper wrapper = new PostBundleWrapper();
             //wrapper.post = API.Get.post(longs[0]).getPayload();
-            wrapper.replies = API.Get.postReplies(longs[0]).getPayload();
+            //wrapper.replies = API.Get.postReplies(longs[0]).getPayload();
             API.closeDatabase();
             return wrapper;
         }
@@ -350,6 +369,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
             View.OnClickListener viewUserProfile = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.i("Clicking username?", "Yes");
                     Intent viewUser = new Intent(getApplicationContext(),ViewProfileActivity.class);
                     viewUser.putExtra(ViewProfileActivity.SELECTED_USER, postBundleWrapper.post.author.id);
                     startActivity(viewUser);

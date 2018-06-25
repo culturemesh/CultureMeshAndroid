@@ -119,7 +119,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
             Log.i("DrawerActivity", "User is logged in as " + currentUser);
             //Load User info.
             new LoadUserInfo().execute(currentUser);
-            new LoadUserSubscriptions().execute(currentUser);
+            //TODO: Fix new LoadUserSubscriptions().execute(currentUser);
         }
     }
 
