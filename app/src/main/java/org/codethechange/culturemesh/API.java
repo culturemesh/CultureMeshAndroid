@@ -95,9 +95,6 @@ class API {
     //reqCounter to ensure that we don't close the database while another thread is using it.
     static int reqCounter;
 
-    static final String PREFIX = "https://www.culturemesh.com/api-dev/v1/";
-
-
     /**
      * Add users to the database by parsing the JSON stored in {@code rawDummy}. In case of any
      * errors, the stack trace is printed to the console.
@@ -803,7 +800,7 @@ class API {
          */
         static void userNetworks(final RequestQueue queue, final long id,
                                  final Response.Listener<NetworkResponse<ArrayList<Network>>> listener) {
-            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX + "user/" +
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "user/" +
                     id + "/networks?" + getCredentials(), null, new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray res) {
@@ -954,7 +951,7 @@ class API {
          */
         static void network(final RequestQueue queue, final long id, final Response.Listener<NetworkResponse<Network>> callback) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET,
-                    PREFIX + "network/" + id + "?" + getCredentials(), null,
+                    API_URL_BASE + "network/" + id + "?" + getCredentials(), null,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject res) {
@@ -1062,7 +1059,7 @@ class API {
          */
         static void networkEvents(final RequestQueue queue, final long id,
                                                           final Response.Listener<NetworkResponse<List<Event>>> listener) {
-            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX + "network/" +
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/" +
                     id + "/events?" + getCredentials(), null, new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray res) {
@@ -1315,7 +1312,7 @@ class API {
         private static void netFromTwoParams(final RequestQueue queue, final String key1, final String val1,
                                              final String key2, final String val2,
                                              final Response.Listener<NetworkResponse<Network>> listener) {
-            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, PREFIX +
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE +
                     "network/networks?" + key1 + "=" + val1 + "&" + key2 + "=" + val2 + "&" +
                     getCredentials(), null, new Response.Listener<JSONArray>() {
                 @Override
@@ -1369,7 +1366,7 @@ class API {
          */
         static void language(final RequestQueue queue, final long id,
                              final Response.Listener<NetworkResponse<Language>> listener) {
-            JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, PREFIX + "language/" +
+            JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE + "language/" +
                     id + "?" + getCredentials(), null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject res) {
@@ -1655,7 +1652,7 @@ class API {
             id = loc.getCountryId();
         }
 
-        JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, PREFIX +
+        JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE +
                 "location/" + category + "/" + id + "?" + getCredentials(), null,
                 new Response.Listener<JSONObject>() {
                     @Override
