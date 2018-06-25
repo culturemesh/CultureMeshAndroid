@@ -951,7 +951,6 @@ class API {
                 @Override
                 public void onResponse(JSONArray res) {
                     ArrayList<org.codethechange.culturemesh.models.Post> posts = new ArrayList<>();
-                    // TODO: Counter needed here
                     try {
                         for (int i = 0; i < res.length(); i++) {
                             org.codethechange.culturemesh.models.Post p =
