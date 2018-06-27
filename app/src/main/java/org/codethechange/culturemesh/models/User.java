@@ -3,6 +3,9 @@ package org.codethechange.culturemesh.models;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -45,6 +48,14 @@ public class User implements Serializable{
         this.aboutMe = aboutMe;
     }
 
+    public User(JSONObject res) throws JSONException{
+        this(res.getInt("id"),
+                res.getString("first_name"),
+                res.getString("last_name"),
+                res.getString("email"), res.getString("username"),
+                "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
+                res.getString("about_me"));
+    }
     public User(){
 
     }

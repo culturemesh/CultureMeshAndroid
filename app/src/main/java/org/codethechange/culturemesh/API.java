@@ -734,42 +734,6 @@ class API {
         }
     }
 
-    // TODO: These two methods seem really redundant. Why not have instantiatePosts use instantiatePost?
-    /**
-     * Instantiates the posts in the provided list. Instantiation is done by getting
-     * the author of each post as a User object via an API call and then setting the post's author
-     * to that object.
-     * @param posts Posts to instantiate
-     */
-    static void instantiatePosts(List<org.codethechange.culturemesh.models.Post> posts) {
-        for (org.codethechange.culturemesh.models.Post post : posts) {
-            //Get the user
-            post.author = API.Get.user(post.userId).getPayload();
-        }
-    }
-
-    /**
-     * Instantiates the provided post by getting the author from the author ID as a {@link User}
-     * object and storing that in {@link org.codethechange.culturemesh.models.Post#author}
-     * @param post Post to instantiate
-     */
-    static void instantiatePost(org.codethechange.culturemesh.models.Post post) {
-            //Get the user
-            post.author = API.Get.user(post.userId).getPayload();
-    }
-
-    /**
-     * Instantiates the {@link PostReply} objects in the provided list by getting the authors
-     * of each comment and storing it in {@link PostReply#author}
-     * @param comments List of PostReplies with which we will get comment authors for
-     */
-    static void instantiatePostReplies(List<PostReply> comments) {
-        for (PostReply comment : comments) {
-            //Get the user
-            comment.author = API.Get.user(comment.userId).getPayload();
-        }
-    }
-
     /**
      * The protocol for GET requests is as follows...
      *      1. Check if cache has relevant data. If so, return it.
@@ -783,11 +747,28 @@ class API {
          * @return If such a user was found, it will be the payload. Otherwise, the request will be
          * marked as failed.
          */
-        static NetworkResponse<User> user(long id) {
-            UserDao uDao = mDb.userDao();
-            User user = uDao.getUser(id);
-            //TODO: Send network request.
-            return new NetworkResponse<>(user == null, user);
+        static void user(RequestQueue queue, long id, final Response.Listener<NetworkResponse<User>> listener) {
+            JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET,
+                    "https://www.culturemesh.com/api-dev/v1/user/" + id + "?" + getCredentials(),
+                    null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject res) {
+                    try {
+                        //make User object out of user JSON.
+                        User user = new User(res);
+                        listener.onResponse(new NetworkResponse<>(false, user));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<User>(true, null));
+                }
+            });
+            queue.add(authReq);
         }
 
         /**
@@ -1092,10 +1073,10 @@ class API {
             List<Long> userIds = nSDao.getNetworkUsers(id);
             ArrayList<User> users = new ArrayList<>();
             for (long uId: userIds) {
-                NetworkResponse<User> res = user(uId);
+                /* TODO: Reimplement this. NetworkResponse<User> res = user(uId);
                 if (!res.fail()) {
                     users.add(res.getPayload());
-                }
+                }*/
             }
             return new NetworkResponse<>(users);
         }
@@ -1180,19 +1161,6 @@ class API {
             EventDao eDao = mDb.eventDao();
             Event event = eDao.getEvent(id);
             return new NetworkResponse<>(event == null, event);
-        }
-
-        static NetworkResponse<ArrayList<User>> eventAttendance(long id) {
-            EventSubscriptionDao eSDao = mDb.eventSubscriptionDao();
-            List<Long> uIds = eSDao.getEventUsers(id);
-            ArrayList<User> users = new ArrayList<>();
-            for (long uid : uIds) {
-                NetworkResponse res = user(uid);
-                if (!res.fail()) {
-                    users.add((User) res.getPayload());
-                }
-            }
-            return new NetworkResponse<>(users);
         }
 
         /**

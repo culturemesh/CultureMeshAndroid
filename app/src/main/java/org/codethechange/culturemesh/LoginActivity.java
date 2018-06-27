@@ -70,6 +70,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                 String userName = userNameField.getText().toString();
                 String password = passwordField.getText().toString();
                 Credential cred = new Credential(userName, password);
+                API.Get
                 new ValidateCredentials().execute(cred);
             }
         });
@@ -228,7 +229,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
             NetworkResponse<User> res;
             try {
                 // TODO: Replace this with actually processing username and password
-                //TODO: Handle sign in.
+                // TODO: Handle sign in.
                 long id = Long.parseLong(credentials[0].userName);
                 res = API.Get.user(id);
             } catch (NumberFormatException e) {

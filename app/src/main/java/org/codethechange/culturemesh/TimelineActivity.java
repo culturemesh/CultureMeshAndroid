@@ -203,7 +203,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         //TODO: For first run, uncomment this: new TestDatabase().execute();
         Log.i("TimelineActivity.onStrt", "Running TestDatabase().execute() to initialize" +
                 "database with dummy data.");
-        new TestDatabase().execute();
+
         //Check if user has selected a network to view, regardless of whether the user is subscribed
         //to any networks yet. Previously, we checked if the user joined a network, and instead
         //navigate the user to ExploreBubbles. This is not ideal because if a user wants to check
@@ -363,35 +363,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         }
     }
 
-    //TODO: Run new TestDatabase().execute() once to load dummy data in!
-    private class TestDatabase extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            API.loadAppDatabase(getApplicationContext());
-            if (API.Get.network(1).getPayload() == null) {
-                Log.i("TimelineActivity.TestDB", "Starting Database Initialization");
-                API.addReplies();
-                API.addUsers();
-                API.addCities();
-                API.addCountries();
-                API.addNetworks();
-                API.addRegions();
-                API.addPosts();
-                API.addEvents();
-                API.subscribeUsers();
-                Log.i("TimelineActivity.TestDB", "Finished Database Initialization");
-                settings.edit().putLong(API.CURRENT_USER, 1).apply();
-                Log.i("TimelineActivity.TestDB", "Set Current User");
-            } else {
-                Log.i("TimelineActivity.TestDB", "Not initializing database since already" +
-                        " initialized.");
-            }
-            API.closeDatabase();
-            return null;
-        }
-    }
-
     /**
      * This function controls the animation for the FloatingActionButtons.
      * When the user taps the pencil icon, two other floating action buttons rise into view - create
@@ -452,7 +423,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         isFABOpen = !isFABOpen;
     }
 
-    private class LoadNetworkData extends AsyncTask<Long, Void, NetUserWrapper> {
+    /*private class LoadNetworkData extends AsyncTask<Long, Void, NetUserWrapper> {
         @Override
         protected NetUserWrapper doInBackground(Long... longs) {
             API.loadAppDatabase(getApplicationContext());
@@ -465,7 +436,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
             Thus, since bundle arguments are either parcelable, serializable, or primitive data types,
             we will be passing in the relevant information for the recycler view (string username,
             string profile picture URL, and long user if for ViewProfileActivity) as separate arguments.
-             */
+
             wrap.netUsernames = new ArrayList<>();
             wrap.netProfilePictures = new ArrayList<>();
             wrap.netUserIds = new long[users.size()];
@@ -510,7 +481,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                 findViewById(R.id.population_button).setOnClickListener(showUsersListener);
             }
         }
-    }
+    }*/
 
     private class NetUserWrapper {
         Network network;

@@ -40,7 +40,7 @@ public class Post extends FeedItem implements Serializable{
         return network;
     }
 
-    public Post(int id, int author, int networkId, String content, String imgLink, String vidLink, String datePosted) {
+    public Post(long id, long author, long networkId, String content, String imgLink, String vidLink, String datePosted) {
         this.id = id;
         this.userId = author;
         this.content = content;
@@ -66,7 +66,7 @@ public class Post extends FeedItem implements Serializable{
         this.vidLink = vidLink;
     }
 
-    public Post(int author, String content, String datePosted) {
+    public Post(long author, String content, String datePosted) {
         this.userId = author;
         this.content = content;
         this.datePosted = datePosted;
