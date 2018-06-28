@@ -231,7 +231,8 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                 // TODO: Replace this with actually processing username and password
                 // TODO: Handle sign in.
                 long id = Long.parseLong(credentials[0].userName);
-                res = API.Get.user(id);
+                User user = new User(id,"","","","","","");
+                res = new NetworkResponse<>(false, user);
             } catch (NumberFormatException e) {
                 res = new NetworkResponse<>(true, R.string.loginFailed);
             }

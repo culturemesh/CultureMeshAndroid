@@ -14,6 +14,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+
 import org.codethechange.culturemesh.models.Network;
 
 import java.util.ArrayList;
@@ -28,6 +32,7 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
     TextView emptyText;
     final static String SELECTED_USER="seluser";
     final static String FIRST_TIME = "firsttime";
+    RequestQueue queue;
 
     /**
      * Returns a new instance of this fragment for the given section
@@ -51,12 +56,48 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
         ArrayList<Network> networks = new ArrayList<>();
         ArrayList<Integer> counts = new ArrayList<>();
         ArrayList<Integer> users = new ArrayList<>();
-        NetworkSummaryAdapter adapter = new NetworkSummaryAdapter(networks, counts, users, this);
+        final NetworkSummaryAdapter adapter = new NetworkSummaryAdapter(networks, counts, users, this);
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
         emptyText = root.findViewById(R.id.empty_text);
         emptyText.setText(getResources().getString(R.string.no_networks));
         //Fetch Data off UI thread.
+        API.Get.userNetworks(queue, getArguments().getLong(SELECTED_USER, -1), new Response.Listener<NetworkResponse<ArrayList<Network>>>() {
+            @Override
+            public void onResponse(NetworkResponse<ArrayList<Network>> response) {
+                // Cool! Now, for each network, we need to find the number of posts and the
+                // number of users.
+                if (!response.fail()) {
+                    ArrayList<Network> nets = response.getPayload();
+                    adapter.getNetworks().addAll(nets);
+                    for (Network net : nets) {
+                        //TODO: size() is limited to int....
+                        API.Get.userNetworks(queue, net.id, new Response.Listener<NetworkResponse<ArrayList<Network>>>() {
+                            @Override
+                            public void onResponse(NetworkResponse<ArrayList<Network>> response) {
+                                if (!response.fail()) {
+                                    // TODO: Rewrite getUserCounts() as HashMap<network_id, user_count>
+                                    // This prevents possibility that the user counts are added in
+                                    // wrong order.
+                                    adapter.getUserCounts().add(response.getPayload().size());
+                                }
+                            }
+                        });
+                        try {
+                            adapter.getUserCounts().add(API.Get.networkUsers(net.id).getPayload().size());
+                        } catch(NullPointerException e) {
+                            adapter.getUserCounts().add(0);
+                        }
+                        try {
+                            adapter.getPostCounts().add(API.Get.networkPosts(net.id).getPayload().size());
+                        } catch(NullPointerException e) {
+                            adapter.getPostCounts().add(0);
+                        }
+                    }
+                }
+
+            }
+        });
         new LoadSubscribedNetworks().execute(getArguments().getLong(SELECTED_USER, -1));
         return root;
 
@@ -98,7 +139,7 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
                    adapter.getUserCounts().add(0);
                 }
                 try {
-                    //adapter.getPostCounts().add(API.Get.networkPosts(net.id).getPayload().size());
+                    adapter.getPostCounts().add(API.Get.networkPosts(net.id).getPayload().size());
                 } catch(NullPointerException e) {
                     adapter.getPostCounts().add(0);
                 }
@@ -120,5 +161,21 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
                 emptyText.setVisibility(View.GONE);
             }
         }
+    }
+
+    /**
+     * This ensures that we are canceling all network requests if the user is leaving this activity.
+     * We use a RequestFilter that accepts all requests (meaning it cancels all requests)
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (queue != null)
+            queue.cancelAll(new RequestQueue.RequestFilter() {
+                @Override
+                public boolean apply(Request<?> request) {
+                    return true;
+                }
+            });
     }
 }
