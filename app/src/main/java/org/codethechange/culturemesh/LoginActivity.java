@@ -70,7 +70,6 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                 String userName = userNameField.getText().toString();
                 String password = passwordField.getText().toString();
                 Credential cred = new Credential(userName, password);
-                API.Get
                 new ValidateCredentials().execute(cred);
             }
         });

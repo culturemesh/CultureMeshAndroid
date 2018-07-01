@@ -1054,6 +1054,7 @@ class API {
                         e.printStackTrace();
                         listener.onResponse(new NetworkResponse<List<Event>>(true));
                         Log.e("API.Get.networkEvents", "Could not parse JSON of event: " + e.getMessage());
+                        return;
                     }
                     listener.onResponse(new NetworkResponse<List<Event>>(events));
                 }
@@ -1068,17 +1069,33 @@ class API {
             queue.add(req);
         }
 
-        static NetworkResponse<ArrayList<User>> networkUsers(long id) {
-            NetworkSubscriptionDao nSDao = mDb.networkSubscriptionDao();
-            List<Long> userIds = nSDao.getNetworkUsers(id);
-            ArrayList<User> users = new ArrayList<>();
-            for (long uId: userIds) {
-                /* TODO: Reimplement this. NetworkResponse<User> res = user(uId);
-                if (!res.fail()) {
-                    users.add(res.getPayload());
-                }*/
-            }
-            return new NetworkResponse<>(users);
+        static void networkUsers(RequestQueue queue, final long id, final Response.Listener<NetworkResponse<ArrayList<User>>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/" +
+                    id + "/users?" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    ArrayList<User> users = new ArrayList<>();
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            User user = new User((JSONObject) response.get(i));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            listener.onResponse(new NetworkResponse<ArrayList<User>>(true));
+                            Log.e("API.Get.networkEvents", "Could not parse JSON of event: " + e.getMessage());
+                            return;
+                        }
+                    }
+                    listener.onResponse(new NetworkResponse<ArrayList<User>>(false, users));
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    int messageID = processNetworkError("API.Get.networkEvents",
+                            "ErrorListener with id=" + id, error);
+                    listener.onResponse(new NetworkResponse<ArrayList<User>>(true, messageID));
+                }
+            });
+            queue.add(req);
         }
 
         /**

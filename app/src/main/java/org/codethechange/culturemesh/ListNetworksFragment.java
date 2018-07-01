@@ -19,8 +19,12 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 
 import org.codethechange.culturemesh.models.Network;
+import org.codethechange.culturemesh.models.Post;
+import org.codethechange.culturemesh.models.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -54,8 +58,8 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
         rv = root.findViewById(R.id.rv);
         //Say it's empty.
         ArrayList<Network> networks = new ArrayList<>();
-        ArrayList<Integer> counts = new ArrayList<>();
-        ArrayList<Integer> users = new ArrayList<>();
+        HashMap<String, Integer> counts = new HashMap<>();
+        HashMap<String, Integer> users = new HashMap<>();
         final NetworkSummaryAdapter adapter = new NetworkSummaryAdapter(networks, counts, users, this);
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -70,35 +74,40 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
                 if (!response.fail()) {
                     ArrayList<Network> nets = response.getPayload();
                     adapter.getNetworks().addAll(nets);
-                    for (Network net : nets) {
+                    if (rv.getAdapter().getItemCount() > 0) {
+                        //Hide empty text.
+                        emptyText.setVisibility(View.GONE);
+                    }
+                    for (final Network net : nets) {
                         //TODO: size() is limited to int....
-                        API.Get.userNetworks(queue, net.id, new Response.Listener<NetworkResponse<ArrayList<Network>>>() {
+                        API.Get.networkUsers(queue, net.id, new Response.Listener<NetworkResponse<ArrayList<User>>>() {
                             @Override
-                            public void onResponse(NetworkResponse<ArrayList<Network>> response) {
+                            public void onResponse(NetworkResponse<ArrayList<User>> response) {
                                 if (!response.fail()) {
-                                    // TODO: Rewrite getUserCounts() as HashMap<network_id, user_count>
+                                    /* getUserCounts() returns HashMap<network_id, user_count> */
                                     // This prevents possibility that the user counts are added in
                                     // wrong order.
-                                    adapter.getUserCounts().add(response.getPayload().size());
+                                    adapter.getUserCounts().put(net.id + "", response.getPayload().size());
+                                } else {
+                                    adapter.getUserCounts().put(net.id + "", 0);
+                                }
+                                adapter.notifyDataSetChanged();
+                            }
+                        });
+                        API.Get.networkPosts(queue, net.id, new Response.Listener<NetworkResponse<List<Post>>>() {
+                            @Override
+                            public void onResponse(NetworkResponse<List<Post>> response) {
+                                if (!response.fail()) {
+                                    adapter.getPostCounts().put(net.id + "", response.getPayload().size());
+                                } else {
+                                    adapter.getPostCounts().put(net.id + "", 0);
                                 }
                             }
                         });
-                        try {
-                            adapter.getUserCounts().add(API.Get.networkUsers(net.id).getPayload().size());
-                        } catch(NullPointerException e) {
-                            adapter.getUserCounts().add(0);
-                        }
-                        try {
-                            adapter.getPostCounts().add(API.Get.networkPosts(net.id).getPayload().size());
-                        } catch(NullPointerException e) {
-                            adapter.getPostCounts().add(0);
-                        }
                     }
                 }
-
             }
         });
-        new LoadSubscribedNetworks().execute(getArguments().getLong(SELECTED_USER, -1));
         return root;
 
     }
@@ -117,50 +126,9 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
         //Commit selected network id to sharedPrefs.
         SharedPreferences prefs = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, Context.MODE_PRIVATE);
         prefs.edit().putLong(API.SELECTED_NETWORK, network.id).apply();
-        Intent viewNetwork = new Intent(getActivity() ,TimelineActivity.class);
+        Intent viewNetwork = new Intent(getActivity(), TimelineActivity.class);
         getActivity().startActivity(viewNetwork);
         getActivity().finish();
-    }
-
-    class LoadSubscribedNetworks extends AsyncTask<Long, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Long... longs) {
-            long userId = longs[0];
-            API.loadAppDatabase(getActivity());
-            NetworkSummaryAdapter adapter = (NetworkSummaryAdapter) rv.getAdapter();
-            ArrayList<Network> nets = API.Get.userNetworks(userId).getPayload();
-            adapter.getNetworks().addAll(nets);
-            for (Network net : nets) {
-                //TODO: size() is limited to int....
-                try {
-                    adapter.getUserCounts().add(API.Get.networkUsers(net.id).getPayload().size());
-                } catch(NullPointerException e) {
-                   adapter.getUserCounts().add(0);
-                }
-                try {
-                    adapter.getPostCounts().add(API.Get.networkPosts(net.id).getPayload().size());
-                } catch(NullPointerException e) {
-                    adapter.getPostCounts().add(0);
-                }
-            }
-            API.closeDatabase();
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(Void v) {
-            rv.getAdapter().notifyDataSetChanged();
-            if (rv.getAdapter().getItemCount() > 0) {
-                //Hide empty text.
-                emptyText.setVisibility(View.GONE);
-            }
-        }
     }
 
     /**

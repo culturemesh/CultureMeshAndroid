@@ -49,7 +49,7 @@ public class Network implements Serializable {
     public Network(Place nearLocation, Place fromLocation, long id) {
         this.fromLocation = fromLocation;
         this.nearLocation = nearLocation;
-        isLanguageBased = true;
+        isLanguageBased = false;
         this.id = id;
     }
 
@@ -62,7 +62,7 @@ public class Network implements Serializable {
     public Network(Place nearLocation, Language lang, long id) {
         this.language = lang;
         this.nearLocation = nearLocation;
-        isLanguageBased = false;
+        isLanguageBased = true;
         this.id = id;
     }
 
