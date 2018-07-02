@@ -749,7 +749,7 @@ class API {
          */
         static void user(RequestQueue queue, long id, final Response.Listener<NetworkResponse<User>> listener) {
             JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET,
-                    "https://www.culturemesh.com/api-dev/v1/user/" + id + "?" + getCredentials(),
+                    API_URL_BASE + "user/" + id + "?" + getCredentials(),
                     null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject res) {
@@ -769,6 +769,28 @@ class API {
                 }
             });
             queue.add(authReq);
+        }
+
+
+        static void networkUserCount(RequestQueue queue, long id, final Response.Listener<NetworkResponse<Long>> listener) {
+            JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE + "network/" + id + "/user_count?" + getCredentials(), null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        Long count = response.getLong("user_count");
+                        listener.onResponse(new NetworkResponse<Long>(false, count));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        listener.onResponse(new NetworkResponse<Long>(true, R.string.network_error));
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<Long>(true, R.string.network_error));
+                }
+            });
+            queue.add(req);
         }
 
         /**
@@ -818,7 +840,7 @@ class API {
                             NetworkResponse object whenever any JSON parsing error occurs. This may
                             not be the best approach.
                              */
-                            listener.onResponse(new NetworkResponse<ArrayList<Network>>(true));
+                            listener.onResponse(new NetworkResponse<ArrayList<Network>>(true, R.string.network_error));
                             return;
                         }
                     }
@@ -1222,6 +1244,7 @@ class API {
                                 }
                             });
                         } catch (JSONException e) {
+                            listener.onResponse(new NetworkResponse<ArrayList<PostReply>>(true, R.string.network_error));
                             e.printStackTrace();
                         }
                     }

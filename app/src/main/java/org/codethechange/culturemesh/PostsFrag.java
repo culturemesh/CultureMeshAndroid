@@ -26,7 +26,12 @@ import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
 
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -36,7 +41,6 @@ import static android.content.Context.MODE_PRIVATE;
  * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
  */
 public class PostsFrag extends Fragment {
-    private String basePath = "www.culturemesh.com/api/v1";
 
     private RecyclerView mRecyclerView;
     private RVAdapter mAdapter;
@@ -115,20 +119,31 @@ public class PostsFrag extends Fragment {
             API.Get.networkPosts(queue, selectedNetwork, new Response.Listener<NetworkResponse<List<Post>>>() {
                 @Override
                 public void onResponse(NetworkResponse<List<Post>> response) {
-                    for (final Post post : response.getPayload()) {
-                        Log.i("Caught posts","in response listen");
-                        //Get comments
-                        API.Get.postReplies(queue, post.id, new Response.Listener<NetworkResponse<ArrayList<PostReply>>>() {
-                            @Override
-                            public void onResponse(NetworkResponse<ArrayList<PostReply>> response) {
-                                Log.i("Adding comments", "Hello");
-                                post.comments = response.getPayload();
-                                feedItems.add(post);
-                                mRecyclerView.getAdapter().notifyDataSetChanged();
-                            }
-                        });
-
+                    if (response.fail()) {
+                        response.showErrorDialog(getContext());
+                    } else {
+                        // We need to sort these posts by date. Oh wait, they're already sorted!
+                        ArrayList<Post> posts = (ArrayList<Post>) response.getPayload();
+                        Log.i("Size", posts.size() + "");
+                        for (final Post post : posts) {
+                            Log.i("Caught posts","in response listen");
+                            feedItems.add(post);
+                            //Get comments
+                            API.Get.postReplies(queue, post.id, new Response.Listener<NetworkResponse<ArrayList<PostReply>>>() {
+                                @Override
+                                public void onResponse(NetworkResponse<ArrayList<PostReply>> response) {
+                                    if (!response.fail()) {
+                                        Log.i("Adding comments", "Hello");
+                                        post.comments = response.getPayload();
+                                        Log.i("Comments", "Adding " + post.comments.size() + "comments to post " + post.id);
+                                        mAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            });
+                        }
+                        mAdapter.notifyDataSetChanged();
                     }
+
                 }
             });
 

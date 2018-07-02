@@ -101,6 +101,15 @@ public class Region extends Place {
     }
 
     /**
+     * Now display just region name.
+     * @return
+     */
+    public String getShortName(){
+        return regionName;
+    }
+
+
+    /**
      * Get the name of the region
      * @return Name of region
      */

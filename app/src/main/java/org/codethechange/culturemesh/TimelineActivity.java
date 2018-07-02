@@ -32,6 +32,10 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
+
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
@@ -58,6 +62,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     private Animation open, close;
     private boolean isFABOpen;
     private TextView population, fromLocation, nearLocation;
+    private RequestQueue queue;
     private long selectedNetwork;
 
     @Override
@@ -73,6 +78,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         create = findViewById(R.id.create);
         createPost = findViewById(R.id.create_post);
         createEvent = findViewById(R.id.create_event);
+        queue = Volley.newRequestQueue(getApplicationContext());
         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
     }
 
@@ -83,8 +89,37 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     }
 
     protected void createDefaultNetwork() {
-        //TODO: Fix new LoadNetworkData().execute(selectedNetwork);
-
+        //Now, load network data for the header bar.
+        API.Get.network(queue, selectedNetwork, new Response.Listener<NetworkResponse<Network>>() {
+            @Override
+            public void onResponse(NetworkResponse<Network> response) {
+                if(!response.fail()) {
+                    Network network = response.getPayload();
+                    //Update from location/language
+                    if (network.isLocationBased()) {
+                        fromLocation.setText(network.fromLocation.getShortName());
+                    } else {
+                        fromLocation.setText(network.language.name);
+                    }
+                    //Update near location
+                    nearLocation.setText(network.nearLocation.getShortName());
+                } else {
+                    response.showErrorDialog(getApplicationContext());
+                }
+            }
+        });
+        //We also need the user data for the population textview and and slide view
+        API.Get.networkUserCount(queue, selectedNetwork, new Response.Listener<NetworkResponse<Long>>() {
+            @Override
+            public void onResponse(NetworkResponse<Long> response) {
+                if (!response.fail()) {
+                    //Manipulate string of number to have magnitude suffix (K,M,etc.) for population text
+                    population.setText(FormatManager.abbreviateNumber(response.getPayload()));
+                } else {
+                    response.showErrorDialog(getApplicationContext());
+                }
+            }
+        });
 
 
         swipeRefreshLayout = findViewById(R.id.postsRefresh);
@@ -269,6 +304,10 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     @Override
     public void onSubscribeListFinish() {
         //Check if the user is subscribed or not this network.
+        Log.i("subscribedNetworkIDs", subscribedNetworkIds.size() + "");
+        if (subscribedNetworkIds.size() >= 1) {
+            Log.i("id comp" , selectedNetwork + " " + subscribedNetworkIds.toArray()[0]);
+        }
         if (subscribedNetworkIds.contains(selectedNetwork)) {
             //We are subscribed! Thus, the user can write posts an events. Let's make sure they have
             //the right listeners.
@@ -302,7 +341,8 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                     startActivity(cEA);
                 }
             });
-            animateFAB();
+            Button joinNetwork = findViewById(R.id.join_network_button);
+            joinNetwork.setVisibility(View.GONE);
         } else {
             //The user has not joined this network yet. We should hide the write post/events buttons
             //and show the join network button.
@@ -315,7 +355,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                     new JoinNetwork().execute(selectedNetwork);
                 }
             });
-
         }
     }
 

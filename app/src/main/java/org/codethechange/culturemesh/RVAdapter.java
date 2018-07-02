@@ -172,7 +172,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             }
             String name = post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName();
             pvh.personName.setText(name);
-            pvh.content.setText(FormatManager.parseText(post.getContent()));
+            pvh.content.setText(FormatManager.parseText(post.getContent(), "#4989c1"));
             pvh.postTypePhoto.setImageDrawable(null /* TODO: logic flow depending on post source */);
             pvh.timestamp.setText(post.getDatePosted().toString());
             pvh.username.setText(post.getAuthor().getUsername());
@@ -196,16 +196,16 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                     //We have at least one post to display! Let's display it.
                     PostReply comment1 = post.comments.get(0);
                     pvh.comment1Name.setText(comment1.author.getUsername());
-                    pvh.comment1Text.setText(FormatManager.parseText(comment1.replyText));
+                    pvh.comment1Text.setText(FormatManager.parseText(comment1.replyText, "#FFFFFF"));
                     pvh.comment1Layout.setVisibility(View.VISIBLE);
                     if (post.comments.size() >= 2) {
                         //Now let's display comment 2.
                         PostReply comment2 = post.comments.get(1);
                         pvh.comment2Name.setText(comment2.author.getUsername());
-                        pvh.comment2Text.setText(FormatManager.parseText(comment2.replyText));
+                        pvh.comment2Text.setText(FormatManager.parseText(comment2.replyText, "#FFFFFF"));
                         pvh.comment2Layout.setVisibility(View.VISIBLE);
                         if (post.comments.size() > 2) {
-                            //Even more comemnts? The user will have to check them out
+                            //Even more comments? The user will have to check them out
                             // in the DetailPostActivity.
                             pvh.viewMoreComments.setVisibility(View.VISIBLE);
                         }
@@ -218,6 +218,10 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                     pvh.comment2Layout.setVisibility(View.GONE);
                     pvh.viewMoreComments.setVisibility(View.GONE);
                 }
+            } else {
+                pvh.comment1Layout.setVisibility(View.GONE);
+                pvh.comment2Layout.setVisibility(View.GONE);
+                pvh.viewMoreComments.setVisibility(View.GONE);
             }
             Log.i("Image Link", post.getAuthor().getImgURL());
         } catch(ClassCastException e) {
@@ -234,12 +238,8 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             //TODO: Format event time.
             pvh.eventTime.setText(event.getTimeOfEvent().toString());
             pvh.bind(item, listener);
-
         }
-
     }
-
-
 
     public interface OnItemClickListener {
         void onItemClick(FeedItem item);

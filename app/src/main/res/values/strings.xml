@@ -164,4 +164,5 @@
 
     </string>
     <string name="title_activity_settings">Edit Profile</string>
+    <string name="network_error">Network Error. Please try again.</string>
 </resources>

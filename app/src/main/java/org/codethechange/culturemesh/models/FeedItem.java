@@ -15,4 +15,5 @@ public class FeedItem {
      */
     @Ignore
     public List<PostReply> comments;
+
 }

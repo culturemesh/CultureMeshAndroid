@@ -140,6 +140,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                     }
                 }
             });
+            Log.i("How many times", "is this called?");
             //Now, load user subscriptions (networks) to display in the navigation drawer.
             API.Get.userNetworks(queue, currentUser, new Response.Listener<NetworkResponse<ArrayList<Network>>>() {
                 @Override
@@ -147,6 +148,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                     if (res.fail()) {
                         res.showErrorDialog(DrawerActivity.this);
                     } else {
+                        Log.i("In here", "how many times does this happen?");
                         subscribedNetworks = new SparseArray<Network>();
 
                         //Instantiate map with key -> menu view id, value -> network.
@@ -167,9 +169,9 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                             String name = "";
                             if (net.isLocationBased()) {
                                 name = getResources().getString(R.string.from) + " " +
-                                        net.fromLocation.getListableName() + " " +
+                                        net.fromLocation.getShortName() + " " +
                                         getResources().getString(R.string.near) + " " +
-                                        net.nearLocation.getListableName();
+                                        net.nearLocation.getShortName();
                             } else {
                                 name = net.language.toString() + " " +
                                         getResources().getString(R.string.speakers_in) + " " +
@@ -189,8 +191,6 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                     }
                 }
             });
-
-            //TODO: Fix new LoadUserSubscriptions().execute(currentUser);
         }
     }
 

@@ -9,6 +9,11 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by nathaniel on 11/10/17.
@@ -79,7 +84,7 @@ public class Post extends FeedItem implements Serializable{
     }
 
     public String getDatePosted() {
-        return datePosted;
+        return this.datePosted;
     }
 
     public void setContent(String content) {
@@ -92,6 +97,16 @@ public class Post extends FeedItem implements Serializable{
 
     public Post(){
 
+    }
+
+    /**
+     * Sometimes, we will want to get the time not just as a string
+     * but as a Date object (i.e. for comparing time for sorting)
+     * @return Date object based on datePosted string.
+     */
+    public Date getPostedTime() throws ParseException {
+        DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy kk:mm:ss z", Locale.US);
+        return df.parse(this.datePosted);
     }
 
     /**

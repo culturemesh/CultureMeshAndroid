@@ -67,6 +67,15 @@ public class Country extends Place {
     }
 
     /**
+     * Now display just country name.
+     * @return
+     */
+    public String getShortName(){
+        return name;
+    }
+
+
+    /**
      * Get name of country
      * @return Name of country
      */

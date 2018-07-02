@@ -122,12 +122,25 @@ public class Event extends FeedItem implements Serializable{
         authorId = json.getLong("id_host");
 
         address = json.getString("address_1");
-        // TODO: Confirm this treatment of missing second address line
-        if (json.has("address_2")) {
+        if (json.has("address_2") && json.getString("address_2") != null &&
+                !json.getString("address_2").equals("null")) {
             address += "\n" + json.getString("address_2");
         }
-        address += "\n" + json.getString("city") + "," + json.getString("region") +
-                "," + json.getString("country");
+        String cityString = json.getString("city");
+        if (cityString == null || cityString.equals("null")) {
+            cityString = "";
+        }
+        String regionString = json.getString("region");
+        if (regionString == null || regionString.equals("null")) {
+            regionString = "";
+        } else {
+            regionString = ", " + regionString;
+        }
+        String countryString = json.getString("country");
+        if (countryString == null || countryString.equals("null")) {
+            countryString = ", " + countryString;
+        }
+        address += "\n" + cityString + regionString + countryString;
     }
 
 }

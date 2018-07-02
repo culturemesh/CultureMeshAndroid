@@ -80,7 +80,7 @@ public class Network implements Serializable {
      * otherwise
      */
     public boolean isLocationBased() {
-        return ! isLanguageBased;
+        return !isLanguageBased;
     }
 
     /**
