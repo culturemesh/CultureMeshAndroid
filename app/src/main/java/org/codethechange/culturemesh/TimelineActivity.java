@@ -352,7 +352,30 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                 @Override
                 public void onClick(View v) {
                     //We need to subscribe this user!
-                    new JoinNetwork().execute(selectedNetwork);
+                    API.Post.addUserToNetwork(queue, currentUser, selectedNetwork, new Response.Listener<NetworkResponse<String>>() {
+                        @Override
+                        public void onResponse(NetworkResponse<String> response) {
+                            if (response.fail()) {
+                                response.showErrorDialog(TimelineActivity.this);
+                            } else {
+                                AlertDialog success = new AlertDialog.Builder(TimelineActivity.this)
+                                        .setTitle(R.string.genericSuccess)
+                                        .setMessage(R.string.join_success)
+                                        .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                            @Override
+                                            public void onDismiss(DialogInterface dialog) {
+                                                subscribedNetworkIds.add(selectedNetwork);
+                                                //Restart the activity.
+                                                Intent restart = new Intent(getApplicationContext(), TimelineActivity.class);
+                                                startActivity(restart);
+                                                finish();
+                                            }
+                                        })
+                                        .create();
+                                success.show();
+                            }
+                        }
+                    });
                 }
             });
         }
@@ -462,106 +485,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         isFABOpen = !isFABOpen;
     }
 
-    /*private class LoadNetworkData extends AsyncTask<Long, Void, NetUserWrapper> {
-        @Override
-        protected NetUserWrapper doInBackground(Long... longs) {
-            API.loadAppDatabase(getApplicationContext());
-            //TODO: Use NetworkResponse for error handling.
-            NetUserWrapper wrap = new NetUserWrapper();
-            wrap.network = API.Get.network(longs[0]).getPayload();
-            List<User> users = API.Get.networkUsers(longs[0]).getPayload();
-            /*The user information is only used for the ViewUsersModalSheetFragment.
-            Fragments like default constructors, so parameters should be passed as an args bundle.
-            Thus, since bundle arguments are either parcelable, serializable, or primitive data types,
-            we will be passing in the relevant information for the recycler view (string username,
-            string profile picture URL, and long user if for ViewProfileActivity) as separate arguments.
-
-            wrap.netUsernames = new ArrayList<>();
-            wrap.netProfilePictures = new ArrayList<>();
-            wrap.netUserIds = new long[users.size()];
-            for (int i = 0; i < users.size(); i++) {
-                User user = users.get(i);
-                wrap.netUsernames.add(user.firstName + " " + user.lastName);
-                wrap.netProfilePictures.add(user.imgURL);
-                wrap.netUserIds[i] = user.id;
-            }
-            API.closeDatabase();
-            return wrap;
-        }
-
-        @Override
-        protected void onPostExecute(final NetUserWrapper wrapper) {
-            Network network = wrapper.network;
-            if (network != null) {
-                //Update population number
-                //Manipulate string of number to have magnitude suffix (K,M,etc.)
-                population.setText(FormatManager.abbreviateNumber(wrapper.netUserIds.length));
-                //Update from location/language
-                if (network.isLocationBased()) {
-                    fromLocation.setText(network.fromLocation.getListableName());
-                } else {
-                    fromLocation.setText(network.language.name);
-                }
-                //Update near location
-                nearLocation.setText(network.nearLocation.getListableName());
-                View.OnClickListener showUsersListener = new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        BottomSheetDialogFragment bsFrag = new ViewUsersModalSheetFragment();
-                        Bundle args = new Bundle();
-                        args.putStringArrayList(ViewUsersModalSheetFragment.USER_NAMES, wrapper.netUsernames);
-                        args.putStringArrayList(ViewUsersModalSheetFragment.IMAGE_URLS, wrapper.netProfilePictures);
-                        args.putLongArray(ViewUsersModalSheetFragment.USER_IDS, wrapper.netUserIds);
-                        bsFrag.setArguments(args);
-                        bsFrag.show(getSupportFragmentManager(), "ViewUsersModalSheet");
-                    }
-                };
-                population.setOnClickListener(showUsersListener);
-                findViewById(R.id.population_button).setOnClickListener(showUsersListener);
-            }
-        }
-    }*/
-
-    private class NetUserWrapper {
-        Network network;
-        ArrayList<String> netUsernames, netProfilePictures;
-        long[] netUserIds;
-    }
-
-
-    class JoinNetwork extends AsyncTask<Long, Void, NetworkResponse> {
-
-        @Override
-        protected NetworkResponse doInBackground(Long... longs) {
-            API.loadAppDatabase(getApplicationContext());
-            NetworkResponse response = API.Post.addUserToNetwork(currentUser, longs[0]);
-            API.closeDatabase();
-            return response;
-        }
-
-        @Override
-        protected void onPostExecute(NetworkResponse networkResponse) {
-            if (networkResponse.fail()) {
-                networkResponse.showErrorDialog(TimelineActivity.this);
-            } else {
-                AlertDialog success = new AlertDialog.Builder(TimelineActivity.this)
-                        .setTitle(R.string.genericSuccess)
-                        .setMessage(R.string.join_success)
-                        .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                            @Override
-                            public void onDismiss(DialogInterface dialog) {
-                                subscribedNetworkIds.add(selectedNetwork);
-                                //Restart the activity.
-                                Intent restart = new Intent(getApplicationContext(), TimelineActivity.class);
-                                startActivity(restart);
-                                finish();
-                            }
-                        })
-                        .create();
-                success.show();
-            }
-        }
-    }
 }
 
 

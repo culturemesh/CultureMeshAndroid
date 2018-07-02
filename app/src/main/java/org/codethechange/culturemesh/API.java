@@ -1492,11 +1492,20 @@ class API {
             return new NetworkResponse<>(es);
         }
 
-        static NetworkResponse addUserToNetwork(long userId, long networkId) {
-            NetworkSubscriptionDao nSDao = mDb.networkSubscriptionDao();
-            NetworkSubscription ns = new NetworkSubscription(userId, networkId);
-            nSDao.insertSubscriptions(ns);
-            return new NetworkResponse<>(ns);
+        static void addUserToNetwork(RequestQueue queue, long userId, long networkId, final Response.Listener<NetworkResponse<String>> listener) {
+            StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "user/" + userId + "/addToNetwork/"
+                    + networkId + "?" + getCredentials(), new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    listener.onResponse(new NetworkResponse<String>(false, response));
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<String>(true, R.string.error_joining_network));
+                }
+            });
+            queue.add(req);
         }
 
         static NetworkResponse removeUserFromNetwork(long userId, long networkId) {

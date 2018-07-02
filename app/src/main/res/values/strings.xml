@@ -165,4 +165,5 @@
     </string>
     <string name="title_activity_settings">Edit Profile</string>
     <string name="network_error">Network Error. Please try again.</string>
+    <string name="error_joining_network">Error joining network. Please try again.</string>
 </resources>
