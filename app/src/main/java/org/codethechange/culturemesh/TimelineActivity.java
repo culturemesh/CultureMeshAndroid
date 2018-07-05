@@ -16,6 +16,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -126,6 +128,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                Log.i("ANOTHA TEST", "FETCHING MORE POSTS");
                 onSwipeRefresh();
             }
         });
@@ -142,7 +145,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
 
         //check if at end of posts
         postsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            private boolean loading = true;
+            private boolean loading = false;
             int pastVisiblesItems, visibleItemCount, totalItemCount;
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -150,14 +153,21 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                     visibleItemCount = mLayoutManager.getChildCount();
                     totalItemCount = mLayoutManager.getItemCount();
                     pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
-                    if (loading)
+                    if (!loading)
                     {
                         if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
                         {
-                            loading = false;
-                            Log.v("...", "Last Item");
-                            fetchPostsAtEnd(pastVisiblesItems);
+                            //Temporarily disable scroll listener until we fetch new feed items.
                             loading = true;
+                            Log.i("Page start", "Starting fetch again...");
+                            FragmentManager fm = getSupportFragmentManager();
+                            PostsFrag frag = (PostsFrag) fm.findFragmentById(R.id.posts_fragment);
+                            frag.fetchNewPage(new Response.Listener<Void>() {
+                                @Override
+                                public void onResponse(Void response) {
+                                    loading = false;
+                                }
+                            });
                         }
                     }
                 }
@@ -210,6 +220,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
 
     //Or rather, use built-in SwipeRefreshLayout; commented out portions were to be used with inner gesture class
     public void onSwipeRefresh() {
+        Log.i("SwipeRefresh", "I WANT MORE POSTS NOW");
         //RecyclerView postsRV = getActivity().findViewById(R.id.postsRV);
         //LinearLayoutManager linearLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
         swipeRefreshLayout.setRefreshing(true);
@@ -220,7 +231,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     //Returns true upon successful retrieval, returns false if issue/no connection
     public boolean refreshPosts() { //probably public? if we want to refresh from outside, if that's possible/needed
         boolean success = true;
-
         //TODO: re-call loading posts. this must be done asynchronously.
 
         swipeRefreshLayout.setRefreshing(false);
@@ -281,7 +291,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         int id = item.getItemId();
 
         if (super.mDrawerToggle.onOptionsItemSelected(item)) {
-            Log.i("Toggle","Toggle selected!");
             return true;
         }
         // noinspection SimplifiableIfStatement
@@ -304,10 +313,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     @Override
     public void onSubscribeListFinish() {
         //Check if the user is subscribed or not this network.
-        Log.i("subscribedNetworkIDs", subscribedNetworkIds.size() + "");
-        if (subscribedNetworkIds.size() >= 1) {
-            Log.i("id comp" , selectedNetwork + " " + subscribedNetworkIds.toArray()[0]);
-        }
         if (subscribedNetworkIds.contains(selectedNetwork)) {
             //We are subscribed! Thus, the user can write posts an events. Let's make sure they have
             //the right listeners.
@@ -484,7 +489,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         }
         isFABOpen = !isFABOpen;
     }
-
 }
 
 

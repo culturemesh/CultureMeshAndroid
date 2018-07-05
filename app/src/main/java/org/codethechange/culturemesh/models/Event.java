@@ -120,7 +120,6 @@ public class Event extends FeedItem implements Serializable{
         description = json.getString("description");
         timeOfEvent = json.getString("event_date");
         authorId = json.getLong("id_host");
-
         address = json.getString("address_1");
         if (json.has("address_2") && json.getString("address_2") != null &&
                 !json.getString("address_2").equals("null")) {
@@ -138,6 +137,8 @@ public class Event extends FeedItem implements Serializable{
         }
         String countryString = json.getString("country");
         if (countryString == null || countryString.equals("null")) {
+            countryString = "";
+        } else {
             countryString = ", " + countryString;
         }
         address += "\n" + cityString + regionString + countryString;

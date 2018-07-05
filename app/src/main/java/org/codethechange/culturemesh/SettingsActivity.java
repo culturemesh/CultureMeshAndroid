@@ -197,26 +197,25 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                         emptyText.setText(getResources().getString(R.string.no_networks));
                     }
                     for (final Network net : nets) {
-                        //TODO: size() is limited to int....
-                        API.Get.networkUsers(queue, net.id, new Response.Listener<NetworkResponse<ArrayList<User>>>() {
+                        API.Get.networkUserCount(queue, net.id, new Response.Listener<NetworkResponse<Long>>() {
                             @Override
-                            public void onResponse(NetworkResponse<ArrayList<User>> response) {
+                            public void onResponse(NetworkResponse<Long> response) {
                                 if (!response.fail()) {
                                     /* getUserCounts() returns HashMap<network_id, user_count> */
                                     // This prevents possibility that the user counts are added in
                                     // wrong order.
-                                    adapter.getUserCounts().put(net.id + "", response.getPayload().size());
+                                    adapter.getUserCounts().put(net.id + "", response.getPayload().intValue());
                                 } else {
                                     adapter.getUserCounts().put(net.id + "", 0);
                                 }
                                 adapter.notifyDataSetChanged();
                             }
                         });
-                        API.Get.networkPosts(queue, net.id, new Response.Listener<NetworkResponse<List<Post>>>() {
+                        API.Get.networkPostCount(queue, net.id, new Response.Listener<NetworkResponse<Long>>() {
                             @Override
-                            public void onResponse(NetworkResponse<List<Post>> response) {
+                            public void onResponse(NetworkResponse<Long> response) {
                                 if (!response.fail()) {
-                                    adapter.getPostCounts().put(net.id + "", response.getPayload().size());
+                                    adapter.getPostCounts().put(net.id + "", response.getPayload().intValue());
                                 } else {
                                     adapter.getPostCounts().put(net.id + "", 0);
                                 }

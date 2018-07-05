@@ -3,8 +3,6 @@ package org.codethechange.culturemesh;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -26,12 +24,7 @@ import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
 
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -48,7 +41,9 @@ public class PostsFrag extends Fragment {
     long selectedNetwork;
     SharedPreferences settings;
     RequestQueue queue;
-    //To figure out params that would be passed in
+    String maxEventId = API.NO_MAX_PAGINATION;
+    //The post with the lowest id that we have fetched. We use this for paginating future posts.
+    String maxPostId = API.NO_MAX_PAGINATION;
 
     public PostsFrag() {
         // Required empty public constructor
@@ -67,20 +62,15 @@ public class PostsFrag extends Fragment {
                              Bundle savedInstanceState) {
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         View rootView = inflater.inflate(R.layout.fragment_posts, container, false);
-
         mRecyclerView = rootView.findViewById(R.id.postsRV);
-
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
-
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(activity);
         mRecyclerView.setLayoutManager(mLayoutManager);
         //Get network id
         selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
-        SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
-                MODE_PRIVATE);
         //We generalize posts/events to be feed items for polymorphism.
         //TODO: Consider error checking for when getPayload is null.
         final ArrayList<FeedItem> feedItems = new ArrayList<FeedItem>();
@@ -102,21 +92,49 @@ public class PostsFrag extends Fragment {
             }
         }, getActivity().getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);
+        fetchNewPage(new Response.Listener<Void>() {
+            @Override
+            public void onResponse(Void response) {
+                //This is really meant for TimelineActivity. We don't do anything here.
+            }
+        });
+        return rootView;
+    }
+
+    /**
+     * If the user has exhausted the list of fetched posts/events, this will fetch another batch of
+     * posts.
+     * @param listener the listener that will be called when we finish fetching the stuffs.
+     */
+    public void fetchNewPage(final Response.Listener<Void> listener){
+        final List<FeedItem> feedItems = mAdapter.getNetPosts();
         if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_EVENTS, true)) {
             //If events aren't filtered out, add them to arraylist.
-            API.Get.networkEvents(queue, selectedNetwork, new Response.Listener<NetworkResponse<List<Event>>>() {
+            API.Get.networkEvents(queue, selectedNetwork, maxEventId, new Response.Listener<NetworkResponse<List<Event>>>() {
                 @Override
                 public void onResponse(NetworkResponse<List<Event>> response) {
-                    if (!response.fail())
-                        feedItems.addAll(response.getPayload());
+                    if (!response.fail()) {
+                        List<Event> events = response.getPayload();
+                        feedItems.addAll(events);
+                        if (events.size() > 0) {
+                            long newMaxEventId = events.get(events.size() - 1).id - 1 ;
+                            if (maxEventId.equals(API.NO_MAX_PAGINATION) || Long.parseLong(maxEventId) > newMaxEventId) {
+                                maxEventId = newMaxEventId + "";
+                            }
+                            Log.i("New Max Event Id", "New Max Event Id: "+ maxEventId + "");
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    }
+                    listener.onResponse(null);
                 }
             });
+
         }
         if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_NATIVE, true)) {
-            //If posts aren't filtered out, add them to arraylist.
-            //We also need to get the post replies.
-            Log.i("Try this!", "About to run getnetposts");
-            API.Get.networkPosts(queue, selectedNetwork, new Response.Listener<NetworkResponse<List<Post>>>() {
+            // If posts aren't filtered out, add them to array list.
+            // We also need to get the post replies.
+            // Deal with pagination. The first batch has no limit on posts ids.
+            API.Get.networkPosts(queue, selectedNetwork, maxPostId, new Response.Listener<NetworkResponse<List<Post>>>() {
                 @Override
                 public void onResponse(NetworkResponse<List<Post>> response) {
                     if (response.fail()) {
@@ -124,31 +142,34 @@ public class PostsFrag extends Fragment {
                     } else {
                         // We need to sort these posts by date. Oh wait, they're already sorted!
                         ArrayList<Post> posts = (ArrayList<Post>) response.getPayload();
-                        Log.i("Size", posts.size() + "");
-                        for (final Post post : posts) {
-                            Log.i("Caught posts","in response listen");
-                            feedItems.add(post);
-                            //Get comments
-                            API.Get.postReplies(queue, post.id, new Response.Listener<NetworkResponse<ArrayList<PostReply>>>() {
-                                @Override
-                                public void onResponse(NetworkResponse<ArrayList<PostReply>> response) {
-                                    if (!response.fail()) {
-                                        Log.i("Adding comments", "Hello");
-                                        post.comments = response.getPayload();
-                                        Log.i("Comments", "Adding " + post.comments.size() + "comments to post " + post.id);
-                                        mAdapter.notifyDataSetChanged();
+                        // Let's assume that the smallest id is the last item.
+                        if (posts.size() > 0) {
+                            long newMaxPostId = posts.get(posts.size() - 1).id - 1;
+                            if (maxPostId.equals(API.NO_MAX_PAGINATION) || Long.parseLong(maxPostId) > newMaxPostId) {
+                                maxPostId = newMaxPostId + "";
+                            }
+                            Log.i("New Max Post Id", "New Max Post Id: " + maxPostId + "");
+                            for (final Post post : posts) {
+                                feedItems.add(post);
+                                //Get comments
+                                API.Get.postReplies(queue, post.id, new Response.Listener<NetworkResponse<ArrayList<PostReply>>>() {
+                                    @Override
+                                    public void onResponse(NetworkResponse<ArrayList<PostReply>> response) {
+                                        if (!response.fail()) {
+                                            post.comments = response.getPayload();
+                                            mAdapter.notifyDataSetChanged();
+                                        }
                                     }
-                                }
-                            });
-                        }
-                        mAdapter.notifyDataSetChanged();
-                    }
+                                });
 
+                            }
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    }
+                    listener.onResponse(null);
                 }
             });
-
         }
-        return rootView;
     }
 
     @Override

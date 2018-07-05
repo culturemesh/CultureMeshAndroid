@@ -91,6 +91,7 @@ class API {
     static final boolean NO_JOINED_NETWORKS = false;
     static final String CURRENT_USER = "curruser";
     static final String API_URL_BASE = "https://www.culturemesh.com/api-dev/v1/";
+    static final String NO_MAX_PAGINATION = "-1"; // If you do not need a maximum id.
     static CMDatabase mDb;
     //reqCounter to ensure that we don't close the database while another thread is using it.
     static int reqCounter;
@@ -793,6 +794,28 @@ class API {
             queue.add(req);
         }
 
+        static void networkPostCount(RequestQueue queue, long id, final Response.Listener<NetworkResponse<Long>> listener) {
+            JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE + "network/" + id + "/post_count?" + getCredentials(), null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    Long count = null;
+                    try {
+                        count = response.getLong("post_count");
+                        listener.onResponse(new NetworkResponse<Long>(false, count));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        listener.onResponse(new NetworkResponse<Long>(true, R.string.network_not_found));
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<Long>(true, R.string.error));
+                }
+            });
+            queue.add(req);
+        }
+
         /**
          * Get the networks a user belongs to
          * @param queue RequestQueue to which the asynchronous job will be added
@@ -997,13 +1020,9 @@ class API {
          * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
          *                 is called with the {@link NetworkResponse} created by the query.
          */
-        static void networkPosts(final RequestQueue queue, final long id, final Response.Listener<NetworkResponse<List<org.codethechange.culturemesh.models.Post>>> listener) {
-            /* TODO: Add caching capability.
-            PostDao pDao = mDb.postDao();
-            List<org.codethechange.culturemesh.models.Post> posts = pDao.getNetworkPosts((int) id);
-            instantiatePosts(posts);*/
+        static void networkPosts(final RequestQueue queue, final long id, String maxId, final Response.Listener<NetworkResponse<List<org.codethechange.culturemesh.models.Post>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/"
-                    + id + "/posts?" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                    + id + "/posts?" + getPagination(maxId + "") + "&count=10" +  getCredentials(), null, new Response.Listener<JSONArray>() {
 
                 @Override
                 public void onResponse(JSONArray response) {
@@ -1060,10 +1079,10 @@ class API {
          * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
          *                 is called with the {@link NetworkResponse} created by the query.
          */
-        static void networkEvents(final RequestQueue queue, final long id,
+        static void networkEvents(final RequestQueue queue, final long id, String maxId,
                                                           final Response.Listener<NetworkResponse<List<Event>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/" +
-                    id + "/events?" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                    id + "/events?" + getPagination(maxId) + "&count=10" + getCredentials(), null, new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray res) {
                     ArrayList<Event> events = new ArrayList<>();
@@ -1749,7 +1768,7 @@ class API {
      * @return credentials string to be appended to request url as a param.
      */
     static String getCredentials(){
-        return "key=" + Credentials.APIKey;
+        return "&key=" + Credentials.APIKey;
     }
 
     //TODO: Try to revive this helper method, or delete it.
@@ -1780,6 +1799,20 @@ class API {
                 });
         }
     }
+
+    /**
+     * Fetches query parameter string you need to add in to the request url.
+     * @param id maximum id of item you want to fetch. Use API.NO_MAX_PAGINATION if you want no limit.
+     * @return pagination query param to add to request url.
+     */
+    private static String getPagination(String id) {
+        if (id.equals(API.NO_MAX_PAGINATION)) {
+            return "";
+        } else {
+            return "&max_id=" + id;
+        }
+    }
+
 
     interface InstantiationListener {
         public void instantiateComponent(RequestQueue queue, Object obj, Response.Listener listener);
