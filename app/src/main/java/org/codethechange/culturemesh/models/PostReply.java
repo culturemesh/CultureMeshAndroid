@@ -53,4 +53,17 @@ public class PostReply {
     public PostReply() {
 
     }
+
+    /**
+     * Makes JSON Object to pass onto network request body.
+     * @return
+     */
+    public JSONObject getJSON() throws JSONException {
+        JSONObject obj = new JSONObject();
+        obj.put("id_parent" , parentId);
+        obj.put("id_user", userId);
+        obj.put("id_network", networkId);
+        obj.put("reply_text", replyText);
+        return obj;
+    }
 }

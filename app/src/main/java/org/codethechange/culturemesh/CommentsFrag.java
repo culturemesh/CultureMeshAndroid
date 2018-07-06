@@ -82,7 +82,7 @@ public class CommentsFrag extends Fragment {
 
         Intent intent = getActivity().getIntent();
         long postID = intent.getLongExtra("postID", 0);
-        API.Get.postReplies(queue, 88, new Response.Listener<NetworkResponse<ArrayList<PostReply>>>() {
+        API.Get.postReplies(queue, postID, new Response.Listener<NetworkResponse<ArrayList<PostReply>>>() {
 
             @Override
             public void onResponse(NetworkResponse<ArrayList<PostReply>> response) {
@@ -127,40 +127,6 @@ public class CommentsFrag extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    private class LoadComments extends AsyncTask<Long,Void,ArrayList<PostReply>> {
-
-        /**
-         * This is the asynchronous part. It calls the client API, which can make network requests
-         * and read from the cache database.
-         * @param longs This should be the network id.
-         * @return a collection of feed items to be displayed in the feed.
-         */
-        @Override
-        protected ArrayList<PostReply> doInBackground(Long... longs) {
-            API.loadAppDatabase(getActivity().getApplicationContext());
-
-            //TODO: Consider error checking for when getPayload is null.
-            //ArrayList<PostReply> comments = (ArrayList<PostReply>) API.Get.postReplies(longs[0]).getPayload();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(final ArrayList<PostReply> comments) {
-            mAdapter = new RVCommentAdapter(comments, new RVCommentAdapter.OnItemClickListener() {
-                @Override
-                public void onCommentClick(PostReply comment) {
-                     //to add comment click/long click functionality
-                    Toast.makeText(getActivity(), "Comment by " + comment.author + " clicked!", Toast.LENGTH_LONG).show();
-                }
-            }, getActivity().getApplicationContext());
-            mRecyclerView.setAdapter(mAdapter);
-            getFragmentManager().beginTransaction()
-                    .detach(CommentsFrag.this)
-                    .attach(CommentsFrag.this)
-                    .commit();
-            API.closeDatabase();
-        }
-    }
 
     /**
      * This ensures that we are canceling all network requests if the user is leaving this activity.

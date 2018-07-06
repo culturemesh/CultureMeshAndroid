@@ -43,6 +43,9 @@ import org.codethechange.culturemesh.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
 
 /**
  * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/8/17.
@@ -66,6 +69,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     private TextView population, fromLocation, nearLocation;
     private RequestQueue queue;
     private long selectedNetwork;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,7 +132,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Log.i("ANOTHA TEST", "FETCHING MORE POSTS");
                 onSwipeRefresh();
             }
         });
@@ -139,37 +142,33 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                 new FilterDialogFragment().show(getFragmentManager(), FILTER_LABEL);
             }
         });
+        final AtomicBoolean loadingMoreFeedItems = new AtomicBoolean();
+        loadingMoreFeedItems.set(false);
         //set up postsRV
         postsRV = findViewById(R.id.postsRV);
         mLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
-
         //check if at end of posts
         postsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            private boolean loading = false;
             int pastVisiblesItems, visibleItemCount, totalItemCount;
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if(dy > 0) {
-                    visibleItemCount = mLayoutManager.getChildCount();
-                    totalItemCount = mLayoutManager.getItemCount();
-                    pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
-                    if (!loading)
-                    {
-                        if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
-                        {
-                            //Temporarily disable scroll listener until we fetch new feed items.
-                            loading = true;
-                            Log.i("Page start", "Starting fetch again...");
-                            FragmentManager fm = getSupportFragmentManager();
-                            PostsFrag frag = (PostsFrag) fm.findFragmentById(R.id.posts_fragment);
-                            frag.fetchNewPage(new Response.Listener<Void>() {
-                                @Override
-                                public void onResponse(Void response) {
-                                    loading = false;
-                                }
-                            });
+                // Required to override, but nothing here.
+            }
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (!recyclerView.canScrollVertically(1) && newState == SCROLL_STATE_IDLE
+                        && !loadingMoreFeedItems.get()) {
+                    //Temporarily disable scroll listener until we fetch new feed items.
+                    loadingMoreFeedItems.set(true);
+                    FragmentManager fm = getSupportFragmentManager();
+                    PostsFrag frag = (PostsFrag) fm.findFragmentById(R.id.posts_fragment);
+                    frag.fetchNewPage(new Response.Listener<Void>() {
+                        @Override
+                        public void onResponse(Void response) {
+                            loadingMoreFeedItems.set(false);
                         }
-                    }
+                    });
                 }
             }
         });
@@ -191,41 +190,12 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
 
     }
 
-    /* Can control refresh aesthetic (i.e. strength of swipe to trigger, direction, etc.) with this
-    class GestureDetector extends android.view.GestureDetector.SimpleOnGestureListener {
-        private static final int SWIPE_MIN_DISTANCE = 120;
-        private static final int SWIPE_MAX_OFF_PATH = 250;
-        private static final int SWIPE_THRESHOLD_VELOCITY = 50;
-
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-                               float velocityY) {
-            try {
-                if (Math.abs(e1.getX() - e2.getX()) > SWIPE_MAX_OFF_PATH){
-                    return false;
-                }
-                // down swipe
-                else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE
-                        && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
-                    RecyclerView postsRV = getActivity().findViewById(R.id.postsRV);
-                    LinearLayoutManager linearLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
-                    if(linearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0) animateRefresh();
-                }
-            } catch (Exception e) {
-                Log.d("gErr", "Gesture error");
-            }
-            return false;
-        }
-    }
-*/
-
     //Or rather, use built-in SwipeRefreshLayout; commented out portions were to be used with inner gesture class
     public void onSwipeRefresh() {
-        Log.i("SwipeRefresh", "I WANT MORE POSTS NOW");
-        //RecyclerView postsRV = getActivity().findViewById(R.id.postsRV);
-        //LinearLayoutManager linearLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
-        swipeRefreshLayout.setRefreshing(true);
-        //if(linearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0)
-        if(!refreshPosts()) Log.d("sErr", "Server/Connection error");
+        //Restart activity to refresh posts.
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
     }
 
     //Returns true upon successful retrieval, returns false if issue/no connection
@@ -236,7 +206,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         swipeRefreshLayout.setRefreshing(false);
         //TODO: if server/connection error, success = false;
 
-        //TODO:     when done, animate old posts fading away and new posts then fading in
+        //TODO: when done, animate old posts fading away and new posts then fading in
         return success;
     }
 
@@ -390,14 +360,13 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
      * This dialog allows us to filter out native/twitter posts from the feed
      */
     public static class FilterDialogFragment extends DialogFragment {
-        boolean[] filterSettings = {true, true, true};
+        boolean[] filterSettings = {true, true};
 
         @Override
         public Dialog onCreateDialog(final Bundle savedInstanceState) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             filterSettings[0] = settings.getBoolean(FILTER_CHOICE_NATIVE, true);
-            filterSettings[1] = settings.getBoolean(FILTER_CHOICE_TWITTER, true);
-            filterSettings[2] = settings.getBoolean(FILTER_CHOICE_EVENTS, true);
+            filterSettings[1] = settings.getBoolean(FILTER_CHOICE_EVENTS, true);
             builder.setTitle(getResources().getString(R.string.filter_posts))
                     .setMultiChoiceItems(R.array.filter_choices, filterSettings,
                             new DialogInterface.OnMultiChoiceClickListener() {
@@ -412,8 +381,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                             // User clicked OK, so save the results somewhere
                             SharedPreferences.Editor editor = settings.edit();
                             editor.putBoolean(FILTER_CHOICE_NATIVE, filterSettings[0]);
-                            editor.putBoolean(FILTER_CHOICE_TWITTER, filterSettings[1]);
-                            editor.putBoolean(FILTER_CHOICE_EVENTS, filterSettings[2]);
+                            editor.putBoolean(FILTER_CHOICE_EVENTS, filterSettings[1]);
                             editor.apply();
                             //Refresh the fragment to apply new filter settings.
                             getActivity().recreate();

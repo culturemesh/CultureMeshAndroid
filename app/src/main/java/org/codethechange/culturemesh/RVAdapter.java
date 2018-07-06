@@ -84,8 +84,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             viewMoreComments = itemView.findViewById(R.id.view_more_comments);
         }
 
-
-
         void hidePostViews() {
             ConstraintSet constraints = new ConstraintSet();
             constraints.clone(layout);
@@ -223,7 +221,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                 pvh.comment2Layout.setVisibility(View.GONE);
                 pvh.viewMoreComments.setVisibility(View.GONE);
             }
-            Log.i("Image Link", post.getAuthor().getImgURL());
         } catch(ClassCastException e) {
             //It's an event.
             Event event = (Event) item;
@@ -235,7 +232,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             pvh.eventTitle.setText(event.getTitle());
             pvh.eventLocation.setText(event.getAddress());
             pvh.eventDescription.setText(event.getDescription());
-            //TODO: Format event time.
             pvh.eventTime.setText(event.getTimeOfEvent().toString());
             pvh.bind(item, listener);
         }

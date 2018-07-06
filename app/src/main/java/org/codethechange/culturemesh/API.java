@@ -53,6 +53,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1277,17 +1278,29 @@ class API {
             queue.add(req);
         }
 
-        static NetworkResponse<List<Place>> autocompletePlace(String text) {
-            // TODO: Take argument for maximum number of locations to return?
-            List<Place> locations = new ArrayList<>();
-            //Get any related cities, countries, or regions.
-            CityDao cityDao = mDb.cityDao();
-            locations.addAll(cityDao.autoCompleteCities(text));
-            RegionDao regionDao = mDb.regionDao();
-            locations.addAll(regionDao.autoCompleteRegions(text));
-            CountryDao countryDao = mDb.countryDao();
-            locations.addAll(countryDao.autoCompleteCountries(text));
-            return new NetworkResponse<>(locations == null, locations);
+        static void autocompletePlace(RequestQueue queue, String text, final Response.Listener<NetworkResponse<List<Location>>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE +
+                    "location/autocomplete?input_text=" + text + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    ArrayList<Location> places = new ArrayList<>();
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            places.add(new Location(response.getJSONObject(i)));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            listener.onResponse(new NetworkResponse<List<Location>>(true, R.string.invalid_format));
+                        }
+                    }
+                    listener.onResponse(new NetworkResponse<List<Location>>(false, places));
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<List<Location>>(true, R.string.network_error));
+                }
+            });
+            queue.add(req);
         }
 
         static NetworkResponse<List<Language>> autocompleteLanguage(String text) {
@@ -1549,19 +1562,42 @@ class API {
         static void post(final RequestQueue queue, org.codethechange.culturemesh.models.Post post,
                                     Response.Listener<String> success,
                                     Response.ErrorListener fail) {
-            /** TODO: For caching
-             * PostDao pDao = mDb.postDao();
-            pDao.insertPosts(post);
-            */
             StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "post/new?" +
                     getCredentials(), success, fail);
             queue.add(req);
         }
 
-        static NetworkResponse reply(PostReply comment) {
-            PostReplyDao prDao = mDb.postReplyDao();
-            prDao.insertPostReplies(comment);
-            return new NetworkResponse(false, comment);
+        static void reply(RequestQueue queue, final PostReply comment, final Response.Listener<NetworkResponse<String>> listener) {
+            StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "post/" +
+                    comment.parentId + "/reply?" + getCredentials(), new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    listener.onResponse(new NetworkResponse<String>(false, null));
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<String>(true, null));
+                }
+            }) {
+                @Override
+                public String getBodyContentType() {
+                    return "application/json; charset=utf-8";
+                }
+
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    try {
+                        return comment.getJSON().toString().getBytes("utf-8");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+            };
+            queue.add(req);
         }
 
         static NetworkResponse event(Event event) {

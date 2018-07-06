@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -88,6 +89,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         final long postID = intent.getLongExtra("postID", 0);
         final long networkID = intent.getLongExtra("networkID", 0);
         cv = findViewById(R.id.cv);
+        final SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         // IMPORTANT: GUIDE FOR NET REQ: Use Volley.newRequestQueue(getApplicationContext())
         // for a quick and easy qay to instantiate RequestQueues.
         queue = Volley.newRequestQueue(this);
@@ -101,7 +103,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         images[0] = findViewById(R.id.attachedImage1);
         images[1] = findViewById(R.id.attachedImage2);
         images[2] = findViewById(R.id.attachedImage3);
-
         commentsRV = findViewById(R.id.commentsRV);
         mLayoutManager = (LinearLayoutManager) commentsRV.getLayoutManager();
         commentsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -126,8 +127,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                 }
             }
         });
-
-
         commentField = findViewById(R.id.write_comment_text);
         boldButton = findViewById(R.id.comment_bold);
         italicButton = findViewById(R.id.comment_italic);
@@ -191,9 +190,25 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                 //TODO: Submit Post Reply to API AsyncTask call.
                 //TODO: Come up with valid id.
                 //TODO: Come up with user id.
-                PostReply pReply = new PostReply((int) (Math.random() * 10000), postID, 1, networkID,
+                PostReply pReply = new PostReply((int) (Math.random() * 10000), postID, settings.getLong(API.CURRENT_USER, -1), networkID,
                         new Date().toString(), content);
-                new SubmitPostReply().execute(pReply);
+                progressBar.setVisibility(View.VISIBLE);
+                API.Post.reply(queue, pReply, new Response.Listener<NetworkResponse<String>>() {
+                    @Override
+                    public void onResponse(NetworkResponse<String> response) {
+                        if (response.fail()) {
+                            response.showErrorDialog(SpecificPostActivity.this);
+                        } else {
+                            progressBar.setVisibility(View.GONE);
+                            commentField.setText("");
+                            closeEditTextView();
+                            //Restart activity.
+                            Intent intent = getIntent();
+                            finish();
+                            startActivity(intent);
+                        }
+                    }
+                });
             }
         });
         //For now, since I believe events cannot take comments, I don't think it is worth the user's
@@ -242,7 +257,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
          * another request inside the listener of the first one if you need data from the first to pass
          * into the second (i.e. id_user from post to get user)
          */
-        API.Get.post(queue, 527, new Response.Listener<NetworkResponse<Post>>() {
+        API.Get.post(queue, postID, new Response.Listener<NetworkResponse<Post>>() {
             @Override
             public void onResponse(NetworkResponse<Post> response) {
                 if (!response.fail()) {
@@ -277,12 +292,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                     username.setOnClickListener(viewUserProfile);
                     personName.setOnClickListener(viewUserProfile);
                 }
-            }
-        });
-        API.Get.postReplies(queue, 88, new Response.Listener<NetworkResponse<ArrayList<PostReply>>>() {
-            @Override
-            public void onResponse(NetworkResponse<ArrayList<PostReply>> response) {
-
             }
         });
     }
@@ -326,69 +335,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
 
 
     }
-
-    class PostBundleWrapper {
-        Post post;
-        List<PostReply> replies;
-    }
-
-    public class loadPostReplies extends AsyncTask<Long, Void, PostBundleWrapper> {
-
-        @Override
-        protected PostBundleWrapper doInBackground(Long... longs) {
-            API.loadAppDatabase(getApplicationContext());
-            PostBundleWrapper wrapper = new PostBundleWrapper();
-            //wrapper.post = API.Get.post(longs[0]).getPayload();
-            //wrapper.replies = API.Get.postReplies(longs[0]).getPayload();
-            API.closeDatabase();
-            return wrapper;
-        }
-
-        @Override
-        protected void onPostExecute(final PostBundleWrapper postBundleWrapper) {
-            Post post = postBundleWrapper.post;
-            String name = post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName();
-            personName.setText(name);
-            content.setText(post.getContent());
-            postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
-            timestamp.setText(post.getDatePosted());
-            username.setText(post.getAuthor().getUsername());
-            if (post.getImageLink() != null || post.getVideoLink() != null ) {
-                //TODO: Figure out how to display videos
-                //TODO: Figure out format for multiple pictures. Assuming separated by commas.
-                String[] links = post.getImageLink().split(",");
-                for (int j = 0;  j < links.length; j++) {
-                    if (links[j] != null && links[j].length() > 0)
-                    Picasso.with(images[j].getContext()).load(links[j]).into(images[j]);
-                }
-            }
-            Picasso.with(personPhoto.getContext()).load(post.getAuthor().getImgURL()).
-                    into(personPhoto);
-
-            //Now, allow redirect to ViewProfileActivity if username or profile pic is tapped.
-            View.OnClickListener viewUserProfile = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.i("Clicking username?", "Yes");
-                    Intent viewUser = new Intent(getApplicationContext(),ViewProfileActivity.class);
-                    viewUser.putExtra(ViewProfileActivity.SELECTED_USER, postBundleWrapper.post.author.id);
-                    startActivity(viewUser);
-                }
-            };
-            personPhoto.setOnClickListener(viewUserProfile);
-            username.setOnClickListener(viewUserProfile);
-            personName.setOnClickListener(viewUserProfile);
-            int r = getResources().getIdentifier("commentColor", "color", "org.codethechange.culturemesh");
-
-      //      String[] comments = {"test comment 1", "test comment 2", "this is good content", "this is, uh, not good content",
-      //              "this is a really long comment to see how comments will work if someone has a lot to say about someone's content, which is very (very) possible"};
-
-      //      ArrayAdapter adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, comments);
-      //      commentLV.setAdapter(adapter);
-      //      adapter.notifyDataSetChanged();
-        }
-    }
-
 
     /**
      * This function animates the bottom view to expand up, allowing for a greater text field
@@ -445,42 +391,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         layout.startAnimation(anim);
     }
 
-    class SubmitPostReply extends AsyncTask<PostReply, Void, NetworkResponse> {
-
-        @Override
-        protected NetworkResponse doInBackground(PostReply... postReplies) {
-            API.loadAppDatabase(getApplicationContext());
-            NetworkResponse res = API.Post.reply(postReplies[0]);
-            API.closeDatabase();
-            return res;
-        }
-
-        /**
-         * Makes the progress bar indeterminate
-         */
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressBar.setVisibility(View.VISIBLE);
-        }
-
-        /**
-         * If POSTing succeeded: Closes the activity and returns the user to the previous screen
-         * If POSTing failed: Displays error message and returns uer to composition screen
-         * @param response Status of doInBackground method that represents whether POSTing succeeded
-         */
-        @Override
-        protected void onPostExecute(NetworkResponse response) {
-            super.onPostExecute(response);
-            if (response.fail()) {
-                response.showErrorDialog(SpecificPostActivity.this);
-            } else {
-                progressBar.setVisibility(View.GONE);
-                commentField.setText("");
-                closeEditTextView();
-            }
-        }
-    }
 
     /**
      * IMPORTANT: EXAMPLE GUIDE FOR NETWORK REQUESTS

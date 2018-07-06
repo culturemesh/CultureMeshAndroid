@@ -2,6 +2,7 @@ package org.codethechange.culturemesh.models;
 import android.arch.persistence.room.Ignore;
 import android.net.Uri;
 
+import org.codethechange.culturemesh.Listable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,7 +34,7 @@ import java.io.Serializable;
  * }
  * </pre>
  */
-public class Location implements Serializable {
+public class Location implements Serializable, Listable {
 
     /**
      * These constants are used to identify the type of location being stored. See the documentation
@@ -45,6 +46,7 @@ public class Location implements Serializable {
     public static final int COUNTRY = 0;
     public static final int REGION = 1;
     public static final int CITY = 2;
+
 
     /**
      * The value to be transmitted to the API in place of a missing country, region, or city ID
@@ -62,6 +64,10 @@ public class Location implements Serializable {
     public long regionId;
     @Ignore
     public long cityId;
+
+    //This is is only used for other searching in FindNetworkActivity. Do not use this field anyhere else.
+    @Ignore
+    public String locationName;
 
     /**
      * Initializes ID instance fields using the provided IDs
@@ -108,6 +114,10 @@ public class Location implements Serializable {
         }
         if (json.has("country_id") && ! json.isNull("country_id")) {
             this.countryId = json.getLong("country_id");
+        }
+
+        if (json.has("name") && !json.isNull("name")) {
+            this.locationName = json.getString("name");
         }
     }
 
@@ -306,5 +316,15 @@ public class Location implements Serializable {
             url += URL_NULL_ID;
         }
         return Uri.encode(url);
+    }
+
+    @Override
+    public String getListableName() {
+        return locationName;
+    }
+
+    @Override
+    public long getNumUsers() {
+        return 0;
     }
 }

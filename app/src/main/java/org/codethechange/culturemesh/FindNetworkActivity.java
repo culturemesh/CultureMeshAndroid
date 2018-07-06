@@ -16,7 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -30,6 +29,7 @@ import static android.view.View.GONE;
 import java.util.List;
 
 import org.codethechange.culturemesh.models.Language;
+import org.codethechange.culturemesh.models.Location;
 import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Place;
@@ -39,7 +39,6 @@ public class FindNetworkActivity extends DrawerActivity {
     // TODO: Replace these with Location Objects.
     // TODO: Let user change their near location and setup appropriate API utilities to achieve this
     static Place near;
-
     public final int REQUEST_NEW_NEAR_LOCATION = 1;
 
     static RequestQueue queue;
@@ -145,7 +144,7 @@ public class FindNetworkActivity extends DrawerActivity {
             SearchView.OnQueryTextListener {
 
         private ListView searchList;
-        private ArrayAdapter<Place> adapter;
+        private SearchAdapter<Location> adapter;
         private SearchView searchView;
 
         public static class ProtoNetwork {
@@ -202,7 +201,7 @@ public class FindNetworkActivity extends DrawerActivity {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Place from = adapter.getItem(position);
+                    Location from = adapter.getItem(position);
                     API.Get.netFromFromAndNear(queue, from.getFromLocation(), near.getNearLocation(),
                             new Response.Listener<NetworkResponse<Network>>() {
                         @Override
@@ -231,7 +230,21 @@ public class FindNetworkActivity extends DrawerActivity {
 
         public void search() {
             String query = searchView.getQuery().toString();
-            new FindLocationFragment.searchPlaces().execute(query);
+            API.Get.autocompletePlace(queue, query, new Response.Listener<NetworkResponse<List<Location>>>() {
+                @Override
+                public void onResponse(NetworkResponse<List<Location>> response) {
+                    if (response.fail()) {
+                        response.showErrorDialog(getContext());
+                    } else {
+                        adapter.clear();
+                        adapter.addAll(response.getPayload());
+                        if (searchList.getVisibility() == GONE) {
+                            searchList.setVisibility(View.VISIBLE);
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            });
         }
 
         @Override
@@ -239,31 +252,6 @@ public class FindNetworkActivity extends DrawerActivity {
             return true;
         }
 
-        class searchPlaces extends AsyncTask<String, Void, NetworkResponse<List<Place>>> {
-            @Override
-            protected NetworkResponse<List<Place>> doInBackground(String... strings) {
-                API.loadAppDatabase(getContext());
-                NetworkResponse<List<Place>> response = API.Get.autocompletePlace(strings[0]);
-                API.closeDatabase();
-                return response;
-
-            }
-
-            @Override
-            protected void onPostExecute(NetworkResponse<List<Place>> response) {
-                super.onPostExecute(response);
-                if (response.fail()) {
-                    response.showErrorDialog(getContext());
-                } else {
-                    adapter.clear();
-                    adapter.addAll(response.getPayload());
-                    if (searchList.getVisibility() == GONE) {
-                        searchList.setVisibility(View.VISIBLE);
-                    }
-                    adapter.notifyDataSetChanged();
-                }
-            }
-        }
 
     }
 

@@ -108,7 +108,6 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         currentUser = settings.getLong(API.CURRENT_USER, -1);
         if (currentUser == -1) {
-            Log.i("DrawerActivity", "User is not logged in");
             //User is not signed in. Replace user info with sign in button
             Button button = navView.getHeaderView(0).findViewById(R.id.nav_user_sign_in_button);
             button.setVisibility(View.VISIBLE);
@@ -121,7 +120,6 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                 }
             });
         } else {
-            Log.i("DrawerActivity", "User is logged in as " + currentUser);
             //Load User info.
             API.Get.user(queue, currentUser, new Response.Listener<NetworkResponse<User>>() {
                 @Override
@@ -140,7 +138,6 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                     }
                 }
             });
-            Log.i("How many times", "is this called?");
             //Now, load user subscriptions (networks) to display in the navigation drawer.
             API.Get.userNetworks(queue, currentUser, new Response.Listener<NetworkResponse<ArrayList<Network>>>() {
                 @Override
@@ -165,7 +162,6 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                         for (int i = 0; i < subscribedNetworks.size(); i++) {
                             int id = subscribedNetworks.keyAt(i);
                             Network net = subscribedNetworks.get(id);
-                            Log.i("DrawerActivity", "Processing subscribed network: " + net);
                             String name = "";
                             if (net.isLocationBased()) {
                                 name = getResources().getString(R.string.from) + " " +
@@ -182,12 +178,10 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                             netMenu.add(Menu.NONE, id, 0, sb);
                         }
                         navView.setNavigationItemSelectedListener(DrawerActivity.this);
-                        Log.i("About to test", "for instance of waitforsubscribedlist");
                         if (thisActivity instanceof WaitForSubscribedList) {
                             Log.i("This happens", "Instance works!");
                             ((WaitForSubscribedList) thisActivity).onSubscribeListFinish();
                         }
-                        Log.i("DrawerActivity", "Finished loading user subscriptions via AsyncTask.");
                     }
                 }
             });
@@ -245,7 +239,6 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
             LoginActivity.setLoggedOut(settings);
             finish();
         }
-
         mDrawerLayout.closeDrawer(GravityCompat.START);
         finish();
         return true;

@@ -121,7 +121,6 @@ public class PostsFrag extends Fragment {
                             if (maxEventId.equals(API.NO_MAX_PAGINATION) || Long.parseLong(maxEventId) > newMaxEventId) {
                                 maxEventId = newMaxEventId + "";
                             }
-                            Log.i("New Max Event Id", "New Max Event Id: "+ maxEventId + "");
                             mAdapter.notifyDataSetChanged();
                         }
                     }
@@ -148,7 +147,6 @@ public class PostsFrag extends Fragment {
                             if (maxPostId.equals(API.NO_MAX_PAGINATION) || Long.parseLong(maxPostId) > newMaxPostId) {
                                 maxPostId = newMaxPostId + "";
                             }
-                            Log.i("New Max Post Id", "New Max Post Id: " + maxPostId + "");
                             for (final Post post : posts) {
                                 feedItems.add(post);
                                 //Get comments
