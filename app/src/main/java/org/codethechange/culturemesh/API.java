@@ -93,6 +93,7 @@ class API {
     static final String CURRENT_USER = "curruser";
     static final String API_URL_BASE = "https://www.culturemesh.com/api-dev/v1/";
     static final String NO_MAX_PAGINATION = "-1"; // If you do not need a maximum id.
+    static final long NEW_NETWORK = -2;
     static CMDatabase mDb;
     //reqCounter to ensure that we don't close the database while another thread is using it.
     static int reqCounter;
@@ -1360,7 +1361,15 @@ class API {
                     try {
                         if (res.length() == 0) {
                             // No network was found
+                            // Let's actually not make this error. How about we pass an id representing
+                            // the network doesn't exist yet with some other parameters?
+                            Network network;
+                            if (key1.equals("from_location")) {
+                                Place from = new Place()
+                                network = new Network()
+                            }
                             listener.onResponse(new NetworkResponse<Network>(true, R.string.noNetworkExist));
+                            return;
                         } else if (res.length() > 1) {
                             listener.onResponse(new NetworkResponse<Network>(true));
                             Log.e("API.Get.netFromTwoParam", "Multiple networks matched this: " +
@@ -1467,7 +1476,6 @@ class API {
                 }
             });
             queue.add(authReq);
-
         }
 
         /**

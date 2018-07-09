@@ -1,7 +1,9 @@
 package org.codethechange.culturemesh;
 
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.design.widget.TabLayout;
@@ -38,7 +40,7 @@ public class FindNetworkActivity extends DrawerActivity {
 
     // TODO: Replace these with Location Objects.
     // TODO: Let user change their near location and setup appropriate API utilities to achieve this
-    static Place near;
+    static Location near;
     public final int REQUEST_NEW_NEAR_LOCATION = 1;
 
     static RequestQueue queue;
@@ -104,7 +106,7 @@ public class FindNetworkActivity extends DrawerActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //TODO: Implement how I receive data. Replace dummy stuff with legit stuff.
-        near = (Place) data.getSerializableExtra(ChooseNearLocationActivity.CHOSEN_PLACE);
+        near = (Location) data.getSerializableExtra(ChooseNearLocationActivity.CHOSEN_PLACE);
         nearButton.setText(near.getListableName());
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -146,16 +148,6 @@ public class FindNetworkActivity extends DrawerActivity {
         private ListView searchList;
         private SearchAdapter<Location> adapter;
         private SearchView searchView;
-
-        public static class ProtoNetwork {
-            public Place from;
-            public NearLocation near;
-
-            public ProtoNetwork(Place from, NearLocation near) {
-                this.from = from;
-                this.near = near;
-            }
-        }
 
         /**
          * The fragment argument representing the section number for this
@@ -202,6 +194,19 @@ public class FindNetworkActivity extends DrawerActivity {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Location from = adapter.getItem(position);
+                    if (near == null) {
+                        final AlertDialog dialog = new AlertDialog.Builder(getContext()).create();
+                        dialog.setTitle(getContext().getString(R.string.error));
+                        dialog.setMessage(getContext().getString(R.string.no_near_loc));
+                        dialog.setButton(AlertDialog.BUTTON_NEUTRAL, getContext().getString(R.string.ok), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialog.dismiss()
+;                            }
+                        });
+                        dialog.show();
+                        return;
+                    }
                     API.Get.netFromFromAndNear(queue, from.getFromLocation(), near.getNearLocation(),
                             new Response.Listener<NetworkResponse<Network>>() {
                         @Override

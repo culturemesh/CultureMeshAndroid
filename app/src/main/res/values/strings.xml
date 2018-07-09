@@ -167,4 +167,5 @@
     <string name="error_joining_network">Error joining network. Please try again.</string>
     <string name="network_not_found">Network not found.</string>
     <string name="invalid_format">Invalid Response Format.</string>
+    <string name="no_near_loc">No near location selected. Please choose a near location.</string>
 </resources>

@@ -57,6 +57,12 @@ public class SearchAdapter<T extends Listable> extends ArrayAdapter<T> implement
         ImageView peopleIcon;
     }
 
+    @Nullable
+    @Override
+    public T getItem(int position) {
+        return items.get(position);
+    }
+
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
