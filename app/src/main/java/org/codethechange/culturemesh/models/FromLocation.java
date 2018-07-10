@@ -29,7 +29,7 @@ public class FromLocation extends DatabaseLocation {
      * @param countryId ID of country
      */
     public FromLocation(long cityId, long regionId,long countryId) {
-        super(cityId, regionId, countryId);
+        super(countryId, regionId, cityId);
         initialize();
     }
 

@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -193,7 +194,7 @@ public class FindNetworkActivity extends DrawerActivity {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Location from = adapter.getItem(position);
+                    final Location from = adapter.getItem(position);
                     if (near == null) {
                         final AlertDialog dialog = new AlertDialog.Builder(getContext()).create();
                         dialog.setTitle(getContext().getString(R.string.error));
@@ -213,6 +214,8 @@ public class FindNetworkActivity extends DrawerActivity {
                         public void onResponse(NetworkResponse<Network> response) {
                             // TODO: If network doesn't exist, offer to create it
                             if (response.fail()) {
+                                Log.i("Location Data", from.getFromLocation().toString() + " " +  near.getNearLocation().toString());
+                                Log.i("Location Data", from.getFromLocation().urlParam() + " " + near.getNearLocation().urlParam());
                                 response.showErrorDialog(getContext());
                             } else {
                                 getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()

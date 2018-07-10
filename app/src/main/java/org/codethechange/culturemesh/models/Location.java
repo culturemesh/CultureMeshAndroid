@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh.models;
 import android.arch.persistence.room.Ignore;
 import android.net.Uri;
+import android.util.Log;
 
 import org.codethechange.culturemesh.Listable;
 import org.json.JSONException;
@@ -98,27 +99,41 @@ public class Location implements Serializable, Listable {
         if (json.has("id") && ! json.isNull("id")) {
             int type = getJsonType(json);
             if (type == CITY) {
-                this.cityId = json.getLong("id");
+                this.cityId = convertToId(json.getString("id"));
             } else if (type == REGION) {
-                this.regionId = json.getLong("id");
+                this.regionId = convertToId(json.getString("id"));
             } else {
-                this.countryId = json.getLong("id");
+                this.countryId = convertToId(json.getString("id"));
             }
         }
 
         if (json.has("city_id") && ! json.isNull("city_id")) {
-            this.cityId = json.getLong("city_id");
+            Log.i("Setting city id as", convertToId(json.getString("city_id")) + "");
+            this.cityId = convertToId(json.getString("city_id"));
         }
         if (json.has("region_id") && ! json.isNull("region_id")) {
-            this.regionId = json.getLong("region_id");
+            Log.i("Setting region id as", convertToId(json.getString("region_id")) + "");
+            this.regionId = convertToId(json.getString("region_id"));
         }
         if (json.has("country_id") && ! json.isNull("country_id")) {
-            this.countryId = json.getLong("country_id");
+            this.countryId = convertToId(json.getString("country_id"));
         }
 
         if (json.has("name") && !json.isNull("name")) {
             this.locationName = json.getString("name");
         }
+    }
+
+    /**
+     * Converts JSON string to id. Primarily for converting "null" to -1
+     * @param id string version, null if necessary
+     * @return long form, - 1 if null
+     */
+    private long convertToId(String id) {
+        if (id.equals("null")) {
+            return NOWHERE;
+        }
+        return Long.valueOf(id);
     }
 
     /**

@@ -1361,18 +1361,11 @@ class API {
                     try {
                         if (res.length() == 0) {
                             // No network was found
-                            // Let's actually not make this error. How about we pass an id representing
-                            // the network doesn't exist yet with some other parameters?
-                            Network network;
-                            if (key1.equals("from_location")) {
-                                Place from = new Place()
-                                network = new Network()
-                            }
                             listener.onResponse(new NetworkResponse<Network>(true, R.string.noNetworkExist));
                             return;
                         } else if (res.length() > 1) {
                             listener.onResponse(new NetworkResponse<Network>(true));
-                            Log.e("API.Get.netFromTwoParam", "Multiple networks matched this: " +
+                            Log.i("API.Get.netFromTwoParam", "Multiple networks matched this: " +
                                     key1 + ":" + val1 + "," + key2 + ":" + val2);
                         }
                         final DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(0));

@@ -31,7 +31,7 @@ public class NearLocation extends DatabaseLocation {
      * @param countryId ID of country
      */
     public NearLocation(long cityId, long regionId, long countryId) {
-        super(cityId, regionId, countryId);
+        super(countryId, regionId, cityId);
         initialize();
     }
 
