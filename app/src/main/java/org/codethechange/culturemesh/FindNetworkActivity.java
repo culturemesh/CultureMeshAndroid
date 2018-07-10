@@ -318,9 +318,20 @@ public class FindNetworkActivity extends DrawerActivity {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    // TODO: If network doesn't exist, offer to create it
+                    if (near == null) {
+                        final AlertDialog dialog = new AlertDialog.Builder(getContext()).create();
+                        dialog.setTitle(getContext().getString(R.string.error));
+                        dialog.setMessage(getContext().getString(R.string.no_near_loc));
+                        dialog.setButton(AlertDialog.BUTTON_NEUTRAL, getContext().getString(R.string.ok), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialog.dismiss()
+                                ;                            }
+                        });
+                        dialog.show();
+                        return;
+                    }
                     Language l = adapter.getItem(position);
-                    // TODO: near should be the user's currently selected home network
                     API.Get.netFromLangAndNear(queue, l, near.getNearLocation(), new Response.Listener<NetworkResponse<Network>>() {
                         @Override
                         public void onResponse(NetworkResponse<Network> response) {
@@ -342,7 +353,21 @@ public class FindNetworkActivity extends DrawerActivity {
 
         public void search() {
             String query = searchView.getQuery().toString();
-            new searchLanguages().execute(query);
+            API.Get.autocompleteLanguage(queue, query, new Response.Listener<NetworkResponse<List<Language>>>() {
+                @Override
+                public void onResponse(NetworkResponse<List<Language>> response) {
+                    if (response.fail()) {
+                        response.showErrorDialog(getActivity());
+                    } else {
+                        adapter.clear();
+                        adapter.addAll(response.getPayload());
+                        if (searchList.getVisibility() == GONE) {
+                            searchList.setVisibility(View.VISIBLE);
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            });
         }
 
         @Override
@@ -354,31 +379,6 @@ public class FindNetworkActivity extends DrawerActivity {
         @Override
         public boolean onQueryTextChange(String newText) {
             return true;
-        }
-
-        class searchLanguages extends AsyncTask<String, Void, NetworkResponse<List<Language>>> {
-            @Override
-            protected NetworkResponse<List<Language>> doInBackground(String... strings) {
-                API.loadAppDatabase(getContext());
-                NetworkResponse<List<Language>> response = API.Get.autocompleteLanguage(strings[0]);
-                API.closeDatabase();
-                return response;
-            }
-
-            @Override
-            protected void onPostExecute(NetworkResponse<List<Language>> response) {
-                super.onPostExecute(response);
-                if (response.fail()) {
-                    response.showErrorDialog(getContext());
-                } else {
-                    adapter.clear();
-                    adapter.addAll(response.getPayload());
-                    if (searchList.getVisibility() == GONE) {
-                        searchList.setVisibility(View.VISIBLE);
-                    }
-                    adapter.notifyDataSetChanged();
-                }
-            }
         }
     }
 

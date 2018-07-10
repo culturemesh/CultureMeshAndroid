@@ -79,7 +79,8 @@ public class SearchAdapter<T extends Listable> extends ArrayAdapter<T> implement
         try {
             Language lang = (Language) items.get(position);
             item.itemName.setText(lang.name);
-            item.numUsers.setText(lang.numSpeakers);
+            Log.i("Language info", lang.toString());
+            item.numUsers.setText(FormatManager.abbreviateNumber(lang.numSpeakers));
         } catch(ClassCastException e) {
             Location loc = (Location) items.get(position);
             item.itemName.setText(loc.locationName);
