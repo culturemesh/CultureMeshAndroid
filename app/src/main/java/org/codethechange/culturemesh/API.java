@@ -2,6 +2,7 @@ package org.codethechange.culturemesh;
 
 import android.arch.persistence.room.Room;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
@@ -47,6 +48,8 @@ import org.codethechange.culturemesh.models.Place;
 import org.codethechange.culturemesh.models.Point;
 import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
+import org.codethechange.culturemesh.models.Postable;
+import org.codethechange.culturemesh.models.Putable;
 import org.codethechange.culturemesh.models.Region;
 import org.codethechange.culturemesh.models.User;
 import org.json.JSONArray;
@@ -55,6 +58,8 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +91,7 @@ TODO: Figure out alternative to id's other than longs and ints, which cannot rep
  */
 
 class API {
+    // Shared Preferences
     static final String SETTINGS_IDENTIFIER = "acmsi";
     static final String PERSONAL_NETWORKS = "pernet";
     static final String SELECTED_NETWORK = "selnet";
@@ -93,12 +99,24 @@ class API {
     final static String FIRST_TIME = "firsttime";
     static final boolean NO_JOINED_NETWORKS = false;
     static final String CURRENT_USER = "curruser";
+    static final String USER_EMAIL = "useremail";
+    static final String USER_PASS = "userpass";
+
     static final String API_URL_BASE = "https://www.culturemesh.com/api-dev/v1/";
     static final String NO_MAX_PAGINATION = "-1"; // If you do not need a maximum id.
     static final long NEW_NETWORK = -2;
     static CMDatabase mDb;
     //reqCounter to ensure that we don't close the database while another thread is using it.
     static int reqCounter;
+    static String loginToken = null;
+    static Calendar loginTokenExpiration = Calendar.getInstance(); // When current token expires
+    static final int TOKEN_SECONDS = 600;   // Lifetime of token validity in seconds
+    static final int TOKEN_BUFFER_SECONDS = 60;    // How early before expiration to refresh token
+    static SharedPreferences settings;
+
+    public static void initializePrefs(SharedPreferences settings) {
+        API.settings = settings;
+    }
 
     /**
      * The protocol for GET requests is as follows...
@@ -830,12 +848,7 @@ class API {
                 public void onResponse(JSONObject res) {
                     try {
                         //make User object out of user JSON.
-                        post.author = new User(res.getInt("id"),
-                                res.getString("first_name"),
-                                res.getString("last_name"),
-                                res.getString("email"), res.getString("username"),
-                                "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
-                                res.getString("about_me"));
+                        post.author = new User(res);
                         listener.onResponse(post);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -869,12 +882,7 @@ class API {
                 public void onResponse(JSONObject res) {
                     try {
                         //make User object out of user JSON.
-                        comment.author = new User(res.getInt("id"),
-                                res.getString("first_name"),
-                                res.getString("last_name"),
-                                res.getString("email"), res.getString("username"),
-                                "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
-                                res.getString("about_me"));
+                        comment.author = new User(res);
                         listener.onResponse(comment);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -889,6 +897,71 @@ class API {
             });
             queue.add(authReq);
 
+        }
+
+        /**
+         * Generically get a login token.
+         * <pre>
+         *     {@code
+         *     Method Behavior:
+         *     * Email or password not in SharedPreferences: Returns failed NetworkResponse object
+         *       describing an authentication error with R.string.authenticationError
+         *     * No token has been stored or token has expired: Use email and password to get a token,
+         *       which is returned. If there is an error, the error message from
+         *       API.Get.loginTokenWithCred is supplied in the NetworkResponse.
+         *     * Token is valid but within buffer window: Use current token to get a new one. Store
+         *       the new token in place of the old one and return the new token. If there is an error,
+         *       the message from API.Get.loginTokenWithToken is supplied in the NetworkResponse.
+         *     }
+         * </pre>
+         * @param queue Queue to which the asynchronous task will be added
+         * @param listener Listener whose onResponse method will be called when task completes
+         */
+        static void loginToken(RequestQueue queue,
+                               final Response.Listener<NetworkResponse<String>> listener) {
+
+            String email = settings.getString(USER_EMAIL, null);
+            String pass  = settings.getString(USER_PASS,  null);
+
+            Calendar now = Calendar.getInstance();
+            Calendar expires = Calendar.getInstance();
+            expires.add(Calendar.SECOND, TOKEN_SECONDS);
+            Calendar refresh = Calendar.getInstance();
+            refresh.add(Calendar.SECOND, TOKEN_SECONDS - TOKEN_BUFFER_SECONDS);
+
+            if (loginToken == null || now.after(expires)) {
+                if (email == null || pass == null) {
+                    listener.onResponse(new NetworkResponse<String>(true, R.string.authenticationError));
+                } else {
+                    Get.loginTokenWithCred(queue, email, pass, new Response.Listener<NetworkResponse<String>>() {
+                        @Override
+                        public void onResponse(NetworkResponse<String> response) {
+                            if (response.fail()) {
+                                listener.onResponse(new NetworkResponse<String>(true,
+                                        response.getMessageID()));
+                            } else {
+                                loginToken = response.getPayload();
+                                listener.onResponse(new NetworkResponse<>(loginToken));
+                            }
+                        }
+                    });
+                }
+            } else if (now.before(refresh)) {
+                listener.onResponse(new NetworkResponse<>(loginToken));
+            } else {
+                Get.loginTokenWithToken(queue, loginToken, new Response.Listener<NetworkResponse<String>>() {
+                    @Override
+                    public void onResponse(NetworkResponse<String> response) {
+                        if (response.fail()) {
+                            listener.onResponse(new NetworkResponse<String>(true,
+                                    response.getMessageID()));
+                        } else {
+                            loginToken = response.getPayload();
+                            listener.onResponse(new NetworkResponse<>(loginToken));
+                        }
+                    }
+                });
+            }
         }
 
         /**
@@ -975,30 +1048,93 @@ class API {
 
 
     static class Post {
-        /*
-            TODO: During production time, we will send it off to server (as well as update locally?).
+        /**
+         * Add a user to an existing event. This operation requires authentication, so the user must
+         * be logged in.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param userId ID of the user to add to the event
+         * @param eventId ID of the event to add the user to
+         * @param listener Listener whose onResponse method will be called when the operation completes
          */
-        static NetworkResponse<EventSubscription> addUserToEvent(long userId, long eventId) {
-            EventSubscriptionDao eSDao = mDb.eventSubscriptionDao();
-            EventSubscription es = new EventSubscription(userId, eventId);
-            eSDao.insertSubscriptions(es);
-            return new NetworkResponse<>(es);
-        }
-
-        static void addUserToNetwork(RequestQueue queue, long userId, long networkId, final Response.Listener<NetworkResponse<String>> listener) {
-            StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "user/" + userId + "/addToNetwork/"
-                    + networkId + "?" + getCredentials(), new Response.Listener<String>() {
+        static void addUserToEvent(final RequestQueue queue, final long userId, final long eventId,
+                              final Response.Listener<NetworkResponse<Void>> listener) {
+            Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
                 @Override
-                public void onResponse(String response) {
-                    listener.onResponse(new NetworkResponse<String>(false, response));
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    listener.onResponse(new NetworkResponse<String>(true, R.string.error_joining_network));
+                public void onResponse(NetworkResponse<String> response) {
+                    if (response.fail()) {
+                        listener.onResponse(new NetworkResponse<Void>(true, response.getMessageID()));
+                    } else {
+                        final String token = response.getPayload();
+                        StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "user/" +
+                                userId + "/addToEvent/" + eventId + "?" + getCredentials(), new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                listener.onResponse(new NetworkResponse<Void>(false));
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                int messageID = processNetworkError("API.Post.addUserToEvent",
+                                        "ErrorListener", error);
+                                listener.onResponse(new NetworkResponse<Void>(true, messageID));
+                            }
+                        }) {
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                Map<String,String> params = super.getParams();
+                                params.put("Username", token);
+                                return params;
+                            }
+                        };
+                        queue.add(req);
+                    }
                 }
             });
-            queue.add(req);
+        }
+
+        /**
+         * Add a user to an existing network. This operation requires authentication, so the user must
+         * be logged in.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param userId ID of the user to add to the network
+         * @param networkId ID of the network to add the user to
+         * @param listener Listener whose onResponse method will be called when the operation completes
+         */
+        static void addUserToNetwork(final RequestQueue queue, final long userId, final long networkId,
+                                     final Response.Listener<NetworkResponse<Void>> listener) {
+
+            Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
+                @Override
+                public void onResponse(NetworkResponse<String> response) {
+                    if (response.fail()) {
+                        listener.onResponse(new NetworkResponse<Void>(true, response.getMessageID()));
+                    } else {
+                        final String token = response.getPayload();
+                        StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "user/" +
+                                userId + "/addToNetwork/" + networkId + "?" + getCredentials(), new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                listener.onResponse(new NetworkResponse<Void>(false));
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                int messageID = processNetworkError("API.Post.addUserToNet",
+                                        "ErrorListener", error);
+                                listener.onResponse(new NetworkResponse<Void>(true, messageID));
+                            }
+                        }) {
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                Map<String,String> params = super.getParams();
+                                params.put("Username", token);
+                                return params;
+                            }
+                        };
+                        queue.add(req);
+                    }
+                }
+            });
         }
 
         static NetworkResponse removeUserFromNetwork(long userId, long networkId) {
@@ -1008,24 +1144,78 @@ class API {
             return new NetworkResponse<>(ns);
         }
 
-        static NetworkResponse user(User user) {
-            UserDao uDao = mDb.userDao();
-            uDao.addUser(user);
-            return new NetworkResponse<>(user);
-        }
+        /**
+         * POST to the server a request, via {@code /user/users}, to create a new user. Note that
+         * <strong>the user's password must be set</strong>. Use {@link User#setPassword(String)}.
+         * Success or failure status will be passed via a {@link NetworkResponse<Void>} to the
+         * listener.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param user User to create. <strong>Must have password set.</strong>
+         * @param listener Listener whose onResponse method will be called when task completes
+         */
+        static void user(final RequestQueue queue, final User user,
+                         final Response.Listener<NetworkResponse<Void>> listener) {
+            StringRequest req = new StringRequest(Request.Method.PUT, API_URL_BASE +
+                    "user/users?" + getCredentials(),
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            listener.onResponse(new NetworkResponse<Void>(false));
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    int messageID = processNetworkError("API.Post.user",
+                            "ErrorListener", error);
+                    listener.onResponse(new NetworkResponse<Void>(true, messageID));
+                }
+            }) {
+                @Override
+                public byte[] getBody() {
+                    try {
+                        return user.getPutJson().toString().getBytes();
+                    } catch (JSONException e) {
+                        Log.e("API.Post.user", "Error forming JSON");
+                        listener.onResponse(new NetworkResponse<Void>(true));
+                        cancel();
+                        return "".getBytes();
+                    }
+                }
 
-        static NetworkResponse network(Network network) {
-            NetworkDao nDao = mDb.networkDao();
-            nDao.insertNetworks(network.getDatabaseNetwork());
-            return new NetworkResponse<>(network);
-        }
-
-        static void post(final RequestQueue queue, org.codethechange.culturemesh.models.Post post,
-                                    Response.Listener<String> success,
-                                    Response.ErrorListener fail) {
-            StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "post/new?" +
-                    getCredentials(), success, fail);
+                @Override
+                public String getBodyContentType() {
+                    return "application/json";
+                }
+            };
             queue.add(req);
+        }
+
+        /**
+         * POST to the server a request, via {@code /network/new}, to create a new {@link Network}.
+         * Success or failure status will be passed via a {@link NetworkResponse<Void>} to the
+         * listener.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param network Network to create.
+         * @param listener Listener whose onResponse method will be called when task completes
+         */
+        static void network(final RequestQueue queue, final Network network,
+                            final Response.Listener<NetworkResponse<Void>> listener) {
+            Post.model(queue, network, API_URL_BASE + "network/new?" + getCredentials(),
+                    "API.Post.net", listener);
+        }
+
+        /**
+         * POST to the server a request, via {@code /post/new}, to create a new
+         * {@link org.codethechange.culturemesh.models.Post}. Success or failure status will be
+         * passed via a {@link NetworkResponse<Void>} to the listener.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param post {@link org.codethechange.culturemesh.models.Post} to create.
+         * @param listener Listener whose onResponse method will be called when task completes
+         */
+        static void post(final RequestQueue queue, final org.codethechange.culturemesh.models.Post post,
+                         final Response.Listener<NetworkResponse<Void>> listener) {
+            Post.model(queue, post, API_URL_BASE + "post/new?" + getCredentials(),
+                    "API.Post.post", listener);
         }
 
         static void reply(RequestQueue queue, final PostReply comment, final Response.Listener<NetworkResponse<String>> listener) {
@@ -1066,17 +1256,166 @@ class API {
             eDao.addEvent(event);
             return new NetworkResponse<>(false, event);
         }
+
+        /**
+         * POST to the server a request to create a new {@link Postable} model. Success
+         * or failure status will be passed via a {@link NetworkResponse<Void>} to the listener.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param toPost Model to create
+         * @param url Full URL to send the POST request to
+         * @param logTag Tag (no more than 23 characters long) to be added to log entries
+         * @param listener Listener whose onResponse method will be called when task completes
+         */
+        private static void model(final RequestQueue queue, final Postable toPost, final String url,
+                                  final String logTag, final Response.Listener<NetworkResponse<Void>> listener) {
+            Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
+                @Override
+                public void onResponse(NetworkResponse<String> response) {
+                    if (response.fail()) {
+                        listener.onResponse(new NetworkResponse<Void>(true, response.getMessageID()));
+                    } else {
+                        final String token = response.getPayload();
+                        StringRequest req = new StringRequest(Request.Method.POST, url,
+                                new Response.Listener<String>() {
+                                    @Override
+                                    public void onResponse(String response) {
+                                        listener.onResponse(new NetworkResponse<Void>(false));
+                                    }
+                                }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                int messageID = processNetworkError(logTag,
+                                        "ErrorListener", error);
+                                listener.onResponse(new NetworkResponse<Void>(true, messageID));
+                            }
+                        }) {
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                Map<String,String> params = super.getParams();
+                                params.put("Username", token);
+                                return params;
+                            }
+
+                            @Override
+                            public byte[] getBody() {
+                                try {
+                                    return toPost.getPostJson().toString().getBytes();
+                                } catch (JSONException e) {
+                                    Log.e(logTag, "Error forming JSON");
+                                    listener.onResponse(new NetworkResponse<Void>(true));
+                                    cancel();
+                                    return "".getBytes();
+                                }
+                            }
+
+                            @Override
+                            public String getBodyContentType() {
+                                return "application/json";
+                            }
+                        };
+                        queue.add(req);
+                    }
+                }
+            });
+        }
     }
 
     static class Put {
-        static NetworkResponse<User> user(User user) {
-            UserDao uDao = mDb.userDao();
-            uDao.addUser(user);
-            return new NetworkResponse<User>(user == null, user);
+
+        /**
+         * PUT to the server, via {@code /user/users}, a request to make changes a {@link User}.
+         * Success or failure status will be passed via a {@link NetworkResponse<Void>} to the
+         * listener.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param user Updated version of the user to change
+         * @param listener Listener whose onResponse method will be called when task completes
+         */
+        static void user(final RequestQueue queue, final User user,
+                         final Response.Listener<NetworkResponse<Void>> listener) {
+            Post.model(queue, user, API_URL_BASE + "user/users?" + getCredentials(),
+                    "API.Put.user", listener);
         }
 
-        static NetworkResponse event(Event event) {
-            return new NetworkResponse();
+        static void event(final RequestQueue queue, final Event event,
+                          final Response.Listener<NetworkResponse<Void>> listener) {
+
+        }
+
+        /**
+         * PUT to the server, via {@code /user/users}, a request to make changes a
+         * {@link org.codethechange.culturemesh.models.Post}.
+         * Success or failure status will be passed via a {@link NetworkResponse<Void>} to the
+         * listener.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param post Updated version of the post to change
+         * @param listener Listener whose onResponse method will be called when task completes
+         */
+        static void post(final RequestQueue queue, final org.codethechange.culturemesh.models.Post post,
+                         final Response.Listener<NetworkResponse<Void>> listener) {
+            Put.model(queue, post, API_URL_BASE + "post/new?" + getCredentials(),
+                    "API.Put.post", listener);
+        }
+
+        /**
+         * PUT to the server a request to make changes to a {@link Putable} model. Success
+         * or failure status will be passed via a {@link NetworkResponse<Void>} to the listener.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param toPut Updated version of the model to change
+         * @param url Full URL to send the POST request to
+         * @param logTag Tag (no more than 23 characters long) to be added to log entries
+         * @param listener Listener whose onResponse method will be called when task completes
+         */
+        private static void model(final RequestQueue queue, final Putable toPut, final String url,
+                                  final String logTag, final Response.Listener<NetworkResponse<Void>> listener) {
+            Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
+                @Override
+                public void onResponse(NetworkResponse<String> response) {
+                    if (response.fail()) {
+                        listener.onResponse(new NetworkResponse<Void>(true, response.getMessageID()));
+                    } else {
+                        final String token = response.getPayload();
+                        StringRequest req = new StringRequest(Request.Method.PUT, url,
+                                new Response.Listener<String>() {
+                                    @Override
+                                    public void onResponse(String response) {
+                                        listener.onResponse(new NetworkResponse<Void>(false));
+                                    }
+                                }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                int messageID = processNetworkError(logTag,
+                                        "ErrorListener", error);
+                                listener.onResponse(new NetworkResponse<Void>(true, messageID));
+                            }
+                        }) {
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                Map<String,String> params = super.getParams();
+                                params.put("Username", token);
+                                return params;
+                            }
+
+                            @Override
+                            public byte[] getBody() {
+                                try {
+                                    return toPut.getPutJson().toString().getBytes();
+                                } catch (JSONException e) {
+                                    Log.e(logTag, "Error forming JSON");
+                                    listener.onResponse(new NetworkResponse<Void>(true));
+                                    cancel();
+                                    return "".getBytes();
+                                }
+                            }
+
+                            @Override
+                            public String getBodyContentType() {
+                                return "application/json";
+                            }
+                        };
+                        queue.add(req);
+                    }
+                }
+            });
         }
     }
 
@@ -1249,6 +1588,7 @@ class API {
             return R.string.noConnection;
         } else if (error instanceof AuthFailureError) {
             Log.e(tag, task + ": An AuthFailureError occurred.");
+            return R.string.authenticationError;
         } else if (error instanceof ParseError) {
             Log.e(tag, task + ": A ParseError occurred.");
         } else if (error instanceof TimeoutError) {
