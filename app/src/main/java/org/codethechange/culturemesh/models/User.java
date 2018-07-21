@@ -88,6 +88,27 @@ public class User implements Serializable{
         this.username = username;
     }
 
+    /**
+     * Create a JSON representation of the object that conforms to the following format:
+     * <pre>
+     *     {@code
+     *       {
+               "id": 0,
+               "username": "string",
+               "first_name": "string",
+               "last_name": "string",
+               "email": "string",
+               "role": 0,
+               "gender": "string",
+               "about_me": "string",
+               "img_link": "string"
+             }
+     *     }
+     * </pre>
+     * This is intended to be the format used by the {@code /user/users} endpoint
+     * @return JSON representation of the object
+     * @throws JSONException Unclear when this would be thrown
+     */
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
         json.put("id", id);
