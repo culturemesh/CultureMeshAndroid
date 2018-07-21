@@ -88,4 +88,18 @@ public class User implements Serializable{
         this.username = username;
     }
 
+    public JSONObject toJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("id", id);
+        json.put("username", username);
+        json.put("first_name", firstName);
+        json.put("last_name", lastName);
+        json.put("email", email);
+        json.put("role", role);
+        json.put("gender", gender);
+        json.put("about_me", aboutMe);
+        json.put("img_link", imgURL);
+        return json;
+    }
+
 }
