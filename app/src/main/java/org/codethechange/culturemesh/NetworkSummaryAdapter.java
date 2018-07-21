@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,6 +61,7 @@ public class NetworkSummaryAdapter extends RecyclerView.Adapter<NetworkSummaryAd
         }
         holder.nearLocation.setText(network.nearLocation.getListableName());
         holder.postCount.setText(FormatManager.abbreviateNumber(postCounts.get(network.id + "")));
+        Log.i("NetworkSummary", network.toString() + " " + userCounts.get(network.id + ""));
         holder.subscribedUserCount.setText(FormatManager.abbreviateNumber(userCounts.get(network.id + "")));
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -138,4 +138,22 @@ public class Post extends FeedItem implements Serializable{
         vidLink = json.getString("vid_link");
         datePosted = json.getString("post_date");
     }
+
+    /**
+     * Converts Post object to corresponding JSON object.
+     * @return JSONObject according to format necessary for POST /user
+     */
+    public JSONObject toJSON() {
+        JSONObject object = new JSONObject();
+        try {
+            object.put("id_user", userId);
+            object.put("id_network", networkId);
+            object.put("post_text", getContent());
+            object.put("img_link", getImageLink());
+            object.put("vid_link", getVideoLink());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return object;
+    }
 }

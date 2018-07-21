@@ -110,7 +110,7 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
                     public void onErrorResponse(VolleyError error) {
                         //Some error happened with the network request. We will need to alert the user.
                         new NetworkResponse<Object>(true, R.string.error_writing_post)
-                                .showErrorDialog(getApplicationContext());
+                                .showErrorDialog(CreatePostActivity.this);
                         progressBar.setVisibility(View.GONE);
                     }
                 });

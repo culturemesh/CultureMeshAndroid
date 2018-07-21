@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
@@ -56,6 +57,7 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
         // Get the intent, verify the action and get the query
         root = inflater.inflate(R.layout.rv_container, container, false);
         rv = root.findViewById(R.id.rv);
+        queue = Volley.newRequestQueue(getActivity());
         //Say it's empty.
         ArrayList<Network> networks = new ArrayList<>();
         HashMap<String, Integer> counts = new HashMap<>();
@@ -73,8 +75,7 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
                 // number of users.
                 if (!response.fail()) {
                     ArrayList<Network> nets = response.getPayload();
-                    adapter.getNetworks().addAll(nets);
-                    if (rv.getAdapter().getItemCount() > 0) {
+                    if (nets.size() > 0) {
                         //Hide empty text.
                         emptyText.setVisibility(View.GONE);
                     }
@@ -90,7 +91,7 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
                                 } else {
                                     adapter.getUserCounts().put(net.id + "", 0);
                                 }
-                                adapter.notifyDataSetChanged();
+                                checkAndAddNetwork(net);
                             }
                         });
                         API.Get.networkPostCount(queue, net.id, new Response.Listener<NetworkResponse<Long>>() {
@@ -101,6 +102,7 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
                                 } else {
                                     adapter.getPostCounts().put(net.id + "", 0);
                                 }
+                                checkAndAddNetwork(net);
                             }
                         });
                     }
@@ -109,6 +111,21 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
         });
         return root;
 
+    }
+
+    /**
+     * We can only add networks to the NetworkSummaryAdapter when the usercounts and postcounts
+     * values have been fetched. Therefore, this function checks if BOTH the user count data
+     * and post count data has been fetched for this network and only then adds it to
+     * the adapter when it is finished.
+     * @param network
+     */
+    private void checkAndAddNetwork(Network network) {
+        NetworkSummaryAdapter adapter = (NetworkSummaryAdapter) rv.getAdapter();
+        if (adapter.getPostCounts().containsKey(network.id + "") && adapter.getUserCounts().containsKey(network.id + "")) {
+            adapter.getNetworks().add(network);
+            adapter.notifyDataSetChanged();
+        }
     }
 
 

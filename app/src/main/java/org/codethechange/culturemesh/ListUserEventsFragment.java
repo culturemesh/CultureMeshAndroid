@@ -12,6 +12,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
+
+import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Post;
 
@@ -26,6 +31,7 @@ import static org.codethechange.culturemesh.API.SELECTED_USER;
 public class ListUserEventsFragment extends Fragment implements RVAdapter.OnItemClickListener {
     RecyclerView rv;
     TextView emptyText;
+    RequestQueue queue;
 
     /**
      * Returns a new instance of this fragment for the given section
@@ -42,17 +48,32 @@ public class ListUserEventsFragment extends Fragment implements RVAdapter.OnItem
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        queue = Volley.newRequestQueue(getActivity());
         // Get the intent, verify the action and get the query
         View root = inflater.inflate(R.layout.rv_container, container, false);
         rv = root.findViewById(R.id.rv);
         //Say it's empty.
         ArrayList<FeedItem> posts = new ArrayList<>();
-        RVAdapter adapter = new RVAdapter(posts, this, getActivity());
+        final RVAdapter adapter = new RVAdapter(posts, this, getActivity());
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
         emptyText = root.findViewById(R.id.empty_text);
         emptyText.setText(getResources().getString(R.string.no_events));
-        new ListUserEventsFragment.LoadUserEvents().execute(getArguments().getLong(SELECTED_USER, -1));
+        API.Get.userEvents(queue, getArguments().getLong(SELECTED_USER, -1), API.HOSTING, new Response.Listener<NetworkResponse<ArrayList<Event>>>() {
+            @Override
+            public void onResponse(NetworkResponse<ArrayList<Event>> response) {
+                if (response.fail()) {
+                    response.showErrorDialog(getContext());
+                } else {
+                    adapter.getNetPosts().addAll(response.getPayload());
+                    rv.getAdapter().notifyDataSetChanged();
+                    if (rv.getAdapter().getItemCount() > 0) {
+                        //Hide empty text.
+                        emptyText.setVisibility(View.GONE);
+                    }
+                }
+            }
+        });
         return root;
 
     }
@@ -73,32 +94,6 @@ public class ListUserEventsFragment extends Fragment implements RVAdapter.OnItem
         }
     }
 
-    class LoadUserEvents extends AsyncTask<Long, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Long... longs) {
-            long userId = longs[0];
-            API.loadAppDatabase(getActivity());
-            RVAdapter adapter = (RVAdapter) rv.getAdapter();
-            adapter.getNetPosts().addAll(API.Get.userEvents(userId).getPayload());
-            API.closeDatabase();
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(Void v) {
-            rv.getAdapter().notifyDataSetChanged();
-            if (rv.getAdapter().getItemCount() > 0) {
-                //Hide empty text.
-                emptyText.setVisibility(View.GONE);
-            }
-        }
-    }
 }
 
 

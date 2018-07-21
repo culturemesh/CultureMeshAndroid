@@ -93,6 +93,7 @@ class API {
     static final String CURRENT_USER = "curruser";
     static final String API_URL_BASE = "https://www.culturemesh.com/api-dev/v1/";
     static final String NO_MAX_PAGINATION = "-1"; // If you do not need a maximum id.
+    static final String HOSTING = "hosting";
     static final long NEW_NETWORK = -2;
     static CMDatabase mDb;
     //reqCounter to ensure that we don't close the database while another thread is using it.
@@ -317,18 +318,28 @@ class API {
          * @param id ID of the {@link User} whose events are being searched for
          * @return List of {@link Event}s to which the user is subscribed
          */
-        static NetworkResponse<ArrayList<Event>> userEvents(long id) {
-            //TODO: Check for event subscriptions with network request.
-            EventSubscriptionDao eSDao = mDb.eventSubscriptionDao();
-            List<Long> eventIds = eSDao.getUserEventSubscriptions(id);
-            ArrayList<Event> events = new ArrayList<>();
-            for (Long eId : eventIds) {
-                NetworkResponse res = event(eId);
-                if (!res.fail()) {
-                    events.add((Event) res.getPayload());
+        static void userEvents(RequestQueue queue, long id, String role, final Response.Listener<NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Event>>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "user/" + id
+                    + "/events?role=" + role + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    ArrayList<Event> events = new ArrayList<>();
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            events.add(new Event((JSONObject) response.get(i)));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    listener.onResponse(new NetworkResponse<ArrayList<Event>>(false, events));
                 }
-            }
-            return new NetworkResponse<>(events);
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<ArrayList<Event>>(true, R.string.invalid_format));
+                }
+            });
+            queue.add(req);
         }
 
         /**
@@ -938,11 +949,27 @@ class API {
             return new NetworkResponse<>(network);
         }
 
-        static void post(final RequestQueue queue, org.codethechange.culturemesh.models.Post post,
-                                    Response.Listener<String> success,
-                                    Response.ErrorListener fail) {
+        static void post(final RequestQueue queue, final org.codethechange.culturemesh.models.Post post,
+                         Response.Listener<String> success,
+                         Response.ErrorListener fail) {
             StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "post/new?" +
-                    getCredentials(), success, fail);
+                    getCredentials(), success, fail) {
+                @Override
+                public String getBodyContentType() {
+                    return "application/json; charset=utf-8";
+                }
+
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    try {
+                        return post.toJSON() == null ? null :
+                                post.toJSON().toString().getBytes("utf-8");
+                    } catch (UnsupportedEncodingException uee) {
+                        return null;
+                    }
+                }
+
+            };
             queue.add(req);
         }
 
