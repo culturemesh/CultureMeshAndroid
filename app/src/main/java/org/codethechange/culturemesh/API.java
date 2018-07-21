@@ -1251,10 +1251,18 @@ class API {
             queue.add(req);
         }
 
-        static NetworkResponse event(Event event) {
-            EventDao eDao = mDb.eventDao();
-            eDao.addEvent(event);
-            return new NetworkResponse<>(false, event);
+        /**
+         * POST to the server a request, via {@code /event/new}, to create a new
+         * {@link Event}. Success or failure status will be
+         * passed via a {@link NetworkResponse<Void>} to the listener.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param event {@link Event} to create.
+         * @param listener Listener whose onResponse method will be called when task completes
+         */
+        static void event(final RequestQueue queue, final Event event,
+                         final Response.Listener<NetworkResponse<Void>> listener) {
+            Post.model(queue, event, API_URL_BASE + "event/new?" + getCredentials(),
+                    "API.Post.event", listener);
         }
 
         /**
@@ -1336,9 +1344,18 @@ class API {
                     "API.Put.user", listener);
         }
 
+        /**
+         * PUT to the server a request, via {@code /event/new}, to update an
+         * {@link Event}. Success or failure status will be
+         * passed via a {@link NetworkResponse<Void>} to the listener.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param event Updated version of the {@link Event} to change
+         * @param listener Listener whose onResponse method will be called when task completes
+         */
         static void event(final RequestQueue queue, final Event event,
                           final Response.Listener<NetworkResponse<Void>> listener) {
-
+            Post.model(queue, event, API_URL_BASE + "event/new?" + getCredentials(),
+                    "API.Post.event", listener);
         }
 
         /**
