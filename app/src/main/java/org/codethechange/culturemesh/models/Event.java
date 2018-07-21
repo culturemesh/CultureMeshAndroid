@@ -1,24 +1,19 @@
 package org.codethechange.culturemesh.models;
 
 
-import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.math.BigInteger;
-
-import java.util.Date;
 
 /**
  * Created by nathaniel on 11/10/17.
  */
 @Entity
-public class Event extends FeedItem implements Serializable{
+public class Event extends FeedItem implements Serializable, Putable, Postable {
     @PrimaryKey
     public long id;
     public long networkId;
@@ -146,5 +141,71 @@ public class Event extends FeedItem implements Serializable{
                 !json.getString("country").equals("null")) {
             country = json.getString("country");
         }
+    }
+
+    /**
+     * Create a JSON representation of the object that conforms to the following format:
+     * <pre>
+     *     {@code
+     *       {
+                "id_network": 0,
+                "id_host": 0,
+                "event_date": "2018-07-21T15:10:30.838Z",
+                "title": "string",
+                "address_1": "string",
+                "address_2": "string",
+                "country": "string",
+                "city": "string",
+                "region": "string",
+                "description": "string"
+             }
+           }
+     * </pre>
+     * This is intended to be the format used by the {@code /event/new} POST endpoint.
+     * @return JSON representation of the object
+     * @throws JSONException Unclear when this would be thrown
+     */
+    public JSONObject getPostJson() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("id_network", networkId);
+        json.put("id_host", authorId);
+        json.put("event_date", timeOfEvent);
+        json.put("title", title);
+        json.put("address_1", addressLine1);
+        json.put("address_2", addressLine2);
+        json.put("country", country);
+        json.put("city", city);
+        json.put("region", region);
+        json.put("description", description);
+        return json;
+    }
+
+    /**
+     * Create a JSON representation of the object that conforms to the following format:
+     * <pre>
+     *     {@code
+     *       {
+                 "id": 0,
+                 "id_network": 0,
+                 "id_host": 0,
+                 "event_date": "2018-07-21T15:10:30.838Z",
+                 "title": "string",
+                 "address_1": "string",
+                 "address_2": "string",
+                 "country": "string",
+                 "city": "string",
+                 "region": "string",
+                 "description": "string"
+              }
+           }
+     * </pre>
+     * This is intended to be the format used by the {@code /event/new} PUT endpoint.
+     * @return JSON representation of the object
+     * @throws JSONException Unclear when this would be thrown
+     */
+    public JSONObject getPutJson() throws JSONException {
+        JSONObject json = getPostJson();
+        json.put("id", id);
+        return json;
     }
 }
