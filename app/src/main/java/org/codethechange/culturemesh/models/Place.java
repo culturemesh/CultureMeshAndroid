@@ -160,6 +160,57 @@ public abstract class Place extends Location implements Listable, Serializable {
     }
 
     /**
+     * Attempt to get the name of the {@link City} for this {@link Place}.
+     * May return {@link Place#NOWHERE}.
+     * @return Name of the {@link City} if one is available, or {@link Place#NOWHERE} otherwise.
+     */
+    public String getCityName() {
+        if (this instanceof City) {
+            City c = (City) this;
+            return c.getName();
+        } else {
+            return Place.NOWHERE;
+        }
+    }
+
+    /**
+     * Attempt to get the name of the {@link Region} for this {@link Place}.
+     * May return {@link Place#NOWHERE}.
+     * @return Name of the {@link Region} if one is available, or {@link Place#NOWHERE} otherwise.
+     */
+    public String getRegionName() {
+        if (this instanceof Region) {
+            Region r = (Region) this;
+            return r.getRegionName();
+        } else if (this instanceof City) {
+            City c = (City) this;
+            return c.getRegionName();
+        } else {
+            return Place.NOWHERE;
+        }
+    }
+
+    /**
+     * Attempt to get the name of the {@link Country} for this {@link Place}.
+     * May return {@link Place#NOWHERE}.
+     * @return Name of the {@link Country} if one is available, or {@link Place#NOWHERE} otherwise.
+     */
+    public String getCountryName() {
+        if (this instanceof Country) {
+            Country c = (Country) this;
+            return c.getCountryName();
+        } else if (this instanceof Region) {
+            Region r = (Region) this;
+            return r.getCountryName();
+        } else if (this instanceof City) {
+            City c = (City) this;
+            return c.getCountryName();
+        } else {
+            return Place.NOWHERE;
+        }
+    }
+
+    /**
      * Represent the object as a string suitable for debugging, but not for display to user.
      * @return String representation of the form {@code Class[var=value, var=value, var=value, ...]}
      */
