@@ -19,7 +19,7 @@ import java.util.Locale;
  * Created by nathaniel on 11/10/17.
  */
 @Entity
-public class Post extends FeedItem implements Serializable{
+public class Post extends FeedItem implements Serializable, Postable, Putable {
     @PrimaryKey
     public long id;
     //When saved in database, we use these.
@@ -164,5 +164,13 @@ public class Post extends FeedItem implements Serializable{
         json.put("vid_link", vidLink);
         json.put("img_link", imgLink);
         return json;
+    }
+
+    public JSONObject getPostJson() throws JSONException {
+        return toJSON();
+    }
+
+    public JSONObject getPutJson() throws JSONException {
+        return toJSON();
     }
 }
