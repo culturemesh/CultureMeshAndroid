@@ -21,27 +21,32 @@ import java.util.Date;
 public class Event extends FeedItem implements Serializable{
     @PrimaryKey
     public long id;
-
     public long networkId;
-
     public String title;
-
     public String description;
-
     public String timeOfEvent;
-
     public long authorId;
+    public String addressLine1;
+    public String addressLine2;
+    public String city;
+    public String region;
+    public String country;
 
-    public String address;
-
-    public Event(long id, long networkId, String title, String description, String timeOfEvent, long author, String address) {
+    public Event(long id, long networkId, String title, String description, String timeOfEvent,
+                 long author, String addressLine1, String addressLine2, String city,
+                 String region, String country) {
         this.id = id;
         this.networkId = networkId;
         this.title = title;
         this.description = description;
         this.timeOfEvent = timeOfEvent;
         this.authorId = author;
-        this.address = address;
+        this.addressLine1 = addressLine1;
+        this.addressLine2 = addressLine2;
+        this.city = city;
+        this.region = region;
+        this.country = country;
+
     }
 
     public String getTitle() {
@@ -77,11 +82,15 @@ public class Event extends FeedItem implements Serializable{
     }
 
     public String getAddress() {
-        return address;
-    }
+        String address = addressLine1;
 
-    public void setAddress(String address) {
-        this.address = address;
+        String[] optional = {addressLine2, city, region, country};
+        for (String s : optional) {
+            if (s != null && !s.equals("") && !s.equals("null")) {
+                address += ", " + s;
+            }
+        }
+        return address;
     }
 
     public Event () {
@@ -108,8 +117,8 @@ public class Event extends FeedItem implements Serializable{
              }
      *     }
      * </pre>
-     * Note that {@code date_created} is not used and may be omitted. {@code address_2} is optional
-     * and used only if provided.
+     * Note that {@code date_created} is not used and may be omitted. {@code address_2},
+     * {@code city}, {@code region}, and {@code country} are optional and used only if provided.
      * @param json JSON representation of the {@link Event} to be created
      * @throws JSONException May be thrown if an improperly formatted JSON is provided
      */
@@ -120,28 +129,22 @@ public class Event extends FeedItem implements Serializable{
         description = json.getString("description");
         timeOfEvent = json.getString("event_date");
         authorId = json.getLong("id_host");
-        address = json.getString("address_1");
+        addressLine1 = json.getString("address_1");
         if (json.has("address_2") && json.getString("address_2") != null &&
                 !json.getString("address_2").equals("null")) {
-            address += "\n" + json.getString("address_2");
+            addressLine2 = json.getString("address_2");
         }
-        String cityString = json.getString("city");
-        if (cityString == null || cityString.equals("null")) {
-            cityString = "";
+        if (json.has("city") && json.getString("city") != null &&
+                !json.getString("city").equals("null")) {
+            city = json.getString("city");
         }
-        String regionString = json.getString("region");
-        if (regionString == null || regionString.equals("null")) {
-            regionString = "";
-        } else {
-            regionString = ", " + regionString;
+        if (json.has("region") && json.getString("region") != null &&
+                !json.getString("region").equals("null")) {
+            region = json.getString("region");
         }
-        String countryString = json.getString("country");
-        if (countryString == null || countryString.equals("null")) {
-            countryString = "";
-        } else {
-            countryString = ", " + countryString;
+        if (json.has("country") && json.getString("country") != null &&
+                !json.getString("country").equals("null")) {
+            country = json.getString("country");
         }
-        address += "\n" + cityString + regionString + countryString;
     }
-
 }
