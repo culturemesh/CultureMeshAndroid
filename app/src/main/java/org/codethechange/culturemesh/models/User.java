@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh.models;
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 import org.json.JSONException;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
  * Created by nathaniel on 11/10/17.
  */
 @Entity
-public class User implements Serializable{
+public class User implements Serializable, Putable, Postable {
     @PrimaryKey
     public long id;
     public int role;
@@ -27,6 +28,9 @@ public class User implements Serializable{
 
     public String aboutMe;
     public String imgURL;
+
+    @Ignore
+    private String password;
 
     public User(long id, String firstName, String lastName, String email, String username,
                 String imgURL, String aboutMe, String gender) {
@@ -105,11 +109,11 @@ public class User implements Serializable{
              }
      *     }
      * </pre>
-     * This is intended to be the format used by the {@code /user/users} endpoint
+     * This is intended to be the format used by the {@code /user/users} PUT endpoint
      * @return JSON representation of the object
      * @throws JSONException Unclear when this would be thrown
      */
-    public JSONObject toJSON() throws JSONException {
+    public JSONObject getPutJson() throws JSONException {
         JSONObject json = new JSONObject();
         json.put("id", id);
         json.put("username", username);
@@ -120,6 +124,40 @@ public class User implements Serializable{
         json.put("gender", gender);
         json.put("about_me", aboutMe);
         json.put("img_link", imgURL);
+        return json;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    /**
+     * Create a JSON representation of the object that conforms to the following format:
+     * <pre>
+     *     {@code
+     *       {
+                "username": "string",
+                "password": "string",
+                "first_name": "string",
+                "last_name": "string",
+                "email": "string",
+                "role": 0
+             }
+     *     }
+     * </pre>
+     * This is intended to be the format used by the {@code /user/users} POST endpoint.
+     * <string>NOTE: The user's password must be set using {@link User#setPassword(String)}</string>
+     * @return JSON representation of the object
+     * @throws JSONException Unclear when this would be thrown
+     */
+    public JSONObject getPostJson() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("username", username);
+        json.put("password", password);
+        json.put("first_name", firstName);
+        json.put("last_name", lastName);
+        json.put("email", email);
+        json.put("role", role);
         return json;
     }
 
