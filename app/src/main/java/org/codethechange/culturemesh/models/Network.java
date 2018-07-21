@@ -10,7 +10,7 @@ import java.io.Serializable;
  * its instance fields like {@link Network#nearLocation} store expanded objects (i.e. {@link Place},
  * not the stripped-down forms for database storage.
  */
-public class Network implements Serializable {
+public class Network implements Serializable, Postable {
 
     /**
      * ID of network. Must always be specified.
@@ -146,6 +146,11 @@ public class Network implements Serializable {
             }
         }
         return json;
+    }
+
+    @Override
+    public JSONObject getPostJson() throws JSONException {
+        return toJSON();
     }
 
     private void addPlaceToJson(String keySuffix, Place p, JSONObject json) throws JSONException {
