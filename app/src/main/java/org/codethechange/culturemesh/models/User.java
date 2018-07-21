@@ -17,28 +17,19 @@ import java.util.ArrayList;
 public class User implements Serializable{
     @PrimaryKey
     public long id;
-
-    public String firstName;
-
-    public String lastName;
-
+    public int role;
     public String email;
-
     public String username;
 
+    public String firstName;
+    public String lastName;
+    public String gender;
+
     public String aboutMe;
-
-    public int role;
-
     public String imgURL;
 
-    public String getImgURL() {
-        return imgURL;
-    }
-
-
     public User(long id, String firstName, String lastName, String email, String username,
-                String imgURL, String aboutMe) {
+                String imgURL, String aboutMe, String gender) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -46,6 +37,7 @@ public class User implements Serializable{
         this.username = username;
         this.imgURL = imgURL;
         this.aboutMe = aboutMe;
+        this.gender = gender;
     }
 
     public User(JSONObject res) throws JSONException{
@@ -54,10 +46,14 @@ public class User implements Serializable{
                 res.getString("last_name"),
                 res.getString("email"), res.getString("username"),
                 "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
-                res.getString("about_me"));
+                res.getString("about_me"), res.getString("gender"));
     }
-    public User(){
+    public User() {
 
+    }
+
+    public String getImgURL() {
+        return imgURL;
     }
 
     public String getFirstName() {
