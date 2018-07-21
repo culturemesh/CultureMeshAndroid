@@ -5,6 +5,7 @@ import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -126,17 +127,17 @@ public class Event extends FeedItem implements Serializable{
             address += "\n" + json.getString("address_2");
         }
         String cityString = json.getString("city");
-        if (cityString == null || cityString.equals("null")) {
+        if (cityString == null || cityString.equals("null") || cityString.equals("")) {
             cityString = "";
         }
         String regionString = json.getString("region");
-        if (regionString == null || regionString.equals("null")) {
+        if (regionString == null || regionString.equals("null") || regionString.equals("")) {
             regionString = "";
         } else {
             regionString = ", " + regionString;
         }
         String countryString = json.getString("country");
-        if (countryString == null || countryString.equals("null")) {
+        if (countryString == null || countryString.equals("null") || countryString.equals("")) {
             countryString = "";
         } else {
             countryString = ", " + countryString;
@@ -144,4 +145,26 @@ public class Event extends FeedItem implements Serializable{
         address += "\n" + cityString + regionString + countryString;
     }
 
+    /**
+     * Converts Event object to corresponding JSON object.
+     * @return JSONObject according to format necessary for POST /event/new?
+     */
+    public JSONObject toJSON() {
+        JSONObject object = new JSONObject();
+        try {
+            object.put("id_network", networkId);
+            object.put("id_host", authorId);
+            object.put("event_date", timeOfEvent);
+            object.put("title", title);
+            object.put("address_1", getAddress());
+            object.put("address_2", "");
+            object.put("country", "");
+            object.put("region", "");
+            object.put("city", "");
+            object.put("description", getDescription());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return object;
+    }
 }

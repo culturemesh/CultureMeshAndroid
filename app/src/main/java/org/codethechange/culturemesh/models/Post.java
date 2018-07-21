@@ -141,7 +141,7 @@ public class Post extends FeedItem implements Serializable{
 
     /**
      * Converts Post object to corresponding JSON object.
-     * @return JSONObject according to format necessary for POST /user
+     * @return JSONObject according to format necessary for POST /post/new?
      */
     public JSONObject toJSON() {
         JSONObject object = new JSONObject();

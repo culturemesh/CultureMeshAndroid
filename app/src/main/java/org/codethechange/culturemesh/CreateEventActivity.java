@@ -17,10 +17,15 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
+
 import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.Language;
 import org.codethechange.culturemesh.models.User;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -33,7 +38,7 @@ public class CreateEventActivity extends AppCompatActivity {
     private EditText nameRef;
     private EditText addressRef;
     private EditText descriptionRef;
-
+    private RequestQueue queue;
     private Activity myActivity = this;
 
     /**
@@ -43,6 +48,7 @@ public class CreateEventActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        queue = Volley.newRequestQueue(getApplicationContext());
         setContentView(R.layout.activity_create_event);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -92,20 +98,31 @@ public class CreateEventActivity extends AppCompatActivity {
 
             // Declare variables for Event() arguments
             Date date = c.getTime();
+            String timeOfEvent = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(date);
             String name = nameRef.getText().toString();
             String address = addressRef.getText().toString();
             String description = descriptionRef.getText().toString();
-            // TODO: Let the user select a language (from a menu? arbitrarily?)
-            Language lang = new Language(12, "TempLanguage", 21);
-            // TODO: Get the User object for the current user
-            User author = null;
             // Create Event TODO: deal with arbitrary id. Perhaps it doesn't matter cuz API.Post(event)
             // should take care of it?
             long networkId = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE)
                     .getLong(API.SELECTED_NETWORK, 1);
-            Event event = new Event((long)(Math.random() * 10000), networkId, name, description, date.toString(), 1, address);
+            Event event = new Event((long)(Math.random() * 10000), networkId, name, description, timeOfEvent,
+                                    getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).getLong(API.CURRENT_USER, -1),
+                                    address);
             // POST Event with AsyncTask
-            new PostEvent().execute(event);
+            final ProgressBar progressBar = findViewById(R.id.eventPostProgressBar);
+            API.Post.event(queue, event, new Response.Listener<NetworkResponse<String>>() {
+                @Override
+                public void onResponse(NetworkResponse<String> response) {
+                    if (response.fail()) {
+                        progressBar.setIndeterminate(true); // Only because cannot get status from API
+                        response.showErrorDialog(myActivity);
+                        progressBar.setIndeterminate(false);
+                    } else {
+                        finish();
+                    }
+                }
+            });
         }
     }
 
@@ -348,62 +365,5 @@ public class CreateEventActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * AsyncTask class to handle network latency when POSTing event
-     */
-    private class PostEvent extends AsyncTask<Event, Integer, NetworkResponse> {
-
-        ProgressBar progressBar;
-
-        /**
-         * In the background, POST an event
-         * @param events Arbitrary number of events, the first of which will be POSTed
-         * @return NetworkResponse containing the results of the network operation
-         */
-        @Override
-        protected NetworkResponse doInBackground(Event... events) {
-            API.loadAppDatabase(getApplicationContext());
-            return API.Post.event(events[0]);
-        }
-
-        /**
-         * Over the course of the POST operation, provided progress updates (nonfunctional)
-         * @param values Values indicating progress
-         */
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-            // Uncomment when getting status of API
-            // progressBar.setProgress(values[0]);
-        }
-
-        /**
-         * Makes the progress bar indeterminate
-         */
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressBar = findViewById(R.id.eventPostProgressBar);
-            progressBar.setIndeterminate(true); // Only because cannot get status from API
-        }
-
-        /**
-         * If POSTing succeeded: Closes the activity and returns the user to the previous screen
-         * If POSTing failed: Displays error dialog and returns user to composing screen
-         * @param response Status of doInBackground method that represents whether POSTing succeeded
-         */
-        @Override
-        protected void onPostExecute(NetworkResponse response) {
-            super.onPostExecute(response);
-            // SOURCE: https://stackoverflow.com/questions/4038479/android-go-back-to-previous-activity
-            API.closeDatabase();
-            if (response.fail()) {
-                response.showErrorDialog(myActivity);
-                progressBar.setIndeterminate(false);
-            } else {
-                finish();
-            }
-        }
-    }
 
 }

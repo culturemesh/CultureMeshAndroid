@@ -90,6 +90,7 @@ class API {
     final static String SELECTED_USER="seluser";
     final static String FIRST_TIME = "firsttime";
     static final boolean NO_JOINED_NETWORKS = false;
+    //The id of the user that is signed in.
     static final String CURRENT_USER = "curruser";
     static final String API_URL_BASE = "https://www.culturemesh.com/api-dev/v1/";
     static final String NO_MAX_PAGINATION = "-1"; // If you do not need a maximum id.
@@ -1006,10 +1007,36 @@ class API {
             queue.add(req);
         }
 
-        static NetworkResponse event(Event event) {
-            EventDao eDao = mDb.eventDao();
-            eDao.addEvent(event);
-            return new NetworkResponse<>(false, event);
+        static void event(RequestQueue queue, final Event event, final Response.Listener<NetworkResponse<String>> listener) {
+            StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "event/new?" +
+                    getCredentials(), new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    listener.onResponse(new NetworkResponse<String>(false, response));
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<String>(true, error.getMessage()));
+                }
+            }) {
+                @Override
+                public String getBodyContentType() {
+                    return "application/json; charset=utf-8";
+                }
+
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    try {
+                        return event.toJSON() == null ? null :
+                                event.toJSON().toString().getBytes("utf-8");
+                    } catch (UnsupportedEncodingException uee) {
+                        return null;
+                    }
+                }
+
+            };
+            queue.add(req);
         }
     }
 
