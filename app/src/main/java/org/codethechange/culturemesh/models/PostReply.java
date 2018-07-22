@@ -12,7 +12,7 @@ import org.json.JSONObject;
  */
 
 @Entity(tableName = "postreply")
-public class PostReply {
+public class PostReply implements Postable, Putable{
     @PrimaryKey
     public long id;
 
@@ -55,15 +55,36 @@ public class PostReply {
     }
 
     /**
-     * Makes JSON Object to pass onto network request body.
-     * @return
+     * Generate a JSON describing the object. The JSON will conform to the following format:
+     * <pre>
+     *     {@code
+     *          {
+                    "id_parent": 0,
+                    "id_user": 0,
+                    "id_network": 0,
+                    "reply_text": "string"
+                }
+     *     }
+     * </pre>
+     * The resulting object is suitable for use with the {@code /post/{postId}/reply} POST or PUT
+     * endpoints.
+     * @return JSON representation of the object
+     * @throws JSONException Unclear when this would be thrown
      */
-    public JSONObject getJSON() throws JSONException {
+    public JSONObject toJSON() throws JSONException {
         JSONObject obj = new JSONObject();
         obj.put("id_parent" , parentId);
         obj.put("id_user", userId);
         obj.put("id_network", networkId);
         obj.put("reply_text", replyText);
         return obj;
+    }
+
+    public JSONObject getPostJson() throws JSONException {
+        return toJSON();
+    }
+
+    public JSONObject getPutJson() throws JSONException {
+        return toJSON();
     }
 }
