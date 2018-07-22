@@ -166,7 +166,7 @@ class API {
         static void userID(RequestQueue queue, String email,
                          final Response.Listener<NetworkResponse<Long>> listener) {
             StringRequest req = new StringRequest(Request.Method.GET, API_URL_BASE +
-                    "user/email?" + getCredentials() + "&" + email, new Response.Listener<String>() {
+                    "user/email?" + getCredentials() + "&email=" + email, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     if (response.equals("No user found")) {
