@@ -131,7 +131,8 @@ class API {
          * @return If such a user was found, it will be the payload. Otherwise, the request will be
          * marked as failed.
          */
-        static void user(RequestQueue queue, long id, final Response.Listener<NetworkResponse<User>> listener) {
+        static void user(RequestQueue queue, long id,
+                         final Response.Listener<NetworkResponse<User>> listener) {
             JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET,
                     API_URL_BASE + "user/" + id + "?" + getCredentials(),
                     null, new Response.Listener<JSONObject>() {
@@ -153,6 +154,42 @@ class API {
                 }
             });
             queue.add(authReq);
+        }
+
+        /**
+         * Get the ID of a {@link User} from an email address. Errors are communicated via a failed
+         * {@link NetworkResponse<Long>}.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param email Email of user whose ID to look up
+         * @param listener Listener whose onResponse method is called when the task has completed
+         */
+        static void userID(RequestQueue queue, String email,
+                         final Response.Listener<NetworkResponse<Long>> listener) {
+            StringRequest req = new StringRequest(Request.Method.GET, API_URL_BASE +
+                    "user/email?" + getCredentials() + "&" + email, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    if (response.equals("No user found")) {
+                        listener.onResponse(new NetworkResponse<Long>(true,
+                                R.string.authenticationError));
+                    } else {
+                        try {
+                            long id = Long.parseLong(response);
+                            listener.onResponse(new NetworkResponse<>(id));
+                        } catch (NumberFormatException e) {
+                            listener.onResponse(new NetworkResponse<Long>(true,
+                                    R.string.authenticationError));
+                        }
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    int messageID = processNetworkError("API.Get.userID", "ErrorListener", error);
+                    listener.onResponse(new NetworkResponse<Long>(true, messageID));
+                }
+            });
+            queue.add(req);
         }
 
 
