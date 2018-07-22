@@ -171,14 +171,13 @@ class API {
                 public void onResponse(String response) {
                     if (response.equals("No user found")) {
                         listener.onResponse(new NetworkResponse<Long>(true,
-                                R.string.authenticationError));
+                                R.string.no_account_with_email));
                     } else {
                         try {
                             long id = Long.parseLong(response);
                             listener.onResponse(new NetworkResponse<>(id));
                         } catch (NumberFormatException e) {
-                            listener.onResponse(new NetworkResponse<Long>(true,
-                                    R.string.authenticationError));
+                            listener.onResponse(new NetworkResponse<Long>(true));
                         }
                     }
                 }
