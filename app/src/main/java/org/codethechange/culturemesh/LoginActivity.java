@@ -42,6 +42,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
      * @param userID ID of the user to make logged-in
      */
     public static void setLoggedIn(SharedPreferences settings, long userID, String email, String password) {
+        API.initializePrefs(settings);
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(API.CURRENT_USER, userID);
         editor.putString(API.USER_EMAIL, email);
@@ -92,7 +93,8 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                                     if (response.fail()) {
                                         response.showErrorDialog(LoginActivity.this);
                                     } else {
-                                        SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+                                        SharedPreferences settings = getSharedPreferences(
+                                                API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
                                         setLoggedIn(settings, id, email, password);
 
                                         Intent returnIntent = new Intent();
