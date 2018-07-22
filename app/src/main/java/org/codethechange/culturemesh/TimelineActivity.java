@@ -327,9 +327,9 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                 @Override
                 public void onClick(View v) {
                     //We need to subscribe this user!
-                    API.Post.addUserToNetwork(queue, currentUser, selectedNetwork, new Response.Listener<NetworkResponse<String>>() {
+                    API.Post.addUserToNetwork(queue, currentUser, selectedNetwork, new Response.Listener<NetworkResponse<Void>>() {
                         @Override
-                        public void onResponse(NetworkResponse<String> response) {
+                        public void onResponse(NetworkResponse<Void> response) {
                             if (response.fail()) {
                                 response.showErrorDialog(TimelineActivity.this);
                             } else {
