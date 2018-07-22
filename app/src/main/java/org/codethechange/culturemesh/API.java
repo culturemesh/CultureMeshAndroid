@@ -1200,7 +1200,7 @@ class API {
          */
         static void network(final RequestQueue queue, final Network network,
                             final Response.Listener<NetworkResponse<Void>> listener) {
-            Post.model(queue, network, API_URL_BASE + "network/new?" + getCredentials(),
+            model(queue, network, API_URL_BASE + "network/new?" + getCredentials(),
                     "API.Post.net", listener);
         }
 
@@ -1214,41 +1214,21 @@ class API {
          */
         static void post(final RequestQueue queue, final org.codethechange.culturemesh.models.Post post,
                          final Response.Listener<NetworkResponse<Void>> listener) {
-            Post.model(queue, post, API_URL_BASE + "post/new?" + getCredentials(),
+            model(queue, post, API_URL_BASE + "post/new?" + getCredentials(),
                     "API.Post.post", listener);
         }
 
-        static void reply(RequestQueue queue, final PostReply comment, final Response.Listener<NetworkResponse<String>> listener) {
-            StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "post/" +
-                    comment.parentId + "/reply?" + getCredentials(), new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    listener.onResponse(new NetworkResponse<String>(false, null));
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    listener.onResponse(new NetworkResponse<String>(true, null));
-                }
-            }) {
-                @Override
-                public String getBodyContentType() {
-                    return "application/json; charset=utf-8";
-                }
-
-                @Override
-                public byte[] getBody() throws AuthFailureError {
-                    try {
-                        return comment.getJSON().toString().getBytes("utf-8");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                }
-            };
-            queue.add(req);
+        /**
+         * POST to the server a request, via {@code /post/{postId}/reply}, to create a new
+         * {@link PostReply}. Success or failure status will be
+         * passed via a {@link NetworkResponse<Void>} to the listener.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param comment {@link PostReply} to create.
+         * @param listener Listener whose onResponse method will be called when task completes
+         */
+        static void reply(RequestQueue queue, final PostReply comment, final Response.Listener<NetworkResponse<Void>> listener) {
+            model(queue, comment, API_URL_BASE + "post/" + comment.parentId + "/reply",
+                    "API.Post.reply", listener);
         }
 
         /**
@@ -1261,7 +1241,7 @@ class API {
          */
         static void event(final RequestQueue queue, final Event event,
                          final Response.Listener<NetworkResponse<Void>> listener) {
-            Post.model(queue, event, API_URL_BASE + "event/new?" + getCredentials(),
+            model(queue, event, API_URL_BASE + "event/new?" + getCredentials(),
                     "API.Post.event", listener);
         }
 
@@ -1340,7 +1320,7 @@ class API {
          */
         static void user(final RequestQueue queue, final User user,
                          final Response.Listener<NetworkResponse<Void>> listener) {
-            Post.model(queue, user, API_URL_BASE + "user/users?" + getCredentials(),
+            model(queue, user, API_URL_BASE + "user/users?" + getCredentials(),
                     "API.Put.user", listener);
         }
 
@@ -1354,7 +1334,7 @@ class API {
          */
         static void event(final RequestQueue queue, final Event event,
                           final Response.Listener<NetworkResponse<Void>> listener) {
-            Post.model(queue, event, API_URL_BASE + "event/new?" + getCredentials(),
+            model(queue, event, API_URL_BASE + "event/new?" + getCredentials(),
                     "API.Post.event", listener);
         }
 
@@ -1369,8 +1349,21 @@ class API {
          */
         static void post(final RequestQueue queue, final org.codethechange.culturemesh.models.Post post,
                          final Response.Listener<NetworkResponse<Void>> listener) {
-            Put.model(queue, post, API_URL_BASE + "post/new?" + getCredentials(),
+            model(queue, post, API_URL_BASE + "post/new?" + getCredentials(),
                     "API.Put.post", listener);
+        }
+
+        /**
+         * PUT to the server a request, via {@code /post/{postId}/reply}, to update a
+         * {@link PostReply}. Success or failure status will be
+         * passed via a {@link NetworkResponse<Void>} to the listener.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param comment Updated version of the {@link PostReply} to make changes to
+         * @param listener Listener whose onResponse method will be called when task completes
+         */
+        static void reply(RequestQueue queue, final PostReply comment, final Response.Listener<NetworkResponse<Void>> listener) {
+            model(queue, comment, API_URL_BASE + "post/" + comment.parentId + "/reply",
+                    "API.Post.reply", listener);
         }
 
         /**
