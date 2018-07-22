@@ -99,19 +99,17 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
                 long userId = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).getLong(API.CURRENT_USER, -1);
                 Post newPost = new Post(0, userId, networkId, contentHTML, "", "", datePosted );
                 //Now let's send it off to the CultureMesh site!!
-                API.Post.post(queue, newPost, new Response.Listener<String>() {
+                API.Post.post(queue, newPost, new Response.Listener<NetworkResponse<Void>>() {
                     @Override
-                    public void onResponse(String response) {
-                        // Everything went well, so the activity will close.
-                        finish();
-                    }
-                }, new Response.ErrorListener(){
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        //Some error happened with the network request. We will need to alert the user.
-                        new NetworkResponse<Object>(true, R.string.error_writing_post)
-                                .showErrorDialog(getApplicationContext());
-                        progressBar.setVisibility(View.GONE);
+                    public void onResponse(NetworkResponse<Void> response) {
+                        if (response.fail()) {
+                            //Some error happened with the network request. We will need to alert the user.
+                            response.showErrorDialog(CreatePostActivity.this);
+                            progressBar.setVisibility(View.GONE);
+                        } else {
+                            // Everything went well, so the activity will close.
+                            finish();
+                        }
                     }
                 });
             }
