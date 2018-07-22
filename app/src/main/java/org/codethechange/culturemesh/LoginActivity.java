@@ -18,6 +18,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
+
 import org.codethechange.culturemesh.models.User;
 
 
@@ -28,6 +32,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
     EditText confirmPassword;
     EditText passwordText;
     TextView needAccountText;
+    private RequestQueue queue;
 
     /**
      * Largely for testing, this public method can be used to set which user is currently logged in
@@ -62,15 +67,40 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         final Button signInButton = findViewById(R.id.sign_in_button);
+        queue = Volley.newRequestQueue(getApplicationContext());
         signInButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                EditText userNameField = findViewById(R.id.user_name_field);
+                EditText emailField = findViewById(R.id.user_name_field);
                 EditText passwordField = findViewById(R.id.password_field);
-                String userName = userNameField.getText().toString();
-                String password = passwordField.getText().toString();
-                Credential cred = new Credential(userName, password);
-                new ValidateCredentials().execute(cred);
+                final String email = emailField.getText().toString();
+                final String password = passwordField.getText().toString();
+
+                API.Get.userID(queue, email, new Response.Listener<NetworkResponse<Long>>() {
+                    @Override
+                    public void onResponse(NetworkResponse<Long> response) {
+                        if (response.fail()) {
+                            response.showErrorDialog(LoginActivity.this);
+                        } else {
+                            final long id = response.getPayload();
+                            API.Get.loginTokenWithCred(queue, email, password, new Response.Listener<NetworkResponse<String>>() {
+                                @Override
+                                public void onResponse(NetworkResponse<String> response) {
+                                    if (response.fail()) {
+                                        response.showErrorDialog(LoginActivity.this);
+                                    } else {
+                                        SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+                                        setLoggedIn(settings, id);
+
+                                        Intent returnIntent = new Intent();
+                                        setResult(Activity.RESULT_OK, returnIntent);
+                                        finish();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
             }
         });
         firstNameText = findViewById(R.id.first_name_field);
