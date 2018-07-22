@@ -41,9 +41,11 @@ public class LoginActivity extends RedirectableAppCompatActivity {
      * @param settings The SharedPreferences storing user login state
      * @param userID ID of the user to make logged-in
      */
-    public static void setLoggedIn(SharedPreferences settings, long userID) {
+    public static void setLoggedIn(SharedPreferences settings, long userID, String email, String password) {
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(API.CURRENT_USER, userID);
+        editor.putString(API.USER_EMAIL, email);
+        editor.putString(API.USER_PASS, password);
         editor.apply();
     }
 
@@ -55,6 +57,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         if (isLoggedIn(settings)) {
             SharedPreferences.Editor editor = settings.edit();
             editor.remove(API.CURRENT_USER);
+            editor.remove(API.USER_PASS);
             editor.apply();
         }
     }
@@ -90,7 +93,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                                         response.showErrorDialog(LoginActivity.this);
                                     } else {
                                         SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-                                        setLoggedIn(settings, id);
+                                        setLoggedIn(settings, id, email, password);
 
                                         Intent returnIntent = new Intent();
                                         setResult(Activity.RESULT_OK, returnIntent);
@@ -229,62 +232,6 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                 }
             }
         });
-    }
-
-    private class Credential {
-        private String userName;
-        private String password;
-
-        public Credential(String userName, String password) {
-            this.userName = userName;
-            this.password = password;
-        }
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-    }
-
-    private class ValidateCredentials extends AsyncTask<Credential, Void, NetworkResponse<User>> {
-        @Override
-        protected NetworkResponse<User> doInBackground(Credential... credentials) {
-            super.onPreExecute();
-
-            API.loadAppDatabase(getApplicationContext());
-            NetworkResponse<User> res;
-            try {
-                // TODO: Replace this with actually processing username and password
-                // TODO: Handle sign in.
-                long id = Long.parseLong(credentials[0].userName);
-                User user = new User(id,"","","","","","");
-                res = new NetworkResponse<>(false, user);
-            } catch (NumberFormatException e) {
-                res = new NetworkResponse<>(true, R.string.loginFailed);
-            }
-
-            API.closeDatabase();
-            return res;
-        }
-
-        @Override
-        protected void onPostExecute(NetworkResponse<User> userNetworkResponse) {
-            super.onPostExecute(userNetworkResponse);
-            if (userNetworkResponse.fail()) {
-                userNetworkResponse.showErrorDialog(LoginActivity.this);
-            } else {
-                SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-                setLoggedIn(settings, userNetworkResponse.getPayload().id);
-
-                Intent returnIntent = new Intent();
-                // TODO: Change result returned to RESULT_CANCELLED for no login
-                setResult(Activity.RESULT_OK, returnIntent);
-                finish();
-            }
-        }
     }
 
 }
