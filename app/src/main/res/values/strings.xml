@@ -55,7 +55,11 @@
     <string name="eventProperty_name">Name of Event</string>
     <string name="eventProperty_date">Event Date</string>
     <!-- Address handles the following website fields: Address 1, Address 2, City, Region -->
-    <string name="eventProperty_address">Address</string>
+    <string name="eventProperty_address1">Address Line 1</string>
+    <string name="eventProperty_address2">Address Line 2</string>
+    <string name="eventProperty_city">City</string>
+    <string name="eventProperty_region">Region</string>
+    <string name="eventProperty_country">Country</string>
     <string name="eventProperty_description">What\'s Happening</string>
     <string name="eventProperty_time">Event Start Time</string>
     <string name="createEvent_setTime">Set Start Time</string>

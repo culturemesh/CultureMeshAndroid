@@ -3,6 +3,7 @@ package org.codethechange.culturemesh;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v4.app.DialogFragment;
 import android.app.TimePickerDialog;
@@ -16,6 +17,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
+
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 
 import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.Language;
@@ -31,10 +36,15 @@ public class CreateEventActivity extends AppCompatActivity {
     private TextView dateRef;
     private TextView timeRef;
     private EditText nameRef;
-    private EditText addressRef;
+    private EditText address1Ref;
+    private EditText address2Ref;
+    private EditText cityRef;
+    private EditText regionRef;
+    private EditText countryRef;
     private EditText descriptionRef;
 
     private Activity myActivity = this;
+    private RequestQueue queue;
 
     /**
      * Initialize activity with saved state
@@ -48,8 +58,14 @@ public class CreateEventActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        queue = Volley.newRequestQueue(CreateEventActivity.this);
+
         nameRef = findViewById(R.id.eventName);
-        addressRef = findViewById(R.id.eventAddress);
+        address1Ref = findViewById(R.id.eventAddress1);
+        address2Ref = findViewById(R.id.eventAddress2);
+        cityRef = findViewById(R.id.eventCity);
+        regionRef = findViewById(R.id.eventRegion);
+        countryRef = findViewById(R.id.eventCountry);
         descriptionRef = findViewById(R.id.eventDescription);
         dateRef = findViewById(R.id.eventDate);
         timeRef = findViewById(R.id.eventTime);
@@ -93,19 +109,32 @@ public class CreateEventActivity extends AppCompatActivity {
             // Declare variables for Event() arguments
             Date date = c.getTime();
             String name = nameRef.getText().toString();
-            String address = addressRef.getText().toString();
+            String address1 = address1Ref.getText().toString();
+            String address2 = address2Ref.getText().toString();
+            String city = cityRef.getText().toString();
+            String region = regionRef.getText().toString();
+            String country = countryRef.getText().toString();
             String description = descriptionRef.getText().toString();
-            // TODO: Let the user select a language (from a menu? arbitrarily?)
-            Language lang = new Language(12, "TempLanguage", 21);
-            // TODO: Get the User object for the current user
-            User author = null;
-            // Create Event TODO: deal with arbitrary id. Perhaps it doesn't matter cuz API.Post(event)
-            // should take care of it?
-            long networkId = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE)
-                    .getLong(API.SELECTED_NETWORK, 1);
-            Event event = new Event((long)(Math.random() * 10000), networkId, name, description, date.toString(), 1, address);
+
+            SharedPreferences prefs = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+            long networkId = prefs.getLong(API.SELECTED_NETWORK, -1);
+            long authorId = prefs.getLong(API.CURRENT_USER, -1);
+            Event event = new Event(-1, networkId, name, description,
+                    date.toString(), authorId, address1, address2, city, region, country);
             // POST Event with AsyncTask
-            new PostEvent().execute(event);
+            final ProgressBar progressBar = findViewById(R.id.eventPostProgressBar);
+            progressBar.setIndeterminate(true);
+            API.Post.event(queue, event, new Response.Listener<NetworkResponse<Void>>() {
+                @Override
+                public void onResponse(NetworkResponse<Void> response) {
+                    if (response.fail()) {
+                        response.showErrorDialog(myActivity);
+                        progressBar.setIndeterminate(false);
+                    } else {
+                        finish();
+                    }
+                }
+            });
         }
     }
 
@@ -138,8 +167,8 @@ public class CreateEventActivity extends AppCompatActivity {
         } else if (descriptionRef.getText().toString().isEmpty()) {
             descriptionRef.setError(getString(R.string.createEvent_missingDescription));
             return false;
-        } else if (addressRef.getText().toString().isEmpty()) {
-            addressRef.setError(getString(R.string.createEvent_missingAddress));
+        } else if (address1Ref.getText().toString().isEmpty()) {
+            address1Ref.setError(getString(R.string.createEvent_missingAddress));
             return false;
         } else
             return true;
@@ -347,63 +376,4 @@ public class CreateEventActivity extends AppCompatActivity {
             return isSet;
         }
     }
-
-    /**
-     * AsyncTask class to handle network latency when POSTing event
-     */
-    private class PostEvent extends AsyncTask<Event, Integer, NetworkResponse> {
-
-        ProgressBar progressBar;
-
-        /**
-         * In the background, POST an event
-         * @param events Arbitrary number of events, the first of which will be POSTed
-         * @return NetworkResponse containing the results of the network operation
-         */
-        @Override
-        protected NetworkResponse doInBackground(Event... events) {
-            API.loadAppDatabase(getApplicationContext());
-            return API.Post.event(events[0]);
-        }
-
-        /**
-         * Over the course of the POST operation, provided progress updates (nonfunctional)
-         * @param values Values indicating progress
-         */
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-            // Uncomment when getting status of API
-            // progressBar.setProgress(values[0]);
-        }
-
-        /**
-         * Makes the progress bar indeterminate
-         */
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressBar = findViewById(R.id.eventPostProgressBar);
-            progressBar.setIndeterminate(true); // Only because cannot get status from API
-        }
-
-        /**
-         * If POSTing succeeded: Closes the activity and returns the user to the previous screen
-         * If POSTing failed: Displays error dialog and returns user to composing screen
-         * @param response Status of doInBackground method that represents whether POSTing succeeded
-         */
-        @Override
-        protected void onPostExecute(NetworkResponse response) {
-            super.onPostExecute(response);
-            // SOURCE: https://stackoverflow.com/questions/4038479/android-go-back-to-previous-activity
-            API.closeDatabase();
-            if (response.fail()) {
-                response.showErrorDialog(myActivity);
-                progressBar.setIndeterminate(false);
-            } else {
-                finish();
-            }
-        }
-    }
-
 }
