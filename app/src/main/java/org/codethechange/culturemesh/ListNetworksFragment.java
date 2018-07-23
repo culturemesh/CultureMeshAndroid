@@ -89,6 +89,7 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
                                     // wrong order.
                                     adapter.getUserCounts().put(net.id + "", response.getPayload().intValue());
                                 } else {
+                                    response.showErrorDialog(getActivity());
                                     adapter.getUserCounts().put(net.id + "", 0);
                                 }
                                 checkAndAddNetwork(net);
@@ -100,12 +101,15 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
                                 if (!response.fail()) {
                                     adapter.getPostCounts().put(net.id + "", response.getPayload().intValue());
                                 } else {
+                                    response.showErrorDialog(getActivity());
                                     adapter.getPostCounts().put(net.id + "", 0);
                                 }
                                 checkAndAddNetwork(net);
                             }
                         });
                     }
+                } else {
+                    response.showErrorDialog(getActivity());
                 }
             }
         });

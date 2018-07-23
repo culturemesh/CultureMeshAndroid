@@ -71,6 +71,8 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
                                 getResources().getString(R.string.speakers_in).toString() + " " +
                                 network.nearLocation.getListableName());
                     }
+                } else {
+                    response.showErrorDialog(CreatePostActivity.this);
                 }
             }
         });
@@ -97,7 +99,7 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
                 //TODO: Allow for attaching images/videos.
                 // Note: id field doesn't matter.
                 long userId = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).getLong(API.CURRENT_USER, -1);
-                Post newPost = new Post(0, userId, networkId, contentHTML, "", "", datePosted );
+                Post newPost = new Post(-1, userId, networkId, contentHTML, "", "", datePosted );
                 //Now let's send it off to the CultureMesh site!!
                 API.Post.post(queue, newPost, new Response.Listener<String>() {
                     @Override

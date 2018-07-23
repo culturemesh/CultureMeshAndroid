@@ -106,7 +106,7 @@ public class CreateEventActivity extends AppCompatActivity {
             // should take care of it?
             long networkId = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE)
                     .getLong(API.SELECTED_NETWORK, 1);
-            Event event = new Event((long)(Math.random() * 10000), networkId, name, description, timeOfEvent,
+            Event event = new Event(-1, networkId, name, description, timeOfEvent,
                                     getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).getLong(API.CURRENT_USER, -1),
                                     address);
             // POST Event with AsyncTask

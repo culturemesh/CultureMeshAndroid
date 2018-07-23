@@ -56,6 +56,7 @@ public class NetworkResponse<E> {
     public NetworkResponse(E inPayload) {
         payload = inPayload;
         fail = false;
+        messageID = R.string.genericSuccess;
     }
 
     /**

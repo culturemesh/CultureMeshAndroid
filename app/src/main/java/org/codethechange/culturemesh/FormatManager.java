@@ -214,8 +214,8 @@ public class FormatManager implements
 
     /**
      * This function converts the CultureMesh tags into a spannable string for textview.
-     * @param formattedText should only have <b></b>, <link></link>, <i></i>
-     *                      or [b][/b][link][/link][i][/i]
+     * @param formattedText should only have {@code <b></b>, <link></link>, <i></i>
+     *                      or [b][/b][link][/link][i][/i]}
      * @param colorString the link color in RGB. Some text has different color backgrounds.
      * @return Spannable to be passed to TextView.
      */
@@ -250,7 +250,7 @@ public class FormatManager implements
             }
         } catch(StringIndexOutOfBoundsException e) {
             //TODO: Do some error handling when having malformed text.
-            Log.e("Parsing Error",  "In formatManager");
+            Log.e("In formatManager", "Format Error");
             e.printStackTrace();
 
         }
