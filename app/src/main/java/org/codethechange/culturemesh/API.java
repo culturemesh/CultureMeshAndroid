@@ -1019,7 +1019,7 @@ class API {
         static void loginTokenWithCred(RequestQueue queue, final String email, final String password,
                                final Response.Listener<NetworkResponse<String>> listener) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE +
-                    "token" + getCredentials(), null, new Response.Listener<JSONObject>() {
+                    "token?" + getCredentials(), null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
                     String token;
