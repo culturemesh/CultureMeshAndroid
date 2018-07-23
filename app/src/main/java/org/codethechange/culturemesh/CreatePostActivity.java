@@ -53,11 +53,31 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
         progressBar = findViewById(R.id.postPostProgressBar);
         //Allow links to redirect to browser.
         content.setMovementMethod(LinkMovementMethod.getInstance());
-        new LoadNetworkData().execute(Long.valueOf(1));
+
+        final long networkId = getIntent().getLongExtra(TimelineActivity.BUNDLE_NETWORK, -1);
+        //Load Network Data to update header text.
+        API.Get.network(queue, networkId, new Response.Listener<NetworkResponse<Network>>() {
+            @Override
+            public void onResponse(NetworkResponse<Network> response) {
+                if (!response.fail() && response.getPayload() != null) {
+                    Network network = response.getPayload();
+                    if (network.isLocationBased()) {
+                        networkLabel.setText(getResources().getString(R.string.from) + " " +
+                                network.fromLocation.getListableName() + " " +
+                                getResources().getString(R.string.near) + " " +
+                                network.nearLocation.getListableName());
+                    } else {
+                        networkLabel.setText(network.language.toString() + " " +
+                                getResources().getString(R.string.speakers_in).toString() + " " +
+                                network.nearLocation.getListableName());
+                    }
+                } else {
+                    response.showErrorDialog(CreatePostActivity.this);
+                }
+            }
+        });
         //Set up a hashmap-like object that makes updating the toggle settings concise.
         //Check out ListenableEditText.java for more info
-        int[] boldIcons = {R.drawable.ic_format_bold_white_24px,
-                R.drawable.ic_format_bold_black_24px};
         //Instantiate a hash-map like object that is also used for updating toggle settings.
         //This sparseArray will be updated with views during onCreateOptionsMenu.
         menuItems = new SparseArray<MenuItem>();
@@ -75,8 +95,11 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
                 String datePosted = new Date().toString();
                 progressBar.setIndeterminate(true); // Only because cannot get status from API
                 //TODO: Replace random with user id.
-                //TOOD: Allow for attaching images/videos.
-                Post newPost = new Post((int) (Math.random() * 100000), 1, 1, contentHTML, "", "", datePosted );
+
+                //TODO: Allow for attaching images/videos.
+                // Note: id field doesn't matter.
+                long userId = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).getLong(API.CURRENT_USER, -1);
+                Post newPost = new Post(-1, userId, networkId, contentHTML, "", "", datePosted );
                 //Now let's send it off to the CultureMesh site!!
                 API.Post.post(queue, newPost, new Response.Listener<String>() {
                     @Override
@@ -89,7 +112,7 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
                     public void onErrorResponse(VolleyError error) {
                         //Some error happened with the network request. We will need to alert the user.
                         new NetworkResponse<Object>(true, R.string.error_writing_post)
-                                .showErrorDialog(getApplicationContext());
+                                .showErrorDialog(CreatePostActivity.this);
                         progressBar.setVisibility(View.GONE);
                     }
                 });
@@ -161,32 +184,6 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
         }
     }
 
-    private class LoadNetworkData extends AsyncTask<Long, Void, Network>{
-
-        @Override
-        protected Network doInBackground(Long... longs) {
-            API.loadAppDatabase(getApplicationContext());
-            return API.Get.network(longs[0]).getPayload();
-        }
-
-        @Override
-        protected void onPostExecute(Network network) {
-            //Update text with network name.
-            if (network != null) {
-                if (network.isLocationBased()) {
-                    networkLabel.setText(getResources().getString(R.string.from) + " " +
-                            network.fromLocation.getListableName() + " " +
-                            getResources().getString(R.string.near) + " " +
-                            network.nearLocation.getListableName());
-                } else {
-                    networkLabel.setText(network.language.toString() + " " +
-                            getResources().getString(R.string.speakers_in).toString() + " " +
-                            network.nearLocation.getListableName());
-                }
-            }
-            API.closeDatabase();
-        }
-    }
 
     /**
      * This ensures that we are canceling all network requests if the user is leaving this activity.

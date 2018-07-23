@@ -126,6 +126,14 @@ public abstract class Place extends Location implements Listable, Serializable {
      */
     public abstract String getListableName();
 
+
+    /**
+     * In the interest of space, we also want the abbreviated version of the location (just the
+     * city name for example)
+     * @return Name of location suitable for header bar.
+     */
+    public abstract String getShortName();
+
     /**
      * Get the coordinates of the location
      * @return Latitude and longitude of the location

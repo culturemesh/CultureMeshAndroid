@@ -65,7 +65,7 @@ public class Language implements Serializable, Listable {
      * @throws JSONException May be thrown for an improperly formatted JSON
      */
     public Language(JSONObject json) throws JSONException {
-        language_id = json.getLong("lang_id");
+        language_id = json.getLong("id");
         name = json.getString("name");
         numSpeakers = json.getInt("num_speakers");
     }

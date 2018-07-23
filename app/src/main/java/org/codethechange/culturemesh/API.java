@@ -15,24 +15,16 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.gson.JsonArray;
 
 import org.codethechange.culturemesh.data.CMDatabase;
-import org.codethechange.culturemesh.data.CityDao;
-import org.codethechange.culturemesh.data.CountryDao;
 import org.codethechange.culturemesh.data.EventDao;
 import org.codethechange.culturemesh.data.EventSubscription;
 import org.codethechange.culturemesh.data.EventSubscriptionDao;
-import org.codethechange.culturemesh.data.LanguageDao;
 import org.codethechange.culturemesh.data.NetworkDao;
 import org.codethechange.culturemesh.data.NetworkSubscription;
 import org.codethechange.culturemesh.data.NetworkSubscriptionDao;
 import org.codethechange.culturemesh.data.PostDao;
-import org.codethechange.culturemesh.data.PostReplyDao;
-import org.codethechange.culturemesh.data.RegionDao;
 import org.codethechange.culturemesh.data.UserDao;
 import org.codethechange.culturemesh.models.City;
 import org.codethechange.culturemesh.models.Country;
@@ -44,8 +36,6 @@ import org.codethechange.culturemesh.models.Location;
 import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Place;
-import org.codethechange.culturemesh.models.Point;
-import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
 import org.codethechange.culturemesh.models.Region;
 import org.codethechange.culturemesh.models.User;
@@ -53,6 +43,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -89,686 +80,16 @@ class API {
     final static String SELECTED_USER="seluser";
     final static String FIRST_TIME = "firsttime";
     static final boolean NO_JOINED_NETWORKS = false;
+    //The id of the user that is signed in.
     static final String CURRENT_USER = "curruser";
     static final String API_URL_BASE = "https://www.culturemesh.com/api-dev/v1/";
+    static final String NO_MAX_PAGINATION = "-1"; // If you do not need a maximum id.
+    static final String HOSTING = "hosting";
+    static final String FEED_ITEM_COUNT_SIZE = "10"; // Number of posts/events to fetch per paginated request
+    static final long NEW_NETWORK = -2;
     static CMDatabase mDb;
     //reqCounter to ensure that we don't close the database while another thread is using it.
     static int reqCounter;
-
-    /**
-     * Add users to the database by parsing the JSON stored in {@code rawDummy}. In case of any
-     * errors, the stack trace is printed to the console.
-     */
-    static void addUsers(){
-        String rawDummy = "\n" +
-                "[\n" +
-                "  {\n" +
-                "    \"username\": \"boonekathryn\",\n" +
-                "    \"fp_code\": \"IDK\",\n" +
-                "    \"confirmed\": false,\n" +
-                "    \"user_id\": 1,\n" +
-                "    \"firstName\": \"Jonathan\",\n" +
-                "    \"act_code\": \"IDK\",\n" +
-                "    \"lastName\": \"Simpson\",\n" +
-                "    \"about_me\": \"Adipisci ad molestiae vel fugit dolor in. Dolore ipsa libero. Doloremque dolor itaque enim. Saepe nam odit.\\nSimilique commodi ex quam quae vel in rerum. Esse nesciunt sunt sed magnam nihil.\",\n" +
-                "    \"img_link\": \"https://lorempixel.com/200/200/\",\n" +
-                "    \"role\": 1,\n" +
-                "    \"gender\": \"female\",\n" +
-                "    \"last_login\": \"2017-11-21 13:21:47\",\n" +
-                "    \"registerDate\": \"2017-02-21 11:53:30\",\n" +
-                "    \"email\": \"kristina00@reynolds.com\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"username\": \"williamosborne\",\n" +
-                "    \"fp_code\": \"IDK\",\n" +
-                "    \"confirmed\": true,\n" +
-                "    \"user_id\": 2,\n" +
-                "    \"firstName\": \"Abigail\",\n" +
-                "    \"act_code\": \"IDK\",\n" +
-                "    \"lastName\": \"Long\",\n" +
-                "    \"about_me\": \"Doloremque maiores veritatis neque itaque earum molestias. Ab quos reprehenderit suscipit qui repellat maxime natus. Animi sit necessitatibus dicta magnam.\",\n" +
-                "    \"img_link\": \"https://dummyimage.com/882x818\",\n" +
-                "    \"role\": 1,\n" +
-                "    \"gender\": \"female\",\n" +
-                "    \"last_login\": \"2017-11-25 08:22:44\",\n" +
-                "    \"registerDate\": \"2017-11-09 00:46:13\",\n" +
-                "    \"email\": \"williamsjade@watkins.com\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"username\": \"rscott\",\n" +
-                "    \"fp_code\": \"IDK\",\n" +
-                "    \"confirmed\": false,\n" +
-                "    \"user_id\": 3,\n" +
-                "    \"firstName\": \"Emily\",\n" +
-                "    \"act_code\": \"IDK\",\n" +
-                "    \"lastName\": \"Miller\",\n" +
-                "    \"about_me\": \"Quae iste eum labore. Harum in deleniti.\\nMagni distinctio non repellendus accusantium accusantium corporis. Cum provident perspiciatis molestias dolore voluptate reiciendis.\",\n" +
-                "    \"img_link\": \"https://picsum.photos/400\",\n" +
-                "    \"role\": 1,\n" +
-                "    \"gender\": \"male\",\n" +
-                "    \"last_login\": \"2017-11-23 15:31:51\",\n" +
-                "    \"registerDate\": \"2015-08-09 13:56:37\",\n" +
-                "    \"email\": \"camposjohn@weber.com\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"username\": \"ihudson\",\n" +
-                "    \"fp_code\": \"IDK\",\n" +
-                "    \"confirmed\": false,\n" +
-                "    \"user_id\": 4,\n" +
-                "    \"firstName\": \"Mindy\",\n" +
-                "    \"act_code\": \"IDK\",\n" +
-                "    \"lastName\": \"Beltran\",\n" +
-                "    \"about_me\": \"Eos libero eveniet sit tempore accusantium. Eveniet voluptates quos excepturi.\\nSaepe ut exercitationem sunt porro laborum. Doloremque quas assumenda cumque tenetur distinctio quis nobis.\",\n" +
-                "    \"img_link\": \"https://picsum.photos/200\",\n" +
-                "    \"role\": 1,\n" +
-                "    \"gender\": \"male\",\n" +
-                "    \"last_login\": \"2017-11-21 07:32:34\",\n" +
-                "    \"registerDate\": \"2016-05-08 21:44:02\",\n" +
-                "    \"email\": \"nicholas32@hotmail.com\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"username\": \"oellis\",\n" +
-                "    \"fp_code\": \"IDK\",\n" +
-                "    \"confirmed\": false,\n" +
-                "    \"user_id\": 5,\n" +
-                "    \"firstName\": \"Kristin\",\n" +
-                "    \"act_code\": \"IDK\",\n" +
-                "    \"lastName\": \"Carey\",\n" +
-                "    \"about_me\": \"Aut tenetur fugiat voluptas tenetur eos ducimus. Aut officiis aliquam ab voluptatem.\\nIpsum et aperiam totam voluptas voluptas. Dolor nulla voluptatem molestiae.\",\n" +
-                "    \"img_link\": \"https://picsum.photos/400\",\n" +
-                "    \"role\": 1,\n" +
-                "    \"gender\": \"male\",\n" +
-                "    \"last_login\": \"2017-11-21 03:03:05\",\n" +
-                "    \"registerDate\": \"2015-06-26 12:19:38\",\n" +
-                "    \"email\": \"christopher18@allen.com\"\n" +
-                "  }\n" +
-                "]";
-        try {
-            UserDao uDAo = mDb.userDao();
-            JSONArray usersJSON = new JSONArray(rawDummy);
-            for (int i = 0; i < usersJSON.length(); i++) {
-                JSONObject userJSON = usersJSON.getJSONObject(i);
-                User user = new User(userJSON.getLong("user_id"), userJSON.getString("firstName"),
-                        userJSON.getString("lastName"), userJSON.getString("email"),
-                        userJSON.getString("username"), userJSON.getString("img_link"),
-                        userJSON.getString("about_me"));
-                uDAo.addUser(user);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Add networks to the database by parsing the JSON stored in {@code rawDummy}. In case of any
-     * errors, the stack trace is printed to the console. The JSON is split apart into the JSON
-     * fragments for each city. Each of those JSONs are then passed to a {@link City}
-     * constructor (specifically {@link DatabaseNetwork#DatabaseNetwork(JSONObject)}), which
-     * extracts the necessary information and initializes itself. Those objects are then added to
-     * the database via {@link NetworkDao}.
-     */
-    static void addNetworks() {
-        String rawDummy = "[\n" +
-                "    {\n" +
-                "      \"id\": 0,\n" +
-                "      \"location_cur\": {\n" +
-                "        \"country_id\": 1,\n" +
-                "        \"region_id\": 1,\n" +
-                "        \"city_id\": 2\n" +
-                "      },\n" +
-                "      \"location_origin\": {\n" +
-                "        \"country_id\": 1,\n" +
-                "        \"region_id\": 2,\n" +
-                "        \"city_id\": 3\n" +
-                "      },\n" +
-                "      \"language_origin\": {\n" +
-                "        \"id\": 2,\n" +
-                "        \"name\": \"entish\",\n" +
-                "        \"num_speakers\": 10,\n" +
-                "        \"added\": 0\n" +
-                "      },\n" +
-                "      \"network_class\": 1,\n" +
-                "      \"date_added\": \"1990-11-23 15:31:51\",\n" +
-                "      \"img_link\": \"img1.png\"\n" +
-                "    },\n" +
-                "\n" +
-                "    {\n" +
-                "      \"id\": 1,\n" +
-                "      \"location_cur\": {\n" +
-                "        \"country_id\": 2,\n" +
-                "        \"region_id\": 4,\n" +
-                "        \"city_id\": 6\n" +
-                "      },\n" +
-                "      \"location_origin\": {\n" +
-                "        \"country_id\": 1,\n" +
-                "        \"region_id\": 1,\n" +
-                "        \"city_id\": 1\n" +
-                "      },\n" +
-                "      \"language_origin\": {\n" +
-                "        \"id\": 3,\n" +
-                "        \"name\": \"valarin\",\n" +
-                "        \"num_speakers\": 1000,\n" +
-                "        \"added\": 0\n" +
-                "      },\n" +
-                "      \"network_class\": 0,\n" +
-                "      \"date_added\": \"1995-11-23 15:31:51\",\n" +
-                "      \"img_link\": \"img2.png\"\n" +
-                "    },\n" +
-                "\n" +
-                "    {\n" +
-                "      \"id\": 2,\n" +
-                "      \"location_cur\": {\n" +
-                "        \"country_id\": 2,\n" +
-                "        \"region_id\": null,\n" +
-                "        \"city_id\": null\n" +
-                "      },\n" +
-                "      \"location_origin\": {\n" +
-                "        \"country_id\": 1,\n" +
-                "        \"region_id\": null,\n" +
-                "        \"city_id\": 1\n" +
-                "      },\n" +
-                "      \"language_origin\": {\n" +
-                "        \"id\": 3,\n" +
-                "        \"name\": \"valarin\",\n" +
-                "        \"num_speakers\": 1000,\n" +
-                "        \"added\": 0\n" +
-                "      },\n" +
-                "      \"network_class\": 0,\n" +
-                "      \"date_added\": \"1995-11-23 15:31:51\",\n" +
-                "      \"img_link\": \"img2.png\"\n" +
-                "    }\n" +
-                "]\n";
-        try {
-            NetworkDao nDAo = mDb.networkDao();
-            JSONArray usersJSON = new JSONArray(rawDummy);
-            for (int i = 0; i < usersJSON.length(); i++) {
-                Log.i("API.addNetworks()", "Start adding network number (not ID) " + i +
-                        " from JSON to Dao");
-                JSONObject netJSON = usersJSON.getJSONObject(i);
-                DatabaseNetwork dn = new DatabaseNetwork(netJSON);
-                Log.i("API.addNetworks()", "Adding network " + dn + " to Dao");
-                nDAo.insertNetworks(dn);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Add regions to the database by parsing the JSON stored in {@code rawDummy}. In case of any
-     * errors, the stack trace is printed to the console. The JSON is split apart into the JSON
-     * fragments for each region. Each of those JSONs are then passed to a {@link Region}
-     * constructor (specifically {@link Region#Region(JSONObject)}), which extracts the necessary
-     * information and initializes itself. Those objects are then added to the database via
-     * {@link RegionDao}.
-     */
-    static void addRegions(){
-        String rawDummy = "[\n" +
-                "  {\n" +
-                "    \"id\": 1,\n" +
-                "    \"name\": \"north\",\n" +
-                "    \"latitude\": 5000.4321,\n" +
-                "    \"longitude\": 1000.1234,\n" +
-                "    \"country_id\": 1,\n" +
-                "    \"country_name\": \"corneria\",\n" +
-                "    \"population\": 400000,\n" +
-                "    \"feature_code\": \"string\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"id\": 2,\n" +
-                "    \"name\": \"south\",\n" +
-                "    \"latitude\": 4000.4321,\n" +
-                "    \"longitude\": 1000.1234,\n" +
-                "    \"country_id\": 1,\n" +
-                "    \"country_name\": \"corneria\",\n" +
-                "    \"population\": 600000,\n" +
-                "    \"feature_code\": \"string\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"id\": 3,\n" +
-                "    \"name\": \"east\",\n" +
-                "    \"latitude\": 50.100,\n" +
-                "    \"longitude\": 250.200,\n" +
-                "    \"country_id\": 2,\n" +
-                "    \"country_name\": \"rohan\",\n" +
-                "    \"population\": 300,\n" +
-                "    \"feature_code\": \"idk\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"id\": 4,\n" +
-                "    \"name\": \"west\",\n" +
-                "    \"latitude\": 150.100,\n" +
-                "    \"longitude\": 150.200,\n" +
-                "    \"country_id\": 2,\n" +
-                "    \"country_name\": \"rohan\",\n" +
-                "    \"population\": 50,\n" +
-                "    \"feature_code\": \"idk\"\n" +
-                "  }\n" +
-                "]";
-        RegionDao rDao = mDb.regionDao();
-        try {
-            JSONArray regionsJSON = new JSONArray(rawDummy);
-            for (int i = 0; i < regionsJSON.length(); i++) {
-                JSONObject regionJSON = regionsJSON.getJSONObject(i);
-                Region region = new Region(regionJSON);
-                rDao.insertRegions(region);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Add cities to the database by parsing the JSON stored in {@code rawDummy}. In case of any
-     * errors, the stack trace is printed to the console. The JSON is split apart into the JSON
-     * fragments for each city. Each of those JSONs are then passed to a {@link City}
-     * constructor (specifically {@link City#City(JSONObject)}), which extracts the necessary
-     * information and initializes itself. Those objects are then added to the database via
-     * {@link CityDao}.
-     */
-    static void addCities() {
-        String rawDummy = "[\n" +
-                "  {\n" +
-                "    \"id\": 1,\n" +
-                "    \"name\": \"City A\",\n" +
-                "    \"latitude\": 1.1,\n" +
-                "    \"longitude\": 2.2,\n" +
-                "    \"region_id\": 1,\n" +
-                "    \"region_name\": \"north\",\n" +
-                "    \"country_id\": 1,\n" +
-                "    \"country_name\": \"corneria\",\n" +
-                "    \"population\": 350000,\n" +
-                "    \"feature_code\": \"idk\",\n" +
-                "    \"tweet_terms\": \"idk\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"id\": 2,\n" +
-                "    \"name\": \"City B\",\n" +
-                "    \"latitude\": 3.3,\n" +
-                "    \"longitude\": 4.4,\n" +
-                "    \"region_id\": 1,\n" +
-                "    \"region_name\": \"north\",\n" +
-                "    \"country_id\": 1,\n" +
-                "    \"country_name\": \"corneria\",\n" +
-                "    \"population\": 100000,\n" +
-                "    \"feature_code\": \"idk\",\n" +
-                "    \"tweet_terms\": \"idk\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"id\": 3,\n" +
-                "    \"name\": \"City C\",\n" +
-                "    \"latitude\": 5.5,\n" +
-                "    \"longitude\": 6.6,\n" +
-                "    \"region_id\": 2,\n" +
-                "    \"region_name\": \"south\",\n" +
-                "    \"country_id\": 1,\n" +
-                "    \"country_name\": \"corneria\",\n" +
-                "    \"population\": 20000,\n" +
-                "    \"feature_code\": \"idk\",\n" +
-                "    \"tweet_terms\": \"idk\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"id\": 4,\n" +
-                "    \"name\": \"City D\",\n" +
-                "    \"latitude\": 7.7,\n" +
-                "    \"longitude\": 8.8,\n" +
-                "    \"region_id\": 3,\n" +
-                "    \"region_name\": \"east\",\n" +
-                "    \"country_id\": 2,\n" +
-                "    \"country_name\": \"rohan\",\n" +
-                "    \"population\": 280,\n" +
-                "    \"feature_code\": \"idk\",\n" +
-                "    \"tweet_terms\": \"idk\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"id\": 5,\n" +
-                "    \"name\": \"City E\",\n" +
-                "    \"latitude\": 9.9,\n" +
-                "    \"longitude\": 10.10,\n" +
-                "    \"region_id\": 4,\n" +
-                "    \"region_name\": \"west\",\n" +
-                "    \"country_id\": 2,\n" +
-                "    \"country_name\": \"rohan\",\n" +
-                "    \"population\": 20,\n" +
-                "    \"feature_code\": \"idk\",\n" +
-                "    \"tweet_terms\": \"idk\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"id\": 6,\n" +
-                "    \"name\": \"City F\",\n" +
-                "    \"latitude\": 11.11,\n" +
-                "    \"longitude\": 12.12,\n" +
-                "    \"region_id\": 4,\n" +
-                "    \"region_name\": \"west\",\n" +
-                "    \"country_id\": 2,\n" +
-                "    \"country_name\": \"rohan\",\n" +
-                "    \"population\": 25,\n" +
-                "    \"feature_code\": \"idk\",\n" +
-                "    \"tweet_terms\": \"idk\"\n" +
-                "  }\n" +
-                "]";
-        CityDao cDao = mDb.cityDao();
-        try {
-            JSONArray citiesJSON = new JSONArray(rawDummy);
-            for (int i = 0; i < citiesJSON.length(); i++) {
-                JSONObject cityJSON = citiesJSON.getJSONObject(i);
-                City city = new City(cityJSON);
-                cDao.insertCities(city);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Add countries to the database by parsing the JSON stored in {@code rawDummy}. In case of any
-     * errors, the stack trace is printed to the console. The JSON is split apart into the JSON
-     * fragments for each country. Each of those JSONs are then passed to a {@link Country}
-     * constructor (specifically {@link Country#Country(JSONObject)}), which extracts the necessary
-     * information and initializes itself. Those objects are then added to the database via
-     * {@link CountryDao}.
-     */
-    static void addCountries() {
-        String rawDummy = "[\n" +
-                "  {\n" +
-                "    \"id\": 1,\n" +
-                "    \"iso_a2\": 0,\n" +
-                "    \"name\": \"corneria\",\n" +
-                "    \"latitude\": 4321.4321,\n" +
-                "    \"longitude\": 1234.1234,\n" +
-                "    \"population\": 1000000,\n" +
-                "    \"feature_code\": \"idk\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"id\": 2,\n" +
-                "    \"iso_a2\": 0,\n" +
-                "    \"name\": \"rohan\",\n" +
-                "    \"latitude\": 100.100,\n" +
-                "    \"longitude\": 200.200,\n" +
-                "    \"population\": 350,\n" +
-                "    \"feature_code\": \"idk\"\n" +
-                "  }\n" +
-                "]";
-        CountryDao cDao = mDb.countryDao();
-        try {
-            JSONArray countriesJSON = new JSONArray(rawDummy);
-            for (int i = 0; i < countriesJSON.length(); i++) {
-                JSONObject countryJSON = countriesJSON.getJSONObject(i);
-                Country country = new Country(countryJSON);
-                cDao.insertCountries(country);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Add posts to the database by parsing the JSON stored in {@code rawDummy}. In case of any
-     * errors, the stack trace is printed to the console. The JSON is interpreted, and its values
-     * are used to instantiate {@link Post} objects. Those objects are then added to the database via
-     * {@link PostDao}.
-     */
-    static void addPosts(){
-        String rawDummy = "[\n" +
-                "  {\n" +
-                "    \"user_id\": 4,\n" +
-                "    \"post_text\": \"Ex excepturi quos vero nesciunt autem. Ipsum voluptates quaerat rerum praesentium modi.\\nEos culpa fuga maxime atque exercitationem nemo. Repellendus officiis et. Explicabo eveniet quibusdam magnam minima.\",\n" +
-                "    \"network_id\": 1,\n" +
-                "    \"img_link\": \"https://www.lorempixel.com/370/965\",\n" +
-                "    \"vid_link\": \"https://dummyimage.com/803x720\",\n" +
-                "    \"post_date\": \"2017-02-12 08:53:43\",\n" +
-                "    \"post_class\": 0,\n" +
-                "    \"id\": 1,\n" +
-                "    \"post_original\": \"Not sure what this field is\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"user_id\": 3,\n" +
-                "    \"post_text\": \"Minus cumque corrupti porro natus tenetur delectus illum. Amet aut molestias eaque autem ea odio.\\nAsperiores sed officia. Similique accusantium facilis sed. Eligendi tempora nisi sint tempora incidunt perferendis.\",\n" +
-                "    \"network_id\": 1,\n" +
-                "    \"img_link\": \"https://www.lorempixel.com/556/586\",\n" +
-                "    \"vid_link\": \"https://dummyimage.com/909x765\",\n" +
-                "    \"post_date\": \"2017-02-01 05:49:35\",\n" +
-                "    \"post_class\": 0,\n" +
-                "    \"id\": 2,\n" +
-                "    \"post_original\": \"Not sure what this field is\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"user_id\": 1,\n" +
-                "    \"post_text\": \"Veritatis illum occaecati est error magni nesciunt. Voluptate cum odio voluptatum quasi natus. Illo vel tempora pariatur tempore.\",\n" +
-                "    \"network_id\": 0,\n" +
-                "    \"img_link\": \"https://dummyimage.com/503x995\",\n" +
-                "    \"vid_link\": \"https://dummyimage.com/796x497\",\n" +
-                "    \"post_date\": \"2017-04-03 18:27:27\",\n" +
-                "    \"post_class\": 0,\n" +
-                "    \"id\": 3,\n" +
-                "    \"post_original\": \"Not sure what this field is\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"user_id\": 3,\n" +
-                "    \"post_text\": \"Dolorem ad ducimus laboriosam veritatis id quam rerum. Nostrum voluptatum mollitia modi.\\nVoluptas aut mollitia in perferendis blanditiis eaque eius. Recusandae similique ratione perspiciatis assumenda.\",\n" +
-                "    \"network_id\": 1,\n" +
-                "    \"img_link\": \"https://placeholdit.imgix.net/~text?txtsize=55&txt=917x558&w=917&h=558\",\n" +
-                "    \"vid_link\": \"https://www.lorempixel.com/1016/295\",\n" +
-                "    \"post_date\": \"2016-08-29 15:27:28\",\n" +
-                "    \"post_class\": 0,\n" +
-                "    \"id\": 4,\n" +
-                "    \"post_original\": \"Not sure what this field is\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"user_id\": 4,\n" +
-                "    \"post_text\": \"Ab voluptates omnis unde voluptas. Molestiae ipsam quis sapiente.\\nProvident illum consectetur deserunt. Nisi vero minus non corrupti impedit.\\nEaque dolor facilis iusto excepturi non. Sunt possimus modi animi.\",\n" +
-                "    \"network_id\": 0,\n" +
-                "    \"img_link\": \"https://www.lorempixel.com/231/204\",\n" +
-                "    \"vid_link\": \"https://dummyimage.com/720x577\",\n" +
-                "    \"post_date\": \"2017-07-29 18:52:43\",\n" +
-                "    \"post_class\": 0,\n" +
-                "    \"id\": 5,\n" +
-                "    \"post_original\": \"Not sure what this field is\"\n" +
-                "  }\n" +
-                "]";
-        PostDao pDao = mDb.postDao();
-        try {
-            JSONArray postsJSON = new JSONArray(rawDummy);
-            for (int i = 0; i < postsJSON.length(); i++) {
-                JSONObject postJSON = postsJSON.getJSONObject(i);
-                Log.i("Network Id\'s", postJSON.getInt("network_id") + "");
-                org.codethechange.culturemesh.models.Post post = new org.codethechange.culturemesh.models.Post(postJSON.getInt("id"), postJSON.getInt("user_id"),
-                        postJSON.getInt("network_id"),postJSON.getString("post_text"),
-                        postJSON.getString("img_link"),postJSON.getString("vid_link"),
-                        postJSON.getString("post_date"));
-                pDao.insertPosts(post);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Add events to the database by parsing the JSON stored in {@code rawDummy}. In case of any
-     * errors, the stack trace is printed to the console. The JSON is interpreted, and its values
-     * are used to instantiate {@link Event} objects. Those objects are then added to the database via
-     * {@link EventDao}.
-     */
-    static void addEvents() {
-        String rawDummy = "[\n" +
-                "  {\n" +
-                "    \"description\": \"Ad officia impedit necessitatibus. Explicabo consequuntur commodi.\\nId id nostrum doloremque ab minus magnam. Ipsa placeat quasi dolores libero laboriosam.\\nNam tenetur ullam eius officia. Asperiores maiores soluta.\",\n" +
-                "    \"title\": \"Centralized motivating encoding\",\n" +
-                "    \"network_id\": 0,\n" +
-                "    \"date_created\": \"2017-10-13 01:49:21\",\n" +
-                "    \"address_1\": \"157 Stacy Drive\\nMercerfort, IA 59281\",\n" +
-                "    \"address_2\": \"PSC 0398, Box 9876\\nAPO AE 17620\",\n" +
-                "    \"event_date\": \"2017-11-03 17:28:51\",\n" +
-                "    \"host_id\": 5,\n" +
-                "    \"id\": 1,\n" +
-                "    \"location\": [\n" +
-                "      \"Uzbekistan\",\n" +
-                "      \"Dunnmouth\",\n" +
-                "      \"Chavezbury\"\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"description\": \"Laudantium sequi quisquam necessitatibus fugit eligendi. Rem blanditiis quibusdam molestias. Quis voluptate consequatur magnam nemo est magnam explicabo. A ipsam ipsum esse id quos.\",\n" +
-                "    \"title\": \"Reverse-engineered 6th Generation\",\n" +
-                "    \"network_id\": 1,\n" +
-                "    \"date_created\": \"2017-09-09 17:12:57\",\n" +
-                "    \"address_1\": \"1709 Fuller Freeway\\nChungland, PR 67499-3841\",\n" +
-                "    \"address_2\": \"916 David Green\\nLake Adamville, MA 66822\",\n" +
-                "    \"event_date\": \"2017-11-16 04:38:29\",\n" +
-                "    \"host_id\": 2,\n" +
-                "    \"id\": 2,\n" +
-                "    \"location\": [\n" +
-                "      \"Malaysia\",\n" +
-                "      \"New John\",\n" +
-                "      \"Kyliefort\"\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"description\": \"Doloremque natus cupiditate ratione sint eveniet. Vitae provident sapiente adipisci.\\nEt inventore quis quos deleniti numquam. Voluptate ipsam totam quas. Ea minima consequuntur consequuntur quaerat facere.\",\n" +
-                "    \"title\": \"Adaptive fault-tolerant hardware\",\n" +
-                "    \"network_id\": 1,\n" +
-                "    \"date_created\": \"2017-10-11 01:13:33\",\n" +
-                "    \"address_1\": \"7874 Bowman Port Suite 466\\nPattonhaven, PR 63278-5184\",\n" +
-                "    \"address_2\": \"7436 William Village\\nRichardchester, NM 28208\",\n" +
-                "    \"event_date\": \"2017-11-10 22:35:03\",\n" +
-                "    \"host_id\": 3,\n" +
-                "    \"id\": 3,\n" +
-                "    \"location\": [\n" +
-                "      \"Macao\",\n" +
-                "      \"South Jillian\",\n" +
-                "      \"New Jenniferfort\"\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"description\": \"Expedita non nam minima aperiam explicabo. Dicta sunt incidunt optio quae. Quam quibusdam dolorum voluptate corrupti ullam sequi. Amet at repellat iusto fuga voluptates aliquam.\",\n" +
-                "    \"title\": \"Quality-focused asynchronous Graphic Interface\",\n" +
-                "    \"network_id\": 0,\n" +
-                "    \"date_created\": \"2017-11-10 17:48:56\",\n" +
-                "    \"address_1\": \"28452 Rivera Pike\\nGambletown, SC 33593-8719\",\n" +
-                "    \"address_2\": \"0314 Escobar Burgs\\nLake Bradburgh, CO 06768\",\n" +
-                "    \"event_date\": \"2017-11-04 21:46:16\",\n" +
-                "    \"host_id\": 5,\n" +
-                "    \"id\": 4,\n" +
-                "    \"location\": [\n" +
-                "      \"Norfolk Island\",\n" +
-                "      \"New Tara\",\n" +
-                "      \"Johnton\"\n" +
-                "    ]\n" +
-                "  }\n" +
-                "]";
-        EventDao cDao = mDb.eventDao();
-        try {
-            JSONArray eventsJSON = new JSONArray(rawDummy);
-            for (int i = 0; i < eventsJSON.length(); i++) {
-                JSONObject eventJSON = eventsJSON.getJSONObject(i);
-                Event event = new Event(eventJSON.getLong("id"), eventJSON.getLong("network_id"), eventJSON.getString("title"), eventJSON.getString("description"),
-                        eventJSON.getString("date_created"), eventJSON.getLong("host_id"),
-                        eventJSON.getString("address_1") + eventJSON.getString("address_2"));
-                cDao.addEvent(event);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Store user subscriptions to networks in the database by adding {@link NetworkSubscription}
-     * objects to the {@link NetworkSubscriptionDao}
-     */
-    static void subscribeUsers() {
-        NetworkSubscription networkSubscription1 = new NetworkSubscription(3,1);
-        NetworkSubscription networkSubscription2 = new NetworkSubscription(1,1);
-        NetworkSubscription networkSubscription3 = new NetworkSubscription(2,1);
-        NetworkSubscription networkSubscription4 = new NetworkSubscription(4,1);
-        NetworkSubscription networkSubscription5 = new NetworkSubscription(4,0);
-        NetworkSubscriptionDao netSubDao = mDb.networkSubscriptionDao();
-        netSubDao.insertSubscriptions(networkSubscription1, networkSubscription2, networkSubscription3,
-                networkSubscription4, networkSubscription5);
-    }
-
-    /**
-     * Add replies to the database by parsing the JSON stored in {@code rawDummy}. In case of any
-     * errors, the stack trace is printed to the console. The JSON is interpreted, and its values
-     * are used to instantiate {@link PostReply} objects. Those objects are then added to the database via
-     * {@link PostReplyDao}.
-     */
-    static void addReplies() {
-        String rawDummy = "[\n" +
-                "  {\n" +
-                "    \"id\": 1,\n" +
-                "    \"parent_id\": 1,\n" +
-                "    \"user_id\": 2,\n" +
-                "    \"network_id\": 1,\n" +
-                "    \"reply_date\": \"2017-03-12 08:53:43\",\n" +
-                "    \"reply_text\": \"Test reply 1.\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"id\": 2,\n" +
-                "    \"parent_id\": 1,\n" +
-                "    \"user_id\": 3,\n" +
-                "    \"network_id\": 1,\n" +
-                "    \"reply_date\": \"2017-03-13 08:53:43\",\n" +
-                "    \"reply_text\": \"Test reply 2.\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"id\": 3,\n" +
-                "    \"parent_id\": 3,\n" +
-                "    \"user_id\": 4,\n" +
-                "    \"network_id\": 0,\n" +
-                "    \"reply_date\": \"2017-04-04 18:27:27\",\n" +
-                "    \"reply_text\": \"Test reply 3.\"\n" +
-                "  }\n" +
-                "]";
-        PostReplyDao postReplyDao = mDb.postReplyDao();
-        try {
-            JSONArray pRJSON = new JSONArray(rawDummy);
-            for (int i = 0; i < pRJSON.length(); i++) {
-                JSONObject pRObj = pRJSON.getJSONObject(i);
-                PostReply pr = new PostReply(pRObj.getLong("id"), pRObj.getLong("parent_id"),
-                        pRObj.getLong("user_id"), pRObj.getLong("network_id"),
-                        pRObj.getString("reply_date"), pRObj.getString("reply_text"));
-                postReplyDao.insertPostReplies(pr);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // TODO: These two methods seem really redundant. Why not have instantiatePosts use instantiatePost?
-    /**
-     * Instantiates the posts in the provided list. Instantiation is done by getting
-     * the author of each post as a User object via an API call and then setting the post's author
-     * to that object.
-     * @param posts Posts to instantiate
-     */
-    static void instantiatePosts(List<org.codethechange.culturemesh.models.Post> posts) {
-        for (org.codethechange.culturemesh.models.Post post : posts) {
-            //Get the user
-            post.author = API.Get.user(post.userId).getPayload();
-        }
-    }
-
-    /**
-     * Instantiates the provided post by getting the author from the author ID as a {@link User}
-     * object and storing that in {@link org.codethechange.culturemesh.models.Post#author}
-     * @param post Post to instantiate
-     */
-    static void instantiatePost(org.codethechange.culturemesh.models.Post post) {
-            //Get the user
-            post.author = API.Get.user(post.userId).getPayload();
-    }
-
-    /**
-     * Instantiates the {@link PostReply} objects in the provided list by getting the authors
-     * of each comment and storing it in {@link PostReply#author}
-     * @param comments List of PostReplies with which we will get comment authors for
-     */
-    static void instantiatePostReplies(List<PostReply> comments) {
-        for (PostReply comment : comments) {
-            //Get the user
-            comment.author = API.Get.user(comment.userId).getPayload();
-        }
-    }
 
     /**
      * The protocol for GET requests is as follows...
@@ -783,11 +104,75 @@ class API {
          * @return If such a user was found, it will be the payload. Otherwise, the request will be
          * marked as failed.
          */
-        static NetworkResponse<User> user(long id) {
-            UserDao uDao = mDb.userDao();
-            User user = uDao.getUser(id);
-            //TODO: Send network request.
-            return new NetworkResponse<>(user == null, user);
+        static void user(RequestQueue queue, long id, final Response.Listener<NetworkResponse<User>> listener) {
+            JsonObjectRequest authReq = new JsonObjectRequest(Request.Method.GET,
+                    API_URL_BASE + "user/" + id + "?" + getCredentials(),
+                    null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject res) {
+                    try {
+                        //make User object out of user JSON.
+                        User user = new User(res);
+                        listener.onResponse(new NetworkResponse<>(false, user));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<User>(true,
+                            processNetworkError("API.Get.user", "ErrorListener", error)));
+                }
+            });
+            queue.add(authReq);
+        }
+
+
+        static void networkUserCount(RequestQueue queue, long id, final Response.Listener<NetworkResponse<Long>> listener) {
+            JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE + "network/" + id + "/user_count?" + getCredentials(), null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        Long count = response.getLong("user_count");
+                        listener.onResponse(new NetworkResponse<Long>(false, count));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        listener.onResponse(new NetworkResponse<Long>(true, R.string.network_error));
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<Long>(true,
+                            processNetworkError("API.Get.networkUserCount", "ErrorListener", error)));
+                }
+            });
+            queue.add(req);
+        }
+
+        static void networkPostCount(RequestQueue queue, long id, final Response.Listener<NetworkResponse<Long>> listener) {
+            JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE + "network/" + id + "/post_count?" + getCredentials(), null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    Long count = null;
+                    try {
+                        count = response.getLong("post_count");
+                        listener.onResponse(new NetworkResponse<Long>(false, count));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        listener.onResponse(new NetworkResponse<Long>(true, R.string.network_not_found));
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<Long>(true,
+                            processNetworkError("API.Get.networkPostCount", "ErrorListener", error)));
+                }
+            });
+            queue.add(req);
         }
 
         /**
@@ -928,18 +313,29 @@ class API {
          * @param id ID of the {@link User} whose events are being searched for
          * @return List of {@link Event}s to which the user is subscribed
          */
-        static NetworkResponse<ArrayList<Event>> userEvents(long id) {
-            //TODO: Check for event subscriptions with network request.
-            EventSubscriptionDao eSDao = mDb.eventSubscriptionDao();
-            List<Long> eventIds = eSDao.getUserEventSubscriptions(id);
-            ArrayList<Event> events = new ArrayList<>();
-            for (Long eId : eventIds) {
-                NetworkResponse res = event(eId);
-                if (!res.fail()) {
-                    events.add((Event) res.getPayload());
+        static void userEvents(RequestQueue queue, long id, String role, final Response.Listener<NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Event>>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "user/" + id
+                    + "/events?role=" + role + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    ArrayList<Event> events = new ArrayList<>();
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            events.add(new Event((JSONObject) response.get(i)));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    listener.onResponse(new NetworkResponse<ArrayList<Event>>(false, events));
                 }
-            }
-            return new NetworkResponse<>(events);
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<ArrayList<Event>>(true,
+                            processNetworkError("API.GEt.userEvents", "ErrorListener", error)));
+                }
+            });
+            queue.add(req);
         }
 
         /**
@@ -994,13 +390,9 @@ class API {
          * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
          *                 is called with the {@link NetworkResponse} created by the query.
          */
-        static void networkPosts(final RequestQueue queue, final long id, final Response.Listener<NetworkResponse<List<org.codethechange.culturemesh.models.Post>>> listener) {
-            /* TODO: Add caching capability.
-            PostDao pDao = mDb.postDao();
-            List<org.codethechange.culturemesh.models.Post> posts = pDao.getNetworkPosts((int) id);
-            instantiatePosts(posts);*/
+        static void networkPosts(final RequestQueue queue, final long id, String maxId, final Response.Listener<NetworkResponse<List<org.codethechange.culturemesh.models.Post>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/"
-                    + id + "/posts?" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                    + id + "/posts?" + getPagination(maxId + "") + "&count=" + FEED_ITEM_COUNT_SIZE +  getCredentials(), null, new Response.Listener<JSONArray>() {
 
                 @Override
                 public void onResponse(JSONArray response) {
@@ -1057,10 +449,10 @@ class API {
          * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
          *                 is called with the {@link NetworkResponse} created by the query.
          */
-        static void networkEvents(final RequestQueue queue, final long id,
+        static void networkEvents(final RequestQueue queue, final long id, String maxId,
                                                           final Response.Listener<NetworkResponse<List<Event>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/" +
-                    id + "/events?" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                    id + "/events?" + getPagination(maxId) + "&count=" + FEED_ITEM_COUNT_SIZE + getCredentials(), null, new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray res) {
                     ArrayList<Event> events = new ArrayList<>();
@@ -1073,6 +465,7 @@ class API {
                         e.printStackTrace();
                         listener.onResponse(new NetworkResponse<List<Event>>(true));
                         Log.e("API.Get.networkEvents", "Could not parse JSON of event: " + e.getMessage());
+                        return;
                     }
                     listener.onResponse(new NetworkResponse<List<Event>>(events));
                 }
@@ -1087,17 +480,33 @@ class API {
             queue.add(req);
         }
 
-        static NetworkResponse<ArrayList<User>> networkUsers(long id) {
-            NetworkSubscriptionDao nSDao = mDb.networkSubscriptionDao();
-            List<Long> userIds = nSDao.getNetworkUsers(id);
-            ArrayList<User> users = new ArrayList<>();
-            for (long uId: userIds) {
-                NetworkResponse<User> res = user(uId);
-                if (!res.fail()) {
-                    users.add(res.getPayload());
+        static void networkUsers(RequestQueue queue, final long id, final Response.Listener<NetworkResponse<ArrayList<User>>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/" +
+                    id + "/users?" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    ArrayList<User> users = new ArrayList<>();
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            User user = new User((JSONObject) response.get(i));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            listener.onResponse(new NetworkResponse<ArrayList<User>>(true));
+                            Log.e("API.Get.networkEvents", "Could not parse JSON of event: " + e.getMessage());
+                            return;
+                        }
+                    }
+                    listener.onResponse(new NetworkResponse<ArrayList<User>>(false, users));
                 }
-            }
-            return new NetworkResponse<>(users);
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    int messageID = processNetworkError("API.Get.networkEvents",
+                            "ErrorListener with id=" + id, error);
+                    listener.onResponse(new NetworkResponse<ArrayList<User>>(true, messageID));
+                }
+            });
+            queue.add(req);
         }
 
         /**
@@ -1182,19 +591,6 @@ class API {
             return new NetworkResponse<>(event == null, event);
         }
 
-        static NetworkResponse<ArrayList<User>> eventAttendance(long id) {
-            EventSubscriptionDao eSDao = mDb.eventSubscriptionDao();
-            List<Long> uIds = eSDao.getEventUsers(id);
-            ArrayList<User> users = new ArrayList<>();
-            for (long uid : uIds) {
-                NetworkResponse res = user(uid);
-                if (!res.fail()) {
-                    users.add((User) res.getPayload());
-                }
-            }
-            return new NetworkResponse<>(users);
-        }
-
         /**
          * Fetch the comments of a post.
          * @param queue The {@link RequestQueue} to house the network requests.
@@ -1237,6 +633,7 @@ class API {
                                 }
                             });
                         } catch (JSONException e) {
+                            listener.onResponse(new NetworkResponse<ArrayList<PostReply>>(true));
                             e.printStackTrace();
                         }
                     }
@@ -1244,31 +641,63 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-
+                    listener.onResponse(new NetworkResponse<ArrayList<PostReply>>(true,
+                            processNetworkError("API.Get.postReplies", "ErrorListener", error)));
                 }
             });
             queue.add(req);
         }
 
-        static NetworkResponse<List<Place>> autocompletePlace(String text) {
-            // TODO: Take argument for maximum number of locations to return?
-            List<Place> locations = new ArrayList<>();
-            //Get any related cities, countries, or regions.
-            CityDao cityDao = mDb.cityDao();
-            locations.addAll(cityDao.autoCompleteCities(text));
-            RegionDao regionDao = mDb.regionDao();
-            locations.addAll(regionDao.autoCompleteRegions(text));
-            CountryDao countryDao = mDb.countryDao();
-            locations.addAll(countryDao.autoCompleteCountries(text));
-            return new NetworkResponse<>(locations == null, locations);
+        static void autocompletePlace(RequestQueue queue, String text, final Response.Listener<NetworkResponse<List<Location>>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE +
+                    "location/autocomplete?input_text=" + text + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    ArrayList<Location> places = new ArrayList<>();
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            places.add(new Location(response.getJSONObject(i)));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            listener.onResponse(new NetworkResponse<List<Location>>(true, R.string.invalid_format));
+                        }
+                    }
+                    listener.onResponse(new NetworkResponse<List<Location>>(false, places));
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<List<Location>>(true,
+                            processNetworkError("API.Get.autocompletePlace", "ErrorListener", error)));
+                }
+            });
+            queue.add(req);
         }
 
-        static NetworkResponse<List<Language>> autocompleteLanguage(String text) {
-            // TODO: Take argument for maximum number of languages to return?
-            // TODO: Use Database for autocompleteLanguage and use instead of dummy data
-            List<Language> matches = new ArrayList<>();
-            matches.add(new Language(0, "Sample Language 0", 10));
-            return new NetworkResponse(matches);
+        static void autocompleteLanguage(RequestQueue queue, String text, final Response.Listener<NetworkResponse<List<Language>>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE +
+                    "language/autocomplete?input_text=" + text + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    ArrayList<Language> places = new ArrayList<>();
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            places.add(new Language(response.getJSONObject(i)));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            listener.onResponse(new NetworkResponse<List<Language>>(true, R.string.invalid_format));
+                        }
+                    }
+                    listener.onResponse(new NetworkResponse<List<Language>>(false, places));
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<List<Language>>(true,
+                            processNetworkError("API.Get.autocompleteLanguage", "ErrorListener", error)));
+                }
+            });
+            queue.add(req);
         }
 
         /**
@@ -1321,6 +750,7 @@ class API {
                         if (res.length() == 0) {
                             // No network was found
                             listener.onResponse(new NetworkResponse<Network>(true, R.string.noNetworkExist));
+                            return;
                         } else if (res.length() > 1) {
                             listener.onResponse(new NetworkResponse<Network>(true));
                             Log.e("API.Get.netFromTwoParam", "Multiple networks matched this: " +
@@ -1427,7 +857,6 @@ class API {
                 }
             });
             queue.add(authReq);
-
         }
 
         /**
@@ -1484,11 +913,21 @@ class API {
             return new NetworkResponse<>(es);
         }
 
-        static NetworkResponse addUserToNetwork(long userId, long networkId) {
-            NetworkSubscriptionDao nSDao = mDb.networkSubscriptionDao();
-            NetworkSubscription ns = new NetworkSubscription(userId, networkId);
-            nSDao.insertSubscriptions(ns);
-            return new NetworkResponse<>(ns);
+        static void addUserToNetwork(RequestQueue queue, long userId, long networkId, final Response.Listener<NetworkResponse<String>> listener) {
+            StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "user/" + userId + "/addToNetwork/"
+                    + networkId + "?" + getCredentials(), new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    listener.onResponse(new NetworkResponse<String>(false, response));
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<String>(true,
+                            processNetworkError("API.Post.addUserToNetwork", "ErrorListener", error)));
+                }
+            });
+            queue.add(req);
         }
 
         static NetworkResponse removeUserFromNetwork(long userId, long networkId) {
@@ -1510,28 +949,95 @@ class API {
             return new NetworkResponse<>(network);
         }
 
-        static void post(final RequestQueue queue, org.codethechange.culturemesh.models.Post post,
-                                    Response.Listener<String> success,
-                                    Response.ErrorListener fail) {
-            /** TODO: For caching
-             * PostDao pDao = mDb.postDao();
-            pDao.insertPosts(post);
-            */
+        static void post(final RequestQueue queue, final org.codethechange.culturemesh.models.Post post,
+                         Response.Listener<String> success,
+                         Response.ErrorListener fail) {
             StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "post/new?" +
-                    getCredentials(), success, fail);
+                    getCredentials(), success, fail) {
+                @Override
+                public String getBodyContentType() {
+                    return "application/json; charset=utf-8";
+                }
+
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    try {
+                        return post.toJSON() == null ? null :
+                                post.toJSON().toString().getBytes("utf-8");
+                    } catch (UnsupportedEncodingException uee) {
+                        return null;
+                    }
+                }
+
+            };
             queue.add(req);
         }
 
-        static NetworkResponse reply(PostReply comment) {
-            PostReplyDao prDao = mDb.postReplyDao();
-            prDao.insertPostReplies(comment);
-            return new NetworkResponse(false, comment);
+        static void reply(RequestQueue queue, final PostReply comment, final Response.Listener<NetworkResponse<String>> listener) {
+            StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "post/" +
+                    comment.parentId + "/reply?" + getCredentials(), new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    listener.onResponse(new NetworkResponse<String>(false, null));
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<String>(true,
+                            processNetworkError("API.Post.reply", "ErrorListener", error)));
+                }
+            }) {
+                @Override
+                public String getBodyContentType() {
+                    return "application/json; charset=utf-8";
+                }
+
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    try {
+                        return comment.getJSON().toString().getBytes("utf-8");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+            };
+            queue.add(req);
         }
 
-        static NetworkResponse event(Event event) {
-            EventDao eDao = mDb.eventDao();
-            eDao.addEvent(event);
-            return new NetworkResponse<>(false, event);
+        static void event(RequestQueue queue, final Event event, final Response.Listener<NetworkResponse<String>> listener) {
+            StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "event/new?" +
+                    getCredentials(), new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    listener.onResponse(new NetworkResponse<String>(false, response));
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<String>(true,
+                            processNetworkError("API.Post.event", "ErrorListener", error)));
+                }
+            }) {
+                @Override
+                public String getBodyContentType() {
+                    return "application/json; charset=utf-8";
+                }
+
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    try {
+                        return event.toJSON() == null ? null :
+                                event.toJSON().toString().getBytes("utf-8");
+                    } catch (UnsupportedEncodingException uee) {
+                        return null;
+                    }
+                }
+
+            };
+            queue.add(req);
         }
     }
 
@@ -1732,37 +1238,23 @@ class API {
      * @return credentials string to be appended to request url as a param.
      */
     static String getCredentials(){
-        return "key=" + Credentials.APIKey;
+        return "&key=" + Credentials.APIKey;
     }
 
-    //TODO: Try to revive this helper method, or delete it.
-    static void instantiateComponents(RequestQueue queue, final ArrayList list, final Response.Listener UICallback, InstantiationListener listener){
 
-        // Here's the tricky part. We need to fetch information for each element,
-        // but we only want to call the listener once, after all the requests are
-        // finished.
-        // Let's make a counter (numReqFin) for the number of requests finished. This will be
-        // a wrapper so that we can pass it by reference.
-        final AtomicInteger numReqFin = new AtomicInteger();
-        numReqFin.set(0);
-        Log.i("Do I make it in here?", "????");
-        for (int i = 0; i < list.size(); i++) {
-                // Next, we will call instantiate postUser, but we will have a special
-                // listener.
-                listener.instantiateComponent(queue, list.get(i), new Response.Listener() {
-                    @Override
-                    public void onResponse(Object response) {
-                        // Update the numReqFin counter that we have another finished post
-                        // object.
-                        Log.i("Checking out this id", numReqFin.get() + " " + list.size());
-                        if (numReqFin.addAndGet(1) == list.size()) {
-                            // We finished!! Call the listener at last.
-                            UICallback.onResponse(new NetworkResponse(false, list));
-                        }
-                    }
-                });
+    /**
+     * Fetches query parameter string you need to add in to the request url.
+     * @param id maximum id of item you want to fetch. Use API.NO_MAX_PAGINATION if you want no limit.
+     * @return pagination query param to add to request url.
+     */
+    private static String getPagination(String id) {
+        if (id.equals(API.NO_MAX_PAGINATION)) {
+            return "";
+        } else {
+            return "&max_id=" + id;
         }
     }
+
 
     interface InstantiationListener {
         public void instantiateComponent(RequestQueue queue, Object obj, Response.Listener listener);

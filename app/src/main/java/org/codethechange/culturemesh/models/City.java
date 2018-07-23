@@ -158,6 +158,14 @@ public class City extends Place {
     }
 
     /**
+     * Now display just city name.
+     * @return
+     */
+    public String getShortName(){
+     return cityName;
+    }
+
+    /**
      * Get the name of the city
      * @return City name
      */

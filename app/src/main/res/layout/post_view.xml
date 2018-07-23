@@ -143,11 +143,11 @@
             android:id="@+id/event_details_linear_layout"
             android:layout_width="395dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="60dp"
             android:orientation="vertical"
             android:visibility="gone"
-            card_view:layout_constraintTop_toTopOf="parent"
-            tools:layout_editor_absoluteX="206dp">
+            card_view:layout_constraintStart_toStartOf="parent"
+            card_view:layout_constraintTop_toTopOf="parent">
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
@@ -233,6 +233,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:background="@drawable/message_shape"
+            android:visibility="gone"
             card_view:layout_constraintEnd_toEndOf="parent"
             card_view:layout_constraintHorizontal_bias="0.0"
             card_view:layout_constraintStart_toStartOf="parent"
@@ -268,6 +269,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:background="@drawable/message_shape"
+            android:visibility="gone"
             card_view:layout_constraintEnd_toEndOf="parent"
             card_view:layout_constraintStart_toStartOf="parent"
             card_view:layout_constraintTop_toBottomOf="@+id/comment1_layout">
@@ -305,6 +307,7 @@
             android:layout_marginTop="8dp"
             android:text="@string/view_more_comments"
             android:textColor="@color/white"
+            android:visibility="gone"
             card_view:layout_constraintEnd_toEndOf="parent"
             card_view:layout_constraintStart_toStartOf="parent"
             card_view:layout_constraintTop_toBottomOf="@+id/comment2_layout" />

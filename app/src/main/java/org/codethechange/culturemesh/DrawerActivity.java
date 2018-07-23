@@ -25,11 +25,16 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 import com.squareup.picasso.Picasso;
 
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,6 +50,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
     NavigationView navView;
     protected long currentUser;
     Activity thisActivity = this;
+    RequestQueue queue;
 
     public interface WaitForSubscribedList {
         void onSubscribeListFinish();
@@ -52,12 +58,11 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
 
     @Override
     public void setContentView(int layoutResID) {
-        Log.i("DrawerActivity", "Running setContentView()");
         fullLayout = (DrawerLayout) getLayoutInflater().inflate(R.layout.activity_drawer, null);
         frameLayout = fullLayout.findViewById(R.id.drawer_frame);
         getLayoutInflater().inflate(layoutResID, frameLayout, true);
         super.setContentView(fullLayout);
-
+        queue = Volley.newRequestQueue(getApplicationContext());
         //All drawer activities must have a toolbar with id "action_bar!"
         Toolbar mToolbar = (Toolbar) findViewById(R.id.action_bar);
         setSupportActionBar(mToolbar);
@@ -103,7 +108,6 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         currentUser = settings.getLong(API.CURRENT_USER, -1);
         if (currentUser == -1) {
-            Log.i("DrawerActivity", "User is not logged in");
             //User is not signed in. Replace user info with sign in button
             Button button = navView.getHeaderView(0).findViewById(R.id.nav_user_sign_in_button);
             button.setVisibility(View.VISIBLE);
@@ -116,10 +120,68 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                 }
             });
         } else {
-            Log.i("DrawerActivity", "User is logged in as " + currentUser);
             //Load User info.
-            new LoadUserInfo().execute(currentUser);
-            //TODO: Fix new LoadUserSubscriptions().execute(currentUser);
+            API.Get.user(queue, currentUser, new Response.Listener<NetworkResponse<User>>() {
+                @Override
+                public void onResponse(NetworkResponse<User> res) {
+                    //Update
+                    if (res.fail()) {
+                        res.showErrorDialog(DrawerActivity.this);
+                    } else {
+                        User user = res.getPayload();
+                        TextView userName = navView.getHeaderView(0).findViewById(R.id.full_name);
+                        userName.setText(user.username);
+                        TextView email = navView.getHeaderView(0).findViewById(R.id.user_email);
+                        email.setText(user.email);
+                        ImageView profilePic = navView.getHeaderView(0).findViewById(R.id.user_icon);
+                        Picasso.with(getApplicationContext()).load(user.imgURL).into(profilePic);
+                    }
+                }
+            });
+            //Now, load user subscriptions (networks) to display in the navigation drawer.
+            API.Get.userNetworks(queue, currentUser, new Response.Listener<NetworkResponse<ArrayList<Network>>>() {
+                @Override
+                public void onResponse(NetworkResponse<ArrayList<Network>> res) {
+                    if (res.fail()) {
+                        res.showErrorDialog(DrawerActivity.this);
+                    } else {
+                        subscribedNetworks = new SparseArray<Network>();
+                        //Instantiate map with key -> menu view id, value -> network.
+                        for (Network net : res.getPayload()) {
+                            Log.i("DrawerActivity", "Found that User with ID " + currentUser
+                                    + " is subscribed to network: " + net);
+                            subscribedNetworkIds.add(net.id);
+                            int viewId = View.generateViewId();
+                            subscribedNetworks.put(viewId, net);
+                        }
+                        Menu navMenu = navView.getMenu();
+                        MenuItem item = navMenu.getItem(2); //Your Networks subItem
+                        SubMenu netMenu = item.getSubMenu();
+                        for (int i = 0; i < subscribedNetworks.size(); i++) {
+                            int id = subscribedNetworks.keyAt(i);
+                            Network net = subscribedNetworks.get(id);
+                            String name = "";
+                            if (net.isLocationBased()) {
+                                name = getResources().getString(R.string.from) + " " +
+                                        net.fromLocation.getShortName() + " " +
+                                        getResources().getString(R.string.near) + " " +
+                                        net.nearLocation.getShortName();
+                            } else {
+                                name = net.language.toString() + " " +
+                                        getResources().getString(R.string.speakers_in) + " " +
+                                        net.nearLocation.getListableName();
+                            }
+                            SpannableStringBuilder sb = new SpannableStringBuilder(name);
+                            sb.setSpan(new RelativeSizeSpan(.8f), 0, sb.length(), 0);
+                            netMenu.add(Menu.NONE, id, 0, sb);
+                        }
+                        navView.setNavigationItemSelectedListener(DrawerActivity.this);
+                        if (thisActivity instanceof WaitForSubscribedList) {
+                            ((WaitForSubscribedList) thisActivity).onSubscribeListFinish();
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -174,99 +236,28 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
             LoginActivity.setLoggedOut(settings);
             finish();
         }
-
         mDrawerLayout.closeDrawer(GravityCompat.START);
         finish();
         return true;
     }
 
-    private class LoadUserSubscriptions extends AsyncTask<Long, Void, Void>{
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            Log.i("DrawerActivity", "Starting to load user subscriptions via AsyncTask.");
-        }
-
-        @Override
-        protected Void doInBackground(Long... longs) {
-            API.loadAppDatabase(getApplicationContext());
-            List<Network> networks = API.Get.userNetworks(longs[0]).getPayload();
-            Log.i("DrawerActivity", "Subscribed Networks from API: " + networks.toString());
-            subscribedNetworks = new SparseArray<Network>();
-
-            //Instantiate map with key -> menu view id, value -> network.
-            for (Network net : networks) {
-                Log.i("DrawerActivity", "Found that User with ID " + longs[0].toString()
-                        + " is subscribed to network: " + net);
-                subscribedNetworkIds.add(net.id);
-                int viewId = View.generateViewId();
-                subscribedNetworks.put(viewId, net);
-            }
-            API.closeDatabase();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void v) {
-            Log.i("DrawerActivity", "Beginning onPostExecute() of LoadUserSubscriptions");
-            Menu navMenu = navView.getMenu();
-            MenuItem item = navMenu.getItem(2); //Your Networks subItem
-            SubMenu netMenu = item.getSubMenu();
-            for (int i = 0; i < subscribedNetworks.size(); i++) {
-                int id = subscribedNetworks.keyAt(i);
-                Network net = subscribedNetworks.get(id);
-                Log.i("DrawerActivity", "Processing subscribed network: " + net);
-                String name = "";
-                if (net.isLocationBased()) {
-                    name = getResources().getString(R.string.from) + " " +
-                            net.fromLocation.getListableName() + " " +
-                            getResources().getString(R.string.near) + " " +
-                            net.nearLocation.getListableName();
-                } else {
-                    name = net.language.toString() + " " +
-                            getResources().getString(R.string.speakers_in) + " " +
-                            net.nearLocation.getListableName();
+    /**
+     * This ensures that we are canceling all network requests if the user is leaving this activity.
+     * We use a RequestFilter that accepts all requests (meaning it cancels all requests)
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (queue != null)
+            queue.cancelAll(new RequestQueue.RequestFilter() {
+                @Override
+                public boolean apply(Request<?> request) {
+                    return true;
                 }
-                SpannableStringBuilder sb = new SpannableStringBuilder(name);
-                sb.setSpan(new RelativeSizeSpan(.8f), 0, sb.length(), 0);
-                netMenu.add(Menu.NONE, id, 0, sb);
-            }
-            navView.setNavigationItemSelectedListener(DrawerActivity.this);
-            Log.i("About to test", "for instance of waitforsubscribedlist");
-            if (thisActivity instanceof WaitForSubscribedList) {
-                Log.i("This happens", "Instance works!");
-                ((WaitForSubscribedList) thisActivity).onSubscribeListFinish();
-            }
-            Log.i("DrawerActivity", "Finished loading user subscriptions via AsyncTask.");
-        }
+            });
     }
 
-    private class LoadUserInfo extends AsyncTask<Long, Void, NetworkResponse<User>> {
 
-        @Override
-        protected NetworkResponse<User> doInBackground(Long... longs) {
-            API.loadAppDatabase(getApplicationContext());
-            NetworkResponse<User> res = API.Get.user(longs[0]);
-            API.closeDatabase();
-            return res;
-        }
-
-        @Override
-        protected void onPostExecute(NetworkResponse<User> res) {
-            if (res.fail()) {
-                res.showErrorDialog(DrawerActivity.this);
-            } else {
-                User user = res.getPayload();
-                TextView userName = navView.getHeaderView(0).findViewById(R.id.full_name);
-                userName.setText(user.username);
-                TextView email = navView.getHeaderView(0).findViewById(R.id.user_email);
-                email.setText(user.email);
-                ImageView profilePic = navView.getHeaderView(0).findViewById(R.id.user_icon);
-                Picasso.with(getApplicationContext()).load(user.imgURL).into(profilePic);
-            }
-
-        }
-    }
 
 }

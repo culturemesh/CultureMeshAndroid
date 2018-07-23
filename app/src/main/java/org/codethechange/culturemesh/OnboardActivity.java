@@ -112,34 +112,12 @@ public class OnboardActivity extends AhoyOnboarderActivity {
             // User is coming from the login activity
             if (response == Activity.RESULT_OK) {
                 Intent launchNext;
-
                 SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-                // TODO: What does the "1" here do?
-                long currUser = settings.getLong(API.CURRENT_USER, 1);
-                if (ApiUtils.hasJoinedNetwork(currUser, new checkJoinedNetworks())) {
-                    launchNext = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
-                } else {
-                    launchNext = new Intent(getApplicationContext(), TimelineActivity.class);
-                }
+                launchNext = new Intent(getApplicationContext(), TimelineActivity.class);
                 startActivity(launchNext);
             }
             // else do nothing, as login failed or they did not log in
         }
     }
 
-    private class checkJoinedNetworks extends AsyncTask<Long, Void, NetworkResponse<ArrayList<Network>>> {
-        @Override
-        protected NetworkResponse<ArrayList<Network>> doInBackground(Long... longs) {
-            API.loadAppDatabase(getApplicationContext());
-            long currUser = longs[0];
-            NetworkResponse<ArrayList<Network>> responseNetworks = API.Get.userNetworks(currUser);
-            return responseNetworks;
-        }
-
-        @Override
-        protected void onPostExecute(NetworkResponse<ArrayList<Network>> arrayListNetworkResponse) {
-            super.onPostExecute(arrayListNetworkResponse);
-            API.closeDatabase();
-        }
-    }
 }

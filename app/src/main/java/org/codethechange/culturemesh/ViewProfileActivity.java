@@ -13,6 +13,10 @@ import android.support.v7.widget.Toolbar;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 import com.squareup.picasso.Picasso;
 
 import org.codethechange.culturemesh.models.User;
@@ -24,6 +28,7 @@ public class ViewProfileActivity extends AppCompatActivity {
     TextView userName, bio, fullName;
     ImageView profilePic;
     long selUser;
+    RequestQueue queue;
 
 
     @Override
@@ -43,7 +48,22 @@ public class ViewProfileActivity extends AppCompatActivity {
         userName = findViewById(R.id.user_name);
         bio = findViewById(R.id.bio);
         profilePic = findViewById(R.id.user_profile);
-        new LoadUserData().execute(selUser);
+        queue = Volley.newRequestQueue(this);
+        //Now, load user data.
+        API.Get.user(queue, selUser, new Response.Listener<NetworkResponse<User>>() {
+            @Override
+            public void onResponse(NetworkResponse<User> res) {
+                if (res.fail()) {
+                    res.showErrorDialog(ViewProfileActivity.this);
+                } else {
+                    User user = res.getPayload();
+                    bio.setText(user.aboutMe);
+                    fullName.setText(user.firstName + " " + user.lastName);
+                    userName.setText(user.username);
+                    Picasso.with(getApplicationContext()).load(user.imgURL).into(profilePic);
+                }
+            }
+        });
     }
 
     /**
@@ -96,27 +116,19 @@ public class ViewProfileActivity extends AppCompatActivity {
         return true;
     }
 
-    class LoadUserData extends AsyncTask<Long, Void, NetworkResponse<User>> {
-
-        @Override
-        protected NetworkResponse<User> doInBackground(Long... longs) {
-            API.loadAppDatabase(getApplicationContext());
-            NetworkResponse res = API.Get.user(longs[0]);
-            API.closeDatabase();
-            return res;
-        }
-
-        @Override
-        protected void onPostExecute(NetworkResponse<User> res) {
-            if (res.fail()) {
-                res.showErrorDialog(ViewProfileActivity.this);
-            } else {
-                User user = res.getPayload();
-                bio.setText(user.aboutMe);
-                fullName.setText(user.firstName + " " + user.lastName);
-                userName.setText(user.username);
-                Picasso.with(getApplicationContext()).load(user.imgURL).into(profilePic);
-            }
-        }
+    /**
+     * This ensures that we are canceling all network requests if the user is leaving this activity.
+     * We use a RequestFilter that accepts all requests (meaning it cancels all requests)
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (queue != null)
+            queue.cancelAll(new RequestQueue.RequestFilter() {
+                @Override
+                public boolean apply(Request<?> request) {
+                    return true;
+                }
+            });
     }
 }

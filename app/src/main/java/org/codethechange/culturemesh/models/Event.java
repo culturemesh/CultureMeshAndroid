@@ -5,6 +5,7 @@ import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -120,14 +121,50 @@ public class Event extends FeedItem implements Serializable{
         description = json.getString("description");
         timeOfEvent = json.getString("event_date");
         authorId = json.getLong("id_host");
-
         address = json.getString("address_1");
-        // TODO: Confirm this treatment of missing second address line
-        if (json.has("address_2")) {
+        if (json.has("address_2") && json.getString("address_2") != null &&
+                !json.getString("address_2").equals("null")) {
             address += "\n" + json.getString("address_2");
         }
-        address += "\n" + json.getString("city") + "," + json.getString("region") +
-                "," + json.getString("country");
+        String cityString = json.getString("city");
+        if (cityString == null || cityString.equals("null") || cityString.equals("")) {
+            cityString = "";
+        }
+        String regionString = json.getString("region");
+        if (regionString == null || regionString.equals("null") || regionString.equals("")) {
+            regionString = "";
+        } else {
+            regionString = ", " + regionString;
+        }
+        String countryString = json.getString("country");
+        if (countryString == null || countryString.equals("null") || countryString.equals("")) {
+            countryString = "";
+        } else {
+            countryString = ", " + countryString;
+        }
+        address += "\n" + cityString + regionString + countryString;
     }
 
+    /**
+     * Converts Event object to corresponding JSON object.
+     * @return JSONObject according to format necessary for POST /event/new?
+     */
+    public JSONObject toJSON() {
+        JSONObject object = new JSONObject();
+        try {
+            object.put("id_network", networkId);
+            object.put("id_host", authorId);
+            object.put("event_date", timeOfEvent);
+            object.put("title", title);
+            object.put("address_1", getAddress());
+            object.put("address_2", "");
+            object.put("country", "");
+            object.put("region", "");
+            object.put("city", "");
+            object.put("description", getDescription());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return object;
+    }
 }

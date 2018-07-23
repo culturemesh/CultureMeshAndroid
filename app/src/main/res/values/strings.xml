@@ -27,7 +27,6 @@
     <string name="filter_posts">Filter Posts</string>
     <string-array name="filter_choices">
         <item>Native Posts</item>
-        <item>Twitter Posts</item>
         <item>Events</item>
     </string-array>
     <string name="ok">OK</string>
@@ -164,4 +163,9 @@
 
     </string>
     <string name="title_activity_settings">Edit Profile</string>
+    <string name="network_error">Network Error. Please try again.</string>
+    <string name="error_joining_network">Error joining network. Please try again.</string>
+    <string name="network_not_found">Network not found.</string>
+    <string name="invalid_format">Invalid Response Format.</string>
+    <string name="no_near_loc">No near location selected. Please choose a near location.</string>
 </resources>

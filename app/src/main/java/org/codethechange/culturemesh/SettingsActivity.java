@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -13,12 +14,19 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 import com.squareup.picasso.Picasso;
 
 import org.codethechange.culturemesh.models.Network;
+import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class SettingsActivity extends DrawerActivity implements NetworkSummaryAdapter.OnNetworkTapListener {
 
@@ -28,6 +36,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
     ImageView profilePicture;
     Button updateProfile;
     User user;
+    RequestQueue queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +51,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         userName = findViewById(R.id.user_name);
         profilePicture = findViewById(R.id.user_profile);
         updateProfile = findViewById(R.id.update_profile_button);
+        queue = Volley.newRequestQueue(getApplicationContext());
         //TODO: Add ability to change profile picture.
         updateProfile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,7 +60,8 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                     user.firstName = firstName.getText().toString();
                     user.lastName = lastName.getText().toString();
                     user.aboutMe = bio.getText().toString();
-                    new UpdateProfile().execute(user);
+                    //TOOD: Add support when we have API Support for PUT /user
+                    // new UpdateProfile().execute(user);
                 } catch(NullPointerException e) {
                     //TODO: User is null. We should handle that.
                     e.printStackTrace();
@@ -58,7 +69,23 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
 
             }
         });
-        new LoadUserInfo().execute(currentUser);
+        //Load User Info.
+        API.Get.user(queue, currentUser, new Response.Listener<NetworkResponse<User>>() {
+            @Override
+            public void onResponse(NetworkResponse<User> response) {
+                if (!response.fail()) {
+                    user = response.getPayload();
+                    bio.setText(user.aboutMe);
+                    firstName.setText(user.firstName);
+                    lastName.setText(user.lastName);
+                    userName.setText(user.username);
+                    email.setText(user.email);
+                    Picasso.with(getApplicationContext()).load(user.getImgURL()).into(profilePicture);
+                } else {
+                    response.showErrorDialog(getApplicationContext());
+                }
+            }
+        });
         rv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         resetAdapter();
         ItemTouchHelper.SimpleCallback listener = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -79,7 +106,8 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                                 //Wow! We are removing this network! Sad..
                                 long networkID = ((NetworkSummaryAdapter) rv.getAdapter()).getNetworks()
                                         .get(viewHolder.getAdapterPosition()).id;
-                                new LeaveNetwork().execute(networkID);
+                                //TODO: Support leaving network when we have the API support.
+                                // API support. new LeaveNetwork().execute(networkID);
                             }
                         })
                         .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -108,53 +136,8 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
 
     @Override
     public void onItemClick(View v, Network network) {
-        //If the
+        //TODO: Figure out what you want here. Perhaps view network?
     }
-
-    class LoadSubscribedNetworks extends AsyncTask<Long, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Long... longs) {
-            long userId = longs[0];
-            API.loadAppDatabase(SettingsActivity.this);
-            NetworkSummaryAdapter adapter = (NetworkSummaryAdapter) rv.getAdapter();
-            ArrayList<Network> nets = API.Get.userNetworks(userId).getPayload();
-            adapter.getNetworks().addAll(nets);
-            for (Network net : nets) {
-                //TODO: size() is limited to int....
-                try {
-                    adapter.getUserCounts().add(API.Get.networkUsers(net.id).getPayload().size());
-                } catch(NullPointerException e) {
-                    adapter.getUserCounts().add(0);
-                }
-                try {
-                    //TODO: Replace this with RequestQueue. Also, Alan just added a count endpoint.
-                    // adapter.getPostCounts().add(API.Get.networkPosts(net.id).getPayload().size());
-                } catch(NullPointerException e) {
-                    adapter.getPostCounts().add(0);
-                }
-            }
-            API.closeDatabase();
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(Void v) {
-            rv.getAdapter().notifyDataSetChanged();
-            if (rv.getAdapter().getItemCount() > 0) {
-                //Hide empty text.
-                emptyText.setVisibility(View.GONE);
-            } else {
-                emptyText.setText(getResources().getString(R.string.no_networks));
-            }
-        }
-    }
-
 
     public class LeaveNetwork extends AsyncTask<Long, Void, Void> {
 
@@ -167,35 +150,12 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         }
     }
 
-    class LoadUserInfo extends AsyncTask<Long, Void, User> {
-
-        @Override
-        protected User doInBackground(Long... longs) {
-            API.loadAppDatabase(getApplicationContext());
-            user = API.Get.user(longs[0]).getPayload();
-            API.closeDatabase();
-            return user;
-        }
-
-        @Override
-        protected void onPostExecute(User user) {
-            bio.setText(user.aboutMe);
-            firstName.setText(user.firstName);
-            lastName.setText(user.lastName);
-            userName.setText(user.username);
-            email.setText(user.email);
-            Picasso.with(getApplicationContext()).load(user.getImgURL()).into(profilePicture);
-
-        }
-    }
-
-
     class UpdateProfile extends AsyncTask<User, Void, NetworkResponse> {
 
         @Override
         protected NetworkResponse doInBackground(User... users) {
             API.loadAppDatabase(getApplicationContext());
-            NetworkResponse res = API.Put.user(users[0]);
+            NetworkResponse res = API.Put.user(user);
             API.closeDatabase();
             return res;
         }
@@ -217,11 +177,74 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
 
     void resetAdapter(){
         ArrayList<Network> networks = new ArrayList<>();
-        ArrayList<Integer> counts = new ArrayList<>();
-        ArrayList<Integer> users = new ArrayList<>();
-        NetworkSummaryAdapter adapter = new NetworkSummaryAdapter(networks, counts, users, SettingsActivity.this);
+        HashMap<String, Integer> counts = new HashMap<>();
+        HashMap<String, Integer> users = new HashMap<>();
+        final NetworkSummaryAdapter adapter = new NetworkSummaryAdapter(networks, counts, users, SettingsActivity.this);
         rv.setAdapter(adapter);
         //Fetch Data off UI thread.
-        new LoadSubscribedNetworks().execute(currentUser);
+        API.Get.userNetworks(queue, currentUser, new Response.Listener<NetworkResponse<ArrayList<Network>>>() {
+            @Override
+            public void onResponse(NetworkResponse<ArrayList<Network>> response) {
+                // Cool! Now, for each network, we need to find the number of posts and the
+                // number of users.
+                if (!response.fail()) {
+                    ArrayList<Network> nets = response.getPayload();
+                    adapter.getNetworks().addAll(nets);
+                    rv.getAdapter().notifyDataSetChanged();
+                    if (rv.getAdapter().getItemCount() > 0) {
+                        //Hide empty text.
+                        emptyText.setVisibility(View.GONE);
+                    } else {
+                        emptyText.setText(getResources().getString(R.string.no_networks));
+                    }
+                    for (final Network net : nets) {
+                        API.Get.networkUserCount(queue, net.id, new Response.Listener<NetworkResponse<Long>>() {
+                            @Override
+                            public void onResponse(NetworkResponse<Long> response) {
+                                if (!response.fail()) {
+                                    /* getUserCounts() returns HashMap<network_id, user_count> */
+                                    // This prevents possibility that the user counts are added in
+                                    // wrong order.
+                                    adapter.getUserCounts().put(net.id + "", response.getPayload().intValue());
+                                } else {
+                                    response.showErrorDialog(SettingsActivity.this);
+                                    adapter.getUserCounts().put(net.id + "", 0);
+                                }
+                                adapter.notifyDataSetChanged();
+                            }
+                        });
+                        API.Get.networkPostCount(queue, net.id, new Response.Listener<NetworkResponse<Long>>() {
+                            @Override
+                            public void onResponse(NetworkResponse<Long> response) {
+                                if (!response.fail()) {
+                                    adapter.getPostCounts().put(net.id + "", response.getPayload().intValue());
+                                } else {
+                                    response.showErrorDialog(SettingsActivity.this);
+                                    adapter.getPostCounts().put(net.id + "", 0);
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    response.showErrorDialog(SettingsActivity.this);
+                }
+            }
+        });
+    }
+
+    /**
+     * This ensures that we are canceling all network requests if the user is leaving this activity.
+     * We use a RequestFilter that accepts all requests (meaning it cancels all requests)
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (queue != null)
+            queue.cancelAll(new RequestQueue.RequestFilter() {
+                @Override
+                public boolean apply(Request<?> request) {
+                    return true;
+                }
+            });
     }
 }

@@ -214,10 +214,24 @@ public class FormatManager implements
 
     /**
      * This function converts the CultureMesh tags into a spannable string for textview.
-     * @param formattedText should only have <b></b>, <link></link>, <i></i>
+     * @param formattedText should only have {@code <b></b>, <link></link>, <i></i>
+     *                      or [b][/b][link][/link][i][/i]}
+     * @param colorString the link color in RGB. Some text has different color backgrounds.
      * @return Spannable to be passed to TextView.
      */
-    public static Spanned parseText(String formattedText) {
+    public static Spanned parseText(String formattedText, String colorString) {
+        if (colorString == null || colorString.length() != 7) {
+            //Use default color.
+            colorString = "#E23824";
+        }
+        // Now we look for user inputted formatting from the server. We need to replace the [] with <>
+        // because SpannableStringBuilder works well with tags.
+        formattedText = formattedText.replaceAll("\\[b\\]","<b>");
+        formattedText = formattedText.replaceAll("\\[/b\\]","</b>");
+        formattedText = formattedText.replaceAll("\\[i\\]","<i>");
+        formattedText = formattedText.replaceAll("\\[/i\\]","</i>");
+        formattedText = formattedText.replaceAll("\\[link\\]","<link>");
+        formattedText = formattedText.replaceAll("\\[/link\\]","</link>");
         //Replace <link> with <a>
         Log.i("Pre-format", formattedText);
         try {
@@ -231,14 +245,16 @@ public class FormatManager implements
                 Log.i("BEFORE",before);
                 Log.i("LINK",link);
                 Log.i("AFTER", formattedText.substring(cursor));
-                formattedText = before + "<a href=\"" + link + "\">" + formattedText.substring(cursor);
+                formattedText = before + "<font color='" + colorString + "'><a href=\"" + link + "\">" + formattedText.substring(cursor);
                 Log.i("formattedTextB4rF",formattedText);
-
             }
         } catch(StringIndexOutOfBoundsException e) {
             //TODO: Do some error handling when having malformed text.
+            Log.e("In formatManager", "Format Error");
+            e.printStackTrace();
+
         }
-        formattedText = formattedText.replace("</link>","</a>");
+        formattedText = formattedText.replace("</link>","</font></a>");
         Log.i("Post-parse",formattedText);
         return fromHtml(formattedText);
     }

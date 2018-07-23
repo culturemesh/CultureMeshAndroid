@@ -9,6 +9,11 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by nathaniel on 11/10/17.
@@ -40,7 +45,7 @@ public class Post extends FeedItem implements Serializable{
         return network;
     }
 
-    public Post(int id, int author, int networkId, String content, String imgLink, String vidLink, String datePosted) {
+    public Post(long id, long author, long networkId, String content, String imgLink, String vidLink, String datePosted) {
         this.id = id;
         this.userId = author;
         this.content = content;
@@ -66,7 +71,7 @@ public class Post extends FeedItem implements Serializable{
         this.vidLink = vidLink;
     }
 
-    public Post(int author, String content, String datePosted) {
+    public Post(long author, String content, String datePosted) {
         this.userId = author;
         this.content = content;
         this.datePosted = datePosted;
@@ -79,7 +84,7 @@ public class Post extends FeedItem implements Serializable{
     }
 
     public String getDatePosted() {
-        return datePosted;
+        return this.datePosted;
     }
 
     public void setContent(String content) {
@@ -92,6 +97,16 @@ public class Post extends FeedItem implements Serializable{
 
     public Post(){
 
+    }
+
+    /**
+     * Sometimes, we will want to get the time not just as a string
+     * but as a Date object (i.e. for comparing time for sorting)
+     * @return Date object based on datePosted string.
+     */
+    public Date getPostedTime() throws ParseException {
+        DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy kk:mm:ss z", Locale.US);
+        return df.parse(this.datePosted);
     }
 
     /**
@@ -122,5 +137,23 @@ public class Post extends FeedItem implements Serializable{
         imgLink = json.getString("img_link");
         vidLink = json.getString("vid_link");
         datePosted = json.getString("post_date");
+    }
+
+    /**
+     * Converts Post object to corresponding JSON object.
+     * @return JSONObject according to format necessary for POST /post/new?
+     */
+    public JSONObject toJSON() {
+        JSONObject object = new JSONObject();
+        try {
+            object.put("id_user", userId);
+            object.put("id_network", networkId);
+            object.put("post_text", getContent());
+            object.put("img_link", getImageLink());
+            object.put("vid_link", getVideoLink());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return object;
     }
 }

@@ -56,6 +56,7 @@ public class NetworkResponse<E> {
     public NetworkResponse(E inPayload) {
         payload = inPayload;
         fail = false;
+        messageID = R.string.genericSuccess;
     }
 
     /**
@@ -109,7 +110,9 @@ public class NetworkResponse<E> {
         // SOURCE: https://stackoverflow.com/questions/26097513/android-simple-alert-dialog
         AlertDialog errDialog = new AlertDialog.Builder(context).create();
         errDialog.setTitle(context.getString(R.string.error));
-        errDialog.setMessage(context.getString(messageID));
+        if (messageID != 0) {
+            errDialog.setMessage(context.getString(messageID));
+        }
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
