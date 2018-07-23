@@ -123,6 +123,8 @@ public class PostsFrag extends Fragment {
                             }
                             mAdapter.notifyDataSetChanged();
                         }
+                    } else {
+                        response.showErrorDialog(getActivity());
                     }
                     listener.onResponse(null);
                 }

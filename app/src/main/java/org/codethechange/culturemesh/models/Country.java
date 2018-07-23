@@ -16,7 +16,7 @@ public class Country extends Place {
     /**
      * 2-Letter ISO country code. This is not currently used.
      */
-    public long isoA2;
+    public String isoA2;
 
     /**
      * Name of country
@@ -32,7 +32,7 @@ public class Country extends Place {
      * @param featureCode Region's feature code
      * @param isoA2 2-Letter ISO country code
      */
-    public Country(long id, String name, Point latLng, long population, String featureCode, long isoA2) {
+    public Country(long id, String name, Point latLng, long population, String featureCode, String isoA2) {
         super(id, Location.NOWHERE, Location.NOWHERE, latLng, population, featureCode);
         this.name = name;
         this.isoA2 = isoA2;
@@ -47,7 +47,7 @@ public class Country extends Place {
     public Country(JSONObject json) throws JSONException {
         super(json);
         this.name = json.getString("name");
-        this.isoA2 = json.getLong("iso_a2");
+        this.isoA2 = json.getString("iso_a2");
     }
 
     /**

@@ -145,9 +145,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                     if (res.fail()) {
                         res.showErrorDialog(DrawerActivity.this);
                     } else {
-                        Log.i("In here", "how many times does this happen?");
                         subscribedNetworks = new SparseArray<Network>();
-
                         //Instantiate map with key -> menu view id, value -> network.
                         for (Network net : res.getPayload()) {
                             Log.i("DrawerActivity", "Found that User with ID " + currentUser
@@ -179,7 +177,6 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                         }
                         navView.setNavigationItemSelectedListener(DrawerActivity.this);
                         if (thisActivity instanceof WaitForSubscribedList) {
-                            Log.i("This happens", "Instance works!");
                             ((WaitForSubscribedList) thisActivity).onSubscribeListFinish();
                         }
                     }

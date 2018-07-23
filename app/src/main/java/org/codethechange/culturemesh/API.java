@@ -16,24 +16,16 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.gson.JsonArray;
 
 import org.codethechange.culturemesh.data.CMDatabase;
-import org.codethechange.culturemesh.data.CityDao;
-import org.codethechange.culturemesh.data.CountryDao;
 import org.codethechange.culturemesh.data.EventDao;
 import org.codethechange.culturemesh.data.EventSubscription;
 import org.codethechange.culturemesh.data.EventSubscriptionDao;
-import org.codethechange.culturemesh.data.LanguageDao;
 import org.codethechange.culturemesh.data.NetworkDao;
 import org.codethechange.culturemesh.data.NetworkSubscription;
 import org.codethechange.culturemesh.data.NetworkSubscriptionDao;
 import org.codethechange.culturemesh.data.PostDao;
-import org.codethechange.culturemesh.data.PostReplyDao;
-import org.codethechange.culturemesh.data.RegionDao;
 import org.codethechange.culturemesh.data.UserDao;
 import org.codethechange.culturemesh.models.City;
 import org.codethechange.culturemesh.models.Country;
@@ -45,8 +37,6 @@ import org.codethechange.culturemesh.models.Location;
 import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Place;
-import org.codethechange.culturemesh.models.Point;
-import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
 import org.codethechange.culturemesh.models.Postable;
 import org.codethechange.culturemesh.models.Putable;
@@ -98,12 +88,15 @@ class API {
     final static String SELECTED_USER="seluser";
     final static String FIRST_TIME = "firsttime";
     static final boolean NO_JOINED_NETWORKS = false;
+    //The id of the user that is signed in.
     static final String CURRENT_USER = "curruser";
     static final String USER_EMAIL = "useremail";
     static final String USER_PASS = "userpass";
 
     static final String API_URL_BASE = "https://www.culturemesh.com/api-dev/v1/";
     static final String NO_MAX_PAGINATION = "-1"; // If you do not need a maximum id.
+    static final String HOSTING = "hosting";
+    static final String FEED_ITEM_COUNT_SIZE = "10"; // Number of posts/events to fetch per paginated request
     static final long NEW_NETWORK = -2;
     static CMDatabase mDb;
     //reqCounter to ensure that we don't close the database while another thread is using it.
@@ -150,7 +143,8 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    listener.onResponse(new NetworkResponse<User>(true, null));
+                    listener.onResponse(new NetworkResponse<User>(true,
+                            processNetworkError("API.Get.user", "ErrorListener", error)));
                 }
             });
             queue.add(authReq);
@@ -207,7 +201,8 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    listener.onResponse(new NetworkResponse<Long>(true, R.string.network_error));
+                    listener.onResponse(new NetworkResponse<Long>(true,
+                            processNetworkError("API.Get.networkUserCount", "ErrorListener", error)));
                 }
             });
             queue.add(req);
@@ -229,7 +224,8 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    listener.onResponse(new NetworkResponse<Long>(true, R.string.error));
+                    listener.onResponse(new NetworkResponse<Long>(true,
+                            processNetworkError("API.Get.networkPostCount", "ErrorListener", error)));
                 }
             });
             queue.add(req);
@@ -282,7 +278,7 @@ class API {
                             NetworkResponse object whenever any JSON parsing error occurs. This may
                             not be the best approach.
                              */
-                            listener.onResponse(new NetworkResponse<ArrayList<Network>>(true, R.string.network_error));
+                            listener.onResponse(new NetworkResponse<ArrayList<Network>>(true));
                             return;
                         }
                     }
@@ -373,18 +369,29 @@ class API {
          * @param id ID of the {@link User} whose events are being searched for
          * @return List of {@link Event}s to which the user is subscribed
          */
-        static NetworkResponse<ArrayList<Event>> userEvents(long id) {
-            //TODO: Check for event subscriptions with network request.
-            EventSubscriptionDao eSDao = mDb.eventSubscriptionDao();
-            List<Long> eventIds = eSDao.getUserEventSubscriptions(id);
-            ArrayList<Event> events = new ArrayList<>();
-            for (Long eId : eventIds) {
-                NetworkResponse res = event(eId);
-                if (!res.fail()) {
-                    events.add((Event) res.getPayload());
+        static void userEvents(RequestQueue queue, long id, String role, final Response.Listener<NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Event>>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "user/" + id
+                    + "/events?role=" + role + getCredentials(), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    ArrayList<Event> events = new ArrayList<>();
+                    for (int i = 0; i < response.length(); i++) {
+                        try {
+                            events.add(new Event((JSONObject) response.get(i)));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    listener.onResponse(new NetworkResponse<ArrayList<Event>>(false, events));
                 }
-            }
-            return new NetworkResponse<>(events);
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    listener.onResponse(new NetworkResponse<ArrayList<Event>>(true,
+                            processNetworkError("API.GEt.userEvents", "ErrorListener", error)));
+                }
+            });
+            queue.add(req);
         }
 
         /**
@@ -441,7 +448,7 @@ class API {
          */
         static void networkPosts(final RequestQueue queue, final long id, String maxId, final Response.Listener<NetworkResponse<List<org.codethechange.culturemesh.models.Post>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/"
-                    + id + "/posts?" + getPagination(maxId + "") + "&count=10" +  getCredentials(), null, new Response.Listener<JSONArray>() {
+                    + id + "/posts?" + getPagination(maxId + "") + "&count=" + FEED_ITEM_COUNT_SIZE +  getCredentials(), null, new Response.Listener<JSONArray>() {
 
                 @Override
                 public void onResponse(JSONArray response) {
@@ -501,7 +508,7 @@ class API {
         static void networkEvents(final RequestQueue queue, final long id, String maxId,
                                                           final Response.Listener<NetworkResponse<List<Event>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/" +
-                    id + "/events?" + getPagination(maxId) + "&count=10" + getCredentials(), null, new Response.Listener<JSONArray>() {
+                    id + "/events?" + getPagination(maxId) + "&count=" + FEED_ITEM_COUNT_SIZE + getCredentials(), null, new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray res) {
                     ArrayList<Event> events = new ArrayList<>();
@@ -682,7 +689,7 @@ class API {
                                 }
                             });
                         } catch (JSONException e) {
-                            listener.onResponse(new NetworkResponse<ArrayList<PostReply>>(true, R.string.network_error));
+                            listener.onResponse(new NetworkResponse<ArrayList<PostReply>>(true));
                             e.printStackTrace();
                         }
                     }
@@ -690,7 +697,8 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-
+                    listener.onResponse(new NetworkResponse<ArrayList<PostReply>>(true,
+                            processNetworkError("API.Get.postReplies", "ErrorListener", error)));
                 }
             });
             queue.add(req);
@@ -715,7 +723,8 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    listener.onResponse(new NetworkResponse<List<Location>>(true, R.string.network_error));
+                    listener.onResponse(new NetworkResponse<List<Location>>(true,
+                            processNetworkError("API.Get.autocompletePlace", "ErrorListener", error)));
                 }
             });
             queue.add(req);
@@ -740,7 +749,8 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    listener.onResponse(new NetworkResponse<List<Language>>(true, R.string.network_error));
+                    listener.onResponse(new NetworkResponse<List<Language>>(true,
+                            processNetworkError("API.Get.autocompleteLanguage", "ErrorListener", error)));
                 }
             });
             queue.add(req);
@@ -799,7 +809,7 @@ class API {
                             return;
                         } else if (res.length() > 1) {
                             listener.onResponse(new NetworkResponse<Network>(true));
-                            Log.i("API.Get.netFromTwoParam", "Multiple networks matched this: " +
+                            Log.e("API.Get.netFromTwoParam", "Multiple networks matched this: " +
                                     key1 + ":" + val1 + "," + key2 + ":" + val2);
                         }
                         final DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(0));
@@ -1081,8 +1091,6 @@ class API {
         }
     }
 
-
-
     static class Post {
         /**
          * Add a user to an existing event. This operation requires authentication, so the user must
@@ -1191,39 +1199,8 @@ class API {
          */
         static void user(final RequestQueue queue, final User user,
                          final Response.Listener<NetworkResponse<Void>> listener) {
-            StringRequest req = new StringRequest(Request.Method.PUT, API_URL_BASE +
-                    "user/users?" + getCredentials(),
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            listener.onResponse(new NetworkResponse<Void>(false));
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    int messageID = processNetworkError("API.Post.user",
-                            "ErrorListener", error);
-                    listener.onResponse(new NetworkResponse<Void>(true, messageID));
-                }
-            }) {
-                @Override
-                public byte[] getBody() {
-                    try {
-                        return user.getPutJson().toString().getBytes();
-                    } catch (JSONException e) {
-                        Log.e("API.Post.user", "Error forming JSON");
-                        listener.onResponse(new NetworkResponse<Void>(true));
-                        cancel();
-                        return "".getBytes();
-                    }
-                }
-
-                @Override
-                public String getBodyContentType() {
-                    return "application/json";
-                }
-            };
-            queue.add(req);
+            model(queue, user, API_URL_BASE + "user/users?" + getCredentials(),
+                    "API.Post.user", listener);
         }
 
         /**
@@ -1323,8 +1300,8 @@ class API {
                             @Override
                             public byte[] getBody() {
                                 try {
-                                    return toPost.getPostJson().toString().getBytes();
-                                } catch (JSONException e) {
+                                    return toPost.getPostJson().toString().getBytes("utf-8");
+                                } catch (JSONException | UnsupportedEncodingException e) {
                                     Log.e(logTag, "Error forming JSON");
                                     listener.onResponse(new NetworkResponse<Void>(true));
                                     cancel();
@@ -1334,7 +1311,7 @@ class API {
 
                             @Override
                             public String getBodyContentType() {
-                                return "application/json";
+                                return "application/json; charset=utf-8";
                             }
                         };
                         queue.add(req);
@@ -1654,34 +1631,6 @@ class API {
         return "&key=" + Credentials.APIKey;
     }
 
-    //TODO: Try to revive this helper method, or delete it.
-    static void instantiateComponents(RequestQueue queue, final ArrayList list, final Response.Listener UICallback, InstantiationListener listener){
-
-        // Here's the tricky part. We need to fetch information for each element,
-        // but we only want to call the listener once, after all the requests are
-        // finished.
-        // Let's make a counter (numReqFin) for the number of requests finished. This will be
-        // a wrapper so that we can pass it by reference.
-        final AtomicInteger numReqFin = new AtomicInteger();
-        numReqFin.set(0);
-        Log.i("Do I make it in here?", "????");
-        for (int i = 0; i < list.size(); i++) {
-                // Next, we will call instantiate postUser, but we will have a special
-                // listener.
-                listener.instantiateComponent(queue, list.get(i), new Response.Listener() {
-                    @Override
-                    public void onResponse(Object response) {
-                        // Update the numReqFin counter that we have another finished post
-                        // object.
-                        Log.i("Checking out this id", numReqFin.get() + " " + list.size());
-                        if (numReqFin.addAndGet(1) == list.size()) {
-                            // We finished!! Call the listener at last.
-                            UICallback.onResponse(new NetworkResponse(false, list));
-                        }
-                    }
-                });
-        }
-    }
 
     /**
      * Fetches query parameter string you need to add in to the request url.

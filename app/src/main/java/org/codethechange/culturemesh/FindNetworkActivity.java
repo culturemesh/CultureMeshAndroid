@@ -39,8 +39,6 @@ import org.codethechange.culturemesh.models.Place;
 
 public class FindNetworkActivity extends DrawerActivity {
 
-    // TODO: Replace these with Location Objects.
-    // TODO: Let user change their near location and setup appropriate API utilities to achieve this
     static Location near;
     public final int REQUEST_NEW_NEAR_LOCATION = 1;
 
@@ -214,8 +212,6 @@ public class FindNetworkActivity extends DrawerActivity {
                         public void onResponse(NetworkResponse<Network> response) {
                             // TODO: If network doesn't exist, offer to create it
                             if (response.fail()) {
-                                Log.i("Location Data", from.getFromLocation().toString() + " " +  near.getNearLocation().toString());
-                                Log.i("Location Data", from.getFromLocation().urlParam() + " " + near.getNearLocation().urlParam());
                                 response.showErrorDialog(getContext());
                             } else {
                                 getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
@@ -325,8 +321,8 @@ public class FindNetworkActivity extends DrawerActivity {
                         dialog.setButton(AlertDialog.BUTTON_NEUTRAL, getContext().getString(R.string.ok), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                dialog.dismiss()
-                                ;                            }
+                                dialog.dismiss();
+                            }
                         });
                         dialog.show();
                         return;

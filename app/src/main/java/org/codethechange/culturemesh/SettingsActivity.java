@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -170,6 +171,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                                     // wrong order.
                                     adapter.getUserCounts().put(net.id + "", response.getPayload().intValue());
                                 } else {
+                                    response.showErrorDialog(SettingsActivity.this);
                                     adapter.getUserCounts().put(net.id + "", 0);
                                 }
                                 adapter.notifyDataSetChanged();
@@ -181,11 +183,14 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                                 if (!response.fail()) {
                                     adapter.getPostCounts().put(net.id + "", response.getPayload().intValue());
                                 } else {
+                                    response.showErrorDialog(SettingsActivity.this);
                                     adapter.getPostCounts().put(net.id + "", 0);
                                 }
                             }
                         });
                     }
+                } else {
+                    response.showErrorDialog(SettingsActivity.this);
                 }
             }
         });

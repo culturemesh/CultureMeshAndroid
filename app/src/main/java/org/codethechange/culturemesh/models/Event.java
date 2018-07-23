@@ -3,6 +3,7 @@ package org.codethechange.culturemesh.models;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -128,18 +129,26 @@ public class Event extends FeedItem implements Serializable, Putable, Postable {
         if (json.has("address_2") && json.getString("address_2") != null &&
                 !json.getString("address_2").equals("null")) {
             addressLine2 = json.getString("address_2");
+        } else {
+            addressLine2 = "";
         }
         if (json.has("city") && json.getString("city") != null &&
                 !json.getString("city").equals("null")) {
             city = json.getString("city");
+        } else {
+            city = "";
         }
         if (json.has("region") && json.getString("region") != null &&
                 !json.getString("region").equals("null")) {
             region = json.getString("region");
+        } else {
+            region = "";
         }
         if (json.has("country") && json.getString("country") != null &&
                 !json.getString("country").equals("null")) {
             country = json.getString("country");
+        } else {
+            country = "";
         }
     }
 

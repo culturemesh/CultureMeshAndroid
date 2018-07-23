@@ -26,6 +26,7 @@ import org.codethechange.culturemesh.models.Event;
 import org.codethechange.culturemesh.models.Language;
 import org.codethechange.culturemesh.models.User;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -42,7 +43,7 @@ public class CreateEventActivity extends AppCompatActivity {
     private EditText regionRef;
     private EditText countryRef;
     private EditText descriptionRef;
-
+    private RequestQueue queue;
     private Activity myActivity = this;
     private RequestQueue queue;
 
@@ -53,6 +54,7 @@ public class CreateEventActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        queue = Volley.newRequestQueue(getApplicationContext());
         setContentView(R.layout.activity_create_event);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -108,6 +110,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
             // Declare variables for Event() arguments
             Date date = c.getTime();
+            String timeOfEvent = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(date);
             String name = nameRef.getText().toString();
             String address1 = address1Ref.getText().toString();
             String address2 = address2Ref.getText().toString();

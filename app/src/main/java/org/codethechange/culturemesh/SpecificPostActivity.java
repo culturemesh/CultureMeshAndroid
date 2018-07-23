@@ -190,7 +190,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                 //TODO: Submit Post Reply to API AsyncTask call.
                 //TODO: Come up with valid id.
                 //TODO: Come up with user id.
-                PostReply pReply = new PostReply((int) (Math.random() * 10000), postID, settings.getLong(API.CURRENT_USER, -1), networkID,
+                PostReply pReply = new PostReply(-1, postID, settings.getLong(API.CURRENT_USER, -1), networkID,
                         new Date().toString(), content);
                 progressBar.setVisibility(View.VISIBLE);
                 API.Post.reply(queue, pReply, new Response.Listener<NetworkResponse<Void>>() {
