@@ -1062,10 +1062,9 @@ class API {
                 }
             }) {
                 @Override
-                public Map<String, String> getHeaders() {
-                    HashMap<String, String> headers = new HashMap<>();
-                    headers.put("email", email);
-                    headers.put("password", password);
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> headers = super.getHeaders();
+                    headers.put("Authorization", genBasicAuth(email, password));
                     return headers;
                 }
             };
@@ -1127,10 +1126,10 @@ class API {
                             }
                         }) {
                             @Override
-                            protected Map<String, String> getParams() throws AuthFailureError {
-                                Map<String,String> params = super.getParams();
-                                params.put("Username", token);
-                                return params;
+                            public Map<String, String> getHeaders() throws AuthFailureError {
+                                Map<String,String> headers = super.getHeaders();
+                                headers.put("Authorization", genBasicAuth(token));
+                                return headers;
                             }
                         };
                         queue.add(req);
@@ -1172,10 +1171,10 @@ class API {
                             }
                         }) {
                             @Override
-                            protected Map<String, String> getParams() throws AuthFailureError {
-                                Map<String,String> params = super.getParams();
-                                params.put("Username", token);
-                                return params;
+                            public Map<String, String> getHeaders() throws AuthFailureError {
+                                Map<String,String> headers = super.getHeaders();
+                                headers.put("Authorization", genBasicAuth(token));
+                                return headers;
                             }
                         };
                         queue.add(req);
@@ -1294,10 +1293,10 @@ class API {
                             }
                         }) {
                             @Override
-                            protected Map<String, String> getParams() throws AuthFailureError {
-                                Map<String,String> params = super.getParams();
-                                params.put("Username", token);
-                                return params;
+                            public Map<String, String> getHeaders() throws AuthFailureError {
+                                Map<String,String> headers = super.getHeaders();
+                                headers.put("Authorization", genBasicAuth(token));
+                                return headers;
                             }
 
                             @Override
@@ -1415,10 +1414,10 @@ class API {
                             }
                         }) {
                             @Override
-                            protected Map<String, String> getParams() throws AuthFailureError {
-                                Map<String,String> params = super.getParams();
-                                params.put("Username", token);
-                                return params;
+                            public Map<String, String> getHeaders() throws AuthFailureError {
+                                Map<String,String> headers = super.getHeaders();
+                                headers.put("Authorization", genBasicAuth(token));
+                                return headers;
                             }
 
                             @Override
@@ -1632,6 +1631,33 @@ class API {
      */
     static String getCredentials(){
         return "&key=" + Credentials.APIKey;
+    }
+
+    /**
+     * Generate from a username/email and password the string to put in the header of a request
+     * as the value of the {@code Authorization} token in order to perform Basic Authentication.
+     * For example: {@code headers.put("Authorization", genBasicAuth(email, password))}. A login
+     * token can be used if it is passed as the {@code email}, in which case the {@code password}
+     * is ignored by the server.
+     * @param email Email or username of account to login as; can also be a login token
+     * @param password Password to login with
+     * @return Value that should be passed in the header as the value of {@code Authorization}
+     */
+    private static String genBasicAuth(String email, String password) {
+        // SOURCE: https://stackoverflow.com/questions/34310134/send-authentication-information-with-volley-request
+        String credentials = email + ":" + password;
+        return "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
+    }
+
+    /**
+     * Generate from a login token the string to put in the header of a request
+     * as the value of the {@code Authorization} token in order to perform Basic Authentication.
+     * For example: {@code headers.put("Authorization", genBasicAuth(token))}.
+     * @param token Login token to authenticate to server
+     * @return Value that should be passed in the header as the value of {@code Authorization}
+     */
+    private static String genBasicAuth(String token) {
+        return genBasicAuth(token, "");
     }
 
 
