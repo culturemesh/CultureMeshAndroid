@@ -18,6 +18,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
+
 import org.codethechange.culturemesh.models.User;
 
 
@@ -28,6 +32,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
     EditText confirmPassword;
     EditText passwordText;
     TextView needAccountText;
+    private RequestQueue queue;
 
     /**
      * Largely for testing, this public method can be used to set which user is currently logged in
@@ -36,9 +41,12 @@ public class LoginActivity extends RedirectableAppCompatActivity {
      * @param settings The SharedPreferences storing user login state
      * @param userID ID of the user to make logged-in
      */
-    public static void setLoggedIn(SharedPreferences settings, long userID) {
+    public static void setLoggedIn(SharedPreferences settings, long userID, String email, String password) {
+        API.initializePrefs(settings);
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(API.CURRENT_USER, userID);
+        editor.putString(API.USER_EMAIL, email);
+        editor.putString(API.USER_PASS, password);
         editor.apply();
     }
 
@@ -50,6 +58,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         if (isLoggedIn(settings)) {
             SharedPreferences.Editor editor = settings.edit();
             editor.remove(API.CURRENT_USER);
+            editor.remove(API.USER_PASS);
             editor.apply();
         }
     }
@@ -62,15 +71,41 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         final Button signInButton = findViewById(R.id.sign_in_button);
+        queue = Volley.newRequestQueue(getApplicationContext());
         signInButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                EditText userNameField = findViewById(R.id.user_name_field);
+                EditText emailField = findViewById(R.id.user_name_field);
                 EditText passwordField = findViewById(R.id.password_field);
-                String userName = userNameField.getText().toString();
-                String password = passwordField.getText().toString();
-                Credential cred = new Credential(userName, password);
-                new ValidateCredentials().execute(cred);
+                final String email = emailField.getText().toString();
+                final String password = passwordField.getText().toString();
+
+                API.Get.userID(queue, email, new Response.Listener<NetworkResponse<Long>>() {
+                    @Override
+                    public void onResponse(NetworkResponse<Long> response) {
+                        if (response.fail()) {
+                            response.showErrorDialog(LoginActivity.this);
+                        } else {
+                            final long id = response.getPayload();
+                            API.Get.loginTokenWithCred(queue, email, password, new Response.Listener<NetworkResponse<String>>() {
+                                @Override
+                                public void onResponse(NetworkResponse<String> response) {
+                                    if (response.fail()) {
+                                        response.showErrorDialog(LoginActivity.this);
+                                    } else {
+                                        SharedPreferences settings = getSharedPreferences(
+                                                API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+                                        setLoggedIn(settings, id, email, password);
+
+                                        Intent returnIntent = new Intent();
+                                        setResult(Activity.RESULT_OK, returnIntent);
+                                        finish();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
             }
         });
         firstNameText = findViewById(R.id.first_name_field);
@@ -199,62 +234,6 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                 }
             }
         });
-    }
-
-    private class Credential {
-        private String userName;
-        private String password;
-
-        public Credential(String userName, String password) {
-            this.userName = userName;
-            this.password = password;
-        }
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-    }
-
-    private class ValidateCredentials extends AsyncTask<Credential, Void, NetworkResponse<User>> {
-        @Override
-        protected NetworkResponse<User> doInBackground(Credential... credentials) {
-            super.onPreExecute();
-
-            API.loadAppDatabase(getApplicationContext());
-            NetworkResponse<User> res;
-            try {
-                // TODO: Replace this with actually processing username and password
-                // TODO: Handle sign in.
-                long id = Long.parseLong(credentials[0].userName);
-                User user = new User(id,"","","","","","");
-                res = new NetworkResponse<>(false, user);
-            } catch (NumberFormatException e) {
-                res = new NetworkResponse<>(true, R.string.loginFailed);
-            }
-
-            API.closeDatabase();
-            return res;
-        }
-
-        @Override
-        protected void onPostExecute(NetworkResponse<User> userNetworkResponse) {
-            super.onPostExecute(userNetworkResponse);
-            if (userNetworkResponse.fail()) {
-                userNetworkResponse.showErrorDialog(LoginActivity.this);
-            } else {
-                SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-                setLoggedIn(settings, userNetworkResponse.getPayload().id);
-
-                Intent returnIntent = new Intent();
-                // TODO: Change result returned to RESULT_CANCELLED for no login
-                setResult(Activity.RESULT_OK, returnIntent);
-                finish();
-            }
-        }
     }
 
 }

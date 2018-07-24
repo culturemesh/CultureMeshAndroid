@@ -19,7 +19,7 @@ import java.util.Locale;
  * Created by nathaniel on 11/10/17.
  */
 @Entity
-public class Post extends FeedItem implements Serializable{
+public class Post extends FeedItem implements Serializable, Postable, Putable {
     @PrimaryKey
     public long id;
     //When saved in database, we use these.
@@ -140,20 +140,37 @@ public class Post extends FeedItem implements Serializable{
     }
 
     /**
-     * Converts Post object to corresponding JSON object.
-     * @return JSONObject according to format necessary for POST /post/new?
+     * Generate a JSON describing the object. The JSON will conform to the following format:
+     * <pre>
+     *     {@code
+     *          {
+                    "id_user": 0,
+                    "id_network": 0,
+                    "post_text": "string",
+                    "vid_link": "string",
+                    "img_link": "string"
+                }
+     *     }
+     * </pre>
+     * The resulting object is suitable for use with the {@code /post/new} endpoint.
+     * @return JSON representation of the object
+     * @throws JSONException Unclear when this would be thrown
      */
-    public JSONObject toJSON() {
-        JSONObject object = new JSONObject();
-        try {
-            object.put("id_user", userId);
-            object.put("id_network", networkId);
-            object.put("post_text", getContent());
-            object.put("img_link", getImageLink());
-            object.put("vid_link", getVideoLink());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return object;
+    public JSONObject toJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("id_user", userId);
+        json.put("id_network", networkId);
+        json.put("post_text", content);
+        json.put("vid_link", vidLink);
+        json.put("img_link", imgLink);
+        return json;
+    }
+
+    public JSONObject getPostJson() throws JSONException {
+        return toJSON();
+    }
+
+    public JSONObject getPutJson() throws JSONException {
+        return toJSON();
     }
 }

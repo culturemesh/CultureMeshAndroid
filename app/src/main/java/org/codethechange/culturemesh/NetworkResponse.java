@@ -14,19 +14,6 @@ public class NetworkResponse<E> {
     private int messageID;
     private E payload;
 
-    // TODO: Remove this testing-only constructor
-    /**
-     * Constructor that randomly chooses a failure state and a generic message based on that state
-     */
-    public NetworkResponse() {
-        Random r = new Random();
-        fail = r.nextBoolean();
-        if (fail)
-            messageID = R.string.genericFail;
-        else
-            messageID = R.string.genericSuccess;
-    }
-
     /**
      * Constructor that creates a generic message based on "inFail"
      * @param inFail Failure state provided by user (true if failed)

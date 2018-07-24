@@ -1,5 +1,8 @@
 package org.codethechange.culturemesh.models;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 
 /**
@@ -7,7 +10,7 @@ import java.io.Serializable;
  * its instance fields like {@link Network#nearLocation} store expanded objects (i.e. {@link Place},
  * not the stripped-down forms for database storage.
  */
-public class Network implements Serializable {
+public class Network implements Serializable, Postable {
 
     /**
      * ID of network. Must always be specified.
@@ -95,6 +98,68 @@ public class Network implements Serializable {
             return new DatabaseNetwork(nearLocation.getNearLocation(),
                     fromLocation.getFromLocation(), id);
         }
+    }
+
+    /**
+     * Generate a JSON describing the object. The JSON will conform to the following format:
+     * <pre>
+     *     {@code
+     *         {
+                  "id_city_cur": 0,
+                  "city_cur": "string",
+                  "id_region_cur": 0,
+                  "region_cur": "string",
+                  "id_country_cur": 0,
+                  "country_cur": "string",
+                  "id_city_origin": 0,
+                  "city_origin": "string",
+                  "id_region_origin": 0,
+                  "region_origin": "string",
+                  "id_country_origin": 0,
+                  "country_origin": "string",
+                  "id_language_origin": 0,
+                  "language_origin": "string",
+                  "network_class": "string"
+               }
+     *     }
+     * </pre>
+     * where missing IDs are passed as {@link Location#NOWHERE}. This format is suitable for
+     * submission to the server using the {@code /network/new} POST endpoint.
+     * @return JSON representation of the object
+     * @throws JSONException Unclear when this would be thrown
+     */
+    public JSONObject toJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+        addPlaceToJson("cur", nearLocation, json);
+        if (isLocationBased()) {
+            addPlaceToJson("origin", fromLocation, json);
+            json.put("network_class", "_l");
+        } else {
+            json.put("id_language_origin", language.language_id);
+            json.put("language_origin", language.name);
+            if (fromLocation instanceof City) {
+                json.put("network_class", "cc");
+            } else if (fromLocation instanceof Region) {
+                json.put("network_class", "rc");
+            } else {
+                json.put("network_class", "co");
+            }
+        }
+        return json;
+    }
+
+    @Override
+    public JSONObject getPostJson() throws JSONException {
+        return toJSON();
+    }
+
+    private void addPlaceToJson(String keySuffix, Place p, JSONObject json) throws JSONException {
+        json.put("id_city_" + keySuffix, p.getCityId());
+        json.put("city_" + keySuffix, p.getCityName());
+        json.put("id_region_" + keySuffix, p.getRegionId());
+        json.put("region_" + keySuffix, p.getRegionName());
+        json.put("id_country_" + keySuffix, p.getCountryId());
+        json.put("country_" + keySuffix, p.getCountryName());
     }
 
     /**

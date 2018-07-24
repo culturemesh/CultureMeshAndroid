@@ -139,42 +139,6 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         //TODO: Figure out what you want here. Perhaps view network?
     }
 
-    public class LeaveNetwork extends AsyncTask<Long, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Long... longs) {
-            API.loadAppDatabase(getApplicationContext());
-            API.Post.removeUserFromNetwork(currentUser, longs[0]);
-            API.closeDatabase();
-            return null;
-        }
-    }
-
-    class UpdateProfile extends AsyncTask<User, Void, NetworkResponse> {
-
-        @Override
-        protected NetworkResponse doInBackground(User... users) {
-            API.loadAppDatabase(getApplicationContext());
-            NetworkResponse res = API.Put.user(user);
-            API.closeDatabase();
-            return res;
-        }
-
-        @Override
-        protected void onPostExecute(NetworkResponse networkResponse) {
-            if (networkResponse.fail()) {
-                //Uh oh. We have a network error.
-                networkResponse.showErrorDialog(SettingsActivity.this);
-            } else {
-                //Yay! We updated the user's settings.
-                new AlertDialog.Builder(SettingsActivity.this)
-                        .setTitle(R.string.genericSuccess)
-                        .setMessage(R.string.updated_profile)
-                        .show();
-            }
-        }
-    }
-
     void resetAdapter(){
         ArrayList<Network> networks = new ArrayList<>();
         HashMap<String, Integer> counts = new HashMap<>();

@@ -55,7 +55,11 @@
     <string name="eventProperty_name">Name of Event</string>
     <string name="eventProperty_date">Event Date</string>
     <!-- Address handles the following website fields: Address 1, Address 2, City, Region -->
-    <string name="eventProperty_address">Address</string>
+    <string name="eventProperty_address1">Address Line 1</string>
+    <string name="eventProperty_address2">Address Line 2</string>
+    <string name="eventProperty_city">City</string>
+    <string name="eventProperty_region">Region</string>
+    <string name="eventProperty_country">Country</string>
     <string name="eventProperty_description">What\'s Happening</string>
     <string name="eventProperty_time">Event Start Time</string>
     <string name="createEvent_setTime">Set Start Time</string>
@@ -79,6 +83,7 @@
     <string name="last_name">Last Name</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="loginFailed">Login Failed</string>
+    <string name="authenticationError">There was an authentication error. Please login.</string>
 
     <string name="error">Error</string>
     <string name="genericFail">Oops, something went wrong.</string>
@@ -168,4 +173,5 @@
     <string name="network_not_found">Network not found.</string>
     <string name="invalid_format">Invalid Response Format.</string>
     <string name="no_near_loc">No near location selected. Please choose a near location.</string>
+    <string name="no_account_with_email">No account was found with the provided email address.</string>
 </resources>

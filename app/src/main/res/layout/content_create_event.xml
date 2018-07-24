@@ -9,6 +9,60 @@
     tools:showIn="@layout/activity_create_event">
 
     <EditText
+        android:id="@+id/eventRegion"
+        android:layout_width="173dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:ems="10"
+        android:hint="@string/eventProperty_region"
+        android:inputType="textPostalAddress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/eventCity"
+        tools:layout_editor_absoluteY="281dp" />
+
+    <EditText
+        android:id="@+id/eventCountry"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="@string/eventProperty_country"
+        android:inputType="textPostalAddress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/eventCity" />
+
+    <EditText
+        android:id="@+id/eventCity"
+        android:layout_width="173dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="@string/eventProperty_city"
+        android:inputType="textPostalAddress"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/eventAddress2" />
+
+    <EditText
+        android:id="@+id/eventAddress2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="@string/eventProperty_address2"
+        android:inputType="textPostalAddress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/eventAddress1" />
+
+    <EditText
         android:id="@+id/eventName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -24,14 +78,14 @@
         app:layout_constraintTop_toBottomOf="@+id/eventPostProgressBar" />
 
     <EditText
-        android:id="@+id/eventAddress"
+        android:id="@+id/eventAddress1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
         android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
         android:layout_marginTop="8dp"
         android:ems="10"
-        android:hint="@string/eventProperty_address"
+        android:hint="@string/eventProperty_address1"
         android:inputType="textPostalAddress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -44,35 +98,34 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
         android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
-        android:layout_marginTop="@dimen/ui_element_vertical_spacing"
+        android:layout_marginTop="8dp"
         android:ems="10"
         android:hint="@string/eventProperty_description"
         android:inputType="textMultiLine"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/eventAddress" />
+        app:layout_constraintTop_toBottomOf="@+id/eventCountry" />
 
     <Button
         android:id="@+id/dateButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
-        android:layout_marginTop="@dimen/ui_element_vertical_spacing"
+        android:onClick="showDatePickerDialog"
         android:text="@string/createEvent_setDate"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/eventName"
-        android:onClick="showDatePickerDialog"/>
+        app:layout_constraintTop_toBottomOf="@+id/eventName" />
 
     <Button
         android:id="@+id/timeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
-        android:layout_marginTop="@dimen/ui_element_vertical_spacing"
+        android:onClick="showTimePickerDialog"
         android:text="@string/createEvent_setTime"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dateButton"
-        android:onClick="showTimePickerDialog"/>
+        app:layout_constraintTop_toBottomOf="@+id/dateButton" />
 
     <!-- TODO: Would it be better to have the date/time listed on the buttons? -->
     <TextView
@@ -106,12 +159,13 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
         android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
-        android:layout_marginTop="@dimen/ui_element_vertical_spacing"
+        android:layout_marginTop="8dp"
+        android:onClick="createEvent"
         android:text="@string/create"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/eventDescription"
-        android:onClick="createEvent"/>
+        app:layout_constraintTop_toBottomOf="@+id/eventDescription" />
 
     <ProgressBar
         android:id="@+id/eventPostProgressBar"
@@ -123,4 +177,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 </android.support.constraint.ConstraintLayout>

@@ -1,6 +1,7 @@
 package org.codethechange.culturemesh.models;
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 import org.json.JSONException;
@@ -14,31 +15,25 @@ import java.util.ArrayList;
  * Created by nathaniel on 11/10/17.
  */
 @Entity
-public class User implements Serializable{
+public class User implements Serializable, Putable, Postable {
     @PrimaryKey
     public long id;
-
-    public String firstName;
-
-    public String lastName;
-
+    public int role;
     public String email;
-
     public String username;
 
+    public String firstName;
+    public String lastName;
+    public String gender;
+
     public String aboutMe;
-
-    public int role;
-
     public String imgURL;
 
-    public String getImgURL() {
-        return imgURL;
-    }
-
+    @Ignore
+    private String password;
 
     public User(long id, String firstName, String lastName, String email, String username,
-                String imgURL, String aboutMe) {
+                String imgURL, String aboutMe, String gender) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -46,6 +41,7 @@ public class User implements Serializable{
         this.username = username;
         this.imgURL = imgURL;
         this.aboutMe = aboutMe;
+        this.gender = gender;
     }
 
     public User(JSONObject res) throws JSONException{
@@ -54,10 +50,14 @@ public class User implements Serializable{
                 res.getString("last_name"),
                 res.getString("email"), res.getString("username"),
                 "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
-                res.getString("about_me"));
+                res.getString("about_me"), res.getString("gender"));
     }
-    public User(){
+    public User() {
 
+    }
+
+    public String getImgURL() {
+        return imgURL;
     }
 
     public String getFirstName() {
@@ -90,6 +90,75 @@ public class User implements Serializable{
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    /**
+     * Create a JSON representation of the object that conforms to the following format:
+     * <pre>
+     *     {@code
+     *       {
+               "id": 0,
+               "username": "string",
+               "first_name": "string",
+               "last_name": "string",
+               "email": "string",
+               "role": 0,
+               "gender": "string",
+               "about_me": "string",
+               "img_link": "string"
+             }
+     *     }
+     * </pre>
+     * This is intended to be the format used by the {@code /user/users} PUT endpoint
+     * @return JSON representation of the object
+     * @throws JSONException Unclear when this would be thrown
+     */
+    public JSONObject getPutJson() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("id", id);
+        json.put("username", username);
+        json.put("first_name", firstName);
+        json.put("last_name", lastName);
+        json.put("email", email);
+        json.put("role", role);
+        json.put("gender", gender);
+        json.put("about_me", aboutMe);
+        json.put("img_link", imgURL);
+        return json;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    /**
+     * Create a JSON representation of the object that conforms to the following format:
+     * <pre>
+     *     {@code
+     *       {
+                "username": "string",
+                "password": "string",
+                "first_name": "string",
+                "last_name": "string",
+                "email": "string",
+                "role": 0
+             }
+     *     }
+     * </pre>
+     * This is intended to be the format used by the {@code /user/users} POST endpoint.
+     * <string>NOTE: The user's password must be set using {@link User#setPassword(String)}</string>
+     * @return JSON representation of the object
+     * @throws JSONException Unclear when this would be thrown
+     */
+    public JSONObject getPostJson() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("username", username);
+        json.put("password", password);
+        json.put("first_name", firstName);
+        json.put("last_name", lastName);
+        json.put("email", email);
+        json.put("role", role);
+        return json;
     }
 
 }
