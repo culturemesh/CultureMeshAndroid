@@ -3,6 +3,7 @@ package org.codethechange.culturemesh;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Base64;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
@@ -970,12 +971,10 @@ class API {
             String pass  = settings.getString(USER_PASS,  null);
 
             Calendar now = Calendar.getInstance();
-            Calendar expires = Calendar.getInstance();
-            expires.add(Calendar.SECOND, TOKEN_SECONDS);
-            Calendar refresh = Calendar.getInstance();
-            refresh.add(Calendar.SECOND, TOKEN_SECONDS - TOKEN_BUFFER_SECONDS);
+            Calendar refresh = (Calendar) loginTokenExpiration.clone();
+            refresh.add(Calendar.SECOND, -1 * TOKEN_BUFFER_SECONDS);
 
-            if (loginToken == null || now.after(expires)) {
+            if (loginToken == null || now.after(loginTokenExpiration)) {
                 if (email == null || pass == null) {
                     listener.onResponse(new NetworkResponse<String>(true, R.string.authenticationError));
                 } else {
@@ -987,6 +986,8 @@ class API {
                                         response.getMessageID()));
                             } else {
                                 loginToken = response.getPayload();
+                                loginTokenExpiration = Calendar.getInstance();
+                                loginTokenExpiration.add(Calendar.SECOND, TOKEN_SECONDS);
                                 listener.onResponse(new NetworkResponse<>(loginToken));
                             }
                         }
@@ -1003,6 +1004,8 @@ class API {
                                     response.getMessageID()));
                         } else {
                             loginToken = response.getPayload();
+                            loginTokenExpiration = Calendar.getInstance();
+                            loginTokenExpiration.add(Calendar.SECOND, TOKEN_SECONDS);
                             listener.onResponse(new NetworkResponse<>(loginToken));
                         }
                     }
