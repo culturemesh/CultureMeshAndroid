@@ -45,7 +45,6 @@ public class CreateEventActivity extends AppCompatActivity {
     private EditText descriptionRef;
     private RequestQueue queue;
     private Activity myActivity = this;
-    private RequestQueue queue;
 
     /**
      * Initialize activity with saved state
