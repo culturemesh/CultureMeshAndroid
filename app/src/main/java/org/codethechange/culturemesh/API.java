@@ -63,6 +63,7 @@ TODO: Figure out alternative to id's other than longs and ints, which cannot rep
      - Perhaps check if it comes from subscribed network, if not do network request instead of cache?
  */
 
+// TODO: Update API documentation
 /**
  * This API serves as the interface between the rest of the app and both the local database and the
  * CultureMesh servers. When another part of the app needs to request information, it calls API
@@ -82,6 +83,7 @@ TODO: Figure out alternative to id's other than longs and ints, which cannot rep
  */
 
 class API {
+    // TODO: Document API constants
     // Shared Preferences
     static final String SETTINGS_IDENTIFIER = "acmsi";
     static final String PERSONAL_NETWORKS = "pernet";
@@ -186,7 +188,8 @@ class API {
             queue.add(req);
         }
 
-
+        // TODO: Consider consolidating many of these API.Get methods via a model method as in API.Post and API.Put
+        // TODO: Document API.Get.networkUserCount
         static void networkUserCount(RequestQueue queue, long id, final Response.Listener<NetworkResponse<Long>> listener) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE + "network/" + id + "/user_count?" + getCredentials(), null, new Response.Listener<JSONObject>() {
                 @Override
@@ -209,6 +212,7 @@ class API {
             queue.add(req);
         }
 
+        // TODO: Document API.Get.networkPostCount
         static void networkPostCount(RequestQueue queue, long id, final Response.Listener<NetworkResponse<Long>> listener) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE + "network/" + id + "/post_count?" + getCredentials(), null, new Response.Listener<JSONObject>() {
                 @Override
@@ -295,16 +299,6 @@ class API {
             });
             queue.add(req);
         }
-
-        /**
-         * Get the {@link org.codethechange.culturemesh.models.Post}s a {@link User} has made. This
-         * is done by asking {@link PostDao} for all posts with the user's ID, as performed by
-         * {@link PostDao#getUserPosts(long)}.
-         * @param id ID of the {@link User} whose {@link org.codethechange.culturemesh.models.Post}s
-         *           are being requested
-         * @return List of the {@link org.codethechange.culturemesh.models.Post}s the user has made
-         */
-        // TODO: When will we ever use this? Perhaps viewing a user profile?
 
         /**
          * Get the {@link org.codethechange.culturemesh.models.Post}s a {@link User} has made.
@@ -537,6 +531,7 @@ class API {
             queue.add(req);
         }
 
+        // TODO: Document API.Get.networkUsers
         static void networkUsers(RequestQueue queue, final long id, final Response.Listener<NetworkResponse<ArrayList<User>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/" +
                     id + "/users?" + getCredentials(), null, new Response.Listener<JSONArray>() {
@@ -642,6 +637,7 @@ class API {
             queue.add(req);
         }
 
+        // TODO: Plugin API.Get.event
         static NetworkResponse<Event> event(long id) {
             EventDao eDao = mDb.eventDao();
             Event event = eDao.getEvent(id);
@@ -705,6 +701,7 @@ class API {
             queue.add(req);
         }
 
+        // TODO: Document autocompletePlace
         static void autocompletePlace(RequestQueue queue, String text, final Response.Listener<NetworkResponse<List<Location>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE +
                     "location/autocomplete?input_text=" + text + getCredentials(), null, new Response.Listener<JSONArray>() {
@@ -731,6 +728,7 @@ class API {
             queue.add(req);
         }
 
+        // TODO: Document autocompleteLanguage
         static void autocompleteLanguage(RequestQueue queue, String text, final Response.Listener<NetworkResponse<List<Language>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE +
                     "language/autocomplete?input_text=" + text + getCredentials(), null, new Response.Listener<JSONArray>() {
@@ -1183,6 +1181,7 @@ class API {
             });
         }
 
+        // TODO: Document or Remove removeUserFromNetwork
         static NetworkResponse removeUserFromNetwork(long userId, long networkId) {
             NetworkSubscriptionDao nSDao = mDb.networkSubscriptionDao();
             NetworkSubscription ns = new NetworkSubscription(userId, networkId);
