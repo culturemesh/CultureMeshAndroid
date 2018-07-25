@@ -1032,7 +1032,7 @@ class API {
         static void loginTokenWithCred(RequestQueue queue, final String email, final String password,
                                final Response.Listener<NetworkResponse<String>> listener) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE +
-                    "token?" + getCredentials(), null, new Response.Listener<JSONObject>() {
+                    "account/token?" + getCredentials(), null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
                     String token;
@@ -1050,6 +1050,7 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+                    // TODO: What if no network response
                     int code = error.networkResponse.statusCode;
                     if (code == 405) {
                         listener.onResponse(new NetworkResponse<String>(true,
@@ -1063,7 +1064,7 @@ class API {
             }) {
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> headers = super.getHeaders();
+                    Map<String, String> headers = new HashMap<>();
                     headers.put("Authorization", genBasicAuth(email, password));
                     return headers;
                 }
