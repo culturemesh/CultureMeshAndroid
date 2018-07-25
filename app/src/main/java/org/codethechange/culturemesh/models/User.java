@@ -14,6 +14,7 @@ import java.util.ArrayList;
 /**
  * Created by nathaniel on 11/10/17.
  */
+// TODO: Document User
 @Entity
 public class User implements Serializable, Putable, Postable {
     @PrimaryKey

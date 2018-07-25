@@ -34,6 +34,7 @@ public abstract class DatabaseLocation extends Location {
         super(json);
     }
 
+    // TODO: Document DatabaseLocation Constructor
     public DatabaseLocation(JSONObject json, String cityIdKey, String regionIdKey, String countryIdKey) throws JSONException {
         super(json, cityIdKey, regionIdKey, countryIdKey);
     }

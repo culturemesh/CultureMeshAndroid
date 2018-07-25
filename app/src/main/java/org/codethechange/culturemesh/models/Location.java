@@ -8,7 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-
+// TODO: Complete Location documentation
 /**
  * This object stores only the city, region, and country ID values, so it acts as a pointer to the
  * more detailed information for the location in each City, Region, and Country's database entries

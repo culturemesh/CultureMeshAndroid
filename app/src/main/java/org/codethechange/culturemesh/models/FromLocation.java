@@ -10,6 +10,7 @@ import org.json.JSONObject;
  */
 public class FromLocation extends DatabaseLocation {
 
+    // TODO: Document FromLocation fields
     /**
      * These instance fields mirror those in Location, but are needed for database storage
      */

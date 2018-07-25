@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 
+// TODO: Document Event
 /**
  * Created by nathaniel on 11/10/17.
  */
