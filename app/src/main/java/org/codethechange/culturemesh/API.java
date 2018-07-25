@@ -1063,7 +1063,7 @@ class API {
                 }
             }) {
                 @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
+                public Map<String, String> getHeaders() {
                     Map<String, String> headers = new HashMap<>();
                     headers.put("Authorization", genBasicAuth(email, password));
                     return headers;
@@ -1127,8 +1127,8 @@ class API {
                             }
                         }) {
                             @Override
-                            public Map<String, String> getHeaders() throws AuthFailureError {
-                                Map<String,String> headers = super.getHeaders();
+                            public Map<String, String> getHeaders() {
+                                Map<String,String> headers = new HashMap<>();
                                 headers.put("Authorization", genBasicAuth(token));
                                 return headers;
                             }
@@ -1172,8 +1172,8 @@ class API {
                             }
                         }) {
                             @Override
-                            public Map<String, String> getHeaders() throws AuthFailureError {
-                                Map<String,String> headers = super.getHeaders();
+                            public Map<String, String> getHeaders() {
+                                Map<String,String> headers = new HashMap<>();
                                 headers.put("Authorization", genBasicAuth(token));
                                 return headers;
                             }
@@ -1294,8 +1294,8 @@ class API {
                             }
                         }) {
                             @Override
-                            public Map<String, String> getHeaders() throws AuthFailureError {
-                                Map<String,String> headers = super.getHeaders();
+                            public Map<String, String> getHeaders() {
+                                Map<String,String> headers = new HashMap<>();
                                 headers.put("Authorization", genBasicAuth(token));
                                 return headers;
                             }
@@ -1415,8 +1415,8 @@ class API {
                             }
                         }) {
                             @Override
-                            public Map<String, String> getHeaders() throws AuthFailureError {
-                                Map<String,String> headers = super.getHeaders();
+                            public Map<String, String> getHeaders() {
+                                Map<String,String> headers = new HashMap<>();
                                 headers.put("Authorization", genBasicAuth(token));
                                 return headers;
                             }
