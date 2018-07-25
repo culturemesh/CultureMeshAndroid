@@ -804,6 +804,7 @@ class API {
                 @Override
                 public void onResponse(JSONArray res) {
                     try {
+                        // TODO: Create new network
                         if (res.length() == 0) {
                             // No network was found
                             listener.onResponse(new NetworkResponse<Network>(true, R.string.noNetworkExist));
