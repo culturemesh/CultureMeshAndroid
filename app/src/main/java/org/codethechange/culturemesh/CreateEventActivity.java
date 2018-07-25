@@ -122,7 +122,7 @@ public class CreateEventActivity extends AppCompatActivity {
             long networkId = prefs.getLong(API.SELECTED_NETWORK, -1);
             long authorId = prefs.getLong(API.CURRENT_USER, -1);
             Event event = new Event(-1, networkId, name, description,
-                    date.toString(), authorId, address1, address2, city, region, country);
+                    timeOfEvent, authorId, address1, address2, city, region, country);
             // POST Event with AsyncTask
             final ProgressBar progressBar = findViewById(R.id.eventPostProgressBar);
             progressBar.setIndeterminate(true);
@@ -231,7 +231,7 @@ public class CreateEventActivity extends AppCompatActivity {
                     amPm = " AM";
                 }
             }
-            String time = inHour + ":" + inMin + amPm;
+            String time = String.format("%02d:%02d %s", inHour, minute, amPm);
             // SOURCE: https://stackoverflow.com/questions/26917564/set-textview-to-time-from-timepicker-android?rq=1
             // Get eventTime from the activity
             TextView textView = getActivity().findViewById(R.id.eventTime);
