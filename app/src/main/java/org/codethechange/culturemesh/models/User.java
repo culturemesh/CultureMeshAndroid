@@ -3,6 +3,7 @@ package org.codethechange.culturemesh.models;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,6 +43,12 @@ public class User implements Serializable, Putable, Postable {
         this.imgURL = imgURL;
         this.aboutMe = aboutMe;
         this.gender = gender;
+    }
+
+    public User(long id, String firstName, String lastName, String email, String username,
+                String imgURL, String aboutMe, String gender, String password) {
+        this(id, firstName, lastName, email, username, imgURL, aboutMe, gender);
+        this.password = password;
     }
 
     public User(JSONObject res) throws JSONException{
@@ -158,6 +165,8 @@ public class User implements Serializable, Putable, Postable {
         json.put("last_name", lastName);
         json.put("email", email);
         json.put("role", role);
+        json.put("act_code", "123456");
+        json.put("fp_code", "12345");
         return json;
     }
 
