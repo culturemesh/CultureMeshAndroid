@@ -4,14 +4,24 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 
-import java.util.Random;
-
 /**
  * Class to store responses after attempting networking tasks
  */
 public class NetworkResponse<E> {
+
+    /**
+     * Whether or not the network task failed.
+     */
     private boolean fail;
+
+    /**
+     * String reference ID of message describing the error.
+     */
     private int messageID;
+
+    /**
+     * Object returned by the network task.
+     */
     private E payload;
 
     /**
@@ -90,10 +100,20 @@ public class NetworkResponse<E> {
 
     /**
      * Get an error dialog that can be displayed to show message from messageID to user
-     * @param context Context upon which to display error dialog
+     * @param context Context upon which to display error dialog (Should be {@code someClass.this})
      * @return Dialog that can be shown
      */
     public AlertDialog getErrorDialog(Context context) {
+        return genErrorDialog(context, messageID);
+    }
+
+    /**
+     * Get an error dialog that can be displayed to the user
+     * @param context Context upon which to display error dialog (Should be {@code someClass.this})
+     * @param messageID String resource ID of message to display
+     * @return {@link AlertDialog} with specified alert message.
+     */
+    public static AlertDialog genErrorDialog(Context context, int messageID) {
         // SOURCE: https://stackoverflow.com/questions/26097513/android-simple-alert-dialog
         AlertDialog errDialog = new AlertDialog.Builder(context).create();
         errDialog.setTitle(context.getString(R.string.error));
