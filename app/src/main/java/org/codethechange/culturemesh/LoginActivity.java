@@ -3,12 +3,9 @@ package org.codethechange.culturemesh;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -31,6 +28,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
     EditText lastNameText;
     EditText confirmPassword;
     EditText passwordText;
+    EditText usernameText;
     TextView needAccountText;
     private RequestQueue queue;
 
@@ -76,7 +74,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (signInToggle) {
-                    EditText emailField = findViewById(R.id.user_name_field);
+                    EditText emailField = findViewById(R.id.email_field);
                     EditText passwordField = findViewById(R.id.password_field);
                     final String email = emailField.getText().toString();
                     final String password = passwordField.getText().toString();
@@ -108,7 +106,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                         }
                     });
                 } else {
-                    EditText emailField = findViewById(R.id.user_name_field);
+                    EditText emailField = findViewById(R.id.email_field);
                     EditText firstNameField = findViewById(R.id.first_name_field);
                     EditText lastNameField = findViewById(R.id.last_name_field);
                     EditText passwordField = findViewById(R.id.password_field);
@@ -167,6 +165,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         confirmPassword = findViewById(R.id.confirm_password_field);
         passwordText = findViewById(R.id.password_field);
         needAccountText = findViewById(R.id.need_account_text);
+        usernameText = findViewById(R.id.username_field);
         final Button signToggleButton = findViewById(R.id.sign_toggle_button);
         //Get number of pixels for 8dp
         DisplayMetrics displaymetrics = new DisplayMetrics();
@@ -176,7 +175,19 @@ public class LoginActivity extends RedirectableAppCompatActivity {
             public void onClick(View v) {
                 if (signInToggle) {
                     //Have animation move edit texts in place.
-                    //Move first name text from bottom to just under username
+                    //Move user name text from bottom to just under email
+                    Animation userNameTextAnim = new Animation() {
+                        @Override
+                        protected void applyTransformation(float interpolatedTime, Transformation t) {
+                            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)
+                                    usernameText.getLayoutParams();
+                            params.topMargin = (int)(1000 - (1000 - eightDp) * interpolatedTime);
+                            usernameText.setLayoutParams(params);
+                        }
+                    };
+                    userNameTextAnim.setDuration(300); // in ms
+                    usernameText.startAnimation(userNameTextAnim);
+                    //Next, move first name to under user name.
                     Animation firstNameTextAnim = new Animation() {
                         @Override
                         protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -188,7 +199,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                     };
                     firstNameTextAnim.setDuration(300); // in ms
                     firstNameText.startAnimation(firstNameTextAnim);
-                    //Have Password move two EditText's below where it is now.
+                    //Have Password move three EditText's below where it is now.
                     final Animation passwordTextAnim = new Animation() {
                         @Override
                         protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -196,13 +207,14 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                                     passwordText.getLayoutParams();
                             params.topMargin = (int) (eightDp + interpolatedTime * (
                                     firstNameText.getMeasuredHeight() + eightDp +
+                                    usernameText.getMeasuredHeight() + eightDp +
                                             lastNameText.getMeasuredHeight()+ eightDp));
                             passwordText.setLayoutParams(params);
                         }
                     };
                     passwordTextAnim.setDuration(300);
                     passwordText.startAnimation(passwordTextAnim);
-                    //Have confirmPasswordMove just below password.
+                    //Have confirmPassword move just below password.
                     final Animation confirmPasswordAnim = new Animation(){
                         @Override
                         protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -210,6 +222,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                                     confirmPassword.getLayoutParams();
                             params.topMargin = (int) (eightDp + interpolatedTime * (
                                     firstNameText.getMeasuredHeight() + eightDp +
+                                            usernameText.getMeasuredHeight() + eightDp +
                                             lastNameText.getMeasuredHeight() + eightDp +
                                             passwordText.getMeasuredHeight() + eightDp));
                             confirmPassword.setLayoutParams(params);
@@ -223,6 +236,10 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                     //Have sign up button be under confirm password field
                     constraints.connect(R.id.sign_in_button, ConstraintSet.TOP,
                             R.id.confirm_password_field, ConstraintSet.BOTTOM);
+                    // We need to have move firstname to be under username as opposed to under
+                    // email.
+                    constraints.connect(R.id.first_name_field, ConstraintSet.TOP,
+                            R.id.username_field, ConstraintSet.BOTTOM);
                     constraints.applyTo(layout);
                     signInToggle = false;
                     //Swap button labels.
@@ -233,7 +250,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                 } else {
                     //Change back to sign in layout.
                     //Have animation move edit texts in place.
-                    //Move first name to bottom under username
+                    //Move first name to bottom under email
                     Animation firstNameTextAnim = new Animation() {
                         @Override
                         protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -245,6 +262,17 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                     };
                     firstNameTextAnim.setDuration(300); // in ms
                     firstNameText.startAnimation(firstNameTextAnim);
+                    Animation usernameAnim = new Animation() {
+                        @Override
+                        protected void applyTransformation(float interpolatedTime, Transformation t) {
+                            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)
+                                    usernameText.getLayoutParams();
+                            params.topMargin = (int)(2000 * interpolatedTime);
+                            usernameText.setLayoutParams(params);
+                        }
+                    };
+                    usernameAnim.setDuration(300);
+                    usernameText.startAnimation(usernameAnim);
                     //Have Password move back up.
                     final Animation passwordTextAnim = new Animation() {
                         @Override
