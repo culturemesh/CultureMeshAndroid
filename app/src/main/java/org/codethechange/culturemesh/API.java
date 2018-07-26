@@ -23,11 +23,8 @@ import org.codethechange.culturemesh.data.CMDatabase;
 import org.codethechange.culturemesh.data.EventDao;
 import org.codethechange.culturemesh.data.EventSubscription;
 import org.codethechange.culturemesh.data.EventSubscriptionDao;
-import org.codethechange.culturemesh.data.NetworkDao;
 import org.codethechange.culturemesh.data.NetworkSubscription;
 import org.codethechange.culturemesh.data.NetworkSubscriptionDao;
-import org.codethechange.culturemesh.data.PostDao;
-import org.codethechange.culturemesh.data.UserDao;
 import org.codethechange.culturemesh.models.City;
 import org.codethechange.culturemesh.models.Country;
 import org.codethechange.culturemesh.models.DatabaseNetwork;
@@ -50,7 +47,6 @@ import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,25 +59,13 @@ TODO: Figure out alternative to id's other than longs and ints, which cannot rep
      - Perhaps check if it comes from subscribed network, if not do network request instead of cache?
  */
 
-// TODO: Update API documentation
 /**
- * This API serves as the interface between the rest of the app and both the local database and the
+ * This API serves as the interface between the rest of the app and the
  * CultureMesh servers. When another part of the app needs to request information, it calls API
  * methods to obtain it. Similarly, API methods should be used to store, send, and update
- * information. The API then handles searching local caches for the information, requesting it from
- * the CultureMesh servers, and updating the local cache. The local cache allows for offline access
- * to limited information.
- *
- * For simplicity, we store the id's of other model objects in the database, not the objects
- * themselves. Thus, when we return these objects, we need to instantiate them with the methods
- * provided in this class.
- *
- * IMPORTANT: If you want to use this class in your activity, make sure you run API.loadAppDatabase()
- * at the beginning of onPreExecute()/doInBackground(), and API.closeDatabase() in onPostExecute().
- * The app will crash otherwise.
- *
+ * information. The API then handles requesting it from
+ * the CultureMesh servers.
  */
-
 class API {
     // TODO: Document API constants
     // Shared Preferences
