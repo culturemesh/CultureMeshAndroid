@@ -108,6 +108,7 @@
     <string name="write_comments">Write a Comment &#8230; </string>
     <string name="post">Post</string>
     <string name="error_writing_post">Error Submitting Post.</string>
+    <string name="error_opening_post">An error occurred when attempting to open the post.</string>
     <string name="cannot_write_empty">Cannot write an empty comment.</string>
     <string name="title_activity_view_profile">View Profile</string>
     <string name="posts">Posts</string>
