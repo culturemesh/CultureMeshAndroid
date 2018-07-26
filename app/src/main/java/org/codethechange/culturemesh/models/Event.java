@@ -49,33 +49,32 @@ public class Event extends FeedItem implements Serializable, Putable, Postable {
     public long authorId;
 
     /**
-     * First line of the address where the event is to take place. This value may be user-generated,
-     * so it may not describe a valid address.
+     * First line of the address where the event is to take place. Some addresses may not have
+     * this value, in which case its value will be {@link Event#NOWHERE_INTERNAL}.
      */
     public String addressLine1;
 
-    // TODO: Define empty address parts to be either empty strings or "null" (pick one)
     /**
      * Second line of the address where the event is to take place. Some addresses may not have
-     * this value, in which case its value will be an empty string ({@code ""}).
+     * this value, in which case its value will be {@link Event#NOWHERE_INTERNAL}.
      */
     public String addressLine2;
 
     /**
      * City portion of the address where the event is to take place. Some addresses may not have
-     * this value, in which case its value will be an empty string ({@code ""}).
+     * this value, in which case its value will be {@link Event#NOWHERE_INTERNAL}.
      */
     public String city;
 
     /**
      * Region portion of the address where the event is to take place. Some addresses may not have
-     * this value, in which case its value will be an empty string ({@code ""}).
+     * this value, in which case its value will be {@link Event#NOWHERE_INTERNAL}.
      */
     public String region;
 
     /**
      * Country portion of the address where the event is to take place. Some addresses may not have
-     * this value, in which case its value will be an empty string ({@code ""}).
+     * this value, in which case its value will be {@link Event#NOWHERE_INTERNAL}.
      */
     public String country;
 
@@ -107,11 +106,11 @@ public class Event extends FeedItem implements Serializable, Putable, Postable {
      * @param timeOfEvent Date and time of the event. Must strictly conform to the format
      *                    {@code yyyy-MM-ddTHH:mm:ss.SSSZ}.
      * @param author Unique identifier for the {@link User} creating the {@link Event}
-     * @param addressLine1 Optional first line of the address. An empty string {@code ""} if absent.
-     * @param addressLine2 Optional second line of the address. An empty string {@code ""} if absent.
-     * @param city Optional city portion of the address. An empty string {@code ""} if absent.
-     * @param region Optional region portion of the address. An empty string {@code ""} if absent.
-     * @param country Optional country portion of the address. An empty string {@code ""} if absent.
+     * @param addressLine1 Optional first line of the address. {@link Event#NOWHERE} if absent.
+     * @param addressLine2 Optional second line of the address. {@link Event#NOWHERE} if absent.
+     * @param city Optional city portion of the address. {@link Event#NOWHERE} if absent.
+     * @param region Optional region portion of the address. {@link Event#NOWHERE} if absent.
+     * @param country Optional country portion of the address. {@link Event#NOWHERE} if absent.
      */
     public Event(long id, long networkId, String title, String description, String timeOfEvent,
                  long author, String addressLine1, String addressLine2, String city,
@@ -268,8 +267,8 @@ public class Event extends FeedItem implements Serializable, Putable, Postable {
              }
      *     }
      * </pre>
-     * Note that {@code date_created} is not used and may be omitted. {@code address_2},
-     * {@code city}, {@code region}, and {@code country} are optional and used only if provided.
+     * Note that {@code date_created} is not used and may be omitted. Empty address fields should
+     * be {@code null}.
      * @param json JSON representation of the {@link Event} to be created
      * @throws JSONException May be thrown if an improperly formatted JSON is provided
      */
@@ -280,27 +279,27 @@ public class Event extends FeedItem implements Serializable, Putable, Postable {
         description = json.getString("description");
         timeOfEvent = json.getString("event_date");
         authorId = json.getLong("id_host");
-        if (!json.isNull("address_1")) {
+        if (!json.isNull("address_1") && !json.getString("address_1").equals(NOWHERE_SERVER)) {
             addressLine1 = json.getString("address_1");
         } else {
             addressLine1 = NOWHERE_INTERNAL;
         }
-        if (! json.isNull("address_2")) {
+        if (! json.isNull("address_2") && !json.getString("address_2").equals(NOWHERE_SERVER)) {
             addressLine2 = json.getString("address_2");
         } else {
             addressLine2 = NOWHERE_INTERNAL;
         }
-        if (! json.isNull("city")) {
+        if (! json.isNull("city") && !json.getString("city").equals(NOWHERE_SERVER)) {
             city = json.getString("city");
         } else {
             city = NOWHERE_INTERNAL;
         }
-        if (! json.isNull("region")) {
+        if (! json.isNull("region") && !json.getString("region").equals(NOWHERE_SERVER)) {
             region = json.getString("region");
         } else {
             region = NOWHERE_INTERNAL;
         }
-        if (! json.isNull("country")) {
+        if (! json.isNull("country") && !json.getString("country").equals(NOWHERE_SERVER)) {
             country = json.getString("country");
         } else {
             country = NOWHERE_INTERNAL;
