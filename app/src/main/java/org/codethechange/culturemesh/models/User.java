@@ -3,14 +3,11 @@ package org.codethechange.culturemesh.models;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.math.BigInteger;
-import java.util.ArrayList;
 
 /**
  * Created by nathaniel on 11/10/17.
@@ -21,7 +18,6 @@ public class User implements Serializable, Putable, Postable {
     @PrimaryKey
     public long id;
     public int role;
-    public String email;
     public String username;
 
     public String firstName;
@@ -34,21 +30,20 @@ public class User implements Serializable, Putable, Postable {
     @Ignore
     private String password;
 
-    public User(long id, String firstName, String lastName, String email, String username,
+    public User(long id, String firstName, String lastName, String username,
                 String imgURL, String aboutMe, String gender) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.email = email;
         this.username = username;
         this.imgURL = imgURL;
         this.aboutMe = aboutMe;
         this.gender = gender;
     }
 
-    public User(long id, String firstName, String lastName, String email, String username,
+    public User(long id, String firstName, String lastName, String username,
                 String imgURL, String aboutMe, String gender, String password) {
-        this(id, firstName, lastName, email, username, imgURL, aboutMe, gender);
+        this(id, firstName, lastName, username, imgURL, aboutMe, gender);
         this.password = password;
     }
 
@@ -76,10 +71,6 @@ public class User implements Serializable, Putable, Postable {
         return lastName;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
     public String getUsername() {
         return username;
     }
@@ -98,10 +89,6 @@ public class User implements Serializable, Putable, Postable {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public void setUsername(String username) {
@@ -139,7 +126,6 @@ public class User implements Serializable, Putable, Postable {
         json.put("username", username);
         json.put("first_name", firstName);
         json.put("last_name", lastName);
-        json.put("email", email);
         json.put("role", role);
         json.put("gender", gender);
         json.put("about_me", aboutMe);
@@ -176,7 +162,6 @@ public class User implements Serializable, Putable, Postable {
         json.put("password", password);
         json.put("first_name", firstName);
         json.put("last_name", lastName);
-        json.put("email", email);
         json.put("role", role);
         json.put("act_code", "123456");
         json.put("fp_code", "12345");
