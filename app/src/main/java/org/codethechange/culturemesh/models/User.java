@@ -77,6 +77,14 @@ public class User implements Serializable, Putable, Postable {
         return username;
     }
 
+    public String getBio() {
+        return aboutMe;
+    }
+
+    public void setImgURL(String imgURL) {
+        this.imgURL = imgURL;
+    }
+
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -91,6 +99,10 @@ public class User implements Serializable, Putable, Postable {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public void setBio(String bio) {
+        this.aboutMe = bio;
     }
 
     /**
