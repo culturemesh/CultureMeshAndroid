@@ -73,7 +73,7 @@
     <string name="noErrors">noerr</string>
     <!-- Strings for Login and New Account UI -->
     <string name="title_activity_login">Sign In</string>
-    <string name="username">Email</string>
+    <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="sign_in">Sign In</string>
     <string name="need_account">Need Account?</string>
