@@ -83,20 +83,20 @@ public class Event extends FeedItem implements Serializable, Putable, Postable {
      * Value instance fields describing address portions hold when that portion is not included
      * in the address. <bold>For use within this class only.</bold>
      */
-    private String NOWHERE_INTERNAL = "";
+    private static final String NOWHERE_INTERNAL = "";
 
     /**
      * Value sent to and received from the server for keys describing address portions when that
      * portion is not included in the address. <bold>For use in server communication only.</bold>
      */
-    private String NOWHERE_SERVER = "";
+    private static final String NOWHERE_SERVER = "";
 
     /**
      * Value other classes should pass to this class and should expect to receive from this class
      * to represent the portions of addresses that are not a part of the address. Note that
      * {@link Event#getAddress()} uses this constant only when the entire address is missing.
      */
-    public String NOWHERE = "";
+    public static final String NOWHERE = "";
 
     /**
      * Construct an Event object from the provided parameters.
