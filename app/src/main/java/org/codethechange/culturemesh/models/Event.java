@@ -280,27 +280,27 @@ public class Event extends FeedItem implements Serializable, Putable, Postable {
         description = json.getString("description");
         timeOfEvent = json.getString("event_date");
         authorId = json.getLong("id_host");
-        addressLine1 = json.getString("address_1");
-        if (json.has("address_2") && json.getString("address_2") != null &&
-                !json.getString("address_2").equals("null")) {
+        if (!json.isNull("address_1")) {
+            addressLine1 = json.getString("address_1");
+        } else {
+            addressLine1 = NOWHERE_INTERNAL;
+        }
+        if (! json.isNull("address_2")) {
             addressLine2 = json.getString("address_2");
         } else {
             addressLine2 = NOWHERE_INTERNAL;
         }
-        if (json.has("city") && json.getString("city") != null &&
-                !json.getString("city").equals("null")) {
+        if (! json.isNull("city")) {
             city = json.getString("city");
         } else {
             city = NOWHERE_INTERNAL;
         }
-        if (json.has("region") && json.getString("region") != null &&
-                !json.getString("region").equals("null")) {
+        if (! json.isNull("region")) {
             region = json.getString("region");
         } else {
             region = NOWHERE_INTERNAL;
         }
-        if (json.has("country") && json.getString("country") != null &&
-                !json.getString("country").equals("null")) {
+        if (! json.isNull("country")) {
             country = json.getString("country");
         } else {
             country = NOWHERE_INTERNAL;
