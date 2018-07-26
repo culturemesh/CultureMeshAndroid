@@ -57,11 +57,9 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
             @Override
             public void onClick(View view) {
                 try {
-                    user.firstName = firstName.getText().toString();
-                    user.lastName = lastName.getText().toString();
-                    user.aboutMe = bio.getText().toString();
-                    //TOOD: Add support when we have API Support for PUT /user
-                    // new UpdateProfile().execute(user);
+                    user.setFirstName(firstName.getText().toString());
+                    user.setLastName(lastName.getText().toString());
+                    user.setBio(bio.getText().toString());
                 } catch(NullPointerException e) {
                     //TODO: User is null. We should handle that.
                     e.printStackTrace();
