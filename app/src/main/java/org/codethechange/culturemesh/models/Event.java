@@ -80,6 +80,25 @@ public class Event extends FeedItem implements Serializable, Putable, Postable {
     public String country;
 
     /**
+     * Value instance fields describing address portions hold when that portion is not included
+     * in the address. <bold>For use within this class only.</bold>
+     */
+    private String NOWHERE_INTERNAL = "";
+
+    /**
+     * Value sent to and received from the server for keys describing address portions when that
+     * portion is not included in the address. <bold>For use in server communication only.</bold>
+     */
+    private String NOWHERE_SERVER = "";
+
+    /**
+     * Value other classes should pass to this class and should expect to receive from this class
+     * to represent the portions of addresses that are not a part of the address. Note that
+     * {@link Event#getAddress()} uses this constant only when the entire address is missing.
+     */
+    public String NOWHERE = "";
+
+    /**
      * Construct an Event object from the provided parameters.
      * @param id Unique identifier for the event
      * @param networkId Unique identifier for the {@link Network} the event is a part of
@@ -103,12 +122,31 @@ public class Event extends FeedItem implements Serializable, Putable, Postable {
         this.description = description;
         this.timeOfEvent = timeOfEvent;
         this.authorId = author;
-        this.addressLine1 = addressLine1;
-        this.addressLine2 = addressLine2;
-        this.city = city;
-        this.region = region;
-        this.country = country;
-
+        if (addressLine1.equals(NOWHERE)) {
+            this.addressLine1 = NOWHERE_INTERNAL;
+        } else {
+            this.addressLine1 = addressLine1;
+        }
+        if (addressLine2.equals(NOWHERE)) {
+            this.addressLine2 = NOWHERE_INTERNAL;
+        } else {
+            this.addressLine2 = addressLine2;
+        }
+        if (city.equals(NOWHERE)) {
+            this.city = NOWHERE_INTERNAL;
+        } else {
+            this.city = city;
+        }
+        if (city.equals(NOWHERE)) {
+            this.region = NOWHERE_INTERNAL;
+        } else {
+            this.region = region;
+        }
+        if (city.equals(NOWHERE)) {
+            this.country = NOWHERE_INTERNAL;
+        } else {
+            this.country = country;
+        }
     }
 
     /**
@@ -182,18 +220,24 @@ public class Event extends FeedItem implements Serializable, Putable, Postable {
      * @return UI-suitable form of the address where the event will take place. Address portions
      * (line1, line2, city, region, and country) are separated by commas, and missing portions are
      * excluded. Example: {@code 123 Any Street, New York, New York}. The address portions are
-     * user-generated, so this String may not describe a valid address.
+     * user-generated, so this String may not describe a valid address. If no address is specified
+     * (i.e. if all address portions are missing), the {@link Event#NOWHERE} constant is returned.
      */
     public String getAddress() {
-        String address = addressLine1;
+        String address = "";
 
-        String[] optional = {addressLine2, city, region, country};
+        String[] optional = {addressLine1, addressLine2, city, region, country};
         for (String s : optional) {
-            if (s != null && !s.equals("") && !s.equals("null")) {
+            if (!s.equals(NOWHERE_INTERNAL)) {
                 address += ", " + s;
             }
         }
-        return address;
+
+        if (address.equals("")) {
+            return NOWHERE;
+        } else {
+            return address.substring(2);
+        }
     }
 
     /**
@@ -241,25 +285,25 @@ public class Event extends FeedItem implements Serializable, Putable, Postable {
                 !json.getString("address_2").equals("null")) {
             addressLine2 = json.getString("address_2");
         } else {
-            addressLine2 = "";
+            addressLine2 = NOWHERE_INTERNAL;
         }
         if (json.has("city") && json.getString("city") != null &&
                 !json.getString("city").equals("null")) {
             city = json.getString("city");
         } else {
-            city = "";
+            city = NOWHERE_INTERNAL;
         }
         if (json.has("region") && json.getString("region") != null &&
                 !json.getString("region").equals("null")) {
             region = json.getString("region");
         } else {
-            region = "";
+            region = NOWHERE_INTERNAL;
         }
         if (json.has("country") && json.getString("country") != null &&
                 !json.getString("country").equals("null")) {
             country = json.getString("country");
         } else {
-            country = "";
+            country = NOWHERE_INTERNAL;
         }
     }
 
@@ -291,11 +335,31 @@ public class Event extends FeedItem implements Serializable, Putable, Postable {
         json.put("id_host", authorId);
         json.put("event_date", timeOfEvent);
         json.put("title", title);
-        json.put("address_1", addressLine1);
-        json.put("address_2", addressLine2);
-        json.put("country", country);
-        json.put("city", city);
-        json.put("region", region);
+        if (addressLine1.equals(NOWHERE_INTERNAL)) {
+            json.put("address_1", NOWHERE_SERVER);
+        } else {
+            json.put("address_1", addressLine1);
+        }
+        if (addressLine2.equals(NOWHERE_INTERNAL)) {
+            json.put("address_2", NOWHERE_SERVER);
+        } else {
+            json.put("address_2", addressLine2);
+        }
+        if (country.equals(NOWHERE_INTERNAL)) {
+            json.put("country", NOWHERE_SERVER);
+        } else {
+            json.put("country", country);
+        }
+        if (city.equals(NOWHERE_INTERNAL)) {
+            json.put("city", NOWHERE_SERVER);
+        } else {
+            json.put("city", city);
+        }
+        if (city.equals(NOWHERE_INTERNAL)) {
+            json.put("region", NOWHERE_SERVER);
+        } else {
+            json.put("region", region);
+        }
         json.put("description", description);
         return json;
     }
