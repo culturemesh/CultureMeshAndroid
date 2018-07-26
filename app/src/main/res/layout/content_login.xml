@@ -23,7 +23,7 @@
         app:srcCompat="@drawable/logo_header" />
 
     <EditText
-        android:id="@+id/user_name_field"
+        android:id="@+id/email_field"
         android:layout_width="0dp"
         android:layout_height="45dp"
         android:layout_marginEnd="8dp"
@@ -54,7 +54,7 @@
         android:paddingStart="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_name_field" />
+        app:layout_constraintTop_toBottomOf="@+id/email_field" />
 
     <EditText
         android:id="@+id/first_name_field"
@@ -71,7 +71,7 @@
         android:paddingStart="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_name_field" />
+        app:layout_constraintTop_toBottomOf="@+id/email_field" />
 
     <EditText
         android:id="@+id/last_name_field"
@@ -96,16 +96,17 @@
         android:layout_height="45dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="1000dp"
         android:background="@drawable/rounded_background_white"
         android:ems="10"
         android:hint="@string/confirm_password"
         android:inputType="textPassword"
         android:paddingEnd="5dp"
         android:paddingStart="10dp"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_name_field" />
+        app:layout_constraintTop_toBottomOf="@+id/email_field" />
 
     <Button
         android:id="@+id/sign_in_button"
@@ -149,4 +150,22 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/username_field"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="2000dp"
+        android:background="@drawable/rounded_background_white"
+        android:ems="10"
+        android:hint="@string/display_name"
+        android:inputType="textPersonName"
+        android:paddingEnd="5dp"
+        android:paddingStart="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/email_field" />
 </android.support.constraint.ConstraintLayout>
