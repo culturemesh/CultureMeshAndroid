@@ -48,6 +48,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -804,6 +805,7 @@ class API {
                 @Override
                 public void onResponse(JSONArray res) {
                     try {
+                        // TODO: Create new network
                         if (res.length() == 0) {
                             // No network was found
                             listener.onResponse(new NetworkResponse<Network>(true, R.string.noNetworkExist));
@@ -1032,7 +1034,7 @@ class API {
         static void loginTokenWithCred(RequestQueue queue, final String email, final String password,
                                final Response.Listener<NetworkResponse<String>> listener) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE +
-                    "token?" + getCredentials(), null, new Response.Listener<JSONObject>() {
+                    "account/token?" + getCredentials(), null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
                     String token;
@@ -1050,6 +1052,7 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+                    // TODO: What if no network response
                     int code = error.networkResponse.statusCode;
                     if (code == 405) {
                         listener.onResponse(new NetworkResponse<String>(true,
@@ -1062,8 +1065,8 @@ class API {
                 }
             }) {
                 @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> headers = super.getHeaders();
+                public Map<String, String> getHeaders() {
+                    Map<String, String> headers = new HashMap<>();
                     headers.put("Authorization", genBasicAuth(email, password));
                     return headers;
                 }
@@ -1126,8 +1129,8 @@ class API {
                             }
                         }) {
                             @Override
-                            public Map<String, String> getHeaders() throws AuthFailureError {
-                                Map<String,String> headers = super.getHeaders();
+                            public Map<String, String> getHeaders() {
+                                Map<String,String> headers = new HashMap<>();
                                 headers.put("Authorization", genBasicAuth(token));
                                 return headers;
                             }
@@ -1171,8 +1174,8 @@ class API {
                             }
                         }) {
                             @Override
-                            public Map<String, String> getHeaders() throws AuthFailureError {
-                                Map<String,String> headers = super.getHeaders();
+                            public Map<String, String> getHeaders() {
+                                Map<String,String> headers = new HashMap<>();
                                 headers.put("Authorization", genBasicAuth(token));
                                 return headers;
                             }
@@ -1200,35 +1203,54 @@ class API {
          * @param listener Listener whose onResponse method will be called when task completes
          */
         static void user(final RequestQueue queue, final User user,
-                         final Response.Listener<NetworkResponse<Void>> listener) {
-            model(queue, user, API_URL_BASE + "user/users?" + getCredentials(),
-                    "API.Post.user", listener);
+                         final Response.Listener<NetworkResponse<String>> listener) {
+            // We cannot use model here because we don't have auth yet: we're making an account!
+            // We cannot call model because we don't have authentication yet: we don't have an
+            // account yet!
+            StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE +
+                    "user/users?" + getCredentials(), new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    listener.onResponse(new NetworkResponse<String>(false, response));
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e("Error called", new String(error.networkResponse.data, StandardCharsets.UTF_8));
+                }
+            }) {
+
+                @Override
+                public byte[] getBody() {
+                    try {
+                        return user.getPostJson().toString().getBytes("utf-8");
+                    } catch (JSONException | UnsupportedEncodingException e) {
+                        Log.e("POST /users error.", "Error forming JSON");
+                        listener.onResponse(new NetworkResponse<String>(true));
+                        cancel();
+                        return "".getBytes();
+                    }
+                }
+
+                @Override
+                public String getBodyContentType() {
+                    return "application/json; charset=utf-8";
+                }
+            };
+            queue.add(req);
         }
 
-        /**
-         * POST to the server a request, via {@code /network/new}, to create a new {@link Network}.
-         * Success or failure status will be passed via a {@link NetworkResponse<Void>} to the
-         * listener.
-         * @param queue Queue to which the asynchronous task will be added
-         * @param network Network to create.
-         * @param listener Listener whose onResponse method will be called when task completes
-         */
-        static void network(final RequestQueue queue, final Network network,
-                            final Response.Listener<NetworkResponse<Void>> listener) {
-            model(queue, network, API_URL_BASE + "network/new?" + getCredentials(),
-                    "API.Post.net", listener);
-        }
 
         /**
          * POST to the server a request, via {@code /post/new}, to create a new
          * {@link org.codethechange.culturemesh.models.Post}. Success or failure status will be
-         * passed via a {@link NetworkResponse<Void>} to the listener.
+         * passed via a {@link NetworkResponse<String>} to the listener.
          * @param queue Queue to which the asynchronous task will be added
          * @param post {@link org.codethechange.culturemesh.models.Post} to create.
          * @param listener Listener whose onResponse method will be called when task completes
          */
         static void post(final RequestQueue queue, final org.codethechange.culturemesh.models.Post post,
-                         final Response.Listener<NetworkResponse<Void>> listener) {
+                         final Response.Listener<NetworkResponse<String>> listener) {
             model(queue, post, API_URL_BASE + "post/new?" + getCredentials(),
                     "API.Post.post", listener);
         }
@@ -1236,12 +1258,12 @@ class API {
         /**
          * POST to the server a request, via {@code /post/{postId}/reply}, to create a new
          * {@link PostReply}. Success or failure status will be
-         * passed via a {@link NetworkResponse<Void>} to the listener.
+         * passed via a {@link NetworkResponse<String>} to the listener.
          * @param queue Queue to which the asynchronous task will be added
          * @param comment {@link PostReply} to create.
          * @param listener Listener whose onResponse method will be called when task completes
          */
-        static void reply(RequestQueue queue, final PostReply comment, final Response.Listener<NetworkResponse<Void>> listener) {
+        static void reply(RequestQueue queue, final PostReply comment, final Response.Listener<NetworkResponse<String>> listener) {
             model(queue, comment, API_URL_BASE + "post/" + comment.parentId + "/reply",
                     "API.Post.reply", listener);
         }
@@ -1249,20 +1271,20 @@ class API {
         /**
          * POST to the server a request, via {@code /event/new}, to create a new
          * {@link Event}. Success or failure status will be
-         * passed via a {@link NetworkResponse<Void>} to the listener.
+         * passed via a {@link NetworkResponse<String>} to the listener.
          * @param queue Queue to which the asynchronous task will be added
          * @param event {@link Event} to create.
          * @param listener Listener whose onResponse method will be called when task completes
          */
         static void event(final RequestQueue queue, final Event event,
-                         final Response.Listener<NetworkResponse<Void>> listener) {
+                         final Response.Listener<NetworkResponse<String>> listener) {
             model(queue, event, API_URL_BASE + "event/new?" + getCredentials(),
                     "API.Post.event", listener);
         }
 
         /**
          * POST to the server a request to create a new {@link Postable} model. Success
-         * or failure status will be passed via a {@link NetworkResponse<Void>} to the listener.
+         * or failure status will be passed via a {@link NetworkResponse<String>} to the listener.
          * @param queue Queue to which the asynchronous task will be added
          * @param toPost Model to create
          * @param url Full URL to send the POST request to
@@ -1270,31 +1292,31 @@ class API {
          * @param listener Listener whose onResponse method will be called when task completes
          */
         private static void model(final RequestQueue queue, final Postable toPost, final String url,
-                                  final String logTag, final Response.Listener<NetworkResponse<Void>> listener) {
+                                  final String logTag, final Response.Listener<NetworkResponse<String>> listener) {
             Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
                 @Override
                 public void onResponse(NetworkResponse<String> response) {
                     if (response.fail()) {
-                        listener.onResponse(new NetworkResponse<Void>(true, response.getMessageID()));
+                        listener.onResponse(new NetworkResponse<String>(true, response.getMessageID()));
                     } else {
                         final String token = response.getPayload();
                         StringRequest req = new StringRequest(Request.Method.POST, url,
                                 new Response.Listener<String>() {
                                     @Override
                                     public void onResponse(String response) {
-                                        listener.onResponse(new NetworkResponse<Void>(false));
+                                        listener.onResponse(new NetworkResponse<String>(false, response));
                                     }
                                 }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 int messageID = processNetworkError(logTag,
                                         "ErrorListener", error);
-                                listener.onResponse(new NetworkResponse<Void>(true, messageID));
+                                listener.onResponse(new NetworkResponse<String>(true, messageID));
                             }
                         }) {
                             @Override
-                            public Map<String, String> getHeaders() throws AuthFailureError {
-                                Map<String,String> headers = super.getHeaders();
+                            public Map<String, String> getHeaders() {
+                                Map<String,String> headers = new HashMap<>();
                                 headers.put("Authorization", genBasicAuth(token));
                                 return headers;
                             }
@@ -1305,7 +1327,7 @@ class API {
                                     return toPost.getPostJson().toString().getBytes("utf-8");
                                 } catch (JSONException | UnsupportedEncodingException e) {
                                     Log.e(logTag, "Error forming JSON");
-                                    listener.onResponse(new NetworkResponse<Void>(true));
+                                    listener.onResponse(new NetworkResponse<String>(true));
                                     cancel();
                                     return "".getBytes();
                                 }
@@ -1327,14 +1349,14 @@ class API {
 
         /**
          * PUT to the server, via {@code /user/users}, a request to make changes a {@link User}.
-         * Success or failure status will be passed via a {@link NetworkResponse<Void>} to the
+         * Success or failure status will be passed via a {@link NetworkResponse<String>} to the
          * listener.
          * @param queue Queue to which the asynchronous task will be added
          * @param user Updated version of the user to change
          * @param listener Listener whose onResponse method will be called when task completes
          */
         static void user(final RequestQueue queue, final User user,
-                         final Response.Listener<NetworkResponse<Void>> listener) {
+                         final Response.Listener<NetworkResponse<String>> listener) {
             model(queue, user, API_URL_BASE + "user/users?" + getCredentials(),
                     "API.Put.user", listener);
         }
@@ -1342,13 +1364,13 @@ class API {
         /**
          * PUT to the server a request, via {@code /event/new}, to update an
          * {@link Event}. Success or failure status will be
-         * passed via a {@link NetworkResponse<Void>} to the listener.
+         * passed via a {@link NetworkResponse<String>} to the listener.
          * @param queue Queue to which the asynchronous task will be added
          * @param event Updated version of the {@link Event} to change
          * @param listener Listener whose onResponse method will be called when task completes
          */
         static void event(final RequestQueue queue, final Event event,
-                          final Response.Listener<NetworkResponse<Void>> listener) {
+                          final Response.Listener<NetworkResponse<String>> listener) {
             model(queue, event, API_URL_BASE + "event/new?" + getCredentials(),
                     "API.Post.event", listener);
         }
@@ -1356,14 +1378,14 @@ class API {
         /**
          * PUT to the server, via {@code /user/users}, a request to make changes a
          * {@link org.codethechange.culturemesh.models.Post}.
-         * Success or failure status will be passed via a {@link NetworkResponse<Void>} to the
+         * Success or failure status will be passed via a {@link NetworkResponse<String>} to the
          * listener.
          * @param queue Queue to which the asynchronous task will be added
          * @param post Updated version of the post to change
          * @param listener Listener whose onResponse method will be called when task completes
          */
         static void post(final RequestQueue queue, final org.codethechange.culturemesh.models.Post post,
-                         final Response.Listener<NetworkResponse<Void>> listener) {
+                         final Response.Listener<NetworkResponse<String>> listener) {
             model(queue, post, API_URL_BASE + "post/new?" + getCredentials(),
                     "API.Put.post", listener);
         }
@@ -1371,19 +1393,19 @@ class API {
         /**
          * PUT to the server a request, via {@code /post/{postId}/reply}, to update a
          * {@link PostReply}. Success or failure status will be
-         * passed via a {@link NetworkResponse<Void>} to the listener.
+         * passed via a {@link NetworkResponse<String>} to the listener.
          * @param queue Queue to which the asynchronous task will be added
          * @param comment Updated version of the {@link PostReply} to make changes to
          * @param listener Listener whose onResponse method will be called when task completes
          */
-        static void reply(RequestQueue queue, final PostReply comment, final Response.Listener<NetworkResponse<Void>> listener) {
+        static void reply(RequestQueue queue, final PostReply comment, final Response.Listener<NetworkResponse<String>> listener) {
             model(queue, comment, API_URL_BASE + "post/" + comment.parentId + "/reply",
-                    "API.Post.reply", listener);
+                    "API.Put.reply", listener);
         }
 
         /**
          * PUT to the server a request to make changes to a {@link Putable} model. Success
-         * or failure status will be passed via a {@link NetworkResponse<Void>} to the listener.
+         * or failure status will be passed via a {@link NetworkResponse<String>} to the listener.
          * @param queue Queue to which the asynchronous task will be added
          * @param toPut Updated version of the model to change
          * @param url Full URL to send the POST request to
@@ -1391,31 +1413,31 @@ class API {
          * @param listener Listener whose onResponse method will be called when task completes
          */
         private static void model(final RequestQueue queue, final Putable toPut, final String url,
-                                  final String logTag, final Response.Listener<NetworkResponse<Void>> listener) {
+                                  final String logTag, final Response.Listener<NetworkResponse<String>> listener) {
             Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
                 @Override
                 public void onResponse(NetworkResponse<String> response) {
                     if (response.fail()) {
-                        listener.onResponse(new NetworkResponse<Void>(true, response.getMessageID()));
+                        listener.onResponse(new NetworkResponse<String>(true, response.getMessageID()));
                     } else {
                         final String token = response.getPayload();
                         StringRequest req = new StringRequest(Request.Method.PUT, url,
                                 new Response.Listener<String>() {
                                     @Override
                                     public void onResponse(String response) {
-                                        listener.onResponse(new NetworkResponse<Void>(false));
+                                        listener.onResponse(new NetworkResponse<String>(false, response));
                                     }
                                 }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 int messageID = processNetworkError(logTag,
                                         "ErrorListener", error);
-                                listener.onResponse(new NetworkResponse<Void>(true, messageID));
+                                listener.onResponse(new NetworkResponse<String>(true, messageID));
                             }
                         }) {
                             @Override
-                            public Map<String, String> getHeaders() throws AuthFailureError {
-                                Map<String,String> headers = super.getHeaders();
+                            public Map<String, String> getHeaders() {
+                                Map<String,String> headers = new HashMap<>();
                                 headers.put("Authorization", genBasicAuth(token));
                                 return headers;
                             }
@@ -1426,7 +1448,7 @@ class API {
                                     return toPut.getPutJson().toString().getBytes();
                                 } catch (JSONException e) {
                                     Log.e(logTag, "Error forming JSON");
-                                    listener.onResponse(new NetworkResponse<Void>(true));
+                                    listener.onResponse(new NetworkResponse<String>(true));
                                     cancel();
                                     return "".getBytes();
                                 }

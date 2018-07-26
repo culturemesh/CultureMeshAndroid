@@ -75,37 +75,91 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         signInButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                EditText emailField = findViewById(R.id.user_name_field);
-                EditText passwordField = findViewById(R.id.password_field);
-                final String email = emailField.getText().toString();
-                final String password = passwordField.getText().toString();
+                if (signInToggle) {
+                    EditText emailField = findViewById(R.id.user_name_field);
+                    EditText passwordField = findViewById(R.id.password_field);
+                    final String email = emailField.getText().toString();
+                    final String password = passwordField.getText().toString();
 
-                API.Get.userID(queue, email, new Response.Listener<NetworkResponse<Long>>() {
-                    @Override
-                    public void onResponse(NetworkResponse<Long> response) {
-                        if (response.fail()) {
-                            response.showErrorDialog(LoginActivity.this);
-                        } else {
-                            final long id = response.getPayload();
-                            API.Get.loginTokenWithCred(queue, email, password, new Response.Listener<NetworkResponse<String>>() {
-                                @Override
-                                public void onResponse(NetworkResponse<String> response) {
-                                    if (response.fail()) {
-                                        response.showErrorDialog(LoginActivity.this);
-                                    } else {
-                                        SharedPreferences settings = getSharedPreferences(
-                                                API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-                                        setLoggedIn(settings, id, email, password);
+                    API.Get.userID(queue, email, new Response.Listener<NetworkResponse<Long>>() {
+                        @Override
+                        public void onResponse(NetworkResponse<Long> response) {
+                            if (response.fail()) {
+                                response.showErrorDialog(LoginActivity.this);
+                            } else {
+                                final long id = response.getPayload();
+                                API.Get.loginTokenWithCred(queue, email, password, new Response.Listener<NetworkResponse<String>>() {
+                                    @Override
+                                    public void onResponse(NetworkResponse<String> response) {
+                                        if (response.fail()) {
+                                            response.showErrorDialog(LoginActivity.this);
+                                        } else {
+                                            SharedPreferences settings = getSharedPreferences(
+                                                    API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+                                            setLoggedIn(settings, id, email, password);
 
-                                        Intent returnIntent = new Intent();
-                                        setResult(Activity.RESULT_OK, returnIntent);
-                                        finish();
+                                            Intent returnIntent = new Intent();
+                                            setResult(Activity.RESULT_OK, returnIntent);
+                                            finish();
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
                         }
+                    });
+                } else {
+                    EditText emailField = findViewById(R.id.user_name_field);
+                    EditText firstNameField = findViewById(R.id.first_name_field);
+                    EditText lastNameField = findViewById(R.id.last_name_field);
+                    EditText passwordField = findViewById(R.id.password_field);
+                    EditText confirmPasswordField = findViewById(R.id.confirm_password_field);
+
+                    final String pass = passwordField.getText().toString();
+                    final String confPass = confirmPasswordField.getText().toString();
+                    final String email = emailField.getText().toString();
+                    if (!pass.equals(confPass)) {
+                        (new NetworkResponse<Void>(true,
+                                R.string.passwords_dont_match)).showErrorDialog(LoginActivity.this);
+                    } else {
+                        //TODO: Think about better way to deal with usernames.
+                        String username = "";
+                        for (int i = 0; i < 24; i++) {
+                            String hex = "1234567890abcdef";
+                            username += hex.charAt((int) (Math.random() * hex.length()));
+                        }
+                        User userToCreate = new User(-1, firstNameField.getText().toString(),
+                                lastNameField.getText().toString(), email,
+                                username, "", "", "", pass);
+                        API.Post.user(queue, userToCreate, new Response.Listener<NetworkResponse<String>>() {
+                            @Override
+                            public void onResponse(NetworkResponse<String> response) {
+                                if (response.fail()) {
+                                    response.showErrorDialog(LoginActivity.this);
+                                } else {
+                                    // The user is created! Let's save the user's creds and
+                                    // id.
+                                    API.Get.userID(queue, email, new Response.Listener<NetworkResponse<Long>>() {
+                                        @Override
+                                        public void onResponse(NetworkResponse<Long> response) {
+                                            if (response.fail()) {
+                                                response.showErrorDialog(LoginActivity.this);
+                                            } else {
+                                                SharedPreferences settings = getSharedPreferences(
+                                                        API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+                                                setLoggedIn(settings, response.getPayload(),
+                                                        email, pass);
+                                                Intent returnIntent = new Intent();
+                                                setResult(Activity.RESULT_OK, returnIntent);
+                                                finish();
+                                            }
+                                        }
+                                    });
+
+                                }
+                            }
+                        });
                     }
-                });
+                }
             }
         });
         firstNameText = findViewById(R.id.first_name_field);

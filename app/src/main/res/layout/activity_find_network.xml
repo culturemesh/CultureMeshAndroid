@@ -85,7 +85,7 @@
             android:layout_marginTop="10dp"
             android:layout_weight="1"
             android:background="@drawable/rounded_background"
-            android:text="Stanford"
+            android:text="@string/title_activity_choose_near_location"
             android:textAppearance="@style/TextAppearance.AppCompat.Widget.Button.Inverse" />
     </LinearLayout>
 
