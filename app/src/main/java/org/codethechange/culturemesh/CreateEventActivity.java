@@ -170,9 +170,6 @@ public class CreateEventActivity extends AppCompatActivity {
         } else if (descriptionRef.getText().toString().isEmpty()) {
             descriptionRef.setError(getString(R.string.createEvent_missingDescription));
             return false;
-        } else if (address1Ref.getText().toString().isEmpty()) {
-            address1Ref.setError(getString(R.string.createEvent_missingAddress));
-            return false;
         } else
             return true;
     }
