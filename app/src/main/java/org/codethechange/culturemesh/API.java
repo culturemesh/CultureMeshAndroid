@@ -1103,39 +1103,9 @@ class API {
          * @param listener Listener whose onResponse method will be called when the operation completes
          */
         static void addUserToEvent(final RequestQueue queue, final long userId, final long eventId,
-                              final Response.Listener<NetworkResponse<Void>> listener) {
-            Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
-                @Override
-                public void onResponse(NetworkResponse<String> response) {
-                    if (response.fail()) {
-                        listener.onResponse(new NetworkResponse<Void>(true, response.getMessageID()));
-                    } else {
-                        final String token = response.getPayload();
-                        StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "user/" +
-                                userId + "/addToEvent/" + eventId + "?" + getCredentials(), new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                listener.onResponse(new NetworkResponse<Void>(false));
-                            }
-                        }, new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                int messageID = processNetworkError("API.Post.addUserToEvent",
-                                        "ErrorListener", error);
-                                listener.onResponse(new NetworkResponse<Void>(true, messageID));
-                            }
-                        }) {
-                            @Override
-                            public Map<String, String> getHeaders() {
-                                Map<String,String> headers = new HashMap<>();
-                                headers.put("Authorization", genBasicAuth(token));
-                                return headers;
-                            }
-                        };
-                        queue.add(req);
-                    }
-                }
-            });
+                              final Response.Listener<NetworkResponse<String>> listener) {
+            emptyModel(queue, API_URL_BASE + "user/" + userId + "/addToEvent/" + eventId + "?" +
+                    getCredentials(), "API.Post.addUserToEvent", listener);
         }
 
         /**
@@ -1147,27 +1117,37 @@ class API {
          * @param listener Listener whose onResponse method will be called when the operation completes
          */
         static void addUserToNetwork(final RequestQueue queue, final long userId, final long networkId,
-                                     final Response.Listener<NetworkResponse<Void>> listener) {
+                                     final Response.Listener<NetworkResponse<String>> listener) {
+            emptyModel(queue, API_URL_BASE + "user/" + userId + "/addToNetwork/" + networkId +
+                    "?" + getCredentials(), "API.Post.addUserToNet", listener);
+        }
 
+        static void removeUserFromNetwork(final RequestQueue queue, long networkId,
+                                          final Response.Listener<NetworkResponse<String>> listener) {
+            emptyModel(queue, API_URL_BASE + "user/leaveNetwork/" + networkId + "?" +
+                    getCredentials(), "API.Post.removeUserFromNetwork", listener);
+        }
+
+        private static void emptyModel(final RequestQueue queue, final String url, final String method,
+                                       final Response.Listener<NetworkResponse<String>> listener) {
             Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
                 @Override
                 public void onResponse(NetworkResponse<String> response) {
                     if (response.fail()) {
-                        listener.onResponse(new NetworkResponse<Void>(true, response.getMessageID()));
+                        listener.onResponse(new NetworkResponse<String>(true, response.getMessageID()));
                     } else {
                         final String token = response.getPayload();
-                        StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "user/" +
-                                userId + "/addToNetwork/" + networkId + "?" + getCredentials(), new Response.Listener<String>() {
+                        StringRequest req = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-                                listener.onResponse(new NetworkResponse<Void>(false));
+                                listener.onResponse(new NetworkResponse<String>(false));
                             }
                         }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                int messageID = processNetworkError("API.Post.addUserToNet",
+                                int messageID = processNetworkError(method,
                                         "ErrorListener", error);
-                                listener.onResponse(new NetworkResponse<Void>(true, messageID));
+                                listener.onResponse(new NetworkResponse<String>(true, messageID));
                             }
                         }) {
                             @Override
@@ -1181,14 +1161,6 @@ class API {
                     }
                 }
             });
-        }
-
-        // TODO: Document or Remove removeUserFromNetwork
-        static NetworkResponse removeUserFromNetwork(long userId, long networkId) {
-            NetworkSubscriptionDao nSDao = mDb.networkSubscriptionDao();
-            NetworkSubscription ns = new NetworkSubscription(userId, networkId);
-            nSDao.deleteNetworkSubscriptions(ns);
-            return new NetworkResponse<>(ns);
         }
 
         /**
