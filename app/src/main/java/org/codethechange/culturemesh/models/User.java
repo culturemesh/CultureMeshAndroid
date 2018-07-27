@@ -14,7 +14,7 @@ import java.io.Serializable;
  */
 // TODO: Document User
 @Entity
-public class User implements Serializable, Putable, Postable {
+public class User implements Serializable {
     @PrimaryKey
     public long id;
     public int role;
@@ -120,7 +120,7 @@ public class User implements Serializable, Putable, Postable {
      * @return JSON representation of the object
      * @throws JSONException Unclear when this would be thrown
      */
-    public JSONObject getPutJson() throws JSONException {
+    public JSONObject getPutJson(String email) throws JSONException {
         JSONObject json = new JSONObject();
         json.put("id", id);
         json.put("username", username);
@@ -156,9 +156,10 @@ public class User implements Serializable, Putable, Postable {
      * @return JSON representation of the object
      * @throws JSONException Unclear when this would be thrown
      */
-    public JSONObject getPostJson() throws JSONException {
+    public JSONObject getPostJson(String email) throws JSONException {
         JSONObject json = new JSONObject();
         json.put("username", username);
+        json.put("email", email);
         json.put("password", password);
         json.put("first_name", firstName);
         json.put("last_name", lastName);
