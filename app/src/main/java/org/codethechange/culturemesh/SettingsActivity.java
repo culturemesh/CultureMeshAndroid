@@ -122,8 +122,13 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                                 //Wow! We are removing this network! Sad..
                                 long networkID = ((NetworkSummaryAdapter) rv.getAdapter()).getNetworks()
                                         .get(viewHolder.getAdapterPosition()).id;
-                                //TODO: Support leaving network when we have the API support.
-                                // API support. new LeaveNetwork().execute(networkID);
+                                API.Post.removeUserFromNetwork(queue, networkID,
+                                        new Response.Listener<NetworkResponse<String>>() {
+                                    @Override
+                                    public void onResponse(NetworkResponse<String> response) {
+                                        rv.getAdapter().notifyDataSetChanged();
+                                    }
+                                });
                             }
                         })
                         .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -138,7 +143,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                     public void onDismiss(DialogInterface dialogInterface) {
                         //Even if we aren't changing anything, the swipe motion removes
                         //the item from the recycler. We need to include it again.
-                        resetAdapter();
+                        rv.getAdapter().notifyDataSetChanged();
                     }
                 });
                 success.show();
