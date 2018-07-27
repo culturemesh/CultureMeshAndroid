@@ -9,6 +9,7 @@ import android.provider.Settings;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,6 +39,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
     Button updateProfile;
     User user;
     RequestQueue queue;
+    private static final String TAG = SettingsActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +99,10 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                     userName.setText(user.username);
                     email.setText(settings.getString(API.USER_EMAIL, getString(R.string.missingEmail)));
                     Picasso.with(getApplicationContext()).load(user.getImgURL()).into(profilePicture);
+                    Log.i(TAG, "User info loaded");
+                    rv.getAdapter().notifyDataSetChanged();
+                    Log.i(TAG, "Adapter notified of new user info");
+
                 } else {
                     response.showErrorDialog(getApplicationContext());
                 }
@@ -183,6 +189,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                         emptyText.setText(getResources().getString(R.string.no_networks));
                     }
                     for (final Network net : nets) {
+                        Log.d(TAG, "Loaded network: " + net);
                         API.Get.networkUserCount(queue, net.id, new Response.Listener<NetworkResponse<Long>>() {
                             @Override
                             public void onResponse(NetworkResponse<Long> response) {
@@ -207,8 +214,10 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                                     response.showErrorDialog(SettingsActivity.this);
                                     adapter.getPostCounts().put(net.id + "", 0);
                                 }
+                                adapter.notifyDataSetChanged();
                             }
                         });
+                        adapter.notifyDataSetChanged();
                     }
                 } else {
                     response.showErrorDialog(SettingsActivity.this);
