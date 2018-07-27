@@ -547,6 +547,7 @@ class API {
                     for (int i = 0; i < response.length(); i++) {
                         try {
                             User user = new User((JSONObject) response.get(i));
+                            users.add(user);
                         } catch (JSONException e) {
                             e.printStackTrace();
                             listener.onResponse(new NetworkResponse<ArrayList<User>>(true));

@@ -85,30 +85,18 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                     EditText passwordField = findViewById(R.id.password_field);
                     final String email = emailField.getText().toString();
                     final String password = passwordField.getText().toString();
-
-                    API.Get.userID(queue, email, new Response.Listener<NetworkResponse<Long>>() {
+                    API.Get.loginTokenWithCred(queue, email, password, new Response.Listener<NetworkResponse<String>>() {
                         @Override
-                        public void onResponse(NetworkResponse<Long> response) {
+                        public void onResponse(NetworkResponse<String> response) {
                             if (response.fail()) {
                                 response.showErrorDialog(LoginActivity.this);
                             } else {
-                                final long id = response.getPayload();
-                                API.Get.loginTokenWithCred(queue, email, password, new Response.Listener<NetworkResponse<String>>() {
-                                    @Override
-                                    public void onResponse(NetworkResponse<String> response) {
-                                        if (response.fail()) {
-                                            response.showErrorDialog(LoginActivity.this);
-                                        } else {
-                                            SharedPreferences settings = getSharedPreferences(
-                                                    API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-                                            setLoggedIn(settings, id, email, password);
-
-                                            Intent returnIntent = new Intent();
-                                            setResult(Activity.RESULT_OK, returnIntent);
-                                            finish();
-                                        }
-                                    }
-                                });
+                                SharedPreferences settings = getSharedPreferences(
+                                        API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+                                setLoggedIn(settings, 160, email, password);
+                                Intent returnIntent = new Intent();
+                                setResult(Activity.RESULT_OK, returnIntent);
+                                finish();
                             }
                         }
                     });
