@@ -121,6 +121,7 @@
     <!-- Strings for help and about pages -->
     <string name="about">About</string>
     <string name="join_success">You successfully joined the network!</string>
+    <string name="success">Success</string>
     <string name="are_you_sure">Are You Sure?</string>
     <string name="leave_network_question">Are you sure you want to leave this network?</string>
     <string name="update_profile">Update Profile</string>

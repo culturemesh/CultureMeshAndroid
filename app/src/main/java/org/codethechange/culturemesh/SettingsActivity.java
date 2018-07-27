@@ -2,6 +2,7 @@ package org.codethechange.culturemesh;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -31,8 +32,8 @@ import java.util.List;
 public class SettingsActivity extends DrawerActivity implements NetworkSummaryAdapter.OnNetworkTapListener {
 
     RecyclerView rv;
-    TextView emptyText, userName, email;
-    EditText bio, firstName, lastName;
+    TextView emptyText;
+    EditText bio, firstName, lastName, userName, email;
     ImageView profilePicture;
     Button updateProfile;
     User user;
@@ -42,6 +43,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        final SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         rv = findViewById(R.id.rv);
         bio = findViewById(R.id.bio);
         firstName = findViewById(R.id.first_name_field);
@@ -60,6 +62,22 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                     user.setFirstName(firstName.getText().toString());
                     user.setLastName(lastName.getText().toString());
                     user.setBio(bio.getText().toString());
+                    user.setUsername(userName.getText().toString());
+                    SharedPreferences.Editor editor = settings.edit();
+                    String emailText = email.getText().toString();
+                    editor.putString(API.USER_EMAIL, emailText);
+                    editor.apply();
+                    API.Put.user(queue, user, emailText, new Response.Listener<NetworkResponse<String>>() {
+                        @Override
+                        public void onResponse(NetworkResponse<String> response) {
+                            if (response.fail()) {
+                                response.showErrorDialog(SettingsActivity.this);
+                            } else {
+                                NetworkResponse.genSuccessDialog(SettingsActivity.this,
+                                        R.string.updated_profile).show();
+                            }
+                        }
+                    });
                 } catch(NullPointerException e) {
                     //TODO: User is null. We should handle that.
                     e.printStackTrace();
@@ -77,7 +95,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                     firstName.setText(user.firstName);
                     lastName.setText(user.lastName);
                     userName.setText(user.username);
-                    email.setText(user.email);
+                    email.setText(settings.getString(API.USER_EMAIL, getString(R.string.missingEmail)));
                     Picasso.with(getApplicationContext()).load(user.getImgURL()).into(profilePicture);
                 } else {
                     response.showErrorDialog(getApplicationContext());
