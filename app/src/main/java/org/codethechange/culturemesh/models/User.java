@@ -51,7 +51,7 @@ public class User implements Serializable {
         this(res.getInt("id"),
                 res.getString("first_name"),
                 res.getString("last_name"),
-                res.getString("email"), res.getString("username"),
+                res.getString("username"),
                 "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
                 res.getString("about_me"), res.getString("gender"));
     }
@@ -108,7 +108,6 @@ public class User implements Serializable {
                "username": "string",
                "first_name": "string",
                "last_name": "string",
-               "email": "string",
                "role": 0,
                "gender": "string",
                "about_me": "string",
