@@ -4,25 +4,55 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Wrapper for {@code DatabaseLocation} that is for From locations. See the documentation for
- * {@code DatabaseLocation} for information as to why this redundancy is necessary. All of these
+ * Wrapper for {@link DatabaseLocation} that is for From locations. See the documentation for
+ * {@link DatabaseLocation} for information as to why this redundancy is necessary. All of these
  * instance fields will be stored in the local cached database.
  */
 public class FromLocation extends DatabaseLocation {
 
-    // TODO: Document FromLocation fields
     /**
-     * These instance fields mirror those in Location, but are needed for database storage
+     * Mirrors the {@link Location#countryId} in {@link Location} to avoid collisions in the
+     * database
+     * @see DatabaseLocation
      */
     public long from_country_id;
+
+    /**
+     * Mirrors the {@link Location#regionId} in {@link Location} to avoid collisions in the
+     * database
+     * @see DatabaseLocation
+     */
     public long from_region_id;
+
+    /**
+     * Mirrors the {@link Location#cityId} in {@link Location} to avoid collisions in the
+     * database
+     * @see DatabaseLocation
+     */
     public long from_city_id;
 
+    /**
+     * Constant that holds the JSON key whose value will be the ID of the city ({@link City#cityId})
+     * in communications with the server.
+     * @see Location#Location(JSONObject, String, String, String)
+     */
     public static final String CITY_ID_KEY = "id_city_origin";
+
+    /**
+     * Constant that holds the JSON key whose value will be the ID of the region
+     * ({@link Region#regionId}) in communications with the server.
+     * @see Location#Location(JSONObject, String, String, String)
+     */
     public static final String REGION_ID_KEY = "id_region_origin";
+
+    /**
+     * Constant that holds the JSON key whose value will be the ID of the country
+     * ({@link Country#countryId}) in communications with the server.
+     * @see Location#Location(JSONObject, String, String, String)
+     */
     public static final String COUNTRY_ID_KEY = "id_country_origin";
 
-    // TODO: Handle undefined geographical areas (e.g. no region defined)
+    // TODO: Add constructors for undefined geographical areas (e.g. no region defined)
     /**
      * Initialize instance fields with provided parameters
      * @param cityId ID of city
