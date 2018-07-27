@@ -85,6 +85,7 @@ class API {
     static final String HOSTING = "hosting";
     static final String FEED_ITEM_COUNT_SIZE = "10"; // Number of posts/events to fetch per paginated request
     static final long NEW_NETWORK = -2;
+    private static final String TAG = API.class.getName();
     static CMDatabase mDb;
     //reqCounter to ensure that we don't close the database while another thread is using it.
     static int reqCounter;
@@ -1045,6 +1046,8 @@ class API {
                     try {
                         int code = error.networkResponse.statusCode;
                         if (code == 401) {
+                            Log.d(TAG, "Authentication failure with 401 error when logging in" +
+                                    "with credentials.");
                             listener.onResponse(NetworkResponse.getAuthFailed(R.string.authenticationError));
                         } else {
                             int messageID = processNetworkError("API.Get.loginToken",
@@ -1662,27 +1665,27 @@ class API {
 
     /**
      * Process errors that could be returned in the form of a {@link VolleyError} the Response.Listener
-     * @param tag Tag to include in log messages
+     * @param method The method where the error occurred
      * @param task Description of the task being attempted. This will be included in log entries.
      * @param error The error returned
      * @return The resource ID of the error message that should be displayed to the user
      */
-    private static int processNetworkError(String tag, String task, VolleyError error) {
+    private static int processNetworkError(String method, String task, VolleyError error) {
         error.printStackTrace();
         if (error instanceof ServerError) {
-            Log.e(tag, task + ": A ServerError occurred with code " + error.networkResponse.statusCode);
+            Log.e(TAG, method + ": " + task + ": A ServerError occurred with code " + error.networkResponse.statusCode);
             return R.string.noConnection;
         } else if (error instanceof NetworkError) {
             // NoConnectionError is a subclass of NetworkError
-            Log.e(tag, task + ": A NetworkError occurred.");
+            Log.e(TAG, method + ": " + task + ": A NetworkError occurred.");
             return R.string.noConnection;
         } else if (error instanceof AuthFailureError) {
-            Log.e(tag, task + ": An AuthFailureError occurred.");
+            Log.e(TAG, method + ": " + task + ": An AuthFailureError occurred.");
             return R.string.authenticationError;
         } else if (error instanceof ParseError) {
-            Log.e(tag, task + ": A ParseError occurred.");
+            Log.e(TAG, method + ": " + task + ": A ParseError occurred.");
         } else if (error instanceof TimeoutError) {
-            Log.e(tag, task + ": A TimeoutError occurred.");
+            Log.e(TAG, method + ": " + task + ": A TimeoutError occurred.");
             return R.string.timeout;
         }
 
