@@ -23,7 +23,7 @@
         android:layout_marginBottom="8dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:textColor="@android:color/primary_text_dark"
+        android:textColor="@color/colorPrimaryDark"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/profile_picture"
         app:layout_constraintStart_toEndOf="@+id/profile_picture"

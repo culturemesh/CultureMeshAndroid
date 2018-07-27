@@ -77,7 +77,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                     firstName.setText(user.firstName);
                     lastName.setText(user.lastName);
                     userName.setText(user.username);
-                    email.setText(user.email);
+                    email.setText(getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).getString(API.USER_EMAIL, ""));
                     Picasso.with(getApplicationContext()).load(user.getImgURL()).into(profilePicture);
                 } else {
                     response.showErrorDialog(getApplicationContext());
