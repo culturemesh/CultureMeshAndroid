@@ -148,6 +148,7 @@ public class Network implements Serializable, Postable {
         return json;
     }
 
+    // TODO: Document getPostJson and addPlaceToJson in Network
     @Override
     public JSONObject getPostJson() throws JSONException {
         return toJSON();

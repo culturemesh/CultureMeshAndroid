@@ -12,6 +12,7 @@ import java.util.HashMap;
  */
 public class NearLocation extends DatabaseLocation {
 
+    // TODO: Document NearLocation fields
     /**
      * These instance fields mirror those in Location, but are needed for database storage
      */

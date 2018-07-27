@@ -105,7 +105,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
             }
         });
         subscribedNetworkIds = new HashSet<>();
-        SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+        final SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         currentUser = settings.getLong(API.CURRENT_USER, -1);
         if (currentUser == -1) {
             //User is not signed in. Replace user info with sign in button
@@ -132,7 +132,15 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                         TextView userName = navView.getHeaderView(0).findViewById(R.id.full_name);
                         userName.setText(user.username);
                         TextView email = navView.getHeaderView(0).findViewById(R.id.user_email);
-                        email.setText(user.email);
+                        String emailString = settings.getString(API.USER_EMAIL, null);
+                        if (emailString == null) {
+                            emailString = getString(R.string.missingEmail);
+                            email.setText(emailString);
+                            NetworkResponse.genErrorDialog(DrawerActivity.this,
+                                    R.string.authenticationError);
+                        } else {
+                            email.setText(emailString);
+                        }
                         ImageView profilePic = navView.getHeaderView(0).findViewById(R.id.user_icon);
                         Picasso.with(getApplicationContext()).load(user.imgURL).into(profilePic);
                     }

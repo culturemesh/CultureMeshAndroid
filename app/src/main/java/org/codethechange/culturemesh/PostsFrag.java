@@ -78,17 +78,19 @@ public class PostsFrag extends Fragment {
             @Override
             public void onItemClick(FeedItem item) {
                 Intent intent = new Intent(getActivity(), SpecificPostActivity.class);
-                long id;
-                try {
-                    id = ((Post) item).id;
-                    intent.putExtra("postID", id);
-                    intent.putExtra("networkID", selectedNetwork);
-                    getActivity().startActivity(intent);
-                } catch(ClassCastException e) {
-                    //I don't think we have commenting support for events??
-                } catch (NullPointerException e) {
-                    Toast.makeText(getActivity(), "Cannot open post", Toast.LENGTH_LONG).show();
+                if (item instanceof Post) {
+                    try {
+                        long id = ((Post) item).id;
+                        intent.putExtra("postID", id);
+                        intent.putExtra("networkID", selectedNetwork);
+                        getActivity().startActivity(intent);
+                    } catch (NullPointerException e) {
+                        NetworkResponse.genErrorDialog(getActivity(), R.string.error_opening_post);
+                    }
+                } else if (item instanceof Event) {
+
                 }
+
             }
         }, getActivity().getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);

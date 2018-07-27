@@ -39,12 +39,11 @@ public class LoginActivity extends RedirectableAppCompatActivity {
      * @param settings The SharedPreferences storing user login state
      * @param userID ID of the user to make logged-in
      */
-    public static void setLoggedIn(SharedPreferences settings, long userID, String email, String password) {
+    public static void setLoggedIn(SharedPreferences settings, long userID, String email) {
         API.initializePrefs(settings);
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(API.CURRENT_USER, userID);
         editor.putString(API.USER_EMAIL, email);
-        editor.putString(API.USER_PASS, password);
         editor.apply();
     }
 
@@ -56,7 +55,6 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         if (isLoggedIn(settings)) {
             SharedPreferences.Editor editor = settings.edit();
             editor.remove(API.CURRENT_USER);
-            editor.remove(API.USER_PASS);
             editor.apply();
         }
     }
@@ -85,15 +83,18 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                     EditText passwordField = findViewById(R.id.password_field);
                     final String email = emailField.getText().toString();
                     final String password = passwordField.getText().toString();
-                    API.Get.loginTokenWithCred(queue, email, password, new Response.Listener<NetworkResponse<String>>() {
+
+                    API.Get.loginWithCred(queue, email, password, new Response.Listener<NetworkResponse<API.Get.LoginResponse>>() {
                         @Override
-                        public void onResponse(NetworkResponse<String> response) {
+                        public void onResponse(NetworkResponse<API.Get.LoginResponse> response) {
                             if (response.fail()) {
                                 response.showErrorDialog(LoginActivity.this);
                             } else {
                                 SharedPreferences settings = getSharedPreferences(
                                         API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-                                setLoggedIn(settings, 160, email, password);
+                                API.Get.LoginResponse bundle = response.getPayload();
+                                User user = bundle.user;
+                                setLoggedIn(settings, user.id, email);
                                 Intent returnIntent = new Intent();
                                 setResult(Activity.RESULT_OK, returnIntent);
                                 finish();
@@ -116,9 +117,9 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                     } else {
                         String username = usernameText.getText().toString();
                         User userToCreate = new User(-1, firstNameField.getText().toString(),
-                                lastNameField.getText().toString(), email,
+                                lastNameField.getText().toString(),
                                 username, "", "", "", pass);
-                        API.Post.user(queue, userToCreate, new Response.Listener<NetworkResponse<String>>() {
+                        API.Post.user(queue, userToCreate, email, new Response.Listener<NetworkResponse<String>>() {
                             @Override
                             public void onResponse(NetworkResponse<String> response) {
                                 if (response.fail()) {
@@ -135,7 +136,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                                                 SharedPreferences settings = getSharedPreferences(
                                                         API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
                                                 setLoggedIn(settings, response.getPayload(),
-                                                        email, pass);
+                                                        email);
                                                 Intent returnIntent = new Intent();
                                                 setResult(Activity.RESULT_OK, returnIntent);
                                                 finish();
