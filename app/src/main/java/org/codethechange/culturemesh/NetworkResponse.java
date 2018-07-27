@@ -176,6 +176,28 @@ public class NetworkResponse<E> {
     }
 
     /**
+     * Get a confirmation dialog that can be displayed to the user to reflect a successful operation
+     * @param context Context upon which to display dialog (Should be {@code someClass.this})
+     * @param messageID String resource ID of message to display
+     * @return {@link AlertDialog} with specified alert message
+     */
+    public static AlertDialog genSuccessDialog(Context context, int messageID) {
+        // SOURCE: https://stackoverflow.com/questions/26097513/android-simple-alert-dialog
+        AlertDialog errDialog = new AlertDialog.Builder(context).create();
+        errDialog.setTitle(context.getString(R.string.success));
+        if (messageID != 0) {
+            errDialog.setMessage(context.getString(messageID));
+        }
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        };
+        errDialog.setButton(AlertDialog.BUTTON_NEUTRAL, context.getString(R.string.ok), listener);
+        return errDialog;
+    }
+
+    /**
      * Show an error dialog that can be displayed to show message from messageID to user
      * @param context Context upon which to display error dialog
      */
