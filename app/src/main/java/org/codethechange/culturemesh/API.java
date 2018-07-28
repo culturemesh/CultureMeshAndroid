@@ -105,6 +105,7 @@ class API {
      */
     static class Get {
 
+        // TODO: Consider creating objects using non-constructor methods so we can use polymorphism
         /**
          * Get a {@link User} object from it's ID
          * @param id ID of user to find
@@ -172,8 +173,13 @@ class API {
             queue.add(req);
         }
 
-        // TODO: Consider consolidating many of these API.Get methods via a model method as in API.Post and API.Put
-        // TODO: Document API.Get.networkUserCount
+        /**
+         * Get the number of {@link User}s who are currently members of a {@link Network}
+         * @param queue Queue to which the asynchronous task will be added
+         * @param id ID of the {@link Network} whose {@link User} count will be retrieved
+         * @param listener Listener whose {@link Response.Listener#onResponse(Object)} is called with
+         *                 a {@link NetworkResponse} that stores the result of the network request
+         */
         static void networkUserCount(RequestQueue queue, long id, final Response.Listener<NetworkResponse<Long>> listener) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE + "network/" + id + "/user_count?" + getCredentials(), null, new Response.Listener<JSONObject>() {
                 @Override
@@ -196,7 +202,15 @@ class API {
             queue.add(req);
         }
 
-        // TODO: Document API.Get.networkPostCount
+        /**
+         * Get the number of {@link org.codethechange.culturemesh.models.Post}s that are currently
+         * on a {@link Network}
+         * @param queue Queue to which the asynchronous task will be added
+         * @param id ID of the {@link Network} whose {@link org.codethechange.culturemesh.models.Post}
+         *           count will be retrieved
+         * @param listener Listener whose {@link Response.Listener#onResponse(Object)} is called with
+         *                 a {@link NetworkResponse} that stores the result of the network request
+         */
         static void networkPostCount(RequestQueue queue, long id, final Response.Listener<NetworkResponse<Long>> listener) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE + "network/" + id + "/post_count?" + getCredentials(), null, new Response.Listener<JSONObject>() {
                 @Override
@@ -515,7 +529,13 @@ class API {
             queue.add(req);
         }
 
-        // TODO: Document API.Get.networkUsers
+        /**
+         * Get all the {@link User}s who are members of a {@link Network}
+         * @param queue Queue to which the asynchronous task will be added
+         * @param id ID of the {@link Network} whose users will be fetched
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
         static void networkUsers(RequestQueue queue, final long id, final Response.Listener<NetworkResponse<ArrayList<User>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/" +
                     id + "/users?" + getCredentials(), null, new Response.Listener<JSONArray>() {
@@ -586,7 +606,16 @@ class API {
          * another request inside the listener of the first one if you need data from the first to pass
          * into the second (i.e. id_user from post to get user)
          */
-        static void post(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<org.codethechange.culturemesh.models.Post>> callback) {
+
+        /**
+         * Get a {@link org.codethechange.culturemesh.models.Post} from it's ID
+         * @param queue Queue to which the asynchronous task will be added
+         * @param id ID of the {@link org.codethechange.culturemesh.models.Post} to retrieve
+         * @param callback Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
+        static void post(final RequestQueue queue, long id,
+                         final Response.Listener<NetworkResponse<org.codethechange.culturemesh.models.Post>> callback) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET,
                     API_URL_BASE + "post/" + id + "?" + getCredentials(),
                     null, new Response.Listener<JSONObject>() {
@@ -685,7 +714,13 @@ class API {
             queue.add(req);
         }
 
-        // TODO: Document autocompletePlace
+        /**
+         * Get potential {@link Location}s that match a user's query text
+         * @param queue Queue to which the asynchronous task will be added
+         * @param text User's query text to get autocomplete results for
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
         static void autocompletePlace(RequestQueue queue, String text, final Response.Listener<NetworkResponse<List<Location>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE +
                     "location/autocomplete?input_text=" + text + getCredentials(), null, new Response.Listener<JSONArray>() {
@@ -712,7 +747,13 @@ class API {
             queue.add(req);
         }
 
-        // TODO: Document autocompleteLanguage
+        /**
+         * Get potential {@link Language}s that match a user's query text
+         * @param queue Queue to which the asynchronous task will be added
+         * @param text User's query text to get autocomplete results for
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
         static void autocompleteLanguage(RequestQueue queue, String text, final Response.Listener<NetworkResponse<List<Language>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE +
                     "language/autocomplete?input_text=" + text + getCredentials(), null, new Response.Listener<JSONArray>() {
