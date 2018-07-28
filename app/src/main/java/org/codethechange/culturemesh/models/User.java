@@ -31,7 +31,7 @@ public class User implements Serializable {
 
     /**
      * User's display name that is publicly used to identify their posts, events, etc. Editable by
-     * user.
+     * user. Must be unique across all of CultureMesh's users.
      */
     public String username;
 
@@ -65,7 +65,8 @@ public class User implements Serializable {
      * @param id Uniquely identifies user across all of CultureMesh.
      * @param firstName User's first name (may be pseudonymous)
      * @param lastName User's last name (may be pseudonymous)
-     * @param username The user's "display name" that will serve as their main public identifier
+     * @param username The user's "display name" that will serve as their main public identifier.
+     *                 Must be unique across all of CultureMesh's users.
      * @param imgURL URL to the user's profile picture
      * @param aboutMe Short bio describing the user
      * @param gender User's self-identified gender
@@ -143,8 +144,8 @@ public class User implements Serializable {
     }
 
     /**
-     * Get the user's chosen display name, which should be used as their public identifier
-     * @return User's display name
+     * Get the user's chosen display name, which should be used as their unique public identifier.
+     * @return User's display name, which must be unique across all of CultureMesh's users.
      */
     public String getUsername() {
         return username;
@@ -183,8 +184,9 @@ public class User implements Serializable {
     }
 
     /**
-     * Set the user's display name
-     * @param username New display name to use for the user
+     * Set the user's display name, which must be unique across CultureMesh
+     * @param username New display name to use for the user. Must be unique across all of
+     *                 CultureMesh's users.
      */
     public void setUsername(String username) {
         this.username = username;
