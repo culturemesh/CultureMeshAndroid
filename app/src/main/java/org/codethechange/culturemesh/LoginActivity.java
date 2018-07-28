@@ -116,8 +116,8 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                         }
                         User userToCreate = new User(-1, firstNameField.getText().toString(),
                                 lastNameField.getText().toString(),
-                                username, "", "", "", pass);
-                        API.Post.user(queue, userToCreate, email, new Response.Listener<NetworkResponse<String>>() {
+                                username, "", "", "");
+                        API.Post.user(queue, userToCreate, email, pass, new Response.Listener<NetworkResponse<String>>() {
                             @Override
                             public void onResponse(NetworkResponse<String> response) {
                                 if (response.fail()) {

@@ -27,9 +27,6 @@ public class User implements Serializable {
     public String aboutMe;
     public String imgURL;
 
-    @Ignore
-    private String password;
-
     public User(long id, String firstName, String lastName, String username,
                 String imgURL, String aboutMe, String gender) {
         this.id = id;
@@ -39,12 +36,6 @@ public class User implements Serializable {
         this.imgURL = imgURL;
         this.aboutMe = aboutMe;
         this.gender = gender;
-    }
-
-    public User(long id, String firstName, String lastName, String username,
-                String imgURL, String aboutMe, String gender, String password) {
-        this(id, firstName, lastName, username, imgURL, aboutMe, gender);
-        this.password = password;
     }
 
     public User(JSONObject res) throws JSONException{
@@ -132,10 +123,6 @@ public class User implements Serializable {
         return json;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     /**
      * Create a JSON representation of the object that conforms to the following format:
      * <pre>
@@ -151,11 +138,10 @@ public class User implements Serializable {
      *     }
      * </pre>
      * This is intended to be the format used by the {@code /user/users} POST endpoint.
-     * <string>NOTE: The user's password must be set using {@link User#setPassword(String)}</string>
      * @return JSON representation of the object
      * @throws JSONException Unclear when this would be thrown
      */
-    public JSONObject getPostJson(String email) throws JSONException {
+    public JSONObject getPostJson(String email, String password) throws JSONException {
         JSONObject json = new JSONObject();
         json.put("username", username);
         json.put("email", email);

@@ -1165,7 +1165,6 @@ class API {
 
         /**
          * POST to the server a request, via {@code /user/users}, to create a new user. Note that
-         * <strong>the user's password must be set</strong>. Use {@link User#setPassword(String)}.
          * Success or failure status will be passed via a {@link NetworkResponse<Void>} to the
          * listener.
          * @param queue Queue to which the asynchronous task will be added
@@ -1174,6 +1173,7 @@ class API {
          * @param listener Listener whose onResponse method will be called when task completes
          */
         static void user(final RequestQueue queue, final User user, final String email,
+                         final String password,
                          final Response.Listener<NetworkResponse<String>> listener) {
             // We cannot use model here because we don't have auth yet: we're making an account!
             StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE +
@@ -1192,7 +1192,7 @@ class API {
                 @Override
                 public byte[] getBody() {
                     try {
-                        return user.getPostJson(email).toString().getBytes("utf-8");
+                        return user.getPostJson(email, password).toString().getBytes("utf-8");
                     } catch (JSONException | UnsupportedEncodingException e) {
                         Log.e("POST /users error.", "Error forming JSON");
                         listener.onResponse(new NetworkResponse<String>(true));
