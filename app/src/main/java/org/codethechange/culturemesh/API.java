@@ -70,30 +70,112 @@ TODO: Figure out alternative to id's other than longs and ints, which cannot rep
 class API {
     // TODO: Document API constants
     // Shared Preferences
+    /**
+     * Identifier for the app's shared preferences. Example:
+     * {@code SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE)}
+     */
     static final String SETTINGS_IDENTIFIER = "acmsi";
+
+    // TODO: Do we need the PERSONAL_NETWORKS constant anymore?
     static final String PERSONAL_NETWORKS = "pernet";
+
+    /**
+     * Identifier for the user's currently selected {@link Network}. This is used to save the network
+     * the user was last viewing so that network can be re-opened when the user navigates back.
+     * Example: {@code settings.getLong(API.SELECTED_NETWORK, -1)}.
+     */
     static final String SELECTED_NETWORK = "selnet";
+
+    // TODO: Document SELECTED_USER constant
     final static String SELECTED_USER="seluser";
+
+    // TODO: Do we need the FIRST_TIME constant anymore?
     final static String FIRST_TIME = "firsttime";
+
+    // TODO: Do we need the NO_JOINED_NETWORKS constant anymore?
     static final boolean NO_JOINED_NETWORKS = false;
-    //The id of the user that is signed in.
+
+    /**
+     * Identifier for the currently-signed-in user's ID. If no user is signed-in, this key should be
+     * removed from the preferences
+     * Example: {@code settings.getLong(API.CURRENT_USER, -1)}.
+     */
     static final String CURRENT_USER = "curruser";
+
+    /**
+     * Identifier for the currently-signed-in user's email. If no user is signed-in, this key should
+     * be removed from the preferences
+     * Example: {@code settings.getLong(API.USER_EMAIL, -1)}.
+     */
     static final String USER_EMAIL = "useremail";
 
+    /**
+     * Base of the URL all API endpoints use. For example, the {@code /token} endpoint has the URL
+     * {@code API_URL_BASE + "/token"}.
+     */
     static final String API_URL_BASE = "https://www.culturemesh.com/api-dev/v1/";
+
+    // TODO: Document NO_MAX_PAGINATION
     static final String NO_MAX_PAGINATION = "-1"; // If you do not need a maximum id.
+
+    // TODO: Document HOSTING
     static final String HOSTING = "hosting";
-    static final String FEED_ITEM_COUNT_SIZE = "10"; // Number of posts/events to fetch per paginated request
+
+    /**
+     * The number of items (e.g. {@link org.codethechange.culturemesh.models.Post}s or {@link Event}s
+     * to fetch with each paginated request
+     */
+    static final String FEED_ITEM_COUNT_SIZE = "10";
+
+    // TODO: Do we need the NEW_NETWORK constant anymore?
     static final long NEW_NETWORK = -2;
+
+    /**
+     * Tag to use for log statements. It is set dynamically so that if the class name is refactored,
+     * the logging tag will be too.
+     */
     private static final String TAG = API.class.getName();
+
+    /**
+     * Database to use for data persistence. Not currently used.
+     */
     static CMDatabase mDb;
-    //reqCounter to ensure that we don't close the database while another thread is using it.
+
+    /**
+     * Counter to ensure that we don't close the database while another thread is using it. Counts
+     * the number of threads currently using the database. Not currently used.
+     */
     static int reqCounter;
+
+    /**
+     * The currently cached login token for the user. May be {@code null} or expired. Expiration is
+     * tracked using {@link API#tokenRetrieved}.
+     */
     static String loginToken = null;
-    static Calendar tokenRetrieved = Calendar.getInstance(); // When current token expires
-    static final int TOKEN_REFRESH = 60;    // Number of seconds to use a token before refreshing
+
+    /**
+     * Stores when the current login token was retrieved. Initialized arbitrarily to the current time
+     * even though {@link API#loginToken} starts out {@code null}.
+     */
+    static Calendar tokenRetrieved = Calendar.getInstance();
+
+    /**
+     * Number of seconds to use a login token (stored in {@link API#loginToken} before refreshing it.
+     * Note that this is not how long the token is valid, just how often to refresh it. Refresh time
+     * must be shorter than the validity time.
+     */
+    static final int TOKEN_REFRESH = 60;
+
+    /**
+     * Reference to the app's {@link SharedPreferences}. Initialized using
+     * {@link API#initializePrefs(SharedPreferences)}
+     */
     static SharedPreferences settings;
 
+    /**
+     * Store the provided reference to the app's {@link SharedPreferences} settings
+     * @param settings
+     */
     public static void initializePrefs(SharedPreferences settings) {
         API.settings = settings;
     }
