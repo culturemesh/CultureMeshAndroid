@@ -68,8 +68,6 @@ TODO: Figure out alternative to id's other than longs and ints, which cannot rep
  * the CultureMesh servers.
  */
 class API {
-    // TODO: Document API constants
-    // Shared Preferences
     /**
      * Identifier for the app's shared preferences. Example:
      * {@code SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE)}
@@ -167,27 +165,11 @@ class API {
     static final int TOKEN_REFRESH = 60;
 
     /**
-     * Reference to the app's {@link SharedPreferences}. Initialized using
-     * {@link API#initializePrefs(SharedPreferences)}
-     */
-    static SharedPreferences settings;
-
-    /**
-     * Store the provided reference to the app's {@link SharedPreferences} settings
-     * @param settings
-     */
-    public static void initializePrefs(SharedPreferences settings) {
-        API.settings = settings;
-    }
-
-    /**
      * The protocol for GET requests is as follows...
      *      1. Check if cache has relevant data. If so, return it.
      *      2. Send network request to update data.
      */
     static class Get {
-
-        // TODO: Consider creating objects using non-constructor methods so we can use polymorphism
         /**
          * Get a {@link User} object from it's ID
          * @param id ID of user to find
