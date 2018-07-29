@@ -8,4 +8,7 @@
 /captures
 .externalNativeBuild
 .idea
+# Hide CultureMesh API Key
 app/src/main/java/org/codethechange/culturemesh/Credentials.java
+# Hide Fabirc API Key and Secret
+app/fabric.properties
