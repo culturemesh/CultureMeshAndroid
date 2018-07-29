@@ -5,15 +5,14 @@ package org.codethechange.culturemesh;
  */
 public interface Listable {
 
-    /**
-     * Get a label to display as an identifier for the object
-     * @return Displayable name for the object
-     */
-    String getListableName();
+    int MAX_CHARS = 30;
+    String ellipses = "...";
 
     /**
-     * Get the number of users, which will be displayed under the person icon in lists
-     * @return Number of users associated with the object
+     * Get a label (maximum of {@link Listable#MAX_CHARS} characters long) to display as an
+     * identifier for the object.
+     * @return Displayable name for the object, which must be less than or equal to
+     * {@link Listable#MAX_CHARS} characters long
      */
-    long getNumUsers();
+    String getListableName();
 }

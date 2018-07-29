@@ -148,12 +148,30 @@ public class Network implements Serializable, Postable {
         return json;
     }
 
-    // TODO: Document getPostJson and addPlaceToJson in Network
+    /**
+     * Generate a JSON representation of the object suitable for use in POST requests.
+     * Wrapper for {@link Network#toJSON()}.
+     * @return JSON that can be passed to the server in the body of a POST request
+     * @throws JSONException May be thrown if something that should be a value in the JSON is not
+     * a valid value in the JSON format.
+     * @see Network#toJSON();
+     */
     @Override
     public JSONObject getPostJson() throws JSONException {
         return toJSON();
     }
 
+    /**
+     * Add the IDs describing either a {@link FromLocation} ({@code keySuffix} = {@code origin}) or
+     * a {@link NearLocation} ({@code keySuffix} = {@code cur})
+     * @param keySuffix The suffix for JSON keys (e.g. {@code cur} in {@code id_city_cur}) depending
+     *                  on the type of place being added. For a {@link NearLocation}, use
+     *                  {@code cur}. For a {@link FromLocation}, use {@code origin}.
+     * @param p The place whose IDs will be added to the JSON
+     * @param json The JSON to add the IDs to
+     * @throws JSONException May be thrown if any of {@code p}'s IDs are not valid values in the
+     * JSON format.
+     */
     private void addPlaceToJson(String keySuffix, Place p, JSONObject json) throws JSONException {
         json.put("id_city_" + keySuffix, p.getCityId());
         json.put("city_" + keySuffix, p.getCityName());

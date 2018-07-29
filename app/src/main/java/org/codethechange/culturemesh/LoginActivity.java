@@ -41,7 +41,6 @@ public class LoginActivity extends RedirectableAppCompatActivity {
      * @param userID ID of the user to make logged-in
      */
     public static void setLoggedIn(SharedPreferences settings, long userID, String email) {
-        API.initializePrefs(settings);
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(API.CURRENT_USER, userID);
         editor.putString(API.USER_EMAIL, email);
@@ -119,8 +118,8 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                         String username = usernameText.getText().toString();
                         User userToCreate = new User(-1, firstNameField.getText().toString(),
                                 lastNameField.getText().toString(),
-                                username, "", "", "", pass);
-                        API.Post.user(queue, userToCreate, email, new Response.Listener<NetworkResponse<String>>() {
+                                username, "", "", "");
+                        API.Post.user(queue, userToCreate, email, pass, new Response.Listener<NetworkResponse<String>>() {
                             @Override
                             public void onResponse(NetworkResponse<String> response) {
                                 if (response.fail()) {

@@ -146,7 +146,7 @@ public class City extends Place {
      * {@code San Francisco} would be expressed as {@code San Francisco, California, United States}.
      * @return Name of city that includes all available geographic descriptors
      */
-    public String getListableName() {
+    public String getFullName() {
         String listable = cityName;
         if (! regionName.equals(Place.NOWHERE)) {
             listable += ", " + regionName;

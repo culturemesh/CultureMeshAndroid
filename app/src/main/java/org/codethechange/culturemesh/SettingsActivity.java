@@ -2,12 +2,14 @@ package org.codethechange.culturemesh;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,17 +33,19 @@ import java.util.List;
 public class SettingsActivity extends DrawerActivity implements NetworkSummaryAdapter.OnNetworkTapListener {
 
     RecyclerView rv;
-    TextView emptyText, userName, email;
-    EditText bio, firstName, lastName;
+    TextView emptyText;
+    EditText bio, firstName, lastName, userName, email;
     ImageView profilePicture;
     Button updateProfile;
     User user;
     RequestQueue queue;
+    private static final String TAG = SettingsActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        final SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         rv = findViewById(R.id.rv);
         bio = findViewById(R.id.bio);
         firstName = findViewById(R.id.first_name_field);
@@ -60,6 +64,22 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                     user.setFirstName(firstName.getText().toString());
                     user.setLastName(lastName.getText().toString());
                     user.setBio(bio.getText().toString());
+                    user.setUsername(userName.getText().toString());
+                    SharedPreferences.Editor editor = settings.edit();
+                    String emailText = email.getText().toString();
+                    editor.putString(API.USER_EMAIL, emailText);
+                    editor.apply();
+                    API.Put.user(queue, user, emailText, new Response.Listener<NetworkResponse<String>>() {
+                        @Override
+                        public void onResponse(NetworkResponse<String> response) {
+                            if (response.fail()) {
+                                response.showErrorDialog(SettingsActivity.this);
+                            } else {
+                                NetworkResponse.genSuccessDialog(SettingsActivity.this,
+                                        R.string.updated_profile).show();
+                            }
+                        }
+                    });
                 } catch(NullPointerException e) {
                     //TODO: User is null. We should handle that.
                     e.printStackTrace();
@@ -77,8 +97,12 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                     firstName.setText(user.firstName);
                     lastName.setText(user.lastName);
                     userName.setText(user.username);
-                    email.setText(getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).getString(API.USER_EMAIL, ""));
+                    email.setText(settings.getString(API.USER_EMAIL, getString(R.string.missingEmail)));
                     Picasso.with(getApplicationContext()).load(user.getImgURL()).into(profilePicture);
+                    Log.i(TAG, "User info loaded");
+                    rv.getAdapter().notifyDataSetChanged();
+                    Log.i(TAG, "Adapter notified of new user info");
+
                 } else {
                     response.showErrorDialog(getApplicationContext());
                 }
@@ -104,8 +128,13 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                                 //Wow! We are removing this network! Sad..
                                 long networkID = ((NetworkSummaryAdapter) rv.getAdapter()).getNetworks()
                                         .get(viewHolder.getAdapterPosition()).id;
-                                //TODO: Support leaving network when we have the API support.
-                                // API support. new LeaveNetwork().execute(networkID);
+                                API.Post.removeUserFromNetwork(queue, networkID,
+                                        new Response.Listener<NetworkResponse<String>>() {
+                                    @Override
+                                    public void onResponse(NetworkResponse<String> response) {
+                                        rv.getAdapter().notifyDataSetChanged();
+                                    }
+                                });
                             }
                         })
                         .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -120,7 +149,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                     public void onDismiss(DialogInterface dialogInterface) {
                         //Even if we aren't changing anything, the swipe motion removes
                         //the item from the recycler. We need to include it again.
-                        resetAdapter();
+                        rv.getAdapter().notifyDataSetChanged();
                     }
                 });
                 success.show();
@@ -160,6 +189,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                         emptyText.setText(getResources().getString(R.string.no_networks));
                     }
                     for (final Network net : nets) {
+                        Log.d(TAG, "Loaded network: " + net);
                         API.Get.networkUserCount(queue, net.id, new Response.Listener<NetworkResponse<Long>>() {
                             @Override
                             public void onResponse(NetworkResponse<Long> response) {
@@ -184,8 +214,10 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                                     response.showErrorDialog(SettingsActivity.this);
                                     adapter.getPostCounts().put(net.id + "", 0);
                                 }
+                                adapter.notifyDataSetChanged();
                             }
                         });
+                        adapter.notifyDataSetChanged();
                     }
                 } else {
                     response.showErrorDialog(SettingsActivity.this);
