@@ -104,9 +104,10 @@ public class FindNetworkActivity extends DrawerActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //TODO: Implement how I receive data. Replace dummy stuff with legit stuff.
-        near = (Location) data.getSerializableExtra(ChooseNearLocationActivity.CHOSEN_PLACE);
-        nearButton.setText(near.getListableName());
+        if (resultCode == ChooseNearLocationActivity.RESULT_OK) {
+            near = (Location) data.getSerializableExtra(ChooseNearLocationActivity.CHOSEN_PLACE);
+            nearButton.setText(near.getListableName());
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 

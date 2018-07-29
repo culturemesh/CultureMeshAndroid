@@ -95,7 +95,6 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                                         API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
                                 API.Get.LoginResponse bundle = response.getPayload();
                                 User user = bundle.user;
-                                Log.i("Sucessful login", "logged in with id "+ user.id);
                                 setLoggedIn(settings, user.id, email);
                                 Intent returnIntent = new Intent();
                                 setResult(Activity.RESULT_OK, returnIntent);
