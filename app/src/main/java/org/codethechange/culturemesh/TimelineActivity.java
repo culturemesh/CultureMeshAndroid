@@ -110,7 +110,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                     //Update near location
                     nearLocation.setText(network.nearLocation.getShortName());
                 } else {
-                    response.showErrorDialog(getApplicationContext());
+                    response.showErrorDialog(TimelineActivity.this);
                 }
             }
         });
@@ -122,7 +122,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                     //Manipulate string of number to have magnitude suffix (K,M,etc.) for population text
                     population.setText(FormatManager.abbreviateNumber(response.getPayload()));
                 } else {
-                    response.showErrorDialog(getApplicationContext());
+                    response.showErrorDialog(TimelineActivity.this);
                 }
             }
         });
