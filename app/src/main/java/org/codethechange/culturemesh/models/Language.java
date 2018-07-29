@@ -97,10 +97,11 @@ public class Language implements Serializable, Listable {
 
     /**
      * Get a descriptive representation of the language suitable for display to user
-     * @return Name of the language
+     * @return Name of the language, abbreviated to be at most {@link Listable#MAX_CHARS} characters
+     * long.
      */
     public String getListableName() {
-        return name;
+        return Place.abbreviateForListing(name);
     }
 
     /**

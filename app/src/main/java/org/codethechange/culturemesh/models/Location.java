@@ -48,19 +48,19 @@ public class Location implements Serializable, Listable {
 
     /**
      * Represents a type of {@code Location} that has only a country defined.
-     * @see {@link Location#getType()}
+     * @see Location#getType()
      */
     public static final int COUNTRY = 0;
 
     /**
      * Represents a type of {@code Location} that has a region defined but not a city.
-     * @see {@link Location#getType()}
+     * @see Location#getType()
      */
     public static final int REGION = 1;
 
     /**
      * Represents a type of {@code Location} that has a city defined.
-     * @see {@link Location#getType()}
+     * @see Location#getType()
      */
     public static final int CITY = 2;
 
@@ -358,15 +358,15 @@ public class Location implements Serializable, Listable {
 
     /**
      * Get a UI-ready name for the Location
-     * @return Name for the Location that is suitable for display to the user
+     * @return Name for the Location that is suitable for display to the user. Abbreviated to be a
+     * maximum of {@link Listable#MAX_CHARS} characters long.
      */
     @Override
     public String getListableName() {
-        return locationName;
+        return Place.abbreviateForListing(locationName);
     }
 
     // TODO: Implement getNumUsers
-    @Override
     public long getNumUsers() {
         return 0;
     }
