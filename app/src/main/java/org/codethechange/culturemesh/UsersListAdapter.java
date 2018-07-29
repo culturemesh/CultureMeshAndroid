@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,6 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import org.codethechange.culturemesh.models.User;
-import org.jetbrains.annotations.NonNls;
 
 import java.util.ArrayList;
 
@@ -24,15 +22,11 @@ import java.util.ArrayList;
  */
 public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.ViewHolder>{
     Context context;
-    ArrayList<String> userNames, imageURLS;
-    long[] userIds;
+    private ArrayList<User> users;
 
-    public UsersListAdapter(Context context, @NonNull ArrayList<String> userNames,
-                            @NonNull ArrayList<String> imageURLS, long[] userIds) {
+    public UsersListAdapter(Context context, @NonNull ArrayList<User> users) {
         this.context = context;
-        this.userNames = userNames;
-        this.imageURLS = imageURLS;
-        this.userIds = userIds;
+        this.users = users;
     }
 
     @Override
@@ -43,13 +37,18 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.View
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.fullName.setText(userNames.get(position));
-        Picasso.with(holder.profilePicture.getContext()).load(imageURLS.get(position)).into(holder.profilePicture);
+        holder.fullName.setText(getUsers().get(position).username);
+        Picasso.with(holder.profilePicture.getContext()).load(getUsers().get(position).getImgURL()).
+                into(holder.profilePicture);
     }
 
     @Override
     public int getItemCount() {
-        return Math.min(userNames.size(), Math.min(userIds.length, imageURLS.size()));
+        return getUsers().size();
+    }
+
+    public ArrayList<User> getUsers() {
+        return users;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder{
@@ -65,7 +64,7 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.View
                 public void onClick(View v) {
                     //We want to view the user in greater detail in ViewProfileActivity!
                     Intent intent = new Intent(context, ViewProfileActivity.class);
-                    intent.putExtra(ViewProfileActivity.SELECTED_USER, userIds[getAdapterPosition()]);
+                    intent.putExtra(ViewProfileActivity.SELECTED_USER, users.get(getAdapterPosition()).id);
                     v.getContext().startActivity(intent);
                 }
             });

@@ -126,6 +126,20 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                 }
             }
         });
+        View.OnClickListener showUsersListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BottomSheetDialogFragment bsFrag = new ViewUsersModalSheetFragment();
+                Bundle args = new Bundle();
+                args.putString(ViewUsersModalSheetFragment.NETWORK_ID, selectedNetwork + "");
+                bsFrag.setArguments(args);
+                bsFrag.show(getSupportFragmentManager(), "ViewUsersModalSheet");
+            }
+        };
+        population.setOnClickListener(showUsersListener);
+        findViewById(R.id.population_button).setOnClickListener(showUsersListener);
+
+        //We also just need a list of users for our modal fragment.
 
 
         swipeRefreshLayout = findViewById(R.id.postsRefresh);
@@ -214,6 +228,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     @Override
     protected void onStart() {
         super.onStart();
+
         //Check if user has selected a network to view, regardless of whether the user is subscribed
         //to any networks yet. Previously, we checked if the user joined a network, and instead
         //navigate the user to ExploreBubbles. This is not ideal because if a user wants to check

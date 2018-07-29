@@ -25,7 +25,7 @@ import static android.view.View.GONE;
 public class ChooseNearLocationActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     public static final String CHOSEN_PLACE = "chosen_place";
-    public final int RESULT_OK = 1;
+    public static final int RESULT_OK = 1;
 
     private SearchAdapter<Location> adapter;
     private ListView searchList;

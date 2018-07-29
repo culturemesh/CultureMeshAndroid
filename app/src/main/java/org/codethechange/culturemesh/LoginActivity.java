@@ -8,6 +8,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -67,6 +68,13 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         final Button signInButton = findViewById(R.id.sign_in_button);
         queue = Volley.newRequestQueue(getApplicationContext());
+        firstNameText = findViewById(R.id.first_name_field);
+        lastNameText = findViewById(R.id.last_name_field);
+        confirmPassword = findViewById(R.id.confirm_password_field);
+        passwordText = findViewById(R.id.password_field);
+        needAccountText = findViewById(R.id.need_account_text);
+        usernameText = findViewById(R.id.username_field);
+        final Button signToggleButton = findViewById(R.id.sign_toggle_button);
         signInButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -107,12 +115,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                         (new NetworkResponse<Void>(true,
                                 R.string.passwords_dont_match)).showErrorDialog(LoginActivity.this);
                     } else {
-                        //TODO: Think about better way to deal with usernames.
-                        String username = "";
-                        for (int i = 0; i < 24; i++) {
-                            String hex = "1234567890abcdef";
-                            username += hex.charAt((int) (Math.random() * hex.length()));
-                        }
+                        String username = usernameText.getText().toString();
                         User userToCreate = new User(-1, firstNameField.getText().toString(),
                                 lastNameField.getText().toString(),
                                 username, "", "", "");
@@ -148,13 +151,6 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                 }
             }
         });
-        firstNameText = findViewById(R.id.first_name_field);
-        lastNameText = findViewById(R.id.last_name_field);
-        confirmPassword = findViewById(R.id.confirm_password_field);
-        passwordText = findViewById(R.id.password_field);
-        needAccountText = findViewById(R.id.need_account_text);
-        usernameText = findViewById(R.id.username_field);
-        final Button signToggleButton = findViewById(R.id.sign_toggle_button);
         //Get number of pixels for 8dp
         DisplayMetrics displaymetrics = new DisplayMetrics();
         final int eightDp = (int) getResources().getDimensionPixelSize(R.dimen.edit_text_spacing);
