@@ -100,7 +100,9 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
                 long userId = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).getLong(API.CURRENT_USER, -1);
                 Post newPost = new Post(-1, userId, networkId, contentHTML, "", "", datePosted );
                 //Now let's send it off to the CultureMesh site!!
-                API.Post.post(queue, newPost, new Response.Listener<NetworkResponse<String>>() {
+                API.Post.post(queue, newPost,
+                        getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
+                        new Response.Listener<NetworkResponse<String>>() {
                     @Override
                     public void onResponse(NetworkResponse<String> response) {
                         if (response.fail()) {

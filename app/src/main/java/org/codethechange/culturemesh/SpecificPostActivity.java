@@ -193,7 +193,8 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                 PostReply pReply = new PostReply(-1, postID, settings.getLong(API.CURRENT_USER, -1), networkID,
                         new Date().toString(), content);
                 progressBar.setVisibility(View.VISIBLE);
-                API.Post.reply(queue, pReply, new Response.Listener<NetworkResponse<String>>() {
+                API.Post.reply(queue, pReply, getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
+                        new Response.Listener<NetworkResponse<String>>() {
                     @Override
                     public void onResponse(NetworkResponse<String> response) {
                         if (response.fail()) {

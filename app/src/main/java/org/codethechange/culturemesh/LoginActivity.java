@@ -84,7 +84,9 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                     final String email = emailField.getText().toString();
                     final String password = passwordField.getText().toString();
 
-                    API.Get.loginWithCred(queue, email, password, new Response.Listener<NetworkResponse<API.Get.LoginResponse>>() {
+                    API.Get.loginWithCred(queue, email, password,
+                            getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
+                            new Response.Listener<NetworkResponse<API.Get.LoginResponse>>() {
                         @Override
                         public void onResponse(NetworkResponse<API.Get.LoginResponse> response) {
                             if (response.fail()) {

@@ -1088,7 +1088,7 @@ class API {
             } else {
                 Log.v(TAG, "Get.loginToken: Token needs to be refreshed, so refreshing.");
                 Get.loginWithToken(queue, settings.getString(LOGIN_TOKEN, "NoTokenStored"),
-                        new Response.Listener<NetworkResponse<LoginResponse>>() {
+                        settings, new Response.Listener<NetworkResponse<LoginResponse>>() {
                     @Override
                     public void onResponse(NetworkResponse<LoginResponse> response) {
                         if (response.fail()) {
@@ -1127,6 +1127,7 @@ class API {
          *                 completes
          */
         static void loginWithCred(RequestQueue queue, final String email, final String password,
+                               final SharedPreferences settings,
                                final Response.Listener<NetworkResponse<LoginResponse>> listener) {
             Log.v(TAG, "Get.loginWithCred: Logging in with credentials email=" + email + ", password=" + password);
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE +
@@ -1163,6 +1164,13 @@ class API {
                         listener.onResponse(new NetworkResponse<LoginResponse>(true));
                         return;
                     }
+                    long tokenRetrieved = System.currentTimeMillis();
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putString(LOGIN_TOKEN, token);
+                    editor.putLong(TOKEN_RETRIEVED, tokenRetrieved);
+                    editor.apply();
+                    Log.v(TAG, "Get.loginToken: New token=" + token + ", retrieved=" +
+                            (new Date(tokenRetrieved)).toString());
                     listener.onResponse(new NetworkResponse<>(new LoginResponse(user, token, email)));
                 }
             }, new Response.ErrorListener() {
@@ -1197,14 +1205,14 @@ class API {
         }
 
         /**
-         * Same as {@link API.Get#loginWithCred(RequestQueue, String, String, Response.Listener)},
+         * Same as {@link API.Get#loginWithCred(RequestQueue, String, String, SharedPreferences, Response.Listener)},
          * but a login token is used in place of the user's credentials.
          * @param queue Queue to which the asynchronous task will be added
          * @param token Login token to use to get another token
          * @param listener Will be called with the {@link NetworkResponse} when the operation
          *                 completes
          */
-        static void loginWithToken(RequestQueue queue, final String token,
+        static void loginWithToken(RequestQueue queue, final String token, SharedPreferences settings,
                                         final Response.Listener<NetworkResponse<LoginResponse>> listener) {
             /*
             When logging in with a token, the token is passed as the email and the password is left
@@ -1215,7 +1223,7 @@ class API {
             period (if applicable) will be reset.
              */
             Log.v(TAG, "Get.loginWithToken: Logging in with token=" + token);
-            loginWithCred(queue, token, "", listener);
+            loginWithCred(queue, token, "", settings, listener);
         }
     }
 
@@ -1460,8 +1468,8 @@ class API {
          * @param email User's email address
          * @param listener Listener whose onResponse method will be called when task completes
          */
-        static void user(final RequestQueue queue, final User user, SharedPreferences settings,
-                         final String email, final Response.Listener<NetworkResponse<String>> listener) {
+        static void user(final RequestQueue queue, final User user, final String email,
+                         SharedPreferences settings, final Response.Listener<NetworkResponse<String>> listener) {
             Get.loginToken(queue, settings, new Response.Listener<NetworkResponse<String>>() {
                 @Override
                 public void onResponse(NetworkResponse<String> response) {
