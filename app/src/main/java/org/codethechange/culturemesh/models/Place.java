@@ -119,13 +119,40 @@ public abstract class Place extends Location implements Listable, Serializable {
     }
 
     /**
-     * Subclasses are required to provide a method to generate a name suitable for display
-     * in listings of places, as required to implement {@link Listable}. This name should be
-     * unambiguous.
-     * @return Name of Location suitable for display in UI lists
+     * Get a name suitable for display in listings of places, as required to implement
+     * {@link Listable}. This name is created by abbreviating the output of
+     * {@link Place#getFullName()} and adding {@link Listable#ellipses} such that the total length
+     * is a no longer than {@link Listable#MAX_CHARS}
+     * @return Name of Location suitable for display in UI lists. Has a maximum length of
+     * {@link Listable#MAX_CHARS}.
      */
-    public abstract String getListableName();
+    public String getListableName() {
+        return abbreviateForListing(getFullName());
+    }
 
+    /**
+     * Subclasses are required to provide a method to generate their full, unambiguous name. For
+     * example, {@code New York, New York, United States of America}.
+     * @return Full, unambiguous name of place
+     */
+    public abstract String getFullName();
+
+    /**
+     * Abbreviate the provided string by truncating it enough so that, after adding
+     * {@link Listable#ellipses}, the string is {@link Listable#MAX_CHARS} characters long. If the
+     * string is already shorter than {@link Listable#MAX_CHARS}, it is returned unchanged.
+     * @param toAbbreviate String whose abbreviated form will be returned
+     * @return Abbreviated form of the string. Has a maximum length of {@link Listable#MAX_CHARS}
+     */
+    public static String abbreviateForListing(String toAbbreviate) {
+        if (toAbbreviate.length() > Listable.MAX_CHARS) {
+            String truncated =  toAbbreviate.substring(0,
+                    Listable.MAX_CHARS - Listable.ellipses.length());
+            return truncated + Listable.ellipses;
+        } else {
+            return toAbbreviate;
+        }
+    }
 
     /**
      * In the interest of space, we also want the abbreviated version of the location (just the

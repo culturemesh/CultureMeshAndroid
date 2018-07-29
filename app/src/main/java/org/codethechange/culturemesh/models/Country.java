@@ -1,5 +1,7 @@
 package org.codethechange.culturemesh.models;
 
+import org.codethechange.culturemesh.Listable;
+
 import android.arch.persistence.room.Entity;
 
 import org.json.JSONException;
@@ -57,12 +59,12 @@ public class Country extends Place {
 
 
     /**
-     * Get name of country, which is suitable for display in UI. Equivalent to
-     * {@link Country#getName()}, but required to implement
-     * {@link org.codethechange.culturemesh.Listable}
-     * @return Name of country
+     * Get name of country, which is suitable for display in UI.
+     * @see org.codethechange.culturemesh.Listable
+     * @return Name of country, abbreviated if necessary to have a maximum length of
+     * {@link org.codethechange.culturemesh.Listable#MAX_CHARS}.
      */
-    public String getListableName() {
+    public String getFullName() {
         return name;
     }
 
