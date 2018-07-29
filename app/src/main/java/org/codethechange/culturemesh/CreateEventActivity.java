@@ -121,6 +121,23 @@ public class CreateEventActivity extends AppCompatActivity {
             SharedPreferences prefs = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
             long networkId = prefs.getLong(API.SELECTED_NETWORK, -1);
             long authorId = prefs.getLong(API.CURRENT_USER, -1);
+
+            if (address1.isEmpty()) {
+                address1 = Event.NOWHERE;
+            }
+            if (address2.isEmpty()) {
+                address2 = Event.NOWHERE;
+            }
+            if (city.isEmpty()) {
+                city = Event.NOWHERE;
+            }
+            if (region.isEmpty()) {
+                region = Event.NOWHERE;
+            }
+            if (country.isEmpty()) {
+                country = Event.NOWHERE;
+            }
+
             Event event = new Event(-1, networkId, name, description,
                     timeOfEvent, authorId, address1, address2, city, region, country);
             // POST Event with AsyncTask
@@ -168,9 +185,6 @@ public class CreateEventActivity extends AppCompatActivity {
             return false;
         } else if (descriptionRef.getText().toString().isEmpty()) {
             descriptionRef.setError(getString(R.string.createEvent_missingDescription));
-            return false;
-        } else if (address1Ref.getText().toString().isEmpty()) {
-            address1Ref.setError(getString(R.string.createEvent_missingAddress));
             return false;
         } else
             return true;

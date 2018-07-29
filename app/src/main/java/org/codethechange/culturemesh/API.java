@@ -23,11 +23,8 @@ import org.codethechange.culturemesh.data.CMDatabase;
 import org.codethechange.culturemesh.data.EventDao;
 import org.codethechange.culturemesh.data.EventSubscription;
 import org.codethechange.culturemesh.data.EventSubscriptionDao;
-import org.codethechange.culturemesh.data.NetworkDao;
 import org.codethechange.culturemesh.data.NetworkSubscription;
 import org.codethechange.culturemesh.data.NetworkSubscriptionDao;
-import org.codethechange.culturemesh.data.PostDao;
-import org.codethechange.culturemesh.data.UserDao;
 import org.codethechange.culturemesh.models.City;
 import org.codethechange.culturemesh.models.Country;
 import org.codethechange.culturemesh.models.DatabaseNetwork;
@@ -51,7 +48,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,53 +61,108 @@ TODO: Figure out alternative to id's other than longs and ints, which cannot rep
  */
 
 /**
- * This API serves as the interface between the rest of the app and both the local database and the
+ * This API serves as the interface between the rest of the app and the
  * CultureMesh servers. When another part of the app needs to request information, it calls API
  * methods to obtain it. Similarly, API methods should be used to store, send, and update
- * information. The API then handles searching local caches for the information, requesting it from
- * the CultureMesh servers, and updating the local cache. The local cache allows for offline access
- * to limited information.
- *
- * For simplicity, we store the id's of other model objects in the database, not the objects
- * themselves. Thus, when we return these objects, we need to instantiate them with the methods
- * provided in this class.
- *
- * IMPORTANT: If you want to use this class in your activity, make sure you run API.loadAppDatabase()
- * at the beginning of onPreExecute()/doInBackground(), and API.closeDatabase() in onPostExecute().
- * The app will crash otherwise.
- *
+ * information. The API then handles requesting it from
+ * the CultureMesh servers.
  */
-
 class API {
-    // Shared Preferences
+    /**
+     * Identifier for the app's shared preferences. Example:
+     * {@code SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE)}
+     */
     static final String SETTINGS_IDENTIFIER = "acmsi";
+
+    // TODO: Do we need the PERSONAL_NETWORKS constant anymore?
     static final String PERSONAL_NETWORKS = "pernet";
+
+    /**
+     * Identifier for the user's currently selected {@link Network}. This is used to save the network
+     * the user was last viewing so that network can be re-opened when the user navigates back.
+     * Example: {@code settings.getLong(API.SELECTED_NETWORK, -1)}.
+     */
     static final String SELECTED_NETWORK = "selnet";
+
+    // TODO: Document SELECTED_USER constant
     final static String SELECTED_USER="seluser";
+
+    // TODO: Do we need the FIRST_TIME constant anymore?
     final static String FIRST_TIME = "firsttime";
+
+    // TODO: Do we need the NO_JOINED_NETWORKS constant anymore?
     static final boolean NO_JOINED_NETWORKS = false;
-    //The id of the user that is signed in.
+
+    /**
+     * Identifier for the currently-signed-in user's ID. If no user is signed-in, this key should be
+     * removed from the preferences
+     * Example: {@code settings.getLong(API.CURRENT_USER, -1)}.
+     */
     static final String CURRENT_USER = "curruser";
+
+    /**
+     * Identifier for the currently-signed-in user's email. If no user is signed-in, this key should
+     * be removed from the preferences
+     * Example: {@code settings.getLong(API.USER_EMAIL, -1)}.
+     */
     static final String USER_EMAIL = "useremail";
-    static final String USER_PASS = "userpass";
 
+    /**
+     * Base of the URL all API endpoints use. For example, the {@code /token} endpoint has the URL
+     * {@code API_URL_BASE + "/token"}.
+     */
     static final String API_URL_BASE = "https://www.culturemesh.com/api-dev/v1/";
-    static final String NO_MAX_PAGINATION = "-1"; // If you do not need a maximum id.
-    static final String HOSTING = "hosting";
-    static final String FEED_ITEM_COUNT_SIZE = "10"; // Number of posts/events to fetch per paginated request
-    static final long NEW_NETWORK = -2;
-    static CMDatabase mDb;
-    //reqCounter to ensure that we don't close the database while another thread is using it.
-    static int reqCounter;
-    static String loginToken = null;
-    static Calendar loginTokenExpiration = Calendar.getInstance(); // When current token expires
-    static final int TOKEN_SECONDS = 600;   // Lifetime of token validity in seconds
-    static final int TOKEN_BUFFER_SECONDS = 60;    // How early before expiration to refresh token
-    static SharedPreferences settings;
 
-    public static void initializePrefs(SharedPreferences settings) {
-        API.settings = settings;
-    }
+    // TODO: Document NO_MAX_PAGINATION
+    static final String NO_MAX_PAGINATION = "-1"; // If you do not need a maximum id.
+
+    // TODO: Document HOSTING
+    static final String HOSTING = "hosting";
+
+    /**
+     * The number of items (e.g. {@link org.codethechange.culturemesh.models.Post}s or {@link Event}s
+     * to fetch with each paginated request
+     */
+    static final String FEED_ITEM_COUNT_SIZE = "10";
+
+    // TODO: Do we need the NEW_NETWORK constant anymore?
+    static final long NEW_NETWORK = -2;
+
+    /**
+     * Tag to use for log statements. It is set dynamically so that if the class name is refactored,
+     * the logging tag will be too.
+     */
+    private static final String TAG = API.class.getName();
+
+    /**
+     * Database to use for data persistence. Not currently used.
+     */
+    static CMDatabase mDb;
+
+    /**
+     * Counter to ensure that we don't close the database while another thread is using it. Counts
+     * the number of threads currently using the database. Not currently used.
+     */
+    static int reqCounter;
+
+    /**
+     * The currently cached login token for the user. May be {@code null} or expired. Expiration is
+     * tracked using {@link API#tokenRetrieved}.
+     */
+    static String loginToken = null;
+
+    /**
+     * Stores when the current login token was retrieved. Initialized arbitrarily to the current time
+     * even though {@link API#loginToken} starts out {@code null}.
+     */
+    static Calendar tokenRetrieved = Calendar.getInstance();
+
+    /**
+     * Number of seconds to use a login token (stored in {@link API#loginToken} before refreshing it.
+     * Note that this is not how long the token is valid, just how often to refresh it. Refresh time
+     * must be shorter than the validity time.
+     */
+    static final int TOKEN_REFRESH = 60;
 
     /**
      * The protocol for GET requests is as follows...
@@ -119,7 +170,6 @@ class API {
      *      2. Send network request to update data.
      */
     static class Get {
-
         /**
          * Get a {@link User} object from it's ID
          * @param id ID of user to find
@@ -187,7 +237,13 @@ class API {
             queue.add(req);
         }
 
-
+        /**
+         * Get the number of {@link User}s who are currently members of a {@link Network}
+         * @param queue Queue to which the asynchronous task will be added
+         * @param id ID of the {@link Network} whose {@link User} count will be retrieved
+         * @param listener Listener whose {@link Response.Listener#onResponse(Object)} is called with
+         *                 a {@link NetworkResponse} that stores the result of the network request
+         */
         static void networkUserCount(RequestQueue queue, long id, final Response.Listener<NetworkResponse<Long>> listener) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE + "network/" + id + "/user_count?" + getCredentials(), null, new Response.Listener<JSONObject>() {
                 @Override
@@ -210,6 +266,15 @@ class API {
             queue.add(req);
         }
 
+        /**
+         * Get the number of {@link org.codethechange.culturemesh.models.Post}s that are currently
+         * on a {@link Network}
+         * @param queue Queue to which the asynchronous task will be added
+         * @param id ID of the {@link Network} whose {@link org.codethechange.culturemesh.models.Post}
+         *           count will be retrieved
+         * @param listener Listener whose {@link Response.Listener#onResponse(Object)} is called with
+         *                 a {@link NetworkResponse} that stores the result of the network request
+         */
         static void networkPostCount(RequestQueue queue, long id, final Response.Listener<NetworkResponse<Long>> listener) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE + "network/" + id + "/post_count?" + getCredentials(), null, new Response.Listener<JSONObject>() {
                 @Override
@@ -296,16 +361,6 @@ class API {
             });
             queue.add(req);
         }
-
-        /**
-         * Get the {@link org.codethechange.culturemesh.models.Post}s a {@link User} has made. This
-         * is done by asking {@link PostDao} for all posts with the user's ID, as performed by
-         * {@link PostDao#getUserPosts(long)}.
-         * @param id ID of the {@link User} whose {@link org.codethechange.culturemesh.models.Post}s
-         *           are being requested
-         * @return List of the {@link org.codethechange.culturemesh.models.Post}s the user has made
-         */
-        // TODO: When will we ever use this? Perhaps viewing a user profile?
 
         /**
          * Get the {@link org.codethechange.culturemesh.models.Post}s a {@link User} has made.
@@ -538,6 +593,13 @@ class API {
             queue.add(req);
         }
 
+        /**
+         * Get all the {@link User}s who are members of a {@link Network}
+         * @param queue Queue to which the asynchronous task will be added
+         * @param id ID of the {@link Network} whose users will be fetched
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
         static void networkUsers(RequestQueue queue, final long id, final Response.Listener<NetworkResponse<ArrayList<User>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/" +
                     id + "/users?" + getCredentials(), null, new Response.Listener<JSONArray>() {
@@ -608,7 +670,16 @@ class API {
          * another request inside the listener of the first one if you need data from the first to pass
          * into the second (i.e. id_user from post to get user)
          */
-        static void post(final RequestQueue queue, long id, final Response.Listener<NetworkResponse<org.codethechange.culturemesh.models.Post>> callback) {
+
+        /**
+         * Get a {@link org.codethechange.culturemesh.models.Post} from it's ID
+         * @param queue Queue to which the asynchronous task will be added
+         * @param id ID of the {@link org.codethechange.culturemesh.models.Post} to retrieve
+         * @param callback Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
+        static void post(final RequestQueue queue, long id,
+                         final Response.Listener<NetworkResponse<org.codethechange.culturemesh.models.Post>> callback) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET,
                     API_URL_BASE + "post/" + id + "?" + getCredentials(),
                     null, new Response.Listener<JSONObject>() {
@@ -643,6 +714,7 @@ class API {
             queue.add(req);
         }
 
+        // TODO: Plugin API.Get.event
         static NetworkResponse<Event> event(long id) {
             EventDao eDao = mDb.eventDao();
             Event event = eDao.getEvent(id);
@@ -706,6 +778,13 @@ class API {
             queue.add(req);
         }
 
+        /**
+         * Get potential {@link Location}s that match a user's query text
+         * @param queue Queue to which the asynchronous task will be added
+         * @param text User's query text to get autocomplete results for
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
         static void autocompletePlace(RequestQueue queue, String text, final Response.Listener<NetworkResponse<List<Location>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE +
                     "location/autocomplete?input_text=" + text + getCredentials(), null, new Response.Listener<JSONArray>() {
@@ -732,6 +811,13 @@ class API {
             queue.add(req);
         }
 
+        /**
+         * Get potential {@link Language}s that match a user's query text
+         * @param queue Queue to which the asynchronous task will be added
+         * @param text User's query text to get autocomplete results for
+         * @param listener Listener whose {@link com.android.volley.Response.Listener#onResponse(Object)}
+         *                 is called with the {@link NetworkResponse} created by the query.
+         */
         static void autocompleteLanguage(RequestQueue queue, String text, final Response.Listener<NetworkResponse<List<Language>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE +
                     "language/autocomplete?input_text=" + text + getCredentials(), null, new Response.Listener<JSONArray>() {
@@ -945,69 +1031,59 @@ class API {
                 }
             });
             queue.add(authReq);
-
         }
 
         /**
-         * Generically get a login token.
-         * <pre>
-         *     {@code
-         *     Method Behavior:
-         *     * Email or password not in SharedPreferences: Returns failed NetworkResponse object
-         *       describing an authentication error with R.string.authenticationError
-         *     * No token has been stored or token has expired: Use email and password to get a token,
-         *       which is returned. If there is an error, the error message from
-         *       API.Get.loginTokenWithCred is supplied in the NetworkResponse.
-         *     * Token is valid but within buffer window: Use current token to get a new one. Store
-         *       the new token in place of the old one and return the new token. If there is an error,
-         *       the message from API.Get.loginTokenWithToken is supplied in the NetworkResponse.
-         *     }
-         * </pre>
+         * Bundle object to store responses from getting tokens, which yield {@link User}s, tokens,
+         * and emails.
+         */
+        public static class LoginResponse {
+            public User user;
+            public String token;
+            public String email;
+
+            /**
+             * Store the provided parameters in the bundle object
+             * @param user User object described by returned JSON
+             * @param token Login token
+             * @param email User's email address
+             */
+            public LoginResponse(User user, String token, String email) {
+                this.user = user;
+                this.token = token;
+                this.email = email;
+            }
+        }
+
+        /**
+         * Generically get a login token. If the token is fresh (less than {@link API#TOKEN_REFRESH}
+         * seconds have passed since the last token was retrieved, stored in
+         * {@link API#tokenRetrieved}), the current token is simply supplied. Otherwise, an attempt
+         * is made to login with the token to get a new one. If this fails, the token has expired,
+         * and the user is directed to sign in again by the error dialog. If it succeeds, the new
+         * token is stored in place of the old one.
+         * @see NetworkResponse#genErrorDialog(Context, int, boolean)
          * @param queue Queue to which the asynchronous task will be added
          * @param listener Listener whose onResponse method will be called when task completes
          */
         static void loginToken(RequestQueue queue,
                                final Response.Listener<NetworkResponse<String>> listener) {
-
-            String email = settings.getString(USER_EMAIL, null);
-            String pass  = settings.getString(USER_PASS,  null);
-
             Calendar now = Calendar.getInstance();
-            Calendar refresh = (Calendar) loginTokenExpiration.clone();
-            refresh.add(Calendar.SECOND, -1 * TOKEN_BUFFER_SECONDS);
+            Calendar refresh = (Calendar) tokenRetrieved.clone();
+            refresh.add(Calendar.SECOND, TOKEN_REFRESH);
 
-            if (loginToken == null || now.after(loginTokenExpiration)) {
-                if (email == null || pass == null) {
-                    listener.onResponse(new NetworkResponse<String>(true, R.string.authenticationError));
-                } else {
-                    Get.loginTokenWithCred(queue, email, pass, new Response.Listener<NetworkResponse<String>>() {
-                        @Override
-                        public void onResponse(NetworkResponse<String> response) {
-                            if (response.fail()) {
-                                listener.onResponse(new NetworkResponse<String>(true,
-                                        response.getMessageID()));
-                            } else {
-                                loginToken = response.getPayload();
-                                loginTokenExpiration = Calendar.getInstance();
-                                loginTokenExpiration.add(Calendar.SECOND, TOKEN_SECONDS);
-                                listener.onResponse(new NetworkResponse<>(loginToken));
-                            }
-                        }
-                    });
-                }
-            } else if (now.before(refresh)) {
+            if (now.before(refresh)) {
                 listener.onResponse(new NetworkResponse<>(loginToken));
             } else {
-                Get.loginTokenWithToken(queue, loginToken, new Response.Listener<NetworkResponse<String>>() {
+                Get.loginWithToken(queue, loginToken, new Response.Listener<NetworkResponse<LoginResponse>>() {
                     @Override
-                    public void onResponse(NetworkResponse<String> response) {
+                    public void onResponse(NetworkResponse<LoginResponse> response) {
                         if (response.fail()) {
                             listener.onResponse(new NetworkResponse<String>(true,
                                     response.getMessageID()));
                         } else {
-                            loginToken = response.getPayload();
-                            loginTokenExpiration = Calendar.getInstance();
-                            loginTokenExpiration.add(Calendar.SECOND, TOKEN_SECONDS);
+                            loginToken = response.getPayload().token;
+                            tokenRetrieved = Calendar.getInstance();
                             listener.onResponse(new NetworkResponse<>(loginToken));
                         }
                     }
@@ -1016,23 +1092,23 @@ class API {
         }
 
         /**
-         * Use a user's login credentials to get a login token from the server. A user's credentials
+         * Use a user's login credentials to login to the server. A user's credentials
          * consist of the email address associated with their account and their password for the
-         * CultureMesh website. If the credentials are accepted by the server, the login token
-         * generated by the server will be stored in the {@link NetworkResponse}, which will not be
-         * in a failed state, passed to the listener. If the credentials are rejected, the
+         * CultureMesh website. If the credentials are accepted by the server, the resulting
+         * LoginResponse will be stored in the {@link NetworkResponse}, which will not be
+         * in a failed state, and passed to the listener. If the credentials are rejected, the
          * {@link NetworkResponse} will be in a failed state with an error message communicating
          * the occurrence of an authentication failure and instructing the user to sign in again.
-         * The returned token will only be valid under certain conditions, as specified by the server
-         * in its documentation.
+         * After dismissing the error dialog, the {@link LoginActivity} will be launched.
+         * @see NetworkResponse#genErrorDialog(Context, int, boolean)
          * @param queue Queue to which the asynchronous task will be added
          * @param email Email address that will serve as the username in the attempted login
          * @param password Password to use in the login attempt
          * @param listener Will be called with the {@link NetworkResponse} when the operation
          *                 completes
          */
-        static void loginTokenWithCred(RequestQueue queue, final String email, final String password,
-                               final Response.Listener<NetworkResponse<String>> listener) {
+        static void loginWithCred(RequestQueue queue, final String email, final String password,
+                               final Response.Listener<NetworkResponse<LoginResponse>> listener) {
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE +
                     "account/token?" + getCredentials(), null, new Response.Listener<JSONObject>() {
                 @Override
@@ -1044,23 +1120,49 @@ class API {
                         e.printStackTrace();
                         Log.e("API.Get.loginToken", "Could not parse JSON of token: " +
                                 e.getMessage());
-                        listener.onResponse(new NetworkResponse<String>(true));
+                        listener.onResponse(new NetworkResponse<LoginResponse>(true));
                         return;
                     }
-                    listener.onResponse(new NetworkResponse<>(token));
+                    String email;
+                    try {
+                        email = response.getString("email");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e("API.Get.loginToken", "Could not parse JSON of email: " +
+                                e.getMessage());
+                        listener.onResponse(new NetworkResponse<LoginResponse>(true));
+                        return;
+                    }
+                    User user;
+                    try {
+                        user = new User(response);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e("API.Get.loginToken", "Could not parse JSON of user: " +
+                                e.getMessage());
+                        listener.onResponse(new NetworkResponse<LoginResponse>(true));
+                        return;
+                    }
+                    listener.onResponse(new NetworkResponse<>(new LoginResponse(user, token, email)));
                 }
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    // TODO: What if no network response
-                    int code = error.networkResponse.statusCode;
-                    if (code == 405) {
-                        listener.onResponse(new NetworkResponse<String>(true,
-                                R.string.authenticationError));
-                    } else {
+                    try {
+                        int code = error.networkResponse.statusCode;
+                        if (code == 401) {
+                            Log.d(TAG, "Authentication failure with 401 error when logging in" +
+                                    "with credentials.");
+                            listener.onResponse(NetworkResponse.getAuthFailed(R.string.authenticationError));
+                        } else {
+                            int messageID = processNetworkError("API.Get.loginToken",
+                                    "ErrorListener", error);
+                            listener.onResponse(new NetworkResponse<LoginResponse>(true, messageID));
+                        }
+                    } catch (Exception e) {
                         int messageID = processNetworkError("API.Get.loginToken",
-                                "ErrorListener with email=" + email, error);
-                        listener.onResponse(new NetworkResponse<String>(true, messageID));
+                                "ErrorListener unable to extract status code", error);
+                        listener.onResponse(new NetworkResponse<LoginResponse>(true, messageID));
                     }
                 }
             }) {
@@ -1075,15 +1177,15 @@ class API {
         }
 
         /**
-         * Same as {@link API.Get#loginTokenWithCred(RequestQueue, String, String, Response.Listener)},
+         * Same as {@link API.Get#loginWithCred(RequestQueue, String, String, Response.Listener)},
          * but a login token is used in place of the user's credentials.
          * @param queue Queue to which the asynchronous task will be added
          * @param token Login token to use to get another token
          * @param listener Will be called with the {@link NetworkResponse} when the operation
          *                 completes
          */
-        static void loginTokenWithToken(RequestQueue queue, final String token,
-                                        final Response.Listener<NetworkResponse<String>> listener) {
+        static void loginWithToken(RequestQueue queue, final String token,
+                                        final Response.Listener<NetworkResponse<LoginResponse>> listener) {
             /*
             When logging in with a token, the token is passed as the email and the password is left
             empty. This works because so long as the token is valid, the password is disregarded
@@ -1092,7 +1194,7 @@ class API {
             This allows a token to be refreshed by using it to get a new token, whose timeout
             period (if applicable) will be reset.
              */
-            loginTokenWithCred(queue, token, "", listener);
+            loginWithCred(queue, token, "", listener);
         }
     }
 
@@ -1106,39 +1208,9 @@ class API {
          * @param listener Listener whose onResponse method will be called when the operation completes
          */
         static void addUserToEvent(final RequestQueue queue, final long userId, final long eventId,
-                              final Response.Listener<NetworkResponse<Void>> listener) {
-            Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
-                @Override
-                public void onResponse(NetworkResponse<String> response) {
-                    if (response.fail()) {
-                        listener.onResponse(new NetworkResponse<Void>(true, response.getMessageID()));
-                    } else {
-                        final String token = response.getPayload();
-                        StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "user/" +
-                                userId + "/addToEvent/" + eventId + "?" + getCredentials(), new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                listener.onResponse(new NetworkResponse<Void>(false));
-                            }
-                        }, new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                int messageID = processNetworkError("API.Post.addUserToEvent",
-                                        "ErrorListener", error);
-                                listener.onResponse(new NetworkResponse<Void>(true, messageID));
-                            }
-                        }) {
-                            @Override
-                            public Map<String, String> getHeaders() {
-                                Map<String,String> headers = new HashMap<>();
-                                headers.put("Authorization", genBasicAuth(token));
-                                return headers;
-                            }
-                        };
-                        queue.add(req);
-                    }
-                }
-            });
+                              final Response.Listener<NetworkResponse<String>> listener) {
+            emptyModel(queue, API_URL_BASE + "user/" + userId + "/addToEvent/" + eventId + "?" +
+                    getCredentials(), "API.Post.addUserToEvent", listener);
         }
 
         /**
@@ -1150,27 +1222,37 @@ class API {
          * @param listener Listener whose onResponse method will be called when the operation completes
          */
         static void addUserToNetwork(final RequestQueue queue, final long userId, final long networkId,
-                                     final Response.Listener<NetworkResponse<Void>> listener) {
+                                     final Response.Listener<NetworkResponse<String>> listener) {
+            emptyModel(queue, API_URL_BASE + "user/" + userId + "/addToNetwork/" + networkId +
+                    "?" + getCredentials(), "API.Post.addUserToNet", listener);
+        }
 
+        static void removeUserFromNetwork(final RequestQueue queue, long networkId,
+                                          final Response.Listener<NetworkResponse<String>> listener) {
+            emptyModel(queue, API_URL_BASE + "user/leaveNetwork/" + networkId + "?" +
+                    getCredentials(), "API.Post.removeUserFromNetwork", listener);
+        }
+
+        private static void emptyModel(final RequestQueue queue, final String url, final String method,
+                                       final Response.Listener<NetworkResponse<String>> listener) {
             Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
                 @Override
                 public void onResponse(NetworkResponse<String> response) {
                     if (response.fail()) {
-                        listener.onResponse(new NetworkResponse<Void>(true, response.getMessageID()));
+                        listener.onResponse(new NetworkResponse<String>(true, response.getMessageID()));
                     } else {
                         final String token = response.getPayload();
-                        StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "user/" +
-                                userId + "/addToNetwork/" + networkId + "?" + getCredentials(), new Response.Listener<String>() {
+                        StringRequest req = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-                                listener.onResponse(new NetworkResponse<Void>(false));
+                                listener.onResponse(new NetworkResponse<String>(false));
                             }
                         }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                int messageID = processNetworkError("API.Post.addUserToNet",
+                                int messageID = processNetworkError(method,
                                         "ErrorListener", error);
-                                listener.onResponse(new NetworkResponse<Void>(true, messageID));
+                                listener.onResponse(new NetworkResponse<String>(true, messageID));
                             }
                         }) {
                             @Override
@@ -1186,27 +1268,19 @@ class API {
             });
         }
 
-        static NetworkResponse removeUserFromNetwork(long userId, long networkId) {
-            NetworkSubscriptionDao nSDao = mDb.networkSubscriptionDao();
-            NetworkSubscription ns = new NetworkSubscription(userId, networkId);
-            nSDao.deleteNetworkSubscriptions(ns);
-            return new NetworkResponse<>(ns);
-        }
-
         /**
          * POST to the server a request, via {@code /user/users}, to create a new user. Note that
-         * <strong>the user's password must be set</strong>. Use {@link User#setPassword(String)}.
          * Success or failure status will be passed via a {@link NetworkResponse<Void>} to the
          * listener.
          * @param queue Queue to which the asynchronous task will be added
          * @param user User to create. <strong>Must have password set.</strong>
+         * @param email User's email address
          * @param listener Listener whose onResponse method will be called when task completes
          */
-        static void user(final RequestQueue queue, final User user,
+        static void user(final RequestQueue queue, final User user, final String email,
+                         final String password,
                          final Response.Listener<NetworkResponse<String>> listener) {
             // We cannot use model here because we don't have auth yet: we're making an account!
-            // We cannot call model because we don't have authentication yet: we don't have an
-            // account yet!
             StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE +
                     "user/users?" + getCredentials(), new Response.Listener<String>() {
                 @Override
@@ -1223,7 +1297,7 @@ class API {
                 @Override
                 public byte[] getBody() {
                     try {
-                        return user.getPostJson().toString().getBytes("utf-8");
+                        return user.getPostJson(email, password).toString().getBytes("utf-8");
                     } catch (JSONException | UnsupportedEncodingException e) {
                         Log.e("POST /users error.", "Error forming JSON");
                         listener.onResponse(new NetworkResponse<String>(true));
@@ -1353,12 +1427,61 @@ class API {
          * listener.
          * @param queue Queue to which the asynchronous task will be added
          * @param user Updated version of the user to change
+         * @param email User's email address
          * @param listener Listener whose onResponse method will be called when task completes
          */
         static void user(final RequestQueue queue, final User user,
-                         final Response.Listener<NetworkResponse<String>> listener) {
-            model(queue, user, API_URL_BASE + "user/users?" + getCredentials(),
-                    "API.Put.user", listener);
+                         final String email, final Response.Listener<NetworkResponse<String>> listener) {
+            Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
+                @Override
+                public void onResponse(NetworkResponse<String> response) {
+                    if (response.fail()) {
+                        listener.onResponse(new NetworkResponse<String>(true, response.getMessageID()));
+                    } else {
+                        final String token = response.getPayload();
+                        StringRequest req = new StringRequest(Request.Method.PUT, API_URL_BASE +
+                                "user/users?" + getCredentials(),
+                                new Response.Listener<String>() {
+                                    @Override
+                                    public void onResponse(String response) {
+                                        listener.onResponse(new NetworkResponse<String>(false, response));
+                                    }
+                                }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                int messageID = processNetworkError("API.Put.User",
+                                        "ErrorListener", error);
+                                listener.onResponse(new NetworkResponse<String>(true, messageID));
+                            }
+                        }) {
+                            @Override
+                            public Map<String, String> getHeaders() {
+                                Map<String,String> headers = new HashMap<>();
+                                headers.put("Authorization", genBasicAuth(token));
+                                return headers;
+                            }
+
+                            @Override
+                            public byte[] getBody() {
+                                try {
+                                    return user.getPutJson(email).toString().getBytes();
+                                } catch (JSONException e) {
+                                    Log.e("API.Put.user", "Error forming JSON");
+                                    listener.onResponse(new NetworkResponse<String>(true));
+                                    cancel();
+                                    return "".getBytes();
+                                }
+                            }
+
+                            @Override
+                            public String getBodyContentType() {
+                                return "application/json";
+                            }
+                        };
+                        queue.add(req);
+                    }
+                }
+            });
         }
 
         /**
@@ -1619,27 +1742,27 @@ class API {
 
     /**
      * Process errors that could be returned in the form of a {@link VolleyError} the Response.Listener
-     * @param tag Tag to include in log messages
+     * @param method The method where the error occurred
      * @param task Description of the task being attempted. This will be included in log entries.
      * @param error The error returned
      * @return The resource ID of the error message that should be displayed to the user
      */
-    private static int processNetworkError(String tag, String task, VolleyError error) {
+    private static int processNetworkError(String method, String task, VolleyError error) {
         error.printStackTrace();
         if (error instanceof ServerError) {
-            Log.e(tag, task + ": A ServerError occurred with code " + error.networkResponse.statusCode);
+            Log.e(TAG, method + ": " + task + ": A ServerError occurred with code " + error.networkResponse.statusCode);
             return R.string.noConnection;
         } else if (error instanceof NetworkError) {
             // NoConnectionError is a subclass of NetworkError
-            Log.e(tag, task + ": A NetworkError occurred.");
+            Log.e(TAG, method + ": " + task + ": A NetworkError occurred.");
             return R.string.noConnection;
         } else if (error instanceof AuthFailureError) {
-            Log.e(tag, task + ": An AuthFailureError occurred.");
+            Log.e(TAG, method + ": " + task + ": An AuthFailureError occurred.");
             return R.string.authenticationError;
         } else if (error instanceof ParseError) {
-            Log.e(tag, task + ": A ParseError occurred.");
+            Log.e(TAG, method + ": " + task + ": A ParseError occurred.");
         } else if (error instanceof TimeoutError) {
-            Log.e(tag, task + ": A TimeoutError occurred.");
+            Log.e(TAG, method + ": " + task + ": A TimeoutError occurred.");
             return R.string.timeout;
         }
 

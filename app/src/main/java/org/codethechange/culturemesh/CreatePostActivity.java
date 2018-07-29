@@ -94,7 +94,6 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
                 String contentHTML = formatManager.toString();
                 String datePosted = new Date().toString();
                 progressBar.setIndeterminate(true); // Only because cannot get status from API
-                //TODO: Replace random with user id.
 
                 //TODO: Allow for attaching images/videos.
                 // Note: id field doesn't matter.

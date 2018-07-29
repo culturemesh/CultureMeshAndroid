@@ -1,4 +1,5 @@
 package org.codethechange.culturemesh.models;
+
 import android.arch.persistence.room.Ignore;
 import android.net.Uri;
 import android.util.Log;
@@ -44,8 +45,23 @@ public class Location implements Serializable, Listable {
      * empty IDs should be handled by subclass constructors or methods.
      */
     protected static final int NOWHERE = -1;
+
+    /**
+     * Represents a type of {@code Location} that has only a country defined.
+     * @see {@link Location#getType()}
+     */
     public static final int COUNTRY = 0;
+
+    /**
+     * Represents a type of {@code Location} that has a region defined but not a city.
+     * @see {@link Location#getType()}
+     */
     public static final int REGION = 1;
+
+    /**
+     * Represents a type of {@code Location} that has a city defined.
+     * @see {@link Location#getType()}
+     */
     public static final int CITY = 2;
 
 
@@ -66,7 +82,11 @@ public class Location implements Serializable, Listable {
     @Ignore
     public long cityId;
 
-    //This is is only used for other searching in FindNetworkActivity. Do not use this field anyhere else.
+    /**
+     * This is is only used for other searching in
+     * {@link org.codethechange.culturemesh.FindNetworkActivity}. Do not use this field
+     * anywhere else.
+     */
     @Ignore
     public String locationName;
 
@@ -166,6 +186,9 @@ public class Location implements Serializable, Listable {
      */
     public Location() {}
 
+    /**
+     * Set all IDs to {@link Location#NOWHERE}
+     */
     private void nullifyIds() {
         cityId = NOWHERE;
         regionId = NOWHERE;
@@ -333,11 +356,16 @@ public class Location implements Serializable, Listable {
         return Uri.encode(url);
     }
 
+    /**
+     * Get a UI-ready name for the Location
+     * @return Name for the Location that is suitable for display to the user
+     */
     @Override
     public String getListableName() {
         return locationName;
     }
 
+    // TODO: Implement getNumUsers
     @Override
     public long getNumUsers() {
         return 0;

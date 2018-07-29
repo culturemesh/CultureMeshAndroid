@@ -214,10 +214,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     @Override
     protected void onStart() {
         super.onStart();
-        //TODO: For first run, uncomment this: new TestDatabase().execute();
-        Log.i("TimelineActivity.onStrt", "Running TestDatabase().execute() to initialize" +
-                "database with dummy data.");
-
         //Check if user has selected a network to view, regardless of whether the user is subscribed
         //to any networks yet. Previously, we checked if the user joined a network, and instead
         //navigate the user to ExploreBubbles. This is not ideal because if a user wants to check
@@ -327,9 +323,9 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                 @Override
                 public void onClick(View v) {
                     //We need to subscribe this user!
-                    API.Post.addUserToNetwork(queue, currentUser, selectedNetwork, new Response.Listener<NetworkResponse<Void>>() {
+                    API.Post.addUserToNetwork(queue, currentUser, selectedNetwork, new Response.Listener<NetworkResponse<String>>() {
                         @Override
-                        public void onResponse(NetworkResponse<Void> response) {
+                        public void onResponse(NetworkResponse<String> response) {
                             if (response.fail()) {
                                 response.showErrorDialog(TimelineActivity.this);
                             } else {

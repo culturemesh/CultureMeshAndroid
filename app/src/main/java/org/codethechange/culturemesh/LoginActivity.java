@@ -3,12 +3,9 @@ package org.codethechange.culturemesh;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -31,6 +28,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
     EditText lastNameText;
     EditText confirmPassword;
     EditText passwordText;
+    EditText usernameText;
     TextView needAccountText;
     private RequestQueue queue;
 
@@ -41,12 +39,10 @@ public class LoginActivity extends RedirectableAppCompatActivity {
      * @param settings The SharedPreferences storing user login state
      * @param userID ID of the user to make logged-in
      */
-    public static void setLoggedIn(SharedPreferences settings, long userID, String email, String password) {
-        API.initializePrefs(settings);
+    public static void setLoggedIn(SharedPreferences settings, long userID, String email) {
         SharedPreferences.Editor editor = settings.edit();
         editor.putLong(API.CURRENT_USER, userID);
         editor.putString(API.USER_EMAIL, email);
-        editor.putString(API.USER_PASS, password);
         editor.apply();
     }
 
@@ -58,7 +54,6 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         if (isLoggedIn(settings)) {
             SharedPreferences.Editor editor = settings.edit();
             editor.remove(API.CURRENT_USER);
-            editor.remove(API.USER_PASS);
             editor.apply();
         }
     }
@@ -76,39 +71,30 @@ public class LoginActivity extends RedirectableAppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (signInToggle) {
-                    EditText emailField = findViewById(R.id.user_name_field);
+                    EditText emailField = findViewById(R.id.email_field);
                     EditText passwordField = findViewById(R.id.password_field);
                     final String email = emailField.getText().toString();
                     final String password = passwordField.getText().toString();
 
-                    API.Get.userID(queue, email, new Response.Listener<NetworkResponse<Long>>() {
+                    API.Get.loginWithCred(queue, email, password, new Response.Listener<NetworkResponse<API.Get.LoginResponse>>() {
                         @Override
-                        public void onResponse(NetworkResponse<Long> response) {
+                        public void onResponse(NetworkResponse<API.Get.LoginResponse> response) {
                             if (response.fail()) {
                                 response.showErrorDialog(LoginActivity.this);
                             } else {
-                                final long id = response.getPayload();
-                                API.Get.loginTokenWithCred(queue, email, password, new Response.Listener<NetworkResponse<String>>() {
-                                    @Override
-                                    public void onResponse(NetworkResponse<String> response) {
-                                        if (response.fail()) {
-                                            response.showErrorDialog(LoginActivity.this);
-                                        } else {
-                                            SharedPreferences settings = getSharedPreferences(
-                                                    API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-                                            setLoggedIn(settings, id, email, password);
-
-                                            Intent returnIntent = new Intent();
-                                            setResult(Activity.RESULT_OK, returnIntent);
-                                            finish();
-                                        }
-                                    }
-                                });
+                                SharedPreferences settings = getSharedPreferences(
+                                        API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+                                API.Get.LoginResponse bundle = response.getPayload();
+                                User user = bundle.user;
+                                setLoggedIn(settings, user.id, email);
+                                Intent returnIntent = new Intent();
+                                setResult(Activity.RESULT_OK, returnIntent);
+                                finish();
                             }
                         }
                     });
                 } else {
-                    EditText emailField = findViewById(R.id.user_name_field);
+                    EditText emailField = findViewById(R.id.email_field);
                     EditText firstNameField = findViewById(R.id.first_name_field);
                     EditText lastNameField = findViewById(R.id.last_name_field);
                     EditText passwordField = findViewById(R.id.password_field);
@@ -128,9 +114,9 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                             username += hex.charAt((int) (Math.random() * hex.length()));
                         }
                         User userToCreate = new User(-1, firstNameField.getText().toString(),
-                                lastNameField.getText().toString(), email,
-                                username, "", "", "", pass);
-                        API.Post.user(queue, userToCreate, new Response.Listener<NetworkResponse<String>>() {
+                                lastNameField.getText().toString(),
+                                username, "", "", "");
+                        API.Post.user(queue, userToCreate, email, pass, new Response.Listener<NetworkResponse<String>>() {
                             @Override
                             public void onResponse(NetworkResponse<String> response) {
                                 if (response.fail()) {
@@ -147,7 +133,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                                                 SharedPreferences settings = getSharedPreferences(
                                                         API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
                                                 setLoggedIn(settings, response.getPayload(),
-                                                        email, pass);
+                                                        email);
                                                 Intent returnIntent = new Intent();
                                                 setResult(Activity.RESULT_OK, returnIntent);
                                                 finish();
@@ -167,6 +153,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         confirmPassword = findViewById(R.id.confirm_password_field);
         passwordText = findViewById(R.id.password_field);
         needAccountText = findViewById(R.id.need_account_text);
+        usernameText = findViewById(R.id.username_field);
         final Button signToggleButton = findViewById(R.id.sign_toggle_button);
         //Get number of pixels for 8dp
         DisplayMetrics displaymetrics = new DisplayMetrics();
@@ -176,7 +163,19 @@ public class LoginActivity extends RedirectableAppCompatActivity {
             public void onClick(View v) {
                 if (signInToggle) {
                     //Have animation move edit texts in place.
-                    //Move first name text from bottom to just under username
+                    //Move user name text from bottom to just under email
+                    Animation userNameTextAnim = new Animation() {
+                        @Override
+                        protected void applyTransformation(float interpolatedTime, Transformation t) {
+                            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)
+                                    usernameText.getLayoutParams();
+                            params.topMargin = (int)(1000 - (1000 - eightDp) * interpolatedTime);
+                            usernameText.setLayoutParams(params);
+                        }
+                    };
+                    userNameTextAnim.setDuration(300); // in ms
+                    usernameText.startAnimation(userNameTextAnim);
+                    //Next, move first name to under user name.
                     Animation firstNameTextAnim = new Animation() {
                         @Override
                         protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -188,7 +187,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                     };
                     firstNameTextAnim.setDuration(300); // in ms
                     firstNameText.startAnimation(firstNameTextAnim);
-                    //Have Password move two EditText's below where it is now.
+                    //Have Password move three EditText's below where it is now.
                     final Animation passwordTextAnim = new Animation() {
                         @Override
                         protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -196,13 +195,14 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                                     passwordText.getLayoutParams();
                             params.topMargin = (int) (eightDp + interpolatedTime * (
                                     firstNameText.getMeasuredHeight() + eightDp +
+                                    usernameText.getMeasuredHeight() + eightDp +
                                             lastNameText.getMeasuredHeight()+ eightDp));
                             passwordText.setLayoutParams(params);
                         }
                     };
                     passwordTextAnim.setDuration(300);
                     passwordText.startAnimation(passwordTextAnim);
-                    //Have confirmPasswordMove just below password.
+                    //Have confirmPassword move just below password.
                     final Animation confirmPasswordAnim = new Animation(){
                         @Override
                         protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -210,6 +210,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                                     confirmPassword.getLayoutParams();
                             params.topMargin = (int) (eightDp + interpolatedTime * (
                                     firstNameText.getMeasuredHeight() + eightDp +
+                                            usernameText.getMeasuredHeight() + eightDp +
                                             lastNameText.getMeasuredHeight() + eightDp +
                                             passwordText.getMeasuredHeight() + eightDp));
                             confirmPassword.setLayoutParams(params);
@@ -223,6 +224,10 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                     //Have sign up button be under confirm password field
                     constraints.connect(R.id.sign_in_button, ConstraintSet.TOP,
                             R.id.confirm_password_field, ConstraintSet.BOTTOM);
+                    // We need to have move firstname to be under username as opposed to under
+                    // email.
+                    constraints.connect(R.id.first_name_field, ConstraintSet.TOP,
+                            R.id.username_field, ConstraintSet.BOTTOM);
                     constraints.applyTo(layout);
                     signInToggle = false;
                     //Swap button labels.
@@ -233,7 +238,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                 } else {
                     //Change back to sign in layout.
                     //Have animation move edit texts in place.
-                    //Move first name to bottom under username
+                    //Move first name to bottom under email
                     Animation firstNameTextAnim = new Animation() {
                         @Override
                         protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -245,6 +250,17 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                     };
                     firstNameTextAnim.setDuration(300); // in ms
                     firstNameText.startAnimation(firstNameTextAnim);
+                    Animation usernameAnim = new Animation() {
+                        @Override
+                        protected void applyTransformation(float interpolatedTime, Transformation t) {
+                            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)
+                                    usernameText.getLayoutParams();
+                            params.topMargin = (int)(2000 * interpolatedTime);
+                            usernameText.setLayoutParams(params);
+                        }
+                    };
+                    usernameAnim.setDuration(300);
+                    usernameText.startAnimation(usernameAnim);
                     //Have Password move back up.
                     final Animation passwordTextAnim = new Animation() {
                         @Override

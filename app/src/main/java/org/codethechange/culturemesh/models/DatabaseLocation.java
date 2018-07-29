@@ -34,6 +34,15 @@ public abstract class DatabaseLocation extends Location {
         super(json);
     }
 
+    /**
+     * Passes all parameters, maintaining order, to
+     * {@link Location#Location(JSONObject, String, String, String)}
+     * @param json
+     * @param cityIdKey
+     * @param regionIdKey
+     * @param countryIdKey
+     * @throws JSONException
+     */
     public DatabaseLocation(JSONObject json, String cityIdKey, String regionIdKey, String countryIdKey) throws JSONException {
         super(json, cityIdKey, regionIdKey, countryIdKey);
     }

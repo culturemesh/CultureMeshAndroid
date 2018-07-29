@@ -13,17 +13,48 @@ import java.util.HashMap;
 public class NearLocation extends DatabaseLocation {
 
     /**
-     * These instance fields mirror those in Location, but are needed for database storage
+     * Mirrors the {@link Location#countryId} in {@link Location} to avoid collisions in the
+     * database
+     * @see DatabaseLocation
      */
     public long near_country_id;
+
+    /**
+     * Mirrors the {@link Location#regionId} in {@link Location} to avoid collisions in the
+     * database
+     * @see DatabaseLocation
+     */
     public long near_region_id;
+
+    /**
+     * Mirrors the {@link Location#cityId} in {@link Location} to avoid collisions in the
+     * database
+     * @see DatabaseLocation
+     */
     public long near_city_id;
 
+    /**
+     * Constant that holds the JSON key whose value will be the ID of the city ({@link City#cityId})
+     * in communications with the server.
+     * @see Location#Location(JSONObject, String, String, String)
+     */
     public static final String CITY_ID_KEY = "id_city_cur";
+
+    /**
+     * Constant that holds the JSON key whose value will be the ID of the region
+     * ({@link Region#regionId}) in communications with the server.
+     * @see Location#Location(JSONObject, String, String, String)
+     */
     public static final String REGION_ID_KEY = "id_region_cur";
+
+    /**
+     * Constant that holds the JSON key whose value will be the ID of the country
+     * ({@link Country#countryId}) in communications with the server.
+     * @see Location#Location(JSONObject, String, String, String)
+     */
     public static final String COUNTRY_ID_KEY = "id_country_cur";
 
-    // TODO: Handle undefined geographical areas (e.g. no region defined)
+    // TODO: Add constructors for undefined geographical areas (e.g. no region defined)
     /**
      * Initialize instance fields with provided parameters
      * @param cityId ID of city

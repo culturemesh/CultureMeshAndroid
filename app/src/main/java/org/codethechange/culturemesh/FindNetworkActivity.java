@@ -181,8 +181,6 @@ public class FindNetworkActivity extends DrawerActivity {
             searchView.setSearchableInfo(mSearchManager.
                     getSearchableInfo(getActivity().getComponentName()));
             searchList = rootView.findViewById(R.id.search_suggestions_list_view);
-            //TODO: Remove dummy data
-            //TODO: Use abstracted API interface.
 
             adapter = new SearchAdapter<>(getActivity(),
                     android.R.layout.simple_list_item_1, R.id.location_language_name_list_view);
@@ -223,7 +221,6 @@ public class FindNetworkActivity extends DrawerActivity {
                 }
             });
             return rootView;
-
         }
 
         @Override
