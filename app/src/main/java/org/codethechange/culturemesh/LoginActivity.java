@@ -118,7 +118,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                         String username = usernameText.getText().toString();
                         User userToCreate = new User(-1, firstNameField.getText().toString(),
                                 lastNameField.getText().toString(),
-                                username, "", "", "");
+                                username);
                         API.Post.user(queue, userToCreate, email, pass, new Response.Listener<NetworkResponse<String>>() {
                             @Override
                             public void onResponse(NetworkResponse<String> response) {

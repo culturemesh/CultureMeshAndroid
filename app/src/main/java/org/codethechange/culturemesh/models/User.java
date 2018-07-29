@@ -16,6 +16,10 @@ import java.io.Serializable;
 @Entity
 public class User implements Serializable {
 
+    public static final String CM_LOGO_URL = "https://www.culturemesh.com/images/cm_logo_blank_profile_lrg.png";
+    public static final String DEFAULT_BIO = "";
+    public static final String DEFAULT_GENDER = "";
+
     /**
      * The user's unique identifier, which identifies them across all of CultureMesh and is constant.
      * Not editable by user.
@@ -80,6 +84,16 @@ public class User implements Serializable {
         this.imgURL = imgURL;
         this.aboutMe = aboutMe;
         this.gender = gender;
+    }
+
+    public User(long id, String firstName, String lastName, String username) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.imgURL = CM_LOGO_URL;
+        this.aboutMe = DEFAULT_BIO;
+        this.gender = DEFAULT_GENDER;
     }
 
     /**
