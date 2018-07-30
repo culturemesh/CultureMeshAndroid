@@ -41,6 +41,25 @@ public class NetworkResponse<E> {
     private boolean isAuthFailed;
 
     /**
+     * Create a new NetworkResponse of the type designated in {@code <>} from another NetworkResponse
+     * of any other type. Any payload in the source object will not be transferred to the created one.
+     * All other fields are copied.
+     * @param toConvert Source to create new object from. All properties except payload will be
+     *                  copied.
+     */
+    public NetworkResponse(NetworkResponse<?> toConvert) {
+        if (!toConvert.fail()) {
+            throw new IllegalArgumentException("The provided NetworkResponse Object to convert (" +
+                    toConvert + ") is not failed. NetworkResponse(NetworkResponse<Object>) requires" +
+                    "an argument NetworkResponse that is failed because the payload is dropped.");
+        }
+        Log.d(TAG, "Creating new NetworkResponse from " + toConvert.toString());
+        fail = toConvert.fail();
+        messageID = toConvert.getMessageID();
+        isAuthFailed = toConvert.isAuthFailed();
+    }
+
+    /**
      * Constructor that creates a generic message based on "inFail"
      * @param inFail Failure state provided by user (true if failed)
      */
@@ -107,6 +126,11 @@ public class NetworkResponse<E> {
         this.messageID = messageID;
     }
 
+    /**
+     * Get a {@link String} describing the type of the provided payload
+     * @param payload Payload whose type will be described. Can be null.
+     * @return {@code null} if the payload is null, the name of the payload's class otherwise
+     */
     private String payloadType(E payload) {
         String payloadType;
         if (payload == null) {
@@ -117,6 +141,11 @@ public class NetworkResponse<E> {
         return payloadType;
     }
 
+    /**
+     * Get a {@link String} describing the provided payload
+     * @param payload Payload which will be described. Can be null.
+     * @return {@code null} if the payload is null, the {@code payload.toString()} otherwise.
+     */
     private String payloadName(E payload) {
         String payloadName;
         if (payload == null) {
@@ -141,6 +170,25 @@ public class NetworkResponse<E> {
         NetworkResponse<API.Get.LoginResponse> nr = new NetworkResponse<>(true, messageID);
         nr.isAuthFailed = true;
         return nr;
+    }
+
+    /**
+     * Get whether the current object represents a failed authentication
+     * @return {@code true} if object represents an authentication failure, {@code false} otherwise
+     */
+    public boolean isAuthFailed() {
+        Log.d(TAG, "Returning isAuthFailed=" + isAuthFailed);
+        return isAuthFailed;
+    }
+
+    /**
+     * Set whether the current object represents a failed authentication
+     * @param isAuthFailed {@code true} if object represents an authentication failure, {@code false}
+     *                                 otherwise
+     */
+    public void setAuthFailed(boolean isAuthFailed) {
+        Log.d(TAG, "Setting isAuthFailed to be " + isAuthFailed);
+        this.isAuthFailed = isAuthFailed;
     }
 
     /**
@@ -273,5 +321,15 @@ public class NetworkResponse<E> {
         Log.d(TAG, "Returning payload=" + payload + ", which is of type=" + type);
         // TODO: This should throw an exception if payload is undefined
         return payload;
+    }
+
+    /**
+     * Get a String representation of the object that conveys the current state of all instance fields
+     * @return String representation of the form {@code NetworkResponse<?>[field1=value1, ...]}
+     */
+    public String toString() {
+        return "NetworkResponse<?>[fail=" + fail + ", messageID=" + messageID + ", payload=" +
+                payloadName(payload) + ", payloadType=" + payloadType(payload) + ", authFail=" +
+                isAuthFailed + "]";
     }
 }
