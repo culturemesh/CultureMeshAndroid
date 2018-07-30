@@ -132,7 +132,7 @@ class API {
      * Tag to use for log statements. It is set dynamically so that if the class name is refactored,
      * the logging tag will be too.
      */
-    private static final String TAG = API.class.getName();
+    private static final String TAG = API.class.getSimpleName();
 
     /**
      * Database to use for data persistence. Not currently used.
@@ -1080,8 +1080,8 @@ class API {
                     @Override
                     public void onResponse(NetworkResponse<LoginResponse> response) {
                         if (response.fail()) {
-                            listener.onResponse(new NetworkResponse<String>(true,
-                                    response.getMessageID()));
+                            NetworkResponse<String> nr = new NetworkResponse<>(response);
+                            listener.onResponse(nr);
                         } else {
                             loginToken = response.getPayload().token;
                             tokenRetrieved = Calendar.getInstance();
@@ -1152,9 +1152,11 @@ class API {
                     try {
                         int code = error.networkResponse.statusCode;
                         if (code == 401) {
-                            Log.d(TAG, "Authentication failure with 401 error when logging in" +
+                            Log.d(TAG, "Authentication failure with 401 error when logging in " +
                                     "with credentials.");
-                            listener.onResponse(NetworkResponse.getAuthFailed(R.string.authenticationError));
+                            NetworkResponse<LoginResponse> nr = new NetworkResponse<>(true, R.string.authenticationError);
+                            nr.setAuthFailed(true);
+                            listener.onResponse(nr);
                         } else {
                             int messageID = processNetworkError("API.Get.loginToken",
                                     "ErrorListener", error);
@@ -1240,7 +1242,7 @@ class API {
                 @Override
                 public void onResponse(NetworkResponse<String> response) {
                     if (response.fail()) {
-                        listener.onResponse(new NetworkResponse<String>(true, response.getMessageID()));
+                        listener.onResponse(new NetworkResponse<String>(response));
                     } else {
                         final String token = response.getPayload();
                         StringRequest req = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
@@ -1371,15 +1373,16 @@ class API {
             Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
                 @Override
                 public void onResponse(NetworkResponse<String> response) {
+                    Log.d(TAG, logTag + " (via Post.model()): Response=" + response);
                     if (response.fail()) {
-                        listener.onResponse(new NetworkResponse<String>(true, response.getMessageID()));
+                        listener.onResponse(new NetworkResponse<String>(response));
                     } else {
                         final String token = response.getPayload();
                         StringRequest req = new StringRequest(Request.Method.POST, url,
                                 new Response.Listener<String>() {
                                     @Override
                                     public void onResponse(String response) {
-                                        listener.onResponse(new NetworkResponse<String>(false, response));
+                                        listener.onResponse(new NetworkResponse<>(false, response));
                                     }
                                 }, new Response.ErrorListener() {
                             @Override
@@ -1437,7 +1440,7 @@ class API {
                 @Override
                 public void onResponse(NetworkResponse<String> response) {
                     if (response.fail()) {
-                        listener.onResponse(new NetworkResponse<String>(true, response.getMessageID()));
+                        listener.onResponse(new NetworkResponse<String>(response));
                     } else {
                         final String token = response.getPayload();
                         StringRequest req = new StringRequest(Request.Method.PUT, API_URL_BASE +
@@ -1542,7 +1545,7 @@ class API {
                 @Override
                 public void onResponse(NetworkResponse<String> response) {
                     if (response.fail()) {
-                        listener.onResponse(new NetworkResponse<String>(true, response.getMessageID()));
+                        listener.onResponse(new NetworkResponse<String>(response));
                     } else {
                         final String token = response.getPayload();
                         StringRequest req = new StringRequest(Request.Method.PUT, url,
