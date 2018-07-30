@@ -5,11 +5,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 
 /**
  * Class to store responses after attempting networking tasks
  */
 public class NetworkResponse<E> {
+
+    /**
+     * Tag to use for log statements. It is set dynamically so that if the class name is refactored,
+     * the logging tag will be too.
+     */
+    private static final String TAG = NetworkResponse.class.getSimpleName();
 
     /**
      * Whether or not the network task failed.
@@ -38,6 +45,7 @@ public class NetworkResponse<E> {
      * @param inFail Failure state provided by user (true if failed)
      */
     public NetworkResponse(boolean inFail) {
+        Log.d(TAG, "Creating new NetworkResponse<?> object with inFail=" + inFail);
         fail = inFail;
         if (inFail)
             messageID = R.string.genericFail;
@@ -51,6 +59,8 @@ public class NetworkResponse<E> {
      * @param inMessageID ID for string resource containing message
      */
     public NetworkResponse(boolean inFail, int inMessageID) {
+        Log.d(TAG, "Creating new NetworkResponse<?> object with inFail=" + inFail +
+                ", messageID=" + inMessageID);
         fail = inFail;
         messageID = inMessageID;
     }
@@ -60,6 +70,8 @@ public class NetworkResponse<E> {
      * @param inPayload Payload returned by networking request
      */
     public NetworkResponse(E inPayload) {
+        Log.d(TAG, "Creating new NetworkResponse<?> object with payload=" +
+                payloadName(inPayload) + ", which is of type " + payloadType(inPayload));
         payload = inPayload;
         fail = false;
         messageID = R.string.genericSuccess;
@@ -71,6 +83,8 @@ public class NetworkResponse<E> {
      * @param inPayload Payload returned by networking request
      */
     public NetworkResponse(boolean inFail, E inPayload) {
+        Log.d(TAG, "Creating new NetworkResponse<?> object with inFail=" + inFail +
+                ", payload=" + payloadName(inPayload) + ", which is of type " + payloadType(inPayload));
         payload = inPayload;
         fail = inFail;
         if (inFail)
@@ -85,9 +99,32 @@ public class NetworkResponse<E> {
      * @param inPayload Payload returned by networking request
      */
     public NetworkResponse(boolean inFail, E inPayload, int messageID) {
+        Log.d(TAG, "Creating new NetworkResponse<?> object with inFail=" + inFail +
+                ", payload=" + payloadName(inPayload) + ", which is of type " +
+                payloadType(inPayload) + ", messageID=" + messageID);
         payload = inPayload;
         fail = inFail;
         this.messageID = messageID;
+    }
+
+    private String payloadType(E payload) {
+        String payloadType;
+        if (payload == null) {
+            payloadType = "null";
+        } else {
+            payloadType = payload.getClass().getSimpleName();
+        }
+        return payloadType;
+    }
+
+    private String payloadName(E payload) {
+        String payloadName;
+        if (payload == null) {
+            payloadName = "null";
+        } else {
+            payloadName = payload.toString();
+        }
+        return payloadName;
     }
 
     /**
@@ -99,6 +136,8 @@ public class NetworkResponse<E> {
      * @return NetworkResponse object to describe an authentication failure.
      */
     public static NetworkResponse<API.Get.LoginResponse> getAuthFailed(int messageID) {
+        Log.d(TAG, "Creating new authFailed NetworkResponse<API.Get.LoginResponse> object with " +
+                "messageID=" + messageID);
         NetworkResponse<API.Get.LoginResponse> nr = new NetworkResponse<>(true, messageID);
         nr.isAuthFailed = true;
         return nr;
@@ -109,6 +148,7 @@ public class NetworkResponse<E> {
      * @return true if the request failed, false if it succeeded
      */
     public boolean fail() {
+        Log.d(TAG, "Returning fail=" + fail);
         return fail;
     }
 
@@ -117,6 +157,7 @@ public class NetworkResponse<E> {
      * @return Resource ID of message
      */
     public int getMessageID() {
+        Log.d(TAG, "Returning messageID=" + messageID);
         return messageID;
     }
 
@@ -127,8 +168,10 @@ public class NetworkResponse<E> {
      */
     public AlertDialog getErrorDialog(Context context) {
         if (isAuthFailed) {
+            Log.d(TAG, "Returning an authFailed Error Dialog for context=" + context.getPackageName());
             return genErrorDialog(context, messageID, true);
         } else {
+            Log.d(TAG, "Returning a non-authFailed Error Dialog for context=" + context.getPackageName());
             return genErrorDialog(context, messageID);
         }
     }
@@ -140,6 +183,8 @@ public class NetworkResponse<E> {
      * @return {@link AlertDialog} with specified alert message.
      */
     public static AlertDialog genErrorDialog(Context context, int messageID) {
+        Log.d(TAG, "Generating an Error Dialog for context=" + context.getPackageName() + ", " +
+                "messageID=" + messageID + ". authFail not specified, so it is false");
         return genErrorDialog(context, messageID, false);
     }
 
@@ -153,6 +198,8 @@ public class NetworkResponse<E> {
      * {@link LoginActivity} upon dismissal if {@code authFail} is true.
      */
     public static AlertDialog genErrorDialog(final Context context, int messageID, final boolean authFail) {
+        Log.d(TAG, "Generating an Error Dialog for context=" + context.getPackageName() + ", " +
+                "messageID=" + messageID + ", authFail=" + authFail);
         // SOURCE: https://stackoverflow.com/questions/26097513/android-simple-alert-dialog
         AlertDialog errDialog = new AlertDialog.Builder(context).create();
         errDialog.setTitle(context.getString(R.string.error));
@@ -162,12 +209,15 @@ public class NetworkResponse<E> {
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 if (authFail) {
+                    Log.d(TAG, "Error dialog dismissed, so launching Intent to LoginActivity " +
+                            "and signing user out");
                     Intent toSignIn = new Intent(context, LoginActivity.class);
                     SharedPreferences settings = context.getSharedPreferences(
                             API.SETTINGS_IDENTIFIER, Context.MODE_PRIVATE);
                     LoginActivity.setLoggedOut(settings);
                     context.startActivity(toSignIn);
                 }
+                Log.d(TAG, "Error dialog dismissed");
                 dialog.dismiss();
             }
         };
@@ -182,6 +232,8 @@ public class NetworkResponse<E> {
      * @return {@link AlertDialog} with specified alert message
      */
     public static AlertDialog genSuccessDialog(Context context, int messageID) {
+        Log.d(TAG, "Generating a Success Dialog for context=" + context.getPackageName() + ", " +
+                "messageID=" + messageID);
         // SOURCE: https://stackoverflow.com/questions/26097513/android-simple-alert-dialog
         AlertDialog errDialog = new AlertDialog.Builder(context).create();
         errDialog.setTitle(context.getString(R.string.success));
@@ -202,6 +254,7 @@ public class NetworkResponse<E> {
      * @param context Context upon which to display error dialog
      */
     public void showErrorDialog(Context context) {
+        Log.d(TAG, "Showing error dialog for context=" + context.getPackageName());
         AlertDialog errDialog = getErrorDialog(context);
         errDialog.show();
     }
@@ -211,6 +264,13 @@ public class NetworkResponse<E> {
      * @return Payload returned by network operation
      */
     public E getPayload() {
+        String type = "";
+        if (payload == null) {
+            type = "null";
+        } else {
+            type = payload.getClass().getSimpleName();
+        }
+        Log.d(TAG, "Returning payload=" + payload + ", which is of type=" + type);
         // TODO: This should throw an exception if payload is undefined
         return payload;
     }
