@@ -48,6 +48,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,6 +130,19 @@ class API {
     static final long NEW_NETWORK = -2;
 
     /**
+     * Settings identifier for the currently cached login token for the user. May be missing
+     * or expired. Expiration is tracked using {@link API#TOKEN_REFRESH}.
+     */
+    static final String LOGIN_TOKEN = "loginToken";
+
+    /**
+     * Settings identifier for when the current login token was retrieved. Stored as the number of
+     * milliseconds since the epoch.
+     * @see API#LOGIN_TOKEN
+     */
+    static final String TOKEN_RETRIEVED = "tokenRetrieved";
+
+    /**
      * Tag to use for log statements. It is set dynamically so that if the class name is refactored,
      * the logging tag will be too.
      */
@@ -146,23 +160,14 @@ class API {
     static int reqCounter;
 
     /**
-     * The currently cached login token for the user. May be {@code null} or expired. Expiration is
-     * tracked using {@link API#tokenRetrieved}.
-     */
-    static String loginToken = null;
-
-    /**
-     * Stores when the current login token was retrieved. Initialized arbitrarily to the current time
-     * even though {@link API#loginToken} starts out {@code null}.
-     */
-    static Calendar tokenRetrieved = Calendar.getInstance();
-
-    /**
-     * Number of seconds to use a login token (stored in {@link API#loginToken} before refreshing it.
+     * Number of seconds to use a login token before refreshing it.
      * Note that this is not how long the token is valid, just how often to refresh it. Refresh time
      * must be shorter than the validity time.
+     *
+     * @see API#LOGIN_TOKEN
+     * @see API#TOKEN_REFRESH
      */
-    static final int TOKEN_REFRESH = 60;
+    static final int TOKEN_REFRESH = 60 * 1000;
 
     /**
      * The protocol for GET requests is as follows...
@@ -1058,40 +1063,47 @@ class API {
 
         /**
          * Generically get a login token. If the token is fresh (less than {@link API#TOKEN_REFRESH}
-         * seconds have passed since the last token was retrieved, stored in
-         * {@link API#tokenRetrieved}), the current token is simply supplied. Otherwise, an attempt
+         * seconds have passed since the last token was retrieved
+         * the current token is simply supplied. Otherwise, an attempt
          * is made to login with the token to get a new one. If this fails, the token has expired,
          * and the user is directed to sign in again by the error dialog. If it succeeds, the new
          * token is stored in place of the old one.
          * @see NetworkResponse#genErrorDialog(Context, int, boolean)
+         * @see API#LOGIN_TOKEN
+         * @see API#TOKEN_RETRIEVED
          * @param queue Queue to which the asynchronous task will be added
          * @param listener Listener whose onResponse method will be called when task completes
          */
-        static void loginToken(RequestQueue queue,
+        static void loginToken(RequestQueue queue, final SharedPreferences settings,
                                final Response.Listener<NetworkResponse<String>> listener) {
-            Calendar now = Calendar.getInstance();
-            Calendar refresh = (Calendar) tokenRetrieved.clone();
-            refresh.add(Calendar.SECOND, TOKEN_REFRESH);
+            long now = System.currentTimeMillis();
+            long retrieved = settings.getLong(TOKEN_RETRIEVED, 0);
 
-            Log.d(TAG, "Get.loginToken: now=" + now.getTime().toString() + ", refresh=" +
-                    refresh.getTime().toString());
-            if (now.before(refresh)) {
+            Log.d(TAG, "Get.loginToken: now=" + (new Date(now)).toString() + ", retrieved=" +
+                    (new Date(retrieved)).toString());
+            if (now - retrieved < TOKEN_REFRESH && settings.contains(LOGIN_TOKEN)) {
                 Log.v(TAG, "Get.loginToken: Don't need to refresh yet, so using stored token. " +
-                        "Token=" + loginToken);
-                listener.onResponse(new NetworkResponse<>(loginToken));
+                        "Token=" + settings.getString(LOGIN_TOKEN, "NoTokenStored"));
+                listener.onResponse(new NetworkResponse<>(settings.getString(LOGIN_TOKEN, "NoTokenStored")));
             } else {
                 Log.v(TAG, "Get.loginToken: Token needs to be refreshed, so refreshing.");
-                Get.loginWithToken(queue, loginToken, new Response.Listener<NetworkResponse<LoginResponse>>() {
+                Get.loginWithToken(queue, settings.getString(LOGIN_TOKEN, "NoTokenStored"),
+                        settings, new Response.Listener<NetworkResponse<LoginResponse>>() {
                     @Override
                     public void onResponse(NetworkResponse<LoginResponse> response) {
                         if (response.fail()) {
                             NetworkResponse<String> nr = new NetworkResponse<>(response);
                             listener.onResponse(nr);
                         } else {
-                            loginToken = response.getPayload().token;
-                            tokenRetrieved = Calendar.getInstance();
-                            Log.v(TAG, "Get.loginToken: New token=" + loginToken + ", retrieved=" + tokenRetrieved.getTime().toString());
-                            listener.onResponse(new NetworkResponse<>(loginToken));
+                            String token = response.getPayload().token;
+                            long tokenRetrieved = System.currentTimeMillis();
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putString(LOGIN_TOKEN, token);
+                            editor.putLong(TOKEN_RETRIEVED, tokenRetrieved);
+                            editor.apply();
+                            Log.v(TAG, "Get.loginToken: New token=" + token + ", retrieved=" +
+                                    (new Date(tokenRetrieved)).toString());
+                            listener.onResponse(new NetworkResponse<>(token));
                         }
                     }
                 });
@@ -1115,6 +1127,7 @@ class API {
          *                 completes
          */
         static void loginWithCred(RequestQueue queue, final String email, final String password,
+                               final SharedPreferences settings,
                                final Response.Listener<NetworkResponse<LoginResponse>> listener) {
             Log.v(TAG, "Get.loginWithCred: Logging in with credentials email=" + email + ", password=" + password);
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE +
@@ -1151,6 +1164,13 @@ class API {
                         listener.onResponse(new NetworkResponse<LoginResponse>(true));
                         return;
                     }
+                    long tokenRetrieved = System.currentTimeMillis();
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putString(LOGIN_TOKEN, token);
+                    editor.putLong(TOKEN_RETRIEVED, tokenRetrieved);
+                    editor.apply();
+                    Log.v(TAG, "Get.loginToken: New token=" + token + ", retrieved=" +
+                            (new Date(tokenRetrieved)).toString());
                     listener.onResponse(new NetworkResponse<>(new LoginResponse(user, token, email)));
                 }
             }, new Response.ErrorListener() {
@@ -1187,14 +1207,14 @@ class API {
         }
 
         /**
-         * Same as {@link API.Get#loginWithCred(RequestQueue, String, String, Response.Listener)},
+         * Same as {@link API.Get#loginWithCred(RequestQueue, String, String, SharedPreferences, Response.Listener)},
          * but a login token is used in place of the user's credentials.
          * @param queue Queue to which the asynchronous task will be added
          * @param token Login token to use to get another token
          * @param listener Will be called with the {@link NetworkResponse} when the operation
          *                 completes
          */
-        static void loginWithToken(RequestQueue queue, final String token,
+        static void loginWithToken(RequestQueue queue, final String token, SharedPreferences settings,
                                         final Response.Listener<NetworkResponse<LoginResponse>> listener) {
             /*
             When logging in with a token, the token is passed as the email and the password is left
@@ -1205,7 +1225,7 @@ class API {
             period (if applicable) will be reset.
              */
             Log.v(TAG, "Get.loginWithToken: Logging in with token=" + token);
-            loginWithCred(queue, token, "", listener);
+            loginWithCred(queue, token, "", settings, listener);
         }
     }
 
@@ -1219,9 +1239,10 @@ class API {
          * @param listener Listener whose onResponse method will be called when the operation completes
          */
         static void addUserToEvent(final RequestQueue queue, final long userId, final long eventId,
+                              SharedPreferences settings,
                               final Response.Listener<NetworkResponse<String>> listener) {
             emptyModel(queue, API_URL_BASE + "user/" + userId + "/addToEvent/" + eventId + "?" +
-                    getCredentials(), "API.Post.addUserToEvent", listener);
+                    getCredentials(), "API.Post.addUserToEvent", settings, listener);
         }
 
         /**
@@ -1233,20 +1254,25 @@ class API {
          * @param listener Listener whose onResponse method will be called when the operation completes
          */
         static void addUserToNetwork(final RequestQueue queue, final long userId, final long networkId,
+                                     SharedPreferences settings,
                                      final Response.Listener<NetworkResponse<String>> listener) {
             emptyModel(queue, API_URL_BASE + "user/" + userId + "/addToNetwork/" + networkId +
-                    "?" + getCredentials(), "API.Post.addUserToNet", listener);
+                    "?" + getCredentials(), "API.Post.addUserToNet", settings, listener);
         }
 
+        // TODO: Document removeUserFromNetwork
         static void removeUserFromNetwork(final RequestQueue queue, long networkId,
+                                          SharedPreferences settings,
                                           final Response.Listener<NetworkResponse<String>> listener) {
             emptyModel(queue, API_URL_BASE + "user/leaveNetwork/" + networkId + "?" +
-                    getCredentials(), "API.Post.removeUserFromNetwork", listener);
+                    getCredentials(), "API.Post.removeUserFromNetwork", settings, listener);
         }
 
+        // TODO: Document emptyModel
         private static void emptyModel(final RequestQueue queue, final String url, final String method,
+                                       final SharedPreferences settings,
                                        final Response.Listener<NetworkResponse<String>> listener) {
-            Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
+            Get.loginToken(queue, settings, new Response.Listener<NetworkResponse<String>>() {
                 @Override
                 public void onResponse(NetworkResponse<String> response) {
                     if (response.fail()) {
@@ -1337,9 +1363,10 @@ class API {
          * @param listener Listener whose onResponse method will be called when task completes
          */
         static void post(final RequestQueue queue, final org.codethechange.culturemesh.models.Post post,
+                         SharedPreferences settings,
                          final Response.Listener<NetworkResponse<String>> listener) {
             model(queue, post, API_URL_BASE + "post/new?" + getCredentials(),
-                    "API.Post.post", listener);
+                    "API.Post.post", settings, listener);
         }
 
         /**
@@ -1350,9 +1377,10 @@ class API {
          * @param comment {@link PostReply} to create.
          * @param listener Listener whose onResponse method will be called when task completes
          */
-        static void reply(RequestQueue queue, final PostReply comment, final Response.Listener<NetworkResponse<String>> listener) {
+        static void reply(RequestQueue queue, final PostReply comment, SharedPreferences settings,
+                          final Response.Listener<NetworkResponse<String>> listener) {
             model(queue, comment, API_URL_BASE + "post/" + comment.parentId + "/reply",
-                    "API.Post.reply", listener);
+                    "API.Post.reply", settings, listener);
         }
 
         /**
@@ -1363,10 +1391,10 @@ class API {
          * @param event {@link Event} to create.
          * @param listener Listener whose onResponse method will be called when task completes
          */
-        static void event(final RequestQueue queue, final Event event,
+        static void event(final RequestQueue queue, final Event event, SharedPreferences settings,
                          final Response.Listener<NetworkResponse<String>> listener) {
             model(queue, event, API_URL_BASE + "event/new?" + getCredentials(),
-                    "API.Post.event", listener);
+                    "API.Post.event", settings, listener);
         }
 
         /**
@@ -1379,8 +1407,9 @@ class API {
          * @param listener Listener whose onResponse method will be called when task completes
          */
         private static void model(final RequestQueue queue, final Postable toPost, final String url,
-                                  final String logTag, final Response.Listener<NetworkResponse<String>> listener) {
-            Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
+                                  final String logTag, SharedPreferences settings,
+                                  final Response.Listener<NetworkResponse<String>> listener) {
+            Get.loginToken(queue, settings, new Response.Listener<NetworkResponse<String>>() {
                 @Override
                 public void onResponse(NetworkResponse<String> response) {
                     Log.d(TAG, logTag + " (via Post.model()): Response=" + response);
@@ -1444,9 +1473,9 @@ class API {
          * @param email User's email address
          * @param listener Listener whose onResponse method will be called when task completes
          */
-        static void user(final RequestQueue queue, final User user,
-                         final String email, final Response.Listener<NetworkResponse<String>> listener) {
-            Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
+        static void user(final RequestQueue queue, final User user, final String email,
+                         SharedPreferences settings, final Response.Listener<NetworkResponse<String>> listener) {
+            Get.loginToken(queue, settings, new Response.Listener<NetworkResponse<String>>() {
                 @Override
                 public void onResponse(NetworkResponse<String> response) {
                     if (response.fail()) {
@@ -1506,10 +1535,10 @@ class API {
          * @param event Updated version of the {@link Event} to change
          * @param listener Listener whose onResponse method will be called when task completes
          */
-        static void event(final RequestQueue queue, final Event event,
+        static void event(final RequestQueue queue, final Event event, SharedPreferences settings,
                           final Response.Listener<NetworkResponse<String>> listener) {
             model(queue, event, API_URL_BASE + "event/new?" + getCredentials(),
-                    "API.Post.event", listener);
+                    "API.Post.event", settings, listener);
         }
 
         /**
@@ -1522,9 +1551,10 @@ class API {
          * @param listener Listener whose onResponse method will be called when task completes
          */
         static void post(final RequestQueue queue, final org.codethechange.culturemesh.models.Post post,
+                         SharedPreferences settings,
                          final Response.Listener<NetworkResponse<String>> listener) {
             model(queue, post, API_URL_BASE + "post/new?" + getCredentials(),
-                    "API.Put.post", listener);
+                    "API.Put.post", settings, listener);
         }
 
         /**
@@ -1535,9 +1565,10 @@ class API {
          * @param comment Updated version of the {@link PostReply} to make changes to
          * @param listener Listener whose onResponse method will be called when task completes
          */
-        static void reply(RequestQueue queue, final PostReply comment, final Response.Listener<NetworkResponse<String>> listener) {
+        static void reply(RequestQueue queue, final PostReply comment, SharedPreferences settings,
+                          final Response.Listener<NetworkResponse<String>> listener) {
             model(queue, comment, API_URL_BASE + "post/" + comment.parentId + "/reply",
-                    "API.Put.reply", listener);
+                    "API.Put.reply", settings, listener);
         }
 
         /**
@@ -1550,8 +1581,9 @@ class API {
          * @param listener Listener whose onResponse method will be called when task completes
          */
         private static void model(final RequestQueue queue, final Putable toPut, final String url,
-                                  final String logTag, final Response.Listener<NetworkResponse<String>> listener) {
-            Get.loginToken(queue, new Response.Listener<NetworkResponse<String>>() {
+                                  final String logTag, SharedPreferences settings,
+                                  final Response.Listener<NetworkResponse<String>> listener) {
+            Get.loginToken(queue, settings, new Response.Listener<NetworkResponse<String>>() {
                 @Override
                 public void onResponse(NetworkResponse<String> response) {
                     if (response.fail()) {

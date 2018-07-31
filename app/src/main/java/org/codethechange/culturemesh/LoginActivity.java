@@ -60,7 +60,9 @@ public class LoginActivity extends RedirectableAppCompatActivity {
     }
 
     private void login(RequestQueue queue, final String email, String password) {
-        API.Get.loginWithCred(queue, email, password, new Response.Listener<NetworkResponse<API.Get.LoginResponse>>() {
+        API.Get.loginWithCred(queue, email, password,
+                getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
+                new Response.Listener<NetworkResponse<API.Get.LoginResponse>>() {
             @Override
             public void onResponse(NetworkResponse<API.Get.LoginResponse> response) {
                 if (response.fail()) {
@@ -104,7 +106,6 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                     final String email = emailField.getText().toString();
                     final String password = passwordField.getText().toString();
                     login(queue, email, password);
-
                 } else {
                     EditText emailField = findViewById(R.id.email_field);
                     EditText firstNameField = findViewById(R.id.first_name_field);
