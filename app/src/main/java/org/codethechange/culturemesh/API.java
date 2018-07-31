@@ -1301,6 +1301,7 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+
                     Log.e("Error called", new String(error.networkResponse.data, StandardCharsets.UTF_8));
                 }
             }) {
@@ -1308,6 +1309,7 @@ class API {
                 @Override
                 public byte[] getBody() {
                     try {
+                        Log.d(TAG, "Post.user: Sending user.PostJson output in body");
                         return user.getPostJson(email, password).toString().getBytes("utf-8");
                     } catch (JSONException | UnsupportedEncodingException e) {
                         Log.e("POST /users error.", "Error forming JSON");

@@ -2,6 +2,7 @@ package org.codethechange.culturemesh.models;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +20,7 @@ public class User implements Serializable {
     public static final String CM_LOGO_URL = "https://www.culturemesh.com/images/cm_logo_blank_profile_lrg.png";
     public static final String DEFAULT_BIO = "";
     public static final String DEFAULT_GENDER = "";
+    public static final String IMG_URL_PREFIX = "https://www.culturemesh.com/user_images/";
 
     /**
      * The user's unique identifier, which identifies them across all of CultureMesh and is constant.
@@ -71,7 +73,7 @@ public class User implements Serializable {
      * @param lastName User's last name (may be pseudonymous)
      * @param username The user's "display name" that will serve as their main public identifier.
      *                 Must be unique across all of CultureMesh's users.
-     * @param imgURL URL to the user's profile picture
+     * @param imgURL URL suffix (after {@link User#IMG_URL_PREFIX} to the user's profile picture
      * @param aboutMe Short bio describing the user
      * @param gender User's self-identified gender
      */
@@ -81,11 +83,24 @@ public class User implements Serializable {
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
-        this.imgURL = imgURL;
+        if (imgURL == null || imgURL.isEmpty()) {
+            imgURL = CM_LOGO_URL;
+        }
+        this.imgURL = IMG_URL_PREFIX + imgURL;
         this.aboutMe = aboutMe;
         this.gender = gender;
     }
 
+    /**
+     * Create a new object, storing the provided parameters into the related instance fields.
+     * Intended to be used when creating accounts, as {@code img_url}, {@code about_me}, and
+     * {@code gender} are initialized to defaults as described in the constants for {@link User}.
+     * @param id Uniquely identifies user across all of CultureMesh.
+     * @param firstName User's first name (may be pseudonymous)
+     * @param lastName User's last name (may be pseudonymous)
+     * @param username The user's "display name" that will serve as their main public identifier.
+     *                 Must be unique across all of CultureMesh's users.
+     */
     public User(long id, String firstName, String lastName, String username) {
         this.id = id;
         this.firstName = firstName;
@@ -112,17 +127,25 @@ public class User implements Serializable {
               }
      *     }
      * </pre>
-     * Other key-value pairs are acceptable, but will be ignored.
+     * Other key-value pairs are acceptable, but will be ignored. Note that {@code img_link} does not
+     * include the base {@link User#IMG_URL_PREFIX}. A missing, null, or empty {@code img_link} is
+     * interpreted as an unset link, which {@link User#CM_LOGO_URL} is used for.
      * @param res JSON describing the user to create
      * @throws JSONException May be thrown in the case of an improperly structured JSON
      */
     public User(JSONObject res) throws JSONException{
-        this(res.getInt("id"),
-                res.getString("first_name"),
-                res.getString("last_name"),
-                res.getString("username"),
-                "https://www.culturemesh.com/user_images/" + res.getString("img_link"),
-                res.getString("about_me"), res.getString("gender"));
+        if (res.has("img_link") && !res.isNull("img_link") &&
+                !res.getString("img_link").isEmpty()) {
+            imgURL = IMG_URL_PREFIX + res.getString("img_link");
+        } else {
+            imgURL = CM_LOGO_URL;
+        }
+        id = res.getInt("id");
+        firstName = res.getString("first_name");
+        lastName = res.getString("last_name");
+        username = res.getString("username");
+        aboutMe = res.getString("about_me");
+        gender = res.getString("gender");
     }
 
     /**
@@ -230,7 +253,10 @@ public class User implements Serializable {
              }
      *     }
      * </pre>
-     * This is intended to be the format used by the {@code /user/users} PUT endpoint
+     * This is intended to be the format used by the {@code /user/users} PUT endpoint.
+     * Note that {@code img_link} does not
+     * include the base {@link User#IMG_URL_PREFIX}. A missing, null, or empty {@code img_link} is
+     * interpreted as an unset link, which {@link User#CM_LOGO_URL} is used for.
      * @return JSON representation of the object
      * @throws JSONException Unclear when this would be thrown
      */
@@ -243,7 +269,12 @@ public class User implements Serializable {
         json.put("role", role);
         json.put("gender", gender);
         json.put("about_me", aboutMe);
-        json.put("img_link", imgURL);
+        if (imgURL.contains(IMG_URL_PREFIX)) {
+            json.put("img_link", imgURL.replace(IMG_URL_PREFIX, ""));
+        } else {
+            json.put("img_link", imgURL);
+        }
+
         return json;
     }
 
@@ -265,6 +296,9 @@ public class User implements Serializable {
      *     }
      * </pre>
      * This is intended to be the format used by the {@code /user/users} POST endpoint.
+     * Note that {@code img_link} does not
+     * include the base {@link User#IMG_URL_PREFIX}. A missing, null, or empty {@code img_link} is
+     * interpreted as an unset link, which {@link User#CM_LOGO_URL} is used for.
      * @return JSON representation of the object
      * @throws JSONException Unclear when this would be thrown
      */
@@ -276,11 +310,9 @@ public class User implements Serializable {
         json.put("first_name", firstName);
         json.put("last_name", lastName);
         json.put("role", role);
-        json.put("img_link", imgURL);
         json.put("about_me", aboutMe);
         json.put("gender", gender);
-
+        Log.v("TESTING", "Created new user with JSON: " + json.toString());
         return json;
     }
-
 }
