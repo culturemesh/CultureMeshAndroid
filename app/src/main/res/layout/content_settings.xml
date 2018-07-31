@@ -29,7 +29,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginTop="8dp"
             android:singleLine="true"
-            android:text="@string/last_name"
+            android:hint="@string/last_name"
 
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/user_profile" />
@@ -41,7 +41,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:singleLine="true"
-            android:text="@string/first_name"
+            android:hint="@string/first_name"
 
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/user_profile" />
@@ -54,7 +54,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:inputType="textMultiLine"
-            android:text="@string/about_me"
+            android:hint="@string/about_me"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/last_name_field" />
@@ -147,7 +147,7 @@
             android:layout_marginBottom="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="@string/display_name"
+            android:hint="@string/display_name"
             android:singleLine="true"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -161,7 +161,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            android:text="@string/email"
+            android:hint="@string/email"
             android:singleLine="true"
             app:layout_constraintStart_toEndOf="@+id/user_profile"
             app:layout_constraintTop_toBottomOf="@+id/user_name" />

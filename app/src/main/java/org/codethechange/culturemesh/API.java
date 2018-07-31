@@ -1073,9 +1073,14 @@ class API {
             Calendar refresh = (Calendar) tokenRetrieved.clone();
             refresh.add(Calendar.SECOND, TOKEN_REFRESH);
 
+            Log.d(TAG, "Get.loginToken: now=" + now.getTime().toString() + ", refresh=" +
+                    refresh.getTime().toString());
             if (now.before(refresh)) {
+                Log.v(TAG, "Get.loginToken: Don't need to refresh yet, so using stored token. " +
+                        "Token=" + loginToken);
                 listener.onResponse(new NetworkResponse<>(loginToken));
             } else {
+                Log.v(TAG, "Get.loginToken: Token needs to be refreshed, so refreshing.");
                 Get.loginWithToken(queue, loginToken, new Response.Listener<NetworkResponse<LoginResponse>>() {
                     @Override
                     public void onResponse(NetworkResponse<LoginResponse> response) {
@@ -1085,6 +1090,7 @@ class API {
                         } else {
                             loginToken = response.getPayload().token;
                             tokenRetrieved = Calendar.getInstance();
+                            Log.v(TAG, "Get.loginToken: New token=" + loginToken + ", retrieved=" + tokenRetrieved.getTime().toString());
                             listener.onResponse(new NetworkResponse<>(loginToken));
                         }
                     }
@@ -1110,6 +1116,7 @@ class API {
          */
         static void loginWithCred(RequestQueue queue, final String email, final String password,
                                final Response.Listener<NetworkResponse<LoginResponse>> listener) {
+            Log.v(TAG, "Get.loginWithCred: Logging in with credentials email=" + email + ", password=" + password);
             JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, API_URL_BASE +
                     "account/token?" + getCredentials(), null, new Response.Listener<JSONObject>() {
                 @Override
@@ -1197,6 +1204,7 @@ class API {
             This allows a token to be refreshed by using it to get a new token, whose timeout
             period (if applicable) will be reset.
              */
+            Log.v(TAG, "Get.loginWithToken: Logging in with token=" + token);
             loginWithCred(queue, token, "", listener);
         }
     }
@@ -1293,6 +1301,7 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+
                     Log.e("Error called", new String(error.networkResponse.data, StandardCharsets.UTF_8));
                 }
             }) {
@@ -1300,6 +1309,7 @@ class API {
                 @Override
                 public byte[] getBody() {
                     try {
+                        Log.d(TAG, "Post.user: Sending user.PostJson output in body");
                         return user.getPostJson(email, password).toString().getBytes("utf-8");
                     } catch (JSONException | UnsupportedEncodingException e) {
                         Log.e("POST /users error.", "Error forming JSON");
