@@ -22,6 +22,8 @@ public class User implements Serializable {
     public static final String DEFAULT_GENDER = "";
     public static final String IMG_URL_PREFIX = "https://www.culturemesh.com/user_images/";
 
+    private static final String TAG = User.class.getSimpleName();
+
     /**
      * The user's unique identifier, which identifies them across all of CultureMesh and is constant.
      * Not editable by user.
@@ -312,7 +314,7 @@ public class User implements Serializable {
         json.put("role", role);
         json.put("about_me", aboutMe);
         json.put("gender", gender);
-        Log.v("TESTING", "Created new user with JSON: " + json.toString());
+        Log.v(TAG, "Created new user with JSON: " + json.toString());
         return json;
     }
 }
