@@ -257,7 +257,10 @@ public class User implements Serializable {
                 "first_name": "string",
                 "last_name": "string",
                 "email": "string",
-                "role": 0
+                "role": 0,
+                "img_link": "string",
+                "about_me": "string",
+                "gender": "string"
              }
      *     }
      * </pre>
@@ -273,8 +276,10 @@ public class User implements Serializable {
         json.put("first_name", firstName);
         json.put("last_name", lastName);
         json.put("role", role);
-        json.put("act_code", "123456");
-        json.put("fp_code", "12345");
+        json.put("img_link", imgURL);
+        json.put("about_me", aboutMe);
+        json.put("gender", gender);
+
         return json;
     }
 
