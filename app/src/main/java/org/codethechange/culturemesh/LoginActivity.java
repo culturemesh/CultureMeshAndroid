@@ -59,6 +59,28 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         }
     }
 
+    private void login(RequestQueue queue, final String email, String password) {
+        API.Get.loginWithCred(queue, email, password,
+                getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
+                new Response.Listener<NetworkResponse<API.Get.LoginResponse>>() {
+            @Override
+            public void onResponse(NetworkResponse<API.Get.LoginResponse> response) {
+                if (response.fail()) {
+                    response.showErrorDialog(LoginActivity.this);
+                } else {
+                    SharedPreferences settings = getSharedPreferences(
+                            API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+                    API.Get.LoginResponse bundle = response.getPayload();
+                    User user = bundle.user;
+                    setLoggedIn(settings, user.id, email);
+                    Intent returnIntent = new Intent();
+                    setResult(Activity.RESULT_OK, returnIntent);
+                    finish();
+                }
+            }
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,26 +105,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                     EditText passwordField = findViewById(R.id.password_field);
                     final String email = emailField.getText().toString();
                     final String password = passwordField.getText().toString();
-
-                    API.Get.loginWithCred(queue, email, password,
-                            getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
-                            new Response.Listener<NetworkResponse<API.Get.LoginResponse>>() {
-                        @Override
-                        public void onResponse(NetworkResponse<API.Get.LoginResponse> response) {
-                            if (response.fail()) {
-                                response.showErrorDialog(LoginActivity.this);
-                            } else {
-                                SharedPreferences settings = getSharedPreferences(
-                                        API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-                                API.Get.LoginResponse bundle = response.getPayload();
-                                User user = bundle.user;
-                                setLoggedIn(settings, user.id, email);
-                                Intent returnIntent = new Intent();
-                                setResult(Activity.RESULT_OK, returnIntent);
-                                finish();
-                            }
-                        }
-                    });
+                    login(queue, email, password);
                 } else {
                     EditText emailField = findViewById(R.id.email_field);
                     EditText firstNameField = findViewById(R.id.first_name_field);
@@ -127,25 +130,7 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                                 if (response.fail()) {
                                     response.showErrorDialog(LoginActivity.this);
                                 } else {
-                                    // The user is created! Let's save the user's creds and
-                                    // id.
-                                    API.Get.userID(queue, email, new Response.Listener<NetworkResponse<Long>>() {
-                                        @Override
-                                        public void onResponse(NetworkResponse<Long> response) {
-                                            if (response.fail()) {
-                                                response.showErrorDialog(LoginActivity.this);
-                                            } else {
-                                                SharedPreferences settings = getSharedPreferences(
-                                                        API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-                                                setLoggedIn(settings, response.getPayload(),
-                                                        email);
-                                                Intent returnIntent = new Intent();
-                                                setResult(Activity.RESULT_OK, returnIntent);
-                                                finish();
-                                            }
-                                        }
-                                    });
-
+                                    login(queue, email, pass);
                                 }
                             }
                         });
