@@ -1242,7 +1242,7 @@ class API {
                               SharedPreferences settings,
                               final Response.Listener<NetworkResponse<String>> listener) {
             emptyModel(queue, API_URL_BASE + "user/" + userId + "/addToEvent/" + eventId + "?" +
-                    getCredentials(), "API.Post.addUserToEvent", settings, listener);
+                    getCredentials(), "API.Post.addUserToEvent", Request.Method.POST, settings, listener);
         }
 
         /**
@@ -1256,52 +1256,23 @@ class API {
                                      SharedPreferences settings,
                                      final Response.Listener<NetworkResponse<String>> listener) {
             emptyModel(queue, API_URL_BASE + "user/joinNetwork/" + networkId +
-                    "?" + getCredentials(), "API.Post.joinNetwork", settings, listener);
+                    "?" + getCredentials(), "API.Post.joinNetwork", Request.Method.POST, settings, listener);
         }
 
-        // TODO: Document removeUserFromNetwork
-        static void removeUserFromNetwork(final RequestQueue queue, long networkId,
+        /**
+         * Remove the current user from a network. This operation requires authentication, so the
+         * user must be logged in. If the user is not in the specified network, no error is thrown.
+         * @param queue Asynchronous task to which the request will be added
+         * @param networkId ID of the network to remove the user from
+         * @param settings Reference to the {@link SharedPreferences} storing the user's login token
+         * @param listener Listener whose {@code onResponse} method will be called when the operation
+         *                 completes
+         */
+        static void leaveNetwork(final RequestQueue queue, long networkId,
                                           SharedPreferences settings,
                                           final Response.Listener<NetworkResponse<String>> listener) {
             emptyModel(queue, API_URL_BASE + "user/leaveNetwork/" + networkId + "?" +
-                    getCredentials(), "API.Post.removeUserFromNetwork", settings, listener);
-        }
-
-        // TODO: Document emptyModel
-        private static void emptyModel(final RequestQueue queue, final String url, final String method,
-                                       final SharedPreferences settings,
-                                       final Response.Listener<NetworkResponse<String>> listener) {
-            Get.loginToken(queue, settings, new Response.Listener<NetworkResponse<String>>() {
-                @Override
-                public void onResponse(NetworkResponse<String> response) {
-                    if (response.fail()) {
-                        listener.onResponse(new NetworkResponse<String>(response));
-                    } else {
-                        final String token = response.getPayload();
-                        StringRequest req = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                listener.onResponse(new NetworkResponse<String>(false));
-                            }
-                        }, new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                int messageID = processNetworkError(method,
-                                        "ErrorListener", error);
-                                listener.onResponse(new NetworkResponse<String>(true, messageID));
-                            }
-                        }) {
-                            @Override
-                            public Map<String, String> getHeaders() {
-                                Map<String,String> headers = new HashMap<>();
-                                headers.put("Authorization", genBasicAuth(token));
-                                return headers;
-                            }
-                        };
-                        queue.add(req);
-                    }
-                }
-            });
+                    getCredentials(), "API.Post.leaveNetwork", Request.Method.DELETE, settings, listener);
         }
 
         /**
@@ -1632,6 +1603,53 @@ class API {
                 }
             });
         }
+    }
+
+    /**
+     * Add to the provided queue a request to the server at the provided URL using the provided method
+     * @param queue Queue to which the asynchronous task will be added
+     * @param url URL of the endpoint to send the request to
+     * @param func Name of the function making the request for logging purposes
+     * @param requestMethod The method (e.g. POST, PUT, GET, etc.) to use in making the request. Use
+     *                      the constants provided in {@link Request.Method}
+     * @param settings Reference to the app's {@link SharedPreferences} where the user's login tokens
+     *                 are stored
+     * @param listener Listener that will be called with the result of the task once completed
+     */
+    private static void emptyModel(final RequestQueue queue, final String url, final String func,
+                                   final int requestMethod, final SharedPreferences settings,
+                                   final Response.Listener<NetworkResponse<String>> listener) {
+        Get.loginToken(queue, settings, new Response.Listener<NetworkResponse<String>>() {
+            @Override
+            public void onResponse(NetworkResponse<String> response) {
+                if (response.fail()) {
+                    listener.onResponse(new NetworkResponse<String>(response));
+                } else {
+                    final String token = response.getPayload();
+                    StringRequest req = new StringRequest(requestMethod, url, new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            listener.onResponse(new NetworkResponse<String>(false));
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            int messageID = processNetworkError(func,
+                                    "ErrorListener", error);
+                            listener.onResponse(new NetworkResponse<String>(true, messageID));
+                        }
+                    }) {
+                        @Override
+                        public Map<String, String> getHeaders() {
+                            Map<String,String> headers = new HashMap<>();
+                            headers.put("Authorization", genBasicAuth(token));
+                            return headers;
+                        }
+                    };
+                    queue.add(req);
+                }
+            }
+        });
     }
 
     /**
