@@ -1246,18 +1246,17 @@ class API {
         }
 
         /**
-         * Add a user to an existing network. This operation requires authentication, so the user must
-         * be logged in.
+         * Add the current user to an existing network. This operation requires authentication, so
+         * the user must be logged in.
          * @param queue Queue to which the asynchronous task will be added
-         * @param userId ID of the user to add to the network
          * @param networkId ID of the network to add the user to
          * @param listener Listener whose onResponse method will be called when the operation completes
          */
-        static void addUserToNetwork(final RequestQueue queue, final long userId, final long networkId,
+        static void joinNetwork(final RequestQueue queue, final long networkId,
                                      SharedPreferences settings,
                                      final Response.Listener<NetworkResponse<String>> listener) {
-            emptyModel(queue, API_URL_BASE + "user/" + userId + "/addToNetwork/" + networkId +
-                    "?" + getCredentials(), "API.Post.addUserToNet", settings, listener);
+            emptyModel(queue, API_URL_BASE + "user/joinNetwork/" + networkId +
+                    "?" + getCredentials(), "API.Post.joinNetwork", settings, listener);
         }
 
         // TODO: Document removeUserFromNetwork
