@@ -69,7 +69,8 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                     String emailText = email.getText().toString();
                     editor.putString(API.USER_EMAIL, emailText);
                     editor.apply();
-                    API.Put.user(queue, user, emailText, new Response.Listener<NetworkResponse<String>>() {
+                    API.Put.user(queue, user, emailText, getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
+                            new Response.Listener<NetworkResponse<String>>() {
                         @Override
                         public void onResponse(NetworkResponse<String> response) {
                             if (response.fail()) {
@@ -128,7 +129,8 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                                 //Wow! We are removing this network! Sad..
                                 long networkID = ((NetworkSummaryAdapter) rv.getAdapter()).getNetworks()
                                         .get(viewHolder.getAdapterPosition()).id;
-                                API.Post.removeUserFromNetwork(queue, networkID,
+                                API.Post.leaveNetwork(queue, networkID,
+                                        getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
                                         new Response.Listener<NetworkResponse<String>>() {
                                     @Override
                                     public void onResponse(NetworkResponse<String> response) {

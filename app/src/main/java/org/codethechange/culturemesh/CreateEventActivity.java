@@ -143,7 +143,9 @@ public class CreateEventActivity extends AppCompatActivity {
             // POST Event with AsyncTask
             final ProgressBar progressBar = findViewById(R.id.eventPostProgressBar);
             progressBar.setIndeterminate(true);
-            API.Post.event(queue, event, new Response.Listener<NetworkResponse<String>>() {
+            API.Post.event(queue, event,
+                    getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
+                    new Response.Listener<NetworkResponse<String>>() {
                 @Override
                 public void onResponse(NetworkResponse<String> response) {
                     if (response.fail()) {
