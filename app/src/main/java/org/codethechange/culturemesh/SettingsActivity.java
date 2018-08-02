@@ -129,7 +129,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                                 //Wow! We are removing this network! Sad..
                                 long networkID = ((NetworkSummaryAdapter) rv.getAdapter()).getNetworks()
                                         .get(viewHolder.getAdapterPosition()).id;
-                                API.Post.removeUserFromNetwork(queue, networkID,
+                                API.Post.leaveNetwork(queue, networkID,
                                         getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
                                         new Response.Listener<NetworkResponse<String>>() {
                                     @Override
