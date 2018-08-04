@@ -180,5 +180,7 @@
     <string name="display_name">Display Name</string>
     <string name="about_me">About Me</string>
     <string name="missingEmail">Missing Email</string>
+    <string name="selectPicture">Select Picture</string>
+    <string name="upload_failure">Upload Failure</string>
     <!-- See the ellipses constant in Listable -->
 </resources>

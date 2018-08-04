@@ -2,13 +2,16 @@ package org.codethechange.culturemesh;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.provider.MediaStore;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -23,12 +26,12 @@ import com.android.volley.toolbox.Volley;
 import com.squareup.picasso.Picasso;
 
 import org.codethechange.culturemesh.models.Network;
-import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.User;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class SettingsActivity extends DrawerActivity implements NetworkSummaryAdapter.OnNetworkTapListener {
 
@@ -40,6 +43,39 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
     User user;
     RequestQueue queue;
     private static final String TAG = SettingsActivity.class.getName();
+    private static final int PICK_IMAGE = 1;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE) {
+            Uri imageURI = data.getData();
+            //Check to see if image is too big.
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageURI);
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                byte[] bytes = stream.toByteArray();
+                System.out.println(imageURI);
+                // Encode image as a string
+                String image = Base64.encodeToString(bytes, Base64.DEFAULT);
+                API.Post.uploadImage(queue, image, getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
+                        new Response.Listener<NetworkResponse<String>>() {
+                            @Override
+                            public void onResponse(NetworkResponse<String> response) {
+                                if (response.fail()) {
+                                    response.showErrorDialog(SettingsActivity.this);
+                                } else {
+                                    Log.i("FINISHED UPLOADING", response.getPayload());
+                                }
+                            }
+                });
+                bitmap.recycle();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +91,16 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         userName = findViewById(R.id.user_name);
         profilePicture = findViewById(R.id.user_profile);
         updateProfile = findViewById(R.id.update_profile_button);
+        queue = Volley.newRequestQueue(getApplicationContext());
+        profilePicture.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, getResources().getString(R.string.selectPicture)), PICK_IMAGE);
+            }
+        });
         queue = Volley.newRequestQueue(getApplicationContext());
         //TODO: Add ability to change profile picture.
         updateProfile.setOnClickListener(new View.OnClickListener() {
@@ -182,8 +228,6 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                 // number of users.
                 if (!response.fail()) {
                     ArrayList<Network> nets = response.getPayload();
-                    adapter.getNetworks().addAll(nets);
-                    rv.getAdapter().notifyDataSetChanged();
                     if (rv.getAdapter().getItemCount() > 0) {
                         //Hide empty text.
                         emptyText.setVisibility(View.GONE);
@@ -200,11 +244,16 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                                     // This prevents possibility that the user counts are added in
                                     // wrong order.
                                     adapter.getUserCounts().put(net.id + "", response.getPayload().intValue());
+                                    if (adapter.getUserCounts().containsKey(net.id +"") &&
+                                            adapter.getPostCounts().containsKey(net.id + "")) {
+                                        //The network is ready to be added.
+                                        adapter.getNetworks().add(net);
+                                        adapter.notifyDataSetChanged();
+                                    }
                                 } else {
                                     response.showErrorDialog(SettingsActivity.this);
                                     adapter.getUserCounts().put(net.id + "", 0);
                                 }
-                                adapter.notifyDataSetChanged();
                             }
                         });
                         API.Get.networkPostCount(queue, net.id, new Response.Listener<NetworkResponse<Long>>() {
@@ -212,6 +261,12 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                             public void onResponse(NetworkResponse<Long> response) {
                                 if (!response.fail()) {
                                     adapter.getPostCounts().put(net.id + "", response.getPayload().intValue());
+                                    if (adapter.getUserCounts().containsKey(net.id +"") &&
+                                            adapter.getPostCounts().containsKey(net.id + "")) {
+                                        //The network is ready to be added.
+                                        adapter.getNetworks().add(net);
+                                        adapter.notifyDataSetChanged();
+                                    }
                                 } else {
                                     response.showErrorDialog(SettingsActivity.this);
                                     adapter.getPostCounts().put(net.id + "", 0);

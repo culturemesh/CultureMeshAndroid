@@ -63,7 +63,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     private FloatingActionButton create, createPost, createEvent;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView postsRV;
-    private LinearLayoutManager mLayoutManager;
     private Animation open, close;
     private boolean isFABOpen;
     private TextView population, fromLocation, nearLocation;
@@ -160,7 +159,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         loadingMoreFeedItems.set(false);
         //set up postsRV
         postsRV = findViewById(R.id.postsRV);
-        mLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
+        LinearLayoutManager mLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
         //check if at end of posts
         postsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
             int pastVisiblesItems, visibleItemCount, totalItemCount;

@@ -1368,6 +1368,32 @@ class API {
         }
 
         /**
+         * Uploads image to server.
+         * @param queue
+         * @param image
+         * @param settings
+         * @param listener
+         */
+        static void uploadImage(final RequestQueue queue, final String image, SharedPreferences settings,
+                                final Response.Listener<NetworkResponse<String>> listener) {
+            StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "upload/image?" + getCredentials(),
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            listener.onResponse(new NetworkResponse<String>(response));
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    System.out.println(new String(error.networkResponse.data));
+                    listener.onResponse(new NetworkResponse<String>(true, R.string.upload_failure));
+                }
+            });
+            queue.add(req);
+
+        }
+
+        /**
          * POST to the server a request to create a new {@link Postable} model. Success
          * or failure status will be passed via a {@link NetworkResponse<String>} to the listener.
          * @param queue Queue to which the asynchronous task will be added
