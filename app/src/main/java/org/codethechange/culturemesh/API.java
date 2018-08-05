@@ -15,6 +15,7 @@ import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
@@ -44,6 +45,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -1365,32 +1368,6 @@ class API {
                          final Response.Listener<NetworkResponse<String>> listener) {
             model(queue, event, API_URL_BASE + "event/new?" + getCredentials(),
                     "API.Post.event", settings, listener);
-        }
-
-        /**
-         * Uploads image to server.
-         * @param queue
-         * @param image
-         * @param settings
-         * @param listener
-         */
-        static void uploadImage(final RequestQueue queue, final String image, SharedPreferences settings,
-                                final Response.Listener<NetworkResponse<String>> listener) {
-            StringRequest req = new StringRequest(Request.Method.POST, API_URL_BASE + "upload/image?" + getCredentials(),
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            listener.onResponse(new NetworkResponse<String>(response));
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    System.out.println(new String(error.networkResponse.data));
-                    listener.onResponse(new NetworkResponse<String>(true, R.string.upload_failure));
-                }
-            });
-            queue.add(req);
-
         }
 
         /**

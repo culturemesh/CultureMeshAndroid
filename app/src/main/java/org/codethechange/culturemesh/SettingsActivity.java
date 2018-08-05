@@ -4,10 +4,13 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.content.CursorLoader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -23,13 +26,23 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
 import com.squareup.picasso.Picasso;
 
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.User;
 
+//For multipart/formdata request body for when uploading images.
+
+
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -45,35 +58,54 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
     private static final String TAG = SettingsActivity.class.getName();
     private static final int PICK_IMAGE = 1;
 
+
+    /**
+     * This function is overridden to handle image selection.
+     * Inspiration from
+     * http://www.tauntaunwonton.com/blog/2015/1/21/simple-posting-of-multipartform-data-from-android
+     * @param requestCode PICK_IMAGE if we asked them to choose an image from the gallery.
+     * @param resultCode
+     * @param data Hopefully, the URI.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE) {
+        if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
+            //GOAL: Upload image to server.
+            //General process: make bitmap, write bytes to temporary file, and pass file as param
+            // to ion's multipart/form-data framework.
             Uri imageURI = data.getData();
-            //Check to see if image is too big.
+            //TODO: Check to see if image is too big.
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageURI);
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                byte[] bytes = stream.toByteArray();
-                System.out.println(imageURI);
-                // Encode image as a string
-                String image = Base64.encodeToString(bytes, Base64.DEFAULT);
-                API.Post.uploadImage(queue, image, getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
-                        new Response.Listener<NetworkResponse<String>>() {
+                File appDirectory = getApplicationContext().getCacheDir();
+                File imageFile = new File(appDirectory, user.username + "_profile.jpg");
+                OutputStream os = new FileOutputStream(imageFile);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 0, os);
+                os.flush();
+                os.close();
+
+                Ion.with(SettingsActivity.this).load("https://www.culturemesh.com/api-dev/v1/upload/image?" + API.getCredentials())
+                        .setMultipartFile("file", "image/*", imageFile)
+                        .asString()
+                        .setCallback(new FutureCallback<String>() {
                             @Override
-                            public void onResponse(NetworkResponse<String> response) {
-                                if (response.fail()) {
-                                    response.showErrorDialog(SettingsActivity.this);
+                            public void onCompleted(Exception e, String result) {
+                                if (result != null) {
+                                    Log.i("IMAGE_UPLOAD", result);
                                 } else {
-                                    Log.i("FINISHED UPLOADING", response.getPayload());
+                                    e.printStackTrace();
                                 }
                             }
-                });
-                bitmap.recycle();
+                        });
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            //Allegedly, Volley is not well-served to handle large payloads. Instead, we will use
+            //Ion.
+
+
+
         }
     }
 
@@ -228,7 +260,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                 // number of users.
                 if (!response.fail()) {
                     ArrayList<Network> nets = response.getPayload();
-                    if (rv.getAdapter().getItemCount() > 0) {
+                    if (nets.size() > 0) {
                         //Hide empty text.
                         emptyText.setVisibility(View.GONE);
                     } else {
@@ -281,6 +313,26 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                 }
             }
         });
+    }
+
+    /**
+     * Converts Uri into file path
+     * Sourced from https://stackoverflow.com/questions/14054307/java-io-filenotfoundexception-in-android
+     * @param uri uri taken from
+     * @return
+     */
+    public String getPath(Uri uri) {
+        String result;
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        if (cursor == null) { // Source is Dropbox or other similar local file path
+            result = uri.getPath();
+        } else {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            result = cursor.getString(idx);
+            cursor.close();
+        }
+        return result;
     }
 
     /**
