@@ -76,7 +76,8 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                 final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageURI);
                 final Bitmap finalBitmap = resizeBitmap(bitmap);
                 File appDirectory = getApplicationContext().getCacheDir();
-                File imageFile = new File(appDirectory, user.username.substring(0,2) + ".jpg");
+                File imageFile = new File(appDirectory, user.username.substring(0,2)
+                        + ".jpg");
                 OutputStream os = new FileOutputStream(imageFile);
                 finalBitmap.compress(Bitmap.CompressFormat.JPEG, MAX_QUALITY, os);
                 os.flush();
@@ -189,12 +190,10 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                     lastName.setText(user.lastName);
                     userName.setText(user.username);
                     email.setText(settings.getString(API.USER_EMAIL, getString(R.string.missingEmail)));
-                    System.out.println(user.getImgURL());
                     Picasso.with(getApplicationContext()).load(user.getImgURL()).into(profilePicture);
                     Log.i(TAG, "User info loaded");
                     rv.getAdapter().notifyDataSetChanged();
                     Log.i(TAG, "Adapter notified of new user info");
-
                 } else {
                     response.showErrorDialog(getApplicationContext());
                 }
