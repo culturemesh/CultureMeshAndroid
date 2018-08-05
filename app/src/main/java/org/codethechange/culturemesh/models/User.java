@@ -273,6 +273,8 @@ public class User implements Serializable {
         json.put("about_me", aboutMe);
         if (imgURL.contains(IMG_URL_PREFIX)) {
             json.put("img_link", imgURL.replace(IMG_URL_PREFIX, ""));
+            Log.i("removed URL PREFIX", imgURL.replace(IMG_URL_PREFIX, ""));
+
         } else {
             json.put("img_link", imgURL);
         }

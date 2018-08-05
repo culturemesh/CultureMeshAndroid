@@ -182,5 +182,8 @@
     <string name="missingEmail">Missing Email</string>
     <string name="selectPicture">Select Picture</string>
     <string name="upload_failure">Upload Failure</string>
+    <string name="upload_sucess">Your profile picture has been updated!</string>
+    <string name="change_picture">Change Profile Picture?</string>
+    <string name="change_picture_prompt">Would you like to upload a new profile picture?</string>
     <!-- See the ellipses constant in Listable -->
 </resources>
