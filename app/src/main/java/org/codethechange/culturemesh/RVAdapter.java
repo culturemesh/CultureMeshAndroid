@@ -22,6 +22,7 @@ import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
@@ -31,6 +32,11 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
         return netPosts;
     }
 
+    /**
+     * This contains the events in this network that the user is attending, which affects
+     * some aspects of the event UI.
+     */
+    private Set<Long> userAttendingEvents;
     private List<FeedItem> netPosts;
     private Context context;
 
@@ -52,9 +58,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
 
         ConstraintLayout layout;
         RelativeLayout comment1Layout, comment2Layout;
-
-        //TODO: Add support for onClick by adding viewholder ConstraintLayout items for
-        //TODO: event time and event place.
 
         PostViewHolder(View itemView) {
             super(itemView);
@@ -163,7 +166,8 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
     public void onBindViewHolder(PostViewHolder pvh, int i) {
         final FeedItem item = netPosts.get(i);
         //Check if post or event.
-        try{
+        if (item instanceof Post) {
+
             Post post = (Post) item;
             if (!pvh.isPost()) {
                 pvh.hideEventViews();
@@ -172,7 +176,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             pvh.personName.setText(name);
             pvh.content.setText(FormatManager.parseText(post.getContent(), "#4989c1"));
             pvh.postTypePhoto.setImageDrawable(null /* TODO: logic flow depending on post source */);
-            pvh.timestamp.setText(post.getDatePosted().toString());
+            pvh.timestamp.setText(post.getDatePosted());
             pvh.username.setText(post.getAuthor().getUsername());
             pvh.bind(item, listener);
             if (post.getImageLink() != null || post.getVideoLink() != null ) {
@@ -221,7 +225,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                 pvh.comment2Layout.setVisibility(View.GONE);
                 pvh.viewMoreComments.setVisibility(View.GONE);
             }
-        } catch(ClassCastException e) {
+        } else {
             //It's an event.
             Event event = (Event) item;
             if (pvh.isPost()) {

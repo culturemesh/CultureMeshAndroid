@@ -14,6 +14,7 @@ import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -31,7 +32,10 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
@@ -54,10 +58,8 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     private String basePath = "www.culturemesh.com/api/v1";
     final String FILTER_LABEL = "fl";
     final static String FILTER_CHOICE_NATIVE = "fcn";
-    final static String FILTER_CHOICE_TWITTER = "fct";
     final static String FILTER_CHOICE_EVENTS = "fce";
     final static String BUNDLE_NETWORK = "bunnet";
-    final static String SUBSCRIBED_NETWORKS = "subscrinets";
     static SharedPreferences settings;
 
     private FloatingActionButton create, createPost, createEvent;
@@ -68,6 +70,8 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     private TextView population, fromLocation, nearLocation;
     private RequestQueue queue;
     private long selectedNetwork;
+    private RelativeLayout loadingPanel; // For paginating posts.
+    private FrameLayout loadingOverlay; // For loading network information.
 
 
     @Override
@@ -84,7 +88,12 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         createPost = findViewById(R.id.create_post);
         createEvent = findViewById(R.id.create_event);
         queue = Volley.newRequestQueue(getApplicationContext());
-        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+        loadingOverlay = findViewById(R.id.loading_overlay);
+        loadingOverlay.bringToFront();
+        org.codethechange.culturemesh.AnimationUtils.animateLoadingOverlay(loadingOverlay,
+                View.VISIBLE, 1, 200);
+        loadingPanel = findViewById(R.id.loadingPanel);
+        loadingPanel.setVisibility(View.GONE);
     }
 
     protected void createNoNetwork() {
@@ -108,6 +117,8 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                     }
                     //Update near location
                     nearLocation.setText(network.nearLocation.getShortName());
+                    org.codethechange.culturemesh.AnimationUtils.animateLoadingOverlay(loadingOverlay,
+                            View.GONE, 0, 1000);
                 } else {
                     response.showErrorDialog(TimelineActivity.this);
                 }
@@ -187,21 +198,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         });
     }
 
-    public void fetchPostsAtEnd(int currItem) {
-        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
-
-        //TODO: load extra posts by loadSize amount
-
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-            }
-        }, 1000);
-
-
-    }
 
     //Or rather, use built-in SwipeRefreshLayout; commented out portions were to be used with inner gesture class
     public void onSwipeRefresh() {
@@ -211,17 +207,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         startActivity(intent);
     }
 
-    //Returns true upon successful retrieval, returns false if issue/no connection
-    public boolean refreshPosts() { //probably public? if we want to refresh from outside, if that's possible/needed
-        boolean success = true;
-        //TODO: re-call loading posts. this must be done asynchronously.
 
-        swipeRefreshLayout.setRefreshing(false);
-        //TODO: if server/connection error, success = false;
-
-        //TODO: when done, animate old posts fading away and new posts then fading in
-        return success;
-    }
 
 
     @Override
