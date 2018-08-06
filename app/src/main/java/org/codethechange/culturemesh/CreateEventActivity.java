@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.support.v4.app.DialogFragment;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
@@ -23,27 +22,82 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
 
 import org.codethechange.culturemesh.models.Event;
-import org.codethechange.culturemesh.models.Language;
-import org.codethechange.culturemesh.models.User;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * Screen through which users can create an event in their currently selected network
+ */
 public class CreateEventActivity extends AppCompatActivity {
 // TODO: Have address search in google maps (Requires API Key?)
+
+    /**
+     * System-generated pop-up window that allows for selection of a date for the event.
+     * @see CreateEventActivity.DatePickerFragment
+     */
     private DatePickerFragment dateFrag;
+
+    /**
+     * System-generated pop-up window that allows for selection of a time for the event
+     * @see CreateEventActivity.TimePickerFragment
+     */
     private TimePickerFragment timeFrag;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
     private TextView dateRef;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
     private TextView timeRef;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
     private EditText nameRef;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
     private EditText address1Ref;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
     private EditText address2Ref;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
     private EditText cityRef;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
     private EditText regionRef;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
     private EditText countryRef;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
     private EditText descriptionRef;
+
+    /**
+     * Queue for asynchronous processes
+     */
     private RequestQueue queue;
+
+    /**
+     * Reference to this activity ({@link CreateEventActivity})
+     */
     private Activity myActivity = this;
 
     /**
