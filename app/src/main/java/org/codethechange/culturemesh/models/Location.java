@@ -367,7 +367,4 @@ public class Location implements Serializable, Listable {
     }
 
     // TODO: Implement getNumUsers
-    public long getNumUsers() {
-        return 0;
-    }
 }
