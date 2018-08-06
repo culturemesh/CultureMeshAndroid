@@ -1854,7 +1854,7 @@ class API {
      * @param password Password to login with
      * @return Value that should be passed in the header as the value of {@code Authorization}
      */
-    private static String genBasicAuth(String email, String password) {
+    static String genBasicAuth(String email, String password) {
         // SOURCE: https://stackoverflow.com/questions/34310134/send-authentication-information-with-volley-request
         String credentials = email + ":" + password;
         return "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
@@ -1867,7 +1867,7 @@ class API {
      * @param token Login token to authenticate to server
      * @return Value that should be passed in the header as the value of {@code Authorization}
      */
-    private static String genBasicAuth(String token) {
+    static String genBasicAuth(String token) {
         return genBasicAuth(token, "");
     }
 
