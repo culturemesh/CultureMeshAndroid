@@ -5,14 +5,12 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,15 +31,19 @@ import java.util.List;
 
 import org.codethechange.culturemesh.models.Language;
 import org.codethechange.culturemesh.models.Location;
-import org.codethechange.culturemesh.models.NearLocation;
 import org.codethechange.culturemesh.models.Network;
-import org.codethechange.culturemesh.models.Place;
 
 public class FindNetworkActivity extends DrawerActivity {
 
+    /**
+     * The user's chosen {@link Location} they are near
+     */
     static Location near;
     public final int REQUEST_NEW_NEAR_LOCATION = 1;
 
+    /**
+     * Queue to hold asynchronous tasks
+     */
     static RequestQueue queue;
 
     /**
@@ -64,8 +66,16 @@ public class FindNetworkActivity extends DrawerActivity {
      */
     private static SearchManager mSearchManager;
 
+    /**
+     * Button that leads to the {@link ChooseNearLocationActivity}
+     */
     private Button nearButton;
 
+    /**
+     * Setup the activity based on content specified in {@link R.layout#activity_find_network}. See
+     * code comments for details on implementation.
+     * @param savedInstanceState Previous state that is passed to superclass.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,10 +108,20 @@ public class FindNetworkActivity extends DrawerActivity {
                 startActivityForResult(chooseNewNear, REQUEST_NEW_NEAR_LOCATION);
             }
         });
-
-
     }
 
+    /**
+     * When the user has chosen a near location using {@link ChooseNearLocationActivity}, this
+     * method is called by the {@link Intent} that launched the near location chooser with the
+     * result of the user's selection. If they did indeed choose a location, that location is saved
+     * and the button text is updated to reflect the location's name.
+     * @param requestCode Status code that indicates a location was chosen if it equals
+     *                    {@link ChooseNearLocationActivity#RESULT_OK}
+     * @param resultCode {@inheritDoc}
+     * @param data Passed to superclass, but the value associated with
+     *             {@link ChooseNearLocationActivity#CHOSEN_PLACE}, which should be the location
+     *             the user chose, is extracted if {@code requestCode} indicates they made a choice
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == ChooseNearLocationActivity.RESULT_OK) {
@@ -111,19 +131,32 @@ public class FindNetworkActivity extends DrawerActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onResume() {
         //TODO: Implement when change nearby location: also consider onResumeFragments()
         super.onResume();
     }
 
+    /**
+     * Inflate the menu; this adds items to the action bar if it is present.
+     * @param menu Menu to create
+     * @return Always returns {@code true}
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_find_network, menu);
         return true;
     }
 
+    /**
+     * Handles clicks to the action bar.
+     * @param item {@inheritDoc}
+     * @return {@code true} if the item ID is that of {@link R.id#action_settings}. Otherwise,
+     * superclass {@code onOptionsItemSelected} is called and the resulting value is returned.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -145,8 +178,19 @@ public class FindNetworkActivity extends DrawerActivity {
     public static class FindLocationFragment extends Fragment implements
             SearchView.OnQueryTextListener {
 
+        /**
+         * The displayed list of search results
+         */
         private ListView searchList;
+
+        /**
+         * The adapter that populates {@link FindLocationFragment#searchList} with results
+         */
         private SearchAdapter<Location> adapter;
+
+        /**
+         * The field into which user enters search queries
+         */
         private SearchView searchView;
 
         /**
@@ -155,6 +199,9 @@ public class FindNetworkActivity extends DrawerActivity {
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
+        /**
+         * Empty constructor that does nothing.
+         */
         public FindLocationFragment() {
         }
 
@@ -170,6 +217,13 @@ public class FindNetworkActivity extends DrawerActivity {
             return fragment;
         }
 
+        /**
+         * Create the displayed fragment.
+         * @param inflater Creates the user interface from {@link R.layout#fragment_find_location}
+         * @param container TODO: What is this?
+         * @param savedInstanceState Previous state that is not used.
+         * @return The inflated view to display.
+         */
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
@@ -223,12 +277,23 @@ public class FindNetworkActivity extends DrawerActivity {
             return rootView;
         }
 
+        /**
+         * When the user submits a query, call {@link FindLocationFragment#search()}
+         * @param query Query text that is discarded.
+         * @return Always returns {@code true}
+         */
         @Override
         public boolean onQueryTextSubmit(String query) {
             search();
             return true;
         }
 
+        /**
+         * Use {@link API.Get#autocompletePlace(RequestQueue, String, Response.Listener)} to get
+         * autocomplete results for the user's query. Pass those results to
+         * {@link FindLocationFragment#adapter}, which will then populate
+         * {@link FindLocationFragment#searchList}
+         */
         public void search() {
             String query = searchView.getQuery().toString();
             API.Get.autocompletePlace(queue, query, new Response.Listener<NetworkResponse<List<Location>>>() {
@@ -248,6 +313,11 @@ public class FindNetworkActivity extends DrawerActivity {
             });
         }
 
+        /**
+         * When the query text changes, do nothing to avoid expensive API calls.
+         * @param newText The updated query text.
+         * @return Always returns {@code true}.
+         */
         @Override
         public boolean onQueryTextChange(String newText) {
             return true;
@@ -263,9 +333,19 @@ public class FindNetworkActivity extends DrawerActivity {
     public static class FindLanguageFragment extends Fragment implements
             SearchView.OnQueryTextListener {
 
-
+        /**
+         * The displayed list of search results
+         */
         private ListView searchList;
+
+        /**
+         * The adapter that populates {@link FindLanguageFragment#searchList} with results
+         */
         private SearchAdapter<Language> adapter;
+
+        /**
+         * The field into which user enters search queries
+         */
         private SearchView searchView;
 
         /**
@@ -274,6 +354,9 @@ public class FindNetworkActivity extends DrawerActivity {
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
+        /**
+         * Empty constructor that does nothing.
+         */
         public FindLanguageFragment() {
         }
 
@@ -289,6 +372,13 @@ public class FindNetworkActivity extends DrawerActivity {
             return fragment;
         }
 
+        /**
+         * Create the displayed fragment.
+         * @param inflater Creates the user interface from {@link R.layout#fragment_find_language}
+         * @param container TODO: What is this?
+         * @param savedInstanceState Previous state that is not used.
+         * @return The inflated view to display.
+         */
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
@@ -339,9 +429,14 @@ public class FindNetworkActivity extends DrawerActivity {
                 }
             });
             return rootView;
-
         }
 
+        /**
+         * Use {@link API.Get#autocompleteLanguage(RequestQueue, String, Response.Listener)} to get
+         * autocomplete results for the user's query. Pass those results to
+         * {@link FindLanguageFragment#adapter}, which will then populate
+         * {@link FindLanguageFragment#searchList}
+         */
         public void search() {
             String query = searchView.getQuery().toString();
             API.Get.autocompleteLanguage(queue, query, new Response.Listener<NetworkResponse<List<Language>>>() {
@@ -361,12 +456,22 @@ public class FindNetworkActivity extends DrawerActivity {
             });
         }
 
+        /**
+         * When the user submits a query, call {@link FindLanguageFragment#search()}
+         * @param query Query text that is discarded.
+         * @return Always returns {@code true}
+         */
         @Override
         public boolean onQueryTextSubmit(String query) {
             search();
             return true;
         }
 
+        /**
+         * When the query text changes, do nothing to avoid expensive API calls.
+         * @param newText The updated query text.
+         * @return Always returns {@code true}.
+         */
         @Override
         public boolean onQueryTextChange(String newText) {
             return true;
@@ -376,18 +481,28 @@ public class FindNetworkActivity extends DrawerActivity {
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
+     * one of the two available tabs: {@code From}, for location-based networks, and {@code Speaks},
+     * for language-based networks.
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+        /**
+         * {@inheritDoc}
+         * @param fm {@inheritDoc}
+         */
         SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
+        /**
+         * Get the appropriate fragment depending on which tab is selected
+         * @param position Either {@code 0}, for {@code near} or {@code 1}, for {@code speaks}
+         * @return {@link FindLocationFragment} for {@code position=1}, {@link FindLanguageFragment}
+         * otherwise.
+         */
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
             switch (position) {
                 case 0:
                     return FindLocationFragment.newInstance(0);
@@ -395,12 +510,21 @@ public class FindNetworkActivity extends DrawerActivity {
             return FindLanguageFragment.newInstance(1);
         }
 
+        /**
+         * Always returns {@code 2} because there are 2 tabs
+         * @return Always {@code 2}
+         */
         @Override
         public int getCount() {
             // Show 2 total pages.
             return 2;
         }
 
+        /**
+         * Get the titles for each tab
+         * @param position Position of tab to get name of ({@code 0} or {@code 1})
+         * @return Reference to name of tab
+         */
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
