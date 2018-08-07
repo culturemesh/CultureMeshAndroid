@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -36,26 +35,79 @@ import org.codethechange.culturemesh.models.User;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-public class DrawerActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+/**
+ * Superclass for all Activities that have a navigation drawer
+ */
+public class DrawerActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
 
+    /**
+     * The inflated user interface for the activity with the drawer
+     */
     protected DrawerLayout fullLayout;
+
+    /**
+     * Parent for the drawer activity
+     */
     protected FrameLayout frameLayout;
+
+    /**
+     * User interface for the drawer itself
+     */
     protected DrawerLayout mDrawerLayout;
+
+    /**
+     * Toggles whether the drawer is visible
+     */
     protected ActionBarDrawerToggle mDrawerToggle;
+
+    /**
+     * The {@link User}'s current {@link Network}s
+     */
     protected SparseArray<Network> subscribedNetworks;
+
+    /**
+     * IDs of the {@link Network}s the current {@link User} is subscribed to
+     */
     protected Set<Long> subscribedNetworkIds;
+
+    /**
+     * The navigation view
+     */
     NavigationView navView;
+
+    /**
+     * ID of the current {@link User}
+     */
     protected long currentUser;
+
+    /**
+     * Reference to the current activity
+     */
     Activity thisActivity = this;
+
+    /**
+     * Queue for asynchronous tasks
+     */
     RequestQueue queue;
 
+    /**
+     * Interface for classes that have actions that must wait until after the list of subscribed
+     * {@link Network}s has been populated. Subclasses can use this list instead of making another
+     * API call.
+     */
     public interface WaitForSubscribedList {
         void onSubscribeListFinish();
     }
 
+    /**
+     * Create the drawer from {@link R.layout#activity_drawer}, which has parent with ID
+     * {@link R.id#drawer_frame}. Populate the drawer with data from the current {@link User}
+     * and their {@link Network}s.
+     * @param layoutResID ID for the layout file to inflate
+     */
     @Override
     public void setContentView(int layoutResID) {
         fullLayout = (DrawerLayout) getLayoutInflater().inflate(R.layout.activity_drawer, null);
@@ -193,9 +245,11 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         }
     }
 
-
-
-
+    /**
+     * {@inheritDoc}
+     * Also syncs the state of {@link DrawerActivity#mDrawerToggle}
+     * @param savedInstanceState {@inheritDoc}
+     */
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -203,12 +257,26 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         mDrawerToggle.syncState();
     }
 
+    /**
+     * {@inheritDoc}
+     * Also updates the configuration of the drawer toggle by calling
+     * {@link DrawerActivity#mDrawerToggle#onConfigurationChanged(Configuration)} with the provided
+     * parameter.
+     * @param newConfig {@inheritDoc}
+     */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
+    /**
+     * Handle navigation items the user selects. If they select a {@link Network}, they are sent
+     * to {@link TimelineActivity} after the selected network is set as their chosen one. Otherwise,
+     * the appropriate activity is launched based on the option they select.
+     * @param item Item the user selected.
+     * @return Always returns {@code true}
+     */
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         //TODO: Handle navigation view item clicks here.
