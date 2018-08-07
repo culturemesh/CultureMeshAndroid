@@ -109,27 +109,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         images[2] = findViewById(R.id.attachedImage3);
         commentsRV = findViewById(R.id.commentsRV);
         mLayoutManager = (LinearLayoutManager) commentsRV.getLayoutManager();
-        commentsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            private boolean loading = true;
-            int pastVisiblesItems, visibleItemCount, totalItemCount;
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if(dy > 0) {
-                    visibleItemCount = mLayoutManager.getChildCount();
-                    totalItemCount = mLayoutManager.getItemCount();
-                    pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
-                    if (loading)
-                    {
-                        if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
-                        {
-                            loading = false;
-                            Log.v("...", "Last Item");
-                            loading = true;
-                        }
-                    }
-                }
-            }
-        });
         commentField = findViewById(R.id.write_comment_text);
         boldButton = findViewById(R.id.comment_bold);
         italicButton = findViewById(R.id.comment_italic);

@@ -77,7 +77,8 @@ public class ViewUsersModalSheetFragment extends BottomSheetDialogFragment{
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
         final TextView emptyText = contentView.findViewById(R.id.empty_text);
-        Log.i("ViewUsers", "in Fragmet on Create View");
+        emptyText.setText(getResources().getString(R.string.loading));
+        Log.i("ViewUsers", "in Fragment on Create View");
         Log.i("SEL NETWORK", Long.parseLong(getArguments().getString(NETWORK_ID)) + "");
         API.Get.networkUsers(queue, Long.parseLong(getArguments().getString(NETWORK_ID)), new Response.Listener<NetworkResponse<ArrayList<User>>>() {
             @Override
