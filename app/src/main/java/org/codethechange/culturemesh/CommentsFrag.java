@@ -89,8 +89,7 @@ public class CommentsFrag extends Fragment {
                 mAdapter = new RVCommentAdapter(response.getPayload(), new RVCommentAdapter.OnItemClickListener() {
                     @Override
                     public void onCommentClick(PostReply comment) {
-                        //to add comment click/long click functionality
-                        Toast.makeText(getActivity(), "Comment by " + comment.author + " clicked!", Toast.LENGTH_LONG).show();
+                        //For now, we do nothing.
                     }
                 }, getActivity().getApplicationContext());
                 mRecyclerView.setAdapter(mAdapter);

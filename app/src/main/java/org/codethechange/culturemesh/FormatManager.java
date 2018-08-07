@@ -16,7 +16,7 @@ import android.util.SparseBooleanArray;
  * Created by Drew Gregory on 3/26/18.
  *
  * This class provides a little decomposition from CreatePost/SpeciticPostActivity in that it handles
- * all the formatting involved in writinf posts/post replies. The supported formatting is:
+ * all the formatting involved in writing posts/post replies. The supported formatting is:
  *  - bold
  *  - italic
  *  - links
@@ -201,7 +201,6 @@ public class FormatManager implements
      * Gets the EditText content in the desired tag format. See comment above.
      */
     public String toString() {
-        SpannableStringBuilder sSB = new SpannableStringBuilder(content.getText());
         String html = Html.toHtml(content.getText());
         //We need to swap out the link tags from <a href=""></a> to <link></link>
         html = html.replaceAll("</a>", "</link>");
@@ -249,7 +248,6 @@ public class FormatManager implements
                 Log.i("formattedTextB4rF",formattedText);
             }
         } catch(StringIndexOutOfBoundsException e) {
-            //TODO: Do some error handling when having malformed text.
             Log.e("In formatManager", "Format Error");
             e.printStackTrace();
 

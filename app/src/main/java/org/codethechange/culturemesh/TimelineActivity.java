@@ -306,8 +306,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                     Intent cPA = new Intent(getApplicationContext(), CreatePostActivity.class);
                     cPA.putExtra(BUNDLE_NETWORK, selectedNetwork);
                     startActivity(cPA);
-                    //TODO: Have fragment post feed loading stuff be in start() method so feed updates
-                    //when createPostActivity finishes.
                 }
             });
             createEvent.setOnClickListener(new View.OnClickListener() {
@@ -322,7 +320,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         } else {
             //The user has not joined this network yet. We should hide the write post/events buttons
             //and show the join network button.
-            Log.i("onSubscribeListFinish", "onSubscribe made visible");
             joinNetwork.setVisibility(View.VISIBLE);
             joinNetwork.setOnClickListener(new View.OnClickListener() {
                 @Override

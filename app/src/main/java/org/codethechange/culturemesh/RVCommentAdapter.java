@@ -29,7 +29,6 @@ import java.util.List;
  */
 public class RVCommentAdapter extends RecyclerView.Adapter<RVCommentAdapter.PostReplyViewHolder> {
     private List<PostReply> comments;
-    private Context context;
 
     static class PostReplyViewHolder extends RecyclerView.ViewHolder {
         boolean reply = true;
@@ -80,7 +79,6 @@ public class RVCommentAdapter extends RecyclerView.Adapter<RVCommentAdapter.Post
 
     public RVCommentAdapter(List<PostReply> comments, OnItemClickListener listener, Context context) {
         this.comments = comments;
-        this.context = context;
         this.listener = listener;
 
     }
@@ -104,8 +102,6 @@ public class RVCommentAdapter extends RecyclerView.Adapter<RVCommentAdapter.Post
             pvh.timestamp.setText(comment.replyDate);
             pvh.username.setText(comment.author.getUsername());
             pvh.bind(comment, listener);
-
-            //TODO: Picasso isn't loading all the images. Figure that out.
             Picasso.with(pvh.personPhoto.getContext()).load(comment.author.getImgURL()).
                     into(pvh.personPhoto);
             Log.i("Image Link", comment.author.getImgURL());

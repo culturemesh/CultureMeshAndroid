@@ -24,6 +24,7 @@ import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -71,6 +72,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
     FormatManager formatManager;
     SparseArray<ImageButton> toggleButtons;
     ProgressBar progressBar;
+    FrameLayout loadingOverlay;
     /**
      * IMPORTANT: GUIDE FOR NETWORK REQUESTS
      * Every activity will have its own RequestQueue that it will pass on to EVERY API method call.
@@ -85,6 +87,8 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_specific_post);
+        loadingOverlay = findViewById(R.id.loading_overlay);
+        loadingOverlay.bringToFront();
         Intent intent = getIntent();
         final long postID = intent.getLongExtra("postID", 0);
         final long networkID = intent.getLongExtra("networkID", 0);
@@ -120,7 +124,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                         {
                             loading = false;
                             Log.v("...", "Last Item");
-                            fetchCommentsAtEnd(pastVisiblesItems);
                             loading = true;
                         }
                     }
@@ -181,15 +184,11 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         postButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: Check if valid string (nonempty)
                 String content = formatManager.toString();
                 if (content.length() <= 0) {
                     Snackbar.make(v, getResources().getString(R.string.cannot_write_empty),
                             Snackbar.LENGTH_LONG).show();
                 }
-                //TODO: Submit Post Reply to API AsyncTask call.
-                //TODO: Come up with valid id.
-                //TODO: Come up with user id.
                 PostReply pReply = new PostReply(-1, postID, settings.getLong(API.CURRENT_USER, -1), networkID,
                         new Date().toString(), content);
                 progressBar.setVisibility(View.VISIBLE);
@@ -270,8 +269,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                     timestamp.setText(post.getDatePosted());
                     username.setText(post.getAuthor().getUsername());
                     if (post.getImageLink() != null || post.getVideoLink() != null ) {
-                        //TODO: Figure out how to display videos
-                        //TODO: Figure out format for multiple pictures. Assuming separated by commas.
                         String[] links = post.getImageLink().split(",");
                         for (int j = 0;  j < links.length; j++) {
                             if (links[j] != null && links[j].length() > 0)
@@ -292,6 +289,9 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                     personPhoto.setOnClickListener(viewUserProfile);
                     username.setOnClickListener(viewUserProfile);
                     personName.setOnClickListener(viewUserProfile);
+                    AnimationUtils.animateLoadingOverlay(loadingOverlay, View.GONE, 0, 300);
+                } else {
+                    response.showErrorDialog(SpecificPostActivity.this);
                 }
             }
         });
@@ -314,27 +314,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                 toggleButton.setImageDrawable(getResources().getDrawable(toggleIcons.get(id)[iconIndex]));
             }
         }
-    }
-
-
-    public void fetchCommentsAtEnd(int currItem) {
-        //TODO: @Dylan: this causes nullpointer because
-        // this view is no where to be found...
-        // findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
-
-        //TODO: load extra posts by loadSize amount
-
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //TODO: @Dylan: this causes nullpointer because
-                // this view is no where to be found...
-                //findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-            }
-        }, 1000);
-
-
     }
 
     /**
