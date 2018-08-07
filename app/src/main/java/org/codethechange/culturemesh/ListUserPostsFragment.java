@@ -2,12 +2,10 @@ package org.codethechange.culturemesh;
 
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,17 +21,33 @@ import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Post;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.codethechange.culturemesh.API.SELECTED_USER;
 
 /**
- * Created by Drew Gregory on 03/29/18.
+ * Creates screen that displays the {@link Post}s a {@link org.codethechange.culturemesh.models.User}
+ * has made.
  */
 public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemClickListener {
+
+    /**
+     * The inflated user interface
+     */
     View root;
+
+    /**
+     * Scrollable list of {@link Post}s
+     */
     RecyclerView rv;
+
+    /**
+     * Displays {@link R.string#no_posts} if there are no {@link Post}s to display
+     */
     TextView emptyText;
+
+    /**
+     * Queue for asynchronous tasks
+     */
     RequestQueue queue;
 
     /**
@@ -48,6 +62,15 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
         return fragment;
     }
 
+    /** Create the user interface.
+     *  Also populate the list of {@link Post}s with the result from
+     * {@link API.Get#userPosts(RequestQueue, long, Response.Listener)}
+     * @param inflater Inflates the user interface from {@link R.layout#rv_container} with the
+     *                 provided {@code container} as the parent.
+     * @param container Parent used by {@code inflater}
+     * @param savedInstanceState Not used
+     * @return The inflated user interface
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -72,8 +95,6 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
                 //However, they don't have their comments yet. Let's add their comments.
                 for (FeedItem post : adapter.getNetPosts()) {
                     //TODO: Fetch comments for this post.
-
-
                 }
                 rv.getAdapter().notifyDataSetChanged();
                 if (rv.getAdapter().getItemCount() > 0) {
@@ -82,11 +103,14 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
                 }
             }
         });
-
         return root;
-
     }
 
+    /**
+     * When the user clicks on an item, redirect them to {@link SpecificPostActivity} where more
+     * details, including comments, are displayed.
+     * @param item The clicked item.
+     */
     @Override
     public void onItemClick(FeedItem item) {
         Intent intent = new Intent(getActivity(), SpecificPostActivity.class);
@@ -102,9 +126,6 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
             Toast.makeText(getActivity(), "Cannot open post", Toast.LENGTH_LONG).show();
         }
     }
-
-
-
 
     /**
      * This ensures that we are canceling all network requests if the user is leaving this activity.
