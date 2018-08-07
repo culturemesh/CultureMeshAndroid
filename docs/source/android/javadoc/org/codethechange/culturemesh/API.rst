@@ -212,9 +212,9 @@ TOKEN_REFRESH
 .. java:field:: static final int TOKEN_REFRESH
    :outertype: API
 
-   Number of seconds to use a login token before refreshing it. Note that this is not how long the token is valid, just how often to refresh it. Refresh time must be shorter than the validity time.
+   Number of milliseconds to use a login token before refreshing it. Note that this is not how long the token is valid, just how often to refresh it. Refresh time must be shorter than the validity time.
 
-   **See also:** :java:ref:`API.LOGIN_TOKEN`, :java:ref:`API.TOKEN_REFRESH`
+   **See also:** :java:ref:`API.LOGIN_TOKEN`
 
 TOKEN_RETRIEVED
 ^^^^^^^^^^^^^^^
