@@ -66,7 +66,7 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
         emptyText = root.findViewById(R.id.empty_text);
-        emptyText.setText(getResources().getString(R.string.no_networks));
+        emptyText.setText(getResources().getString(R.string.loading));
         //Fetch Data off UI thread.
         API.Get.userNetworks(queue, getArguments().getLong(SELECTED_USER, -1), new Response.Listener<NetworkResponse<ArrayList<Network>>>() {
             @Override
@@ -78,6 +78,8 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
                     if (nets.size() > 0) {
                         //Hide empty text.
                         emptyText.setVisibility(View.GONE);
+                    } else {
+                        emptyText.setText(getResources().getString(R.string.no_networks));
                     }
                     for (final Network net : nets) {
                         API.Get.networkUserCount(queue, net.id, new Response.Listener<NetworkResponse<Long>>() {

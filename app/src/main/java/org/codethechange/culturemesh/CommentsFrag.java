@@ -22,6 +22,7 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
 
 import org.codethechange.culturemesh.models.Network;
+import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
 
 import java.util.ArrayList;
@@ -89,7 +90,10 @@ public class CommentsFrag extends Fragment {
                 mAdapter = new RVCommentAdapter(response.getPayload(), new RVCommentAdapter.OnItemClickListener() {
                     @Override
                     public void onCommentClick(PostReply comment) {
-                        //For now, we do nothing.
+                        //Navigate to author of comment.
+                        Intent viewUser = new Intent(getActivity(),ViewProfileActivity.class);
+                        viewUser.putExtra(ViewProfileActivity.SELECTED_USER, comment.getAuthor().id);
+                        startActivity(viewUser);
                     }
                 }, getActivity().getApplicationContext());
                 mRecyclerView.setAdapter(mAdapter);
