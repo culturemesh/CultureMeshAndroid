@@ -185,5 +185,7 @@
     <string name="upload_sucess">Your profile picture has been updated!</string>
     <string name="change_picture">Change Profile Picture?</string>
     <string name="change_picture_prompt">Would you like to upload a new profile picture?</string>
+    <string name="loading_text">Looking all over the world for your content &#8230;</string>
+    <string name="retry">Retry</string>
     <!-- See the ellipses constant in Listable -->
 </resources>

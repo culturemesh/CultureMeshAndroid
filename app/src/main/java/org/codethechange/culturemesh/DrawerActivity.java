@@ -49,6 +49,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
     protected Set<Long> subscribedNetworkIds;
     NavigationView navView;
     protected long currentUser;
+    protected Toolbar mToolbar;
     Activity thisActivity = this;
     RequestQueue queue;
 
@@ -64,7 +65,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
         super.setContentView(fullLayout);
         queue = Volley.newRequestQueue(getApplicationContext());
         //All drawer activities must have a toolbar with id "action_bar!"
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.action_bar);
+        mToolbar = (Toolbar) findViewById(R.id.action_bar);
         setSupportActionBar(mToolbar);
         //Set Up Navigation Drawer
         //Setup Navigation Drawer Layout
@@ -185,6 +186,7 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
                         }
                         navView.setNavigationItemSelectedListener(DrawerActivity.this);
                         if (thisActivity instanceof WaitForSubscribedList) {
+                            Log.i("DrawerActivity", "calling onSubscribeListFinish");
                             ((WaitForSubscribedList) thisActivity).onSubscribeListFinish();
                         }
                     }

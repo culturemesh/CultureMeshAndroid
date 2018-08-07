@@ -68,6 +68,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     private Animation open, close;
     private boolean isFABOpen;
     private TextView population, fromLocation, nearLocation;
+    Button joinNetwork;
     private RequestQueue queue;
     private long selectedNetwork;
     private RelativeLayout loadingPanel; // For paginating posts.
@@ -87,9 +88,12 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         create = findViewById(R.id.create);
         createPost = findViewById(R.id.create_post);
         createEvent = findViewById(R.id.create_event);
+        joinNetwork = findViewById(R.id.join_network_button);
         queue = Volley.newRequestQueue(getApplicationContext());
         loadingOverlay = findViewById(R.id.loading_overlay);
         loadingOverlay.bringToFront();
+        //But we also want the toolbar to be present too.
+        mToolbar.bringToFront();
         org.codethechange.culturemesh.AnimationUtils.animateLoadingOverlay(loadingOverlay,
                 View.VISIBLE, 1, 200);
         loadingPanel = findViewById(R.id.loadingPanel);
@@ -278,6 +282,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
      */
     @Override
     public void onSubscribeListFinish() {
+        Log.i("onSubscribeListFinish", "onSubscribe called");
         //Check if the user is subscribed or not this network.
         if (subscribedNetworkIds.contains(selectedNetwork)) {
             //We are subscribed! Thus, the user can write posts an events. Let's make sure they have
@@ -312,12 +317,12 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                     startActivity(cEA);
                 }
             });
-            Button joinNetwork = findViewById(R.id.join_network_button);
+
             joinNetwork.setVisibility(View.GONE);
         } else {
             //The user has not joined this network yet. We should hide the write post/events buttons
             //and show the join network button.
-            Button joinNetwork = findViewById(R.id.join_network_button);
+            Log.i("onSubscribeListFinish", "onSubscribe made visible");
             joinNetwork.setVisibility(View.VISIBLE);
             joinNetwork.setOnClickListener(new View.OnClickListener() {
                 @Override

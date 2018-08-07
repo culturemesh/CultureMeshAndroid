@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -16,7 +17,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -44,6 +47,8 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
     EditText bio, firstName, lastName, userName, email;
     ImageView profilePicture;
     Button updateProfile;
+    ScrollView scrollView;
+    private FrameLayout loadingOverlay; // For loading network information.
     User user;
     RequestQueue queue;
     private static final String TAG = SettingsActivity.class.getName();
@@ -151,6 +156,10 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         final SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+        loadingOverlay = findViewById(R.id.loading_overlay);
+        loadingOverlay.bringToFront();
+        scrollView = findViewById(R.id.scroll_view);
+        scrollView.setVisibility(View.GONE);
         rv = findViewById(R.id.rv);
         bio = findViewById(R.id.bio);
         firstName = findViewById(R.id.first_name_field);
@@ -197,6 +206,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         API.Get.user(queue, currentUser, new Response.Listener<NetworkResponse<User>>() {
             @Override
             public void onResponse(NetworkResponse<User> response) {
+
                 if (!response.fail()) {
                     user = response.getPayload();
                     bio.setText(user.aboutMe);
@@ -208,9 +218,12 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                     Log.i(TAG, "User info loaded");
                     rv.getAdapter().notifyDataSetChanged();
                     Log.i(TAG, "Adapter notified of new user info");
+                    AnimationUtils.animateLoadingOverlay(loadingOverlay, View.GONE, 0, 300);
+                    AnimationUtils.animateLoadingOverlay(scrollView, View.VISIBLE, 1 , 300);
                 } else {
-                    response.showErrorDialog(getApplicationContext());
+                    response.showErrorDialog(SettingsActivity.this);
                 }
+
             }
         });
         rv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -341,25 +354,6 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         });
     }
 
-    /**
-     * Converts Uri into file path
-     * Sourced from https://stackoverflow.com/questions/14054307/java-io-filenotfoundexception-in-android
-     * @param uri uri taken from
-     * @return
-     */
-    public String getPath(Uri uri) {
-        String result;
-        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-        if (cursor == null) { // Source is Dropbox or other similar local file path
-            result = uri.getPath();
-        } else {
-            cursor.moveToFirst();
-            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-            result = cursor.getString(idx);
-            cursor.close();
-        }
-        return result;
-    }
 
     /**
      * This ensures that we are canceling all network requests if the user is leaving this activity.
