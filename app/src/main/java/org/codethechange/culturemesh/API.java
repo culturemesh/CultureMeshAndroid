@@ -163,12 +163,11 @@ class API {
     static int reqCounter;
 
     /**
-     * Number of seconds to use a login token before refreshing it.
+     * Number of milliseconds to use a login token before refreshing it.
      * Note that this is not how long the token is valid, just how often to refresh it. Refresh time
      * must be shorter than the validity time.
      *
      * @see API#LOGIN_TOKEN
-     * @see API#TOKEN_REFRESH
      */
     static final int TOKEN_REFRESH = 60 * 1000;
 
