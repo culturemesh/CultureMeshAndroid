@@ -2,6 +2,9 @@
 User Interaction Flow
 =====================
 
+The below diagram illustrates roughly how users move through the app and
+between different activities.
+
 .. code-block:: plain
 
                                       Launch App
@@ -22,7 +25,7 @@ User Interaction Flow
                                           |
                         TimelineActivity extends DrawerActivity
                        /     |       |                 |
-                      /  View Users  +----+-----+------+------------+-------+
+                      /  View Users  +    +-----+------+------------+-------+
                      /               |    |     |      |            |       |
                     /       +--------+ Settings |  Find Network   Explore   |
   FloatingActionButton      |        |          |      |                    |
@@ -33,6 +36,6 @@ User Interaction Flow
    |               |               |        |                 |
    |  CreateEventActivity      Make Reply   |               AboutActivity
    |                                        |
-CreatePostActivity                         Help
+   CreatePostActivity                      Help
                                             |
-                                    OnboardActivity
+                                     OnboardActivity
