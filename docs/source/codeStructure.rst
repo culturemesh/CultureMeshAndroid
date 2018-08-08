@@ -5,9 +5,23 @@ Structure of Code
 --------------
 User Interface
 --------------
+The screens displayed to users are called activities. Each one has an associated
+``*Activity.java`` file that defines a ``*Activity`` class. For example, the
+timeline for a network has an associated :java:ref:`TimelineActivity` that
+controls it. Each activity may also include fragments
+(e.g. :java:ref:`ListNetworksFragment`) that define part of an activity
+and can be reused across multiple activities. They are also often used for parts
+of the activity that sometimes disappear or are exchanged with other fragments.
+Each activity and fragment may also have layouts defined in the ``res`` folder
+as ``activity_*.xml`` and ``content_*.xml``.
 
 Adapters
 ========
+In some activities, large scrollable lists need to be displayed. Generating the
+displayable list elements (``View`` s) for all the items is inefficient, so
+``RecyclerView`` s are used, which efficiently handle generating the list using
+adapters. These classes (e.g. :java:ref:`RVAdapter`) provide the functionality
+``RecyclerView`` needs to dynamically generate each displayed list element.
 
 -----------
 Data Models
@@ -253,3 +267,12 @@ Recommended Usage
 -----
 Other
 -----
+
+First Activity
+==============
+
+Managing Formatted Text
+=======================
+
+Handling Redirections
+=====================
