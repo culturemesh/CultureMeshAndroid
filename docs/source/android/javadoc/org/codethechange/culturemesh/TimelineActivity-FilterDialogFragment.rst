@@ -20,8 +20,6 @@
 
 .. java:import:: android.content.res ColorStateList
 
-.. java:import:: android.os AsyncTask
-
 .. java:import:: android.os Bundle
 
 .. java:import:: android.os Handler
@@ -30,8 +28,6 @@
 
 .. java:import:: android.support.design.widget FloatingActionButton
 
-.. java:import:: android.support.v4.app Fragment
-
 .. java:import:: android.support.v4.app FragmentManager
 
 .. java:import:: android.support.v4.widget SwipeRefreshLayout
@@ -39,8 +35,6 @@
 .. java:import:: android.support.v7.widget LinearLayoutManager
 
 .. java:import:: android.support.v7.widget RecyclerView
-
-.. java:import:: android.util Log
 
 .. java:import:: android.view View
 
@@ -71,12 +65,6 @@
 .. java:import:: com.android.volley.toolbox Volley
 
 .. java:import:: org.codethechange.culturemesh.models Network
-
-.. java:import:: org.codethechange.culturemesh.models User
-
-.. java:import:: java.util ArrayList
-
-.. java:import:: java.util List
 
 .. java:import:: java.util.concurrent.atomic AtomicBoolean
 

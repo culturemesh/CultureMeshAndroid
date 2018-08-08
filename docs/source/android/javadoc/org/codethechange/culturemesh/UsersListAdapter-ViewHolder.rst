@@ -31,6 +31,8 @@ UsersListAdapter.ViewHolder
 .. java:type::  class ViewHolder extends RecyclerView.ViewHolder
    :outertype: UsersListAdapter
 
+   Holder of UI elements that compose each element of the displayed list
+
 Fields
 ------
 fullName
@@ -39,11 +41,15 @@ fullName
 .. java:field::  TextView fullName
    :outertype: UsersListAdapter.ViewHolder
 
+   \ :java:ref:`User`\ 's name
+
 profilePicture
 ^^^^^^^^^^^^^^
 
 .. java:field::  ImageView profilePicture
    :outertype: UsersListAdapter.ViewHolder
+
+   \ :java:ref:`User`\ 's profile picture
 
 Constructors
 ------------
@@ -52,4 +58,8 @@ ViewHolder
 
 .. java:constructor::  ViewHolder(View v)
    :outertype: UsersListAdapter.ViewHolder
+
+   Initialize instance fields with fields in \ ``v``\  and set the listener for clicks to open a more detailed view of the profile in \ :java:ref:`ViewProfileActivity`\
+
+   :param v: \ :java:ref:`View`\  to use to display the list item
 

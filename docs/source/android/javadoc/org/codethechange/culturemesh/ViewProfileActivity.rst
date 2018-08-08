@@ -1,5 +1,3 @@
-.. java:import:: android.os AsyncTask
-
 .. java:import:: android.os Bundle
 
 .. java:import:: android.support.design.widget TabLayout
@@ -42,6 +40,8 @@ ViewProfileActivity
 
 .. java:type:: public class ViewProfileActivity extends AppCompatActivity
 
+   Displays the profile of a user other than the currently-logged-in one
+
 Fields
 ------
 SELECTED_USER
@@ -50,11 +50,15 @@ SELECTED_USER
 .. java:field:: public static final String SELECTED_USER
    :outertype: ViewProfileActivity
 
+   Key for extra in \ :java:ref:`android.content.Intent`\ s that specifies the user whose profile is to be displayed. This should be included in the intent that launches this activity.
+
 mTabLayout
 ^^^^^^^^^^
 
 .. java:field::  TabLayout mTabLayout
    :outertype: ViewProfileActivity
+
+   Handles the tabs available in the interface and serves as the framework on which the rest of the UI elements are arranged.
 
 mViewPager
 ^^^^^^^^^^
@@ -62,11 +66,15 @@ mViewPager
 .. java:field::  ViewPager mViewPager
    :outertype: ViewProfileActivity
 
+   Manages the variety of lists that could be displayed: networks, posts, and events
+
 profilePic
 ^^^^^^^^^^
 
 .. java:field::  ImageView profilePic
    :outertype: ViewProfileActivity
+
+   Field for the displayed profile's photo
 
 queue
 ^^^^^
@@ -74,17 +82,23 @@ queue
 .. java:field::  RequestQueue queue
    :outertype: ViewProfileActivity
 
+   Queue for asynchronous tasks
+
 selUser
 ^^^^^^^
 
 .. java:field::  long selUser
    :outertype: ViewProfileActivity
 
+   ID of the \ :java:ref:`User`\  whose profile to display
+
 userName
 ^^^^^^^^
 
 .. java:field::  TextView userName
    :outertype: ViewProfileActivity
+
+   Text fields for the displayed profile's display name, bio, and name
 
 Methods
 -------
@@ -93,6 +107,10 @@ onCreate
 
 .. java:method:: @Override protected void onCreate(Bundle savedInstanceState)
    :outertype: ViewProfileActivity
+
+   Setup the user interface using the layout defined in \ :java:ref:`R.layout.activity_view_profile`\  and configure the various tabs. Initialize instance fields with the elements of the \ :java:ref:`android.view.View`\  created from the layout and fill the UI fields with the content of the profile using \ :java:ref:`API.Get.user(RequestQueue,long,Response.Listener)`\
+
+   :param savedInstanceState: {@inheritDoc}
 
 onStop
 ^^^^^^
@@ -109,4 +127,6 @@ onSupportNavigateUp
    :outertype: ViewProfileActivity
 
    This allows the user to hit the back button on the toolbar to go to the previous activity.
+
+   :return: Always \ ``true``\
 

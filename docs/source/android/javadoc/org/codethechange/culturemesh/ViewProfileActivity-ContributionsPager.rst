@@ -1,5 +1,3 @@
-.. java:import:: android.os AsyncTask
-
 .. java:import:: android.os Bundle
 
 .. java:import:: android.support.design.widget TabLayout

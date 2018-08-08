@@ -8,8 +8,6 @@
 
 .. java:import:: android.support.v7.widget RecyclerView
 
-.. java:import:: android.util Log
-
 .. java:import:: android.view LayoutInflater
 
 .. java:import:: android.view View
@@ -45,6 +43,8 @@ RVAdapter.OnItemClickListener
 .. java:type:: public interface OnItemClickListener
    :outertype: RVAdapter
 
+   Interface listeners for clicks on items must implement
+
 Methods
 -------
 onItemClick
@@ -52,4 +52,8 @@ onItemClick
 
 .. java:method::  void onItemClick(FeedItem item)
    :outertype: RVAdapter.OnItemClickListener
+
+   Handle a click on the provided item
+
+   :param item: Item that was clicked on
 

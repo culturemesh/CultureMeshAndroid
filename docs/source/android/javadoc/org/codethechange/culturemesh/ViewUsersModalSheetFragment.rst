@@ -66,11 +66,15 @@ USER_NAMES
 .. java:field:: public static final String USER_NAMES
    :outertype: ViewUsersModalSheetFragment
 
+   Keys for values passed as arguments to the fragment
+
 queue
 ^^^^^
 
 .. java:field::  RequestQueue queue
    :outertype: ViewUsersModalSheetFragment
+
+   Queue for asynchronous tasks
 
 Methods
 -------
@@ -79,4 +83,9 @@ setupDialog
 
 .. java:method:: @Override public void setupDialog(Dialog dialog, int style)
    :outertype: ViewUsersModalSheetFragment
+
+   Create and configure \ :java:ref:`View`\  from \ :java:ref:`R.layout.rv_container`\ . Populate the fields in that \ :java:ref:`View`\  with the result of \ :java:ref:`API.Get.networkUsers(RequestQueue,long,Response.Listener)`\
+
+   :param dialog: \ :java:ref:`Dialog`\  whose contents will be set using the \ :java:ref:`View`\  inflated from \ :java:ref:`R.layout.rv_container`\
+   :param style: Not used
 
