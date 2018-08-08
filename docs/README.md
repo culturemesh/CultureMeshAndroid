@@ -1,5 +1,5 @@
 # CultureMesh Documentation
-This repository stores documentation for CultureMesh's Android app and API.
+This repository stores documentation for CultureMesh's Android app.
 
 ## Dependencies
 The following dependencies may be needed to successfully generate the
