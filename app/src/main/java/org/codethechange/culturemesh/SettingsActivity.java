@@ -115,47 +115,61 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
             // GOAL: Upload image to server.
-            // General process: make bitmap, write bytes to temporary file, and pass file as param
-            // to ion's multipart/form-data framework.
+            final Uri imageURI = data.getData();
+            //First, let's make sure the user is authenticated.
+            API.Get.loginToken(queue, getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
+                    new Response.Listener<NetworkResponse<String>>() {
+                        @Override
+                        public void onResponse(NetworkResponse<String> response) {
+                            if (response.fail()) {
+                                response.showErrorDialog(SettingsActivity.this);
+                            } else {
+                                // We're good to go!
+                                // General process: make bitmap, write bytes to temporary file,
+                                // and pass file as param
+                                // to ion's multipart/form-data framework.
+                                try {
+                                    final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageURI);
+                                    final Bitmap finalBitmap = resizeBitmap(bitmap);
+                                    File appDirectory = getApplicationContext().getCacheDir();
+                                    File imageFile = new File(appDirectory, user.username.substring(0,2)
+                                            + ".jpg");
+                                    OutputStream os = new FileOutputStream(imageFile);
+                                    finalBitmap.compress(Bitmap.CompressFormat.JPEG, MAX_QUALITY, os);
+                                    os.flush();
+                                    os.close();
+                                    Ion.with(SettingsActivity.this).load(API.API_URL_BASE + "upload/image?"
+                                            + API.getCredentials())
+                                            .setHeader("Authorization", API.genBasicAuth(response.getPayload()))
+                                            .setMultipartFile("file", "image/*", imageFile)
+                                            .asString()
+                                            .setCallback(new FutureCallback<String>() {
+                                                @Override
+                                                public void onCompleted(Exception e, String result) {
+                                                    if (result != null) {
+                                                        NetworkResponse.genSuccessDialog(SettingsActivity.this,
+                                                                R.string.upload_sucess).show();
+                                                        // Update the user's picture with the returned URL.
+                                                        user.imgURL = result;
+                                                        Picasso.with(getApplicationContext()).load(user.imgURL).
+                                                                into(profilePicture);
+                                                    } else {
+                                                        NetworkResponse.genErrorDialog(SettingsActivity.this,
+                                                                R.string.upload_failure).show();
+                                                    }
+                                                    bitmap.recycle();
+                                                    finalBitmap.recycle();
+                                                }
+                                            });
 
-            Uri imageURI = data.getData();
-            try {
-                final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageURI);
-                final Bitmap finalBitmap = resizeBitmap(bitmap);
-                File appDirectory = getApplicationContext().getCacheDir();
-                File imageFile = new File(appDirectory, user.username.substring(0,2)
-                        + ".jpg");
-                OutputStream os = new FileOutputStream(imageFile);
-                finalBitmap.compress(Bitmap.CompressFormat.JPEG, MAX_QUALITY, os);
-                os.flush();
-                os.close();
-                Ion.with(SettingsActivity.this).load(API.API_URL_BASE + "upload/image?"
-                        + API.getCredentials())
-                        .setMultipartFile("file", "image/*", imageFile)
-                        .asString()
-                        .setCallback(new FutureCallback<String>() {
-                            @Override
-                            public void onCompleted(Exception e, String result) {
-                                if (result != null) {
-                                    NetworkResponse.genSuccessDialog(SettingsActivity.this,
-                                            R.string.upload_sucess).show();
-                                    // Update the user's picture with the returned URL.
-                                    user.imgURL = result;
-                                    Picasso.with(getApplicationContext()).load(user.imgURL).
-                                            into(profilePicture);
-                                } else {
-                                    NetworkResponse.genErrorDialog(SettingsActivity.this,
-                                            R.string.upload_failure).show();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    NetworkResponse.genErrorDialog(SettingsActivity.this, R.string.upload_failure);
                                 }
-                                bitmap.recycle();
-                                finalBitmap.recycle();
                             }
-                        });
+                        }
+                    });
 
-            } catch (IOException e) {
-                e.printStackTrace();
-                NetworkResponse.genErrorDialog(SettingsActivity.this, R.string.upload_failure);
-            }
         }
     }
 
