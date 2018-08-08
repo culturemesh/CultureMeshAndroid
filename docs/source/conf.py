@@ -24,9 +24,9 @@ copyright = '2018, CultureMesh'
 author = 'Stanford CodeTheChange'
 
 # The short X.Y version
-version = '0.1.0'
+version = '0.2.0'
 # The full version, including alpha/beta/rc tags
-release = '0.1.0-alpha'
+release = '0.2.0-beta'
 
 
 # -- General configuration ---------------------------------------------------
