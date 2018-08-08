@@ -6,9 +6,119 @@ Structure of Code
 User Interface
 --------------
 
+Adapters
+========
+
 -----------
 Data Models
 -----------
+Conceptually, the data stored with CultureMesh, including :java:ref:`Place` s,
+:java:ref:`User` s, :java:ref:`Network` s, and :java:ref:`Event` s are represented
+as models. These models are represented in JSON when in transit between the app
+and the server and as instances of the appropriate class
+(see :java:ref:`models`) within the app. The :java:ref:`API` class handles
+converting between object and JSON formats, often using constructors and getters
+within the model's class (e.g. :java:ref:`Post.getPostJSON`).
+
+Places and Locations
+====================
+:java:ref:`Place` s and/or :java:ref:`Location` s are part of the definition of a
+:java:ref:`Network`, and they are used by themselves when displaying lists from
+which the user can choose parameters to narrow their search for networks.
+
+The difference between a place and a location is not well captured in their
+names. A place defines a particular geographic area that is one of three types:
+a :java:ref:`City`, a :java:ref:`Region`, or a :java:ref:`Country`. A location
+can be any of those three, and includes definitions for one or more places.
+For example, a location might refer to San Francisco, in which case it would
+store ``San Francisco, California, United States``.
+
+Places can also store references to parent places, so this distinction may seem
+unhelpful. However, we use it because the salient difference between a location
+and a place is that a place is a separate model that stores all the information
+CultureMesh has on that place (e.g. name, population, etc.). On the other hand,
+a location only stores the IDs of the places that define it. In practice, this
+means that places can be thought of as residing in a list of all places
+CultureMesh knows about, while locations are used to define networks.
+
+Inheritance Structure
+---------------------
+
+.. code-block:: plain
+
+                      Location
+                     (IDs only)
+                     /        \
+                    /          \
+                   /            \
+                  /              \
+         Place (Abstract)    DatabaseLocation (Abstract)
+          (Full Info)                   (IDs)
+            /  |  \                   /      \
+           /   |   \           NearLocation  FromLocation
+      City  Region  Country  (Wrappers for DatabaseLocation)
+   (Specific cases of Place)
+
+The diagram above illustrates the inheritance hierarchy consisting of classes
+storing location/place information. The tree rooted at
+:java:ref:`DatabaseLocation` exists because of the potential to cache data
+locally in a database. This would allow for offline access and better
+performance when internet connection is poor. However, the database
+we experimented with required that the near (or current) location be specified
+using a different class than the from (or origin) location so that their
+instance fields could have different names and not conflict in the database.
+This is why :java:ref:`NearLocation` and :java:ref:`FromLocation` exist, as they
+are otherwise essentially the same. Whenever they can be treated identically,
+:java:ref:`DatabaseLocation` can be used. DatabaseLocation also stores
+functionality that is common to both subclasses.
+
+Networks, Languages, Events, and Posts
+======================================
+A :java:ref:`Network` is defined in one of two ways:
+
+* Location-based: The network is defined by a :java:ref:`NearLocation` and a
+  :java:ref:`FromLocation`.
+* Language-based: The network is defined by a :java:ref:`NearLocation` and a
+  :java:ref:`Language`.
+
+When the network is initially received from the server as a JSON, it is parsed
+to create a :java:ref:`DatabaseNetwork`, which represents the above properties
+by their IDs. Then, that DatabaseNetwork is expanded into a :java:ref:`Network`,
+which includes full :java:ref:`Place` and/or :java:ref:`Language` objects for
+the above properties.
+
+While not stored in the Network object, there are also lists of
+:java:ref:`Event` s and :java:ref:`Post` s associated with each network. These
+are fetched separately from the server each time they are needed. Instead of
+separate classes for their ID-only representations coming from the server and
+the fuller ones used within the app, they are instantiated in stages within the
+:java:ref:`API` class. First, their JSON representations are parsed to partially
+instantiate them. Then, missing parts (e.g. full Network objects) are fetched
+from the server and parsed to fully instantiate the objects.
+
+Both Event and Post are subclasses of :java:ref:`FeedItem`, which requires them
+to have a public instance field containing a list of comments. This allows them
+to both be displayed via polymorphism within a feed like
+:java:ref:`TimelineActivity`. These comments are represented by
+:java:ref:`PostReply` objects.
+
+Interfaces for Sending Objects
+==============================
+To reduce code redundancy, the :java:ref:`API` class uses a series of ``model``
+methods that can send ``PUT`` and ``POST`` requests (separate ``model`` methods)
+with any object so long as that object can generate a JSON representation of
+itself for the request using ``getPutJSON`` or ``getPostJSON``. The presence
+of these methods is enforced by the interfaces :java:ref:`Postable` and
+:java:ref:`Putable`, which allows for the ``model`` methods to be polymorphic.
+
+Other
+=====
+A :java:ref:`Point` describes a particular spot on the globe in terms of its
+latitude and longitude. It is really just a holder for the two values.
+
+A :java:ref:`User` object represents any of CultureMesh's users. It only stores
+parts of their public profiles, so methods that work with private information
+like passwords or email addresses take those values as parameters.
 
 ------------------------------------
 Connections to CultureMesh's Servers
