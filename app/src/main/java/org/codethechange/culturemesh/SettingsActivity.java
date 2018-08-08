@@ -37,22 +37,69 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Screen that displays the current user's profile and let's them update it
+ */
 public class SettingsActivity extends DrawerActivity implements NetworkSummaryAdapter.OnNetworkTapListener {
 
     RecyclerView rv;
+
+    /**
+     * Text field that displays {@link R.string#no_networks} if the user has not joined any
+     * {@link Network}s
+     */
     TextView emptyText;
+
+    /**
+     * Editable text fields that make up parts of the {@link User}'s profile
+     */
     EditText bio, firstName, lastName, userName, email;
+
+    /**
+     * The field for the {@link User}'s profile picture
+     */
     ImageView profilePicture;
+
+    /**
+     * Button for updating the {@link User}'s profile on the server with the one currently displayed
+     */
     Button updateProfile;
+
+    /**
+     * The user whose profile is displayed and being edited
+     */
     User user;
+
+    /**
+     * Queue for asynchronous tasks
+     */
     RequestQueue queue;
+
+    /**
+     * Tag for log statements
+     */
     private static final String TAG = SettingsActivity.class.getName();
+
+    /**
+     * The {@code requestCode} used if the user was asked to pick an image from their gallery.
+     * @see SettingsActivity#onActivityResult(int, int, Intent)
+     */
     private static final int PICK_IMAGE = 1;
-    // Quality 100 means no compression.
+
+    /**
+     * Constant that clarifies that quality 100 means no compression.
+     */
     final int MAX_QUALITY = 100;
-    // The max number of pixels for an image given the image
-    // Each pixel is 8 bytes large (according to RGBA_F16), and a MB is 2^20 bytes
+
+    /**
+     * The max number of pixels for an image given the image.
+     * Each pixel is 8 bytes large (according to RGBA_F16), and a MB is 2^20 bytes
+     */
     final long MAX_PIXELS = 1 << 18;
+
+    /**
+     * The maximum number of pixels allowed on a single side of an image
+     */
     final double MAX_SIDE = Math.sqrt(MAX_PIXELS);
 
     /**
@@ -60,7 +107,7 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
      * Inspiration from
      * http://www.tauntaunwonton.com/blog/2015/1/21/simple-posting-of-multipartform-data-from-android
      * @param requestCode PICK_IMAGE if we asked them to choose an image from the gallery.
-     * @param resultCode
+     * @param resultCode {@inheritDoc}
      * @param data Hopefully, the URI.
      */
     @Override
@@ -132,6 +179,14 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
                 (int) (bitmap.getHeight() * scalingFactor), true);
     }
 
+    /**
+     * Setup the user interface with the layout defined in {@link R.layout#activity_settings}. Also
+     * initialize instance fields for UI fields with the elements defined in the layout file. Fill
+     * the fields with the current profile (fetched using
+     * {@link API.Get#user(RequestQueue, long, Response.Listener)}). Link listeners to buttons
+     * and the displays of {@link Network}s to handle interactions.
+     * @param savedInstanceState {@inheritDoc}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -201,12 +256,27 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
         });
         rv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         resetAdapter();
-        ItemTouchHelper.SimpleCallback listener = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        ItemTouchHelper.SimpleCallback listener = new ItemTouchHelper.SimpleCallback(0,
+                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            /**
+             * {@inheritDoc}
+             * @param recyclerView {@inheritDoc}
+             * @param viewHolder {@inheritDoc}
+             * @param target {@inheritDoc}
+             * @return Always returns {@code false}
+             */
             @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+                                  RecyclerView.ViewHolder target) {
                 return false;
             }
 
+            /**
+             * Confirm the user wants to leave the {@link Network} swiped and, if they confirm they
+             * do, remove them.
+             * @param viewHolder
+             * @param swipeDir
+             */
             @Override
             public void onSwiped(final RecyclerView.ViewHolder viewHolder, int swipeDir) {
                 //Remove swiped item from list and notify the RecyclerView
@@ -253,11 +323,22 @@ public class SettingsActivity extends DrawerActivity implements NetworkSummaryAd
 
     }
 
+    /**
+     * Handle what happens when a user clicks on a {@link Network}. Right now, nothing is done.
+     * @param v {@inheritDoc}
+     * @param network {@inheritDoc}
+     */
     @Override
     public void onItemClick(View v, Network network) {
         //TODO: Figure out what you want here. Perhaps view network?
     }
 
+    /**
+     * Reset the adapter by clearing it and then populating it with new information from
+     * {@link API.Get#userNetworks(RequestQueue, long, Response.Listener)},
+     * {@link API.Get#networkPostCount(RequestQueue, long, Response.Listener)}, and
+     * {@link API.Get#networkUserCount(RequestQueue, long, Response.Listener)}.
+     */
     void resetAdapter(){
         ArrayList<Network> networks = new ArrayList<>();
         HashMap<String, Integer> counts = new HashMap<>();
