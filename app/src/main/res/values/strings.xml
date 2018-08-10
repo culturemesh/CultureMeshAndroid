@@ -99,6 +99,10 @@
     <string name="cultureMesh_description">CultureMesh helps you connect with nearby people who
         speak your language or come from where you do."</string>
     <string name="networks_explain">Join networks to learn about events and people near you.</string>
+    <string name="find_network_explain_1">Use the sidebar to find a network.</string>
+    <string name="find_network_explain_2">Select a nearby location.</string>
+    <string name="find_network_explain_3">Choose whether to find a network based on what people speak or where people are from.</string>
+    <string name="find_network_explain_4">Search for a location or language.</string>
     <string name="ready_question">Ready?</string>
     <string name="lets_start">Let\'s get Started!</string>
     <string name="logIn_signUp">Log In or Sign Up</string>
