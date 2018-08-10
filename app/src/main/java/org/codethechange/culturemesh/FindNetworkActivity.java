@@ -220,7 +220,7 @@ public class FindNetworkActivity extends DrawerActivity {
         /**
          * Create the displayed fragment.
          * @param inflater Creates the user interface from {@link R.layout#fragment_find_location}
-         * @param container TODO: What is this?
+         * @param container Parent container to attach inflated {@link View} to
          * @param savedInstanceState Previous state that is not used.
          * @return The inflated view to display.
          */
@@ -375,7 +375,7 @@ public class FindNetworkActivity extends DrawerActivity {
         /**
          * Create the displayed fragment.
          * @param inflater Creates the user interface from {@link R.layout#fragment_find_language}
-         * @param container TODO: What is this?
+         * @param container Parent container to attach inflated {@link View} to
          * @param savedInstanceState Previous state that is not used.
          * @return The inflated view to display.
          */

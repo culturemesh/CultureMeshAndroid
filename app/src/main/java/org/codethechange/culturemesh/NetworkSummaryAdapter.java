@@ -130,7 +130,7 @@ public class NetworkSummaryAdapter extends RecyclerView.Adapter<NetworkSummaryAd
     }
 
     /**
-     * Get the number of {@link Network}s are stored in the list
+     * Get the number of {@link Network}s that are stored in the list
      * @return Number of items in the list
      */
     @Override

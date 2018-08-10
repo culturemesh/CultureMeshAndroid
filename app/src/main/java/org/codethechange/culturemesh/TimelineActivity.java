@@ -70,7 +70,10 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
      */
     private FloatingActionButton create, createPost, createEvent;
 
-    // TODO: Document this
+    /**
+     * The small circle with the arrow in the center that rotates down from the top of the view
+     * if the user swipes down.
+     */
     private SwipeRefreshLayout swipeRefreshLayout;
 
     /**
