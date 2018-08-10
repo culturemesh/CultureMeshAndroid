@@ -14,38 +14,87 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-// TODO: Document Post
+
 /**
- * Created by nathaniel on 11/10/17.
+ * Represents a post made by a user in a network. A post is arbitrary, formatted text of the user's
+ * choosing.
  */
 @Entity
 public class Post extends FeedItem implements Serializable, Postable, Putable {
+    /**
+     * Uniquely identifies the post across all of CultureMesh
+     */
     @PrimaryKey
     public long id;
-    //When saved in database, we use these.
+
+    /**
+     * Unique identifier for the user who created the post. This is used when only a reference to
+     * the full {@link User} object is needed, e.g. when getting a post from the API. The rest of
+     * the information associated with the user can be fetched later.
+     */
     public long userId;
+
+    /**
+     * Unique identifier for the network the post was made in. This is used when only a reference to
+     * the full {@link Network} object is needed, e.g. when getting a post from the API. The rest of
+     * the information associated with the network can be fetched later.
+     */
     public long networkId;
 
+    /**
+     * The body of the post. May be formatted.
+     * @see org.codethechange.culturemesh.FormatManager
+     */
     public String content;
+
+    /**
+     * Link to an image, if available, that is associated with the post
+     */
     public String imgLink;
-    public String vidLink; //TODO: Handle multiple links?
+
+    /**
+     * Link to a video, if available, that is associated with the post
+     * TODO: Handle multiple links?
+     */
+    public String vidLink;
+
+    /**
+     * Timestamp for when the post was created. Should conform to
+     * {@code EEE, dd MMM yyyy kk:mm:ss z}
+     */
     public String datePosted;
 
-    //When instantiated, we use these
+    /**
+     * The {@link User} who created the post. This may not be present and have to be instantiated
+     * from {@link Post#userId}. Currently, this is handled by
+     * {@link org.codethechange.culturemesh.API}
+     */
     @Ignore
     public User author;
+
+    /**
+     * The {@link Network} who created the post. This may not be present and have to be instantiated
+     * from {@link Post#networkId}. Currently, this is handled by
+     * {@link org.codethechange.culturemesh.API}
+     */
     @Ignore
     public Network network;
 
-    public User getAuthor() {
-        return author;
-    }
-
-    public Network getNetwork() {
-        return network;
-    }
-
-    public Post(long id, long author, long networkId, String content, String imgLink, String vidLink, String datePosted) {
+    /**
+     * Create a new post object from the provided parameters. The resulting object will not be
+     * fully instantiated (e.g. {@link Post#author} and {@link Post#network} will be {@code null}.
+     * @param id Uniquely identifies the post across all of CultureMesh
+     * @param author ID of {@link User} who created the post
+     * @param networkId ID of the {@link Network} in which the post was made
+     * @param content Formatted text that composes the body of the post.
+     *                @see org.codethechange.culturemesh.FormatManager
+     * @param imgLink Link to an image associated with the post. {@code null} if none associated.
+     * @param vidLink Link to a video associated with the post. {@code null} if none associated
+     * @param datePosted When the post was created. Must conform to
+     *                   {@code EEE, dd MMM yyyy kk:mm:ss z}
+     */
+    public Post(long id, long author, long networkId, String content, String imgLink,
+                String vidLink, String datePosted) {
         this.id = id;
         this.userId = author;
         this.content = content;
@@ -55,48 +104,95 @@ public class Post extends FeedItem implements Serializable, Postable, Putable {
         this.networkId = networkId;
     }
 
+    /**
+     * Empty constructor for database
+     */
+    public Post(){
+
+    }
+
+    /**
+     * Get the URL to the image associated with the post.
+     * @return URL to associated image. If no image is associated, {@code null}
+     */
     public String getImageLink() {
         return imgLink;
     }
 
+    /**
+     * Associate the image at the provided URL with the post. Replaces any existing image URL.
+     * @param imgLink URL to the image to add to the post
+     */
     public void setImageLink(String imgLink) {
         this.imgLink = imgLink;
     }
 
+    /**
+     * Get the URL to the video associated with the post.
+     * @return URL to associated video. If no video is associated, {@code null}
+     */
     public String getVideoLink() {
         return vidLink;
     }
 
+    /**
+     * Associate the video at the provided URL with the post. Replaces any existing video URL.
+     * @param vidLink URL to the video to add to the post
+     */
     public void setVideoLink(String vidLink) {
         this.vidLink = vidLink;
     }
 
-    public Post(long author, String content, String datePosted) {
-        this.userId = author;
-        this.content = content;
-        this.datePosted = datePosted;
-        this.imgLink = null;
-        this.vidLink = null;
-    }
-
+    /**
+     * Get the formatted text that makes up the body of the post.
+     * @return Body of the post, which may be formatted.
+     * @see org.codethechange.culturemesh.FormatManager
+     */
     public String getContent() {
         return content;
     }
 
+    /**
+     * Get when the post was created.
+     * @return Timestamp of when post was created. Conforms to {@code EEE, dd MMM yyyy kk:mm:ss z}
+     */
     public String getDatePosted() {
         return this.datePosted;
     }
 
+    /**
+     * Set the body of the post to the parameter provided.
+     * @param content Formatted body of the post.
+     *                @see org.codethechange.culturemesh.FormatManager
+     */
     public void setContent(String content) {
         this.content = content;
     }
 
+    /**
+     * Get the timestamp for when the post was created.
+     * @param datePosted When post was created. Conforms to {@code EEE, dd MMM yyyy kk:mm:ss z}
+     */
     public void setDatePosted(String datePosted) {
         this.datePosted = datePosted;
     }
 
-    public Post(){
+    /**
+     * Get the author of the post. <strong>Object must be fully instantiated, not just populated
+     * with IDs</strong>
+     * @return Author of the post
+     */
+    public User getAuthor() {
+        return author;
+    }
 
+    /**
+     * Get the network of the post. <strong>Object must be fully instantiated, not just populated
+     * with IDs</strong>
+     * @return Network of the post
+     */
+    public Network getNetwork() {
+        return network;
     }
 
     /**
@@ -152,7 +248,7 @@ public class Post extends FeedItem implements Serializable, Postable, Putable {
                 }
      *     }
      * </pre>
-     * The resulting object is suitable for use with the {@code /post/new} endpoint.
+     * The resulting object is suitable for use with the {@code /post/new} endpoint (PUT and POST).
      * @return JSON representation of the object
      * @throws JSONException Unclear when this would be thrown
      */
@@ -166,10 +262,16 @@ public class Post extends FeedItem implements Serializable, Postable, Putable {
         return json;
     }
 
+    /**
+     * Wrapper for {@link Post#toJSON()}
+     */
     public JSONObject getPostJson() throws JSONException {
         return toJSON();
     }
 
+    /**
+     * Wrapper for {@link Post#toJSON()}
+     */
     public JSONObject getPutJson() throws JSONException {
         return toJSON();
     }

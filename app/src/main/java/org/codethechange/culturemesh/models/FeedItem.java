@@ -4,10 +4,9 @@ import android.arch.persistence.room.Ignore;
 
 import java.util.List;
 
-// TODO: Rewrite FeedItem docs
 /**
- * Created by drewgregory on 1/18/18.
- * Superclass for Posts and Events so we can use Polymorphism for feeds.
+ * Superclass for Posts and Events that mandates they both have a list of PostReply objects
+ * that can be displayed in a feed.
  */
 
 public class FeedItem {

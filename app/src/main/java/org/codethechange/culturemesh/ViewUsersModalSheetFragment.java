@@ -39,26 +39,54 @@ import java.util.Objects;
  */
 public class ViewUsersModalSheetFragment extends BottomSheetDialogFragment{
 
+    /**
+     * Keys for values passed as arguments to the fragment
+     */
     public static final String USER_NAMES = "usernames", IMAGE_URLS = "imgurls", USER_IDS ="userids",
                                 NETWORK_ID = "id";
+
+    /**
+     * Queue for asynchronous tasks
+     */
     RequestQueue queue;
 
-    private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback = new BottomSheetBehavior.BottomSheetCallback() {
+    /**
+     * Handles interactions with the list of subscribed users
+     */
+    private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback =
+            new BottomSheetBehavior.BottomSheetCallback() {
 
+                /**
+                 * If the {@code newState} is equal to {@link BottomSheetBehavior#STATE_HIDDEN},
+                 * dismiss.
+                 * @param bottomSheet
+                 * @param newState
+                 */
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
             if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                 dismiss();
             }
-
         }
 
+                /**
+                 * Does nothing
+                 * @param bottomSheet {@inheritDoc}
+                 * @param slideOffset {@inheritDoc}
+                 */
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
         }
     };
 
-
+    /**
+     * Create and configure {@link View} from {@link R.layout#rv_container}. Populate the fields
+     * in that {@link View} with the result of
+     * {@link API.Get#networkUsers(RequestQueue, long, Response.Listener)}
+     * @param dialog {@link Dialog} whose contents will be set using the {@link View} inflated from
+     *                             {@link R.layout#rv_container}
+     * @param style Not used
+     */
     @Override
     public void setupDialog(Dialog dialog, int style) {
         View contentView = View.inflate(getContext(), R.layout.rv_container, null);
@@ -104,6 +132,5 @@ public class ViewUsersModalSheetFragment extends BottomSheetDialogFragment{
         if( behavior != null && behavior instanceof BottomSheetBehavior ) {
             ((BottomSheetBehavior) behavior).setBottomSheetCallback(mBottomSheetBehaviorCallback);
         }
-
     }
 }

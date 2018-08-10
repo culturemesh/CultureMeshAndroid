@@ -11,17 +11,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -39,37 +36,84 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
 
 import org.codethechange.culturemesh.models.Network;
-import org.codethechange.culturemesh.models.User;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
 
 /**
- * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/8/17.
+ * Show a feed of {@link org.codethechange.culturemesh.models.Post}s and
+ * {@link org.codethechange.culturemesh.models.Event}s for the currently selected
+ * {@link Network}
  */
 public class TimelineActivity extends DrawerActivity implements DrawerActivity.WaitForSubscribedList{
-    private String basePath = "www.culturemesh.com/api/v1";
+
+    // TODO: Document this
     final String FILTER_LABEL = "fl";
+
+    // TODO: Document this
     final static String FILTER_CHOICE_NATIVE = "fcn";
-    final static String FILTER_CHOICE_TWITTER = "fct";
+
+    // TODO: Document this
     final static String FILTER_CHOICE_EVENTS = "fce";
+
+    // TODO: Document this
     final static String BUNDLE_NETWORK = "bunnet";
-    final static String SUBSCRIBED_NETWORKS = "subscrinets";
+
+    /**
+     * The app's preferences
+     */
     static SharedPreferences settings;
 
+    /**
+     * Floating buttons that allow users to create posts and events
+     */
     private FloatingActionButton create, createPost, createEvent;
+
+    /**
+     * The small circle with the arrow in the center that rotates down from the top of the view
+     * if the user swipes down.
+     */
     private SwipeRefreshLayout swipeRefreshLayout;
+
+    /**
+     * Scrollable list of {@link org.codethechange.culturemesh.models.Post}s and
+     * {@link org.codethechange.culturemesh.models.Event}s in the feed
+     */
     private RecyclerView postsRV;
+
+    /**
+     * Handle the animations for expanding the "create" floating action button into buttons to
+     * create {@link org.codethechange.culturemesh.models.Post}s and
+     * {@link org.codethechange.culturemesh.models.Event}s (open) and performing the reverse (close)
+     */
     private Animation open, close;
+
+    /**
+     * Whether or not the floating action button is expanded into separate buttons
+     */
     private boolean isFABOpen;
+
+    /**
+     * Text fields to display information about the displayed {@link Network}
+     */
     private TextView population, fromLocation, nearLocation;
+
+    /**
+     * Queue for asynchronous tasks
+     */
     private RequestQueue queue;
+
+    /**
+     * ID of the selected {@link Network}
+     */
     private long selectedNetwork;
 
-
+    /**
+     * Setup user interface using layout defined in {@link R.layout#activity_timeline} and
+     * initialize instance fields with that layout's fields (elements)
+     * @param savedInstanceState {@inheritDoc}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,12 +131,19 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
     }
 
+    /**
+     * If the user has no selected network, direct them to {@link ExploreBubblesOpenGLActivity}
+     */
     protected void createNoNetwork() {
         Intent startExplore = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
         startActivity(startExplore);
         finish();
     }
 
+    /**
+     * Use API methods to fetch details of the user's selected network. Then setup activity to
+     * display that network's feed.
+     */
     protected void createDefaultNetwork() {
         //Now, load network data for the header bar.
         API.Get.network(queue, selectedNetwork, new Response.Listener<NetworkResponse<Network>>() {
@@ -187,6 +238,10 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         });
     }
 
+    /**
+     * Load more posts. Not currently used or finished.
+     * @param currItem Not used.
+     */
     public void fetchPostsAtEnd(int currItem) {
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
 
@@ -199,19 +254,22 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                 findViewById(R.id.loadingPanel).setVisibility(View.GONE);
             }
         }, 1000);
-
-
     }
 
-    //Or rather, use built-in SwipeRefreshLayout; commented out portions were to be used with inner gesture class
+    /**
+     * Restart activity to refresh the feed
+     */
     public void onSwipeRefresh() {
-        //Restart activity to refresh posts.
         Intent intent = getIntent();
         finish();
         startActivity(intent);
     }
 
-    //Returns true upon successful retrieval, returns false if issue/no connection
+    /**
+     * Returns true upon successful retrieval, returns false if issue/no connection. Not used or
+     * complete.
+     * @return Always returns {@code true}
+     */
     public boolean refreshPosts() { //probably public? if we want to refresh from outside, if that's possible/needed
         boolean success = true;
         //TODO: re-call loading posts. this must be done asynchronously.
@@ -223,15 +281,16 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         return success;
     }
 
-
+    /**
+     * Check if user has selected a network to view, regardless of whether the user is subscribed
+     * to any networks yet. Previously, we checked if the user joined a network, and instead
+     * navigate the user to ExploreBubbles. This is not ideal because if a user wants to check
+     * out a network before joining one, then they will be unable to view the network. Also
+     * calls {@link DrawerActivity#onStart()}
+     */
     @Override
     protected void onStart() {
         super.onStart();
-
-        //Check if user has selected a network to view, regardless of whether the user is subscribed
-        //to any networks yet. Previously, we checked if the user joined a network, and instead
-        //navigate the user to ExploreBubbles. This is not ideal because if a user wants to check
-        //out a network before joining one, then they will be unable to view the network.
         selectedNetwork = settings.getLong(API.SELECTED_NETWORK, -1);
         if (selectedNetwork != -1) {
             createDefaultNetwork();
@@ -240,7 +299,10 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         }
     }
 
-
+    /**
+     * Handle the back button being pressed. If the drawer is open, close it. If the user has
+     * scrolled down the feed, return it to the start. Otherwise, go back to the previous activity.
+     */
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -256,6 +318,11 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         }
     }
 
+    /**
+     * Inflate {@code menu} from {@link R.menu#timeline}
+     * @param menu {@link Menu} to inflate
+     * @return Always returns {@code true}
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -263,6 +330,13 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     * @param item {@inheritDoc}
+     * @return If {@code item} is selected or if it has the same ID as {@link R.id#action_settings},
+     * return {@code true}. Otherwise, return the result of
+     * {@link DrawerActivity#onOptionsItemSelected(MenuItem)} with parameter {@code item}
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will

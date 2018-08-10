@@ -5,7 +5,6 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,38 +23,114 @@ import org.codethechange.culturemesh.models.PostReply;
 import java.util.List;
 
 /**
- * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
+ * Adapter that provides the {@link Post}s and/or {@link Event}s of a
+ * {@link org.codethechange.culturemesh.models.Network} to displayed, scrollable lists
  */
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
+
+    /**
+     * Get the items being represented as elements of the displayed list (not just the ones
+     * currently visible).
+     * @return Items represented as elements in the displayed list
+     */
     public List<FeedItem> getNetPosts() {
         return netPosts;
     }
 
+    /**
+     * All of the items that are represented in the displayed list, including those not currently
+     * visible due to scrolling.
+     */
     private List<FeedItem> netPosts;
+
+    /**
+     * The {@link Context} in which the list is displayed
+     */
     private Context context;
 
+    /**
+     * Stores the {@link View} elements of each item in the displayed list. Instances of this class
+     * are linked to objects in {@link RVAdapter#netPosts} by
+     * {@link RVAdapter#onBindViewHolder(PostViewHolder, int)}, which fills the fields with content
+     * from the object.
+     */
     static class PostViewHolder extends RecyclerView.ViewHolder {
+
+        /**
+         * Whether this instance is configured to display the information for a {@link Post} or for
+         * a {@link Event}. {@code true} if it is for a {@link Post}
+         */
         boolean post = true;
 
+        /**
+         * Check whether the instance is displaying information for a {@link Post} or a {@link Event}
+         * @return {@code true} if displaying information for a {@link Post}. {@code false} if
+         * for an {@link Event}
+         */
         public boolean isPost() {
             return post;
         }
+
+        /**
+         * The {@link View} for the displayed list item
+         */
         CardView cv;
+
+        /**
+         * Text fields for both {@link Post} and {@link Event} information
+         */
         TextView personName, username, content, timestamp, eventTitle, comment1Name,
                  comment1Text, comment2Name, comment2Text, viewMoreComments;
+
+        /**
+         * Display images with the displayed list item
+         */
         ImageView personPhoto, postTypePhoto;
+
+        /**
+         * Array of all image displays
+         */
         ImageView[] images;
+
+        /**
+         * Layout within which the details section of the displayed list item is defined
+         */
         LinearLayout eventDetailsLL;
+
+        /**
+         * Time of the {@link Event}
+         */
         TextView eventTime;
+
+        /**
+         * Where the {@link Event} will take place
+         */
         TextView eventLocation;
+
+        /**
+         * Description of the {@link Event}
+         */
         TextView eventDescription;
 
+        /**
+         * Layout within which the displayed list item is defined
+         */
         ConstraintLayout layout;
+
+        /**
+         * Layout within which the two displayed comments are defined
+         */
         RelativeLayout comment1Layout, comment2Layout;
 
         //TODO: Add support for onClick by adding viewholder ConstraintLayout items for
         //TODO: event time and event place.
 
+        /**
+         * Initialize instance fields by retrieving UI elements by their IDs in the provided
+         * {@link View}
+         * @param itemView Canvas upon which the displayed list item is built. Should already have
+         *                 the needed fields and other elements.
+         */
         PostViewHolder(View itemView) {
             super(itemView);
             cv = itemView.findViewById(R.id.cv);
@@ -84,6 +159,10 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             viewMoreComments = itemView.findViewById(R.id.view_more_comments);
         }
 
+        /**
+         * This instance will display the information from a {@link Event}, so hide all the fields
+         * that describe {@link Post}s
+         */
         void hidePostViews() {
             ConstraintSet constraints = new ConstraintSet();
             constraints.clone(layout);
@@ -109,6 +188,10 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
 
         }
 
+        /**
+         * This instance will display the information from a {@link Post}, so hide all the fields
+         * that describe {@link Event}s
+         */
         void hideEventViews()
         {
             ConstraintSet constraints = new ConstraintSet();
@@ -132,6 +215,14 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             viewMoreComments.setVisibility(View.VISIBLE);
         }
 
+        /**
+         * Set the displayed list item's listener that handles clicks to that of the provided
+         * listener
+         * @param item The clicked-on item which will be passed to the listener's
+         *             {@link OnItemClickListener#onItemClick(FeedItem)}method when the item is
+         *             clicked
+         * @param listener Listener to handle all clicks on items in the list
+         */
         public void bind(final FeedItem item, final OnItemClickListener listener) {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -143,22 +234,43 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
 
     }
 
+    /**
+     * The listener that will handle all clicks on items in the list
+     */
     private final OnItemClickListener listener;
 
+    /**
+     * Initialize instance fields with provided parameters
+     * @param netPosts List of objects to represent in the displayed list
+     * @param listener Listener to handle clicks on list tiems
+     * @param context {@link Context} in which the list will be displayed
+     */
     public RVAdapter(List<FeedItem> netPosts, OnItemClickListener listener, Context context) {
         this.netPosts = netPosts;
         this.context = context;
         this.listener = listener;
-
     }
 
+    /**
+     * Create a new {@link PostViewHolder} from a {@link View} created by inflating the layout
+     * described by {@link R.layout#post_view}.
+     * @param parent Parent for created {@link View} used to create {@link PostViewHolder}
+     * @param viewType Not used
+     * @return A new {@link PostViewHolder} for inclusion in the displayed list
+     */
     @Override
     public PostViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.post_view, parent, false);
         return new PostViewHolder(v);
     }
 
-
+    /**
+     * Link the provided {@link PostViewHolder} to an object in the list {@link RVAdapter#netPosts},
+     * which is used to fill the fields in the {@link PostViewHolder}
+     * @param pvh Item in the displayed list whose fields to fill with information
+     * @param i Index of object in {@link RVAdapter#netPosts} that will serve as the source of
+     *          information to fill into the displayed list item
+     */
     @Override
     public void onBindViewHolder(PostViewHolder pvh, int i) {
         final FeedItem item = netPosts.get(i);
@@ -237,11 +349,23 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
         }
     }
 
+    /**
+     * Interface listeners for clicks on items must implement
+     */
     public interface OnItemClickListener {
+
+        /**
+         * Handle a click on the provided item
+         * @param item Item that was clicked on
+         */
         void onItemClick(FeedItem item);
         //add more custom click functions here e.g. long click
     }
 
+    /**
+     * Get the number of items to display
+     * @return Number of items in the list of items to display ({@link RVAdapter#netPosts})
+     */
     @Override
     public int getItemCount() {
         return netPosts.size();

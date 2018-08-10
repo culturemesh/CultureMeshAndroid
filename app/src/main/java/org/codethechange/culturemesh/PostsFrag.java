@@ -8,11 +8,9 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -45,18 +43,27 @@ public class PostsFrag extends Fragment {
     //The post with the lowest id that we have fetched. We use this for paginating future posts.
     String maxPostId = API.NO_MAX_PAGINATION;
 
-    public PostsFrag() {
-        // Required empty public constructor
-    }
-
+    /**
+     * {@inheritDoc}
+     * Also initialize {@link PostsFrag#settings} and {@link PostsFrag#queue}
+     * @param savedInstanceState {@inheritDoc}
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         queue = Volley.newRequestQueue(getContext());
         super.onCreate(savedInstanceState);
-
     }
 
+    /**
+     * Create user interface and handle clicks on posts by launching {@link SpecificPostActivity},
+     * which displays more detailed information.
+     * @param inflater Inflates {@link R.layout#fragment_posts} into a full user interface that is
+     *                 a child of {@code container}
+     * @param container Parent of created user interface
+     * @param savedInstanceState Not used
+     * @return Inflated user interface
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -131,7 +138,6 @@ public class PostsFrag extends Fragment {
                     listener.onResponse(null);
                 }
             });
-
         }
         if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_NATIVE, true)) {
             // If posts aren't filtered out, add them to array list.
@@ -174,11 +180,18 @@ public class PostsFrag extends Fragment {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * @param context {@inheritDoc}
+     */
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onDetach() {
         super.onDetach();

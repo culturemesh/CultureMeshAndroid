@@ -3,7 +3,6 @@ package org.codethechange.culturemesh;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
@@ -20,23 +19,41 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
 
 import org.codethechange.culturemesh.models.Network;
-import org.codethechange.culturemesh.models.Post;
-import org.codethechange.culturemesh.models.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 
 /**
- * Created by Drew Gregory on 03/27/18.
+ * Fragment for displaying lists of clickable networks
  */
-public class ListNetworksFragment extends Fragment implements  NetworkSummaryAdapter.OnNetworkTapListener {
+public class ListNetworksFragment extends Fragment implements
+        NetworkSummaryAdapter.OnNetworkTapListener {
+
+    /**
+     * Inflated user interface created by {@link ListNetworksFragment#onCreate(Bundle)}
+     */
     View root;
+
+    /**
+     * Scrollable list of networks
+     */
     RecyclerView rv;
+
+    /**
+     * Displays {@link R.string#no_networks} if there are no networks to display
+     */
     TextView emptyText;
+
+    /**
+     * Key stored in the fragment's arguments and whose value is the ID of the user whose networks
+     * are to be displayed.
+     */
     final static String SELECTED_USER="seluser";
-    final static String FIRST_TIME = "firsttime";
+
+    /**
+     * Queue for asynchronous tasks
+     */
     RequestQueue queue;
 
     /**
@@ -51,6 +68,14 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
         return fragment;
     }
 
+    /**
+     * Setup the user interface to display the list of networks and populate that list with the
+     * result of calling {@link API.Get#userNetworks(RequestQueue, long, Response.Listener)}.
+     * @param inflater Inflates the user interface specified in {@link R.layout#rv_container}
+     * @param container Parent of the generated hierarchy of user interface elements
+     * @param savedInstanceState Saved state to restore
+     * @return Inflated user interface
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -68,7 +93,8 @@ public class ListNetworksFragment extends Fragment implements  NetworkSummaryAda
         emptyText = root.findViewById(R.id.empty_text);
         emptyText.setText(getResources().getString(R.string.no_networks));
         //Fetch Data off UI thread.
-        API.Get.userNetworks(queue, getArguments().getLong(SELECTED_USER, -1), new Response.Listener<NetworkResponse<ArrayList<Network>>>() {
+        API.Get.userNetworks(queue, getArguments().getLong(SELECTED_USER, -1),
+                new Response.Listener<NetworkResponse<ArrayList<Network>>>() {
             @Override
             public void onResponse(NetworkResponse<ArrayList<Network>> response) {
                 // Cool! Now, for each network, we need to find the number of posts and the

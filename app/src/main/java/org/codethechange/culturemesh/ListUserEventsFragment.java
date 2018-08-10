@@ -1,7 +1,6 @@
 package org.codethechange.culturemesh;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,12 +25,23 @@ import java.util.ArrayList;
 import static org.codethechange.culturemesh.API.SELECTED_USER;
 
 /**
- * Created by Drew Gregory on 03/29/18.
  * This fragment lists the the events a user is subscribed to. It is used in ViewProfileActivity.
  */
 public class ListUserEventsFragment extends Fragment implements RVAdapter.OnItemClickListener {
+
+    /**
+     * Scrollable list of events.
+     */
     RecyclerView rv;
+
+    /**
+     * Text field that displays {@link R.string#no_events} if there are no events to display
+     */
     TextView emptyText;
+
+    /**
+     * Queue for asynchronous tasks
+     */
     RequestQueue queue;
 
     /**
@@ -46,6 +56,14 @@ public class ListUserEventsFragment extends Fragment implements RVAdapter.OnItem
         return fragment;
     }
 
+    /**
+     * Setup the user interface to display the list of events and populate that list with the
+     * result of calling {@link API.Get#userEvents(RequestQueue, long, String, Response.Listener)}.
+     * @param inflater Inflates the user interface specified in {@link R.layout#rv_container}
+     * @param container Parent of the generated hierarchy of user interface elements
+     * @param savedInstanceState Saved state to restore
+     * @return Inflated user interface
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -79,6 +97,11 @@ public class ListUserEventsFragment extends Fragment implements RVAdapter.OnItem
 
     }
 
+    /**
+     * When an item is clicked, if it is a {@link Post}, the user is sent to a screen to view the
+     * post in more detail, including comments. If the item is an {@link Event}, no action is taken.
+     * @param item The item that was clicked
+     */
     @Override
     public void onItemClick(FeedItem item) {
         Intent intent = new Intent(getActivity(), SpecificPostActivity.class);

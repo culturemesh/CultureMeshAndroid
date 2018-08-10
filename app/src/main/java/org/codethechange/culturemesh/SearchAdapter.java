@@ -21,12 +21,39 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Populates a displayed list with items
+ * @param <T> Type of item to put in the list
+ */
 public class SearchAdapter<T extends Listable> extends ArrayAdapter<T> implements Filterable {
+
+    /**
+     * {@link Context} which holds the list
+     */
     private Context context;
+
+    /**
+     * ID of the UI element that is the list
+     */
     private int listViewID;
+
+    /**
+     * Filters list items based on queries
+     */
     private Filter filter;
+
+    /**
+     * List of items to display
+     */
     private List<T> items;
 
+    /**
+     * Initialize instance fields with provided parameters
+     * @param context {@inheritDoc}
+     * @param resource {@inheritDoc}
+     * @param listViewID Identifier for list the adapter will populate
+     * @param items {@inheritDoc}
+     */
     public SearchAdapter(@NonNull Context context, @LayoutRes int resource, int listViewID,
                          @NonNull List<T> items) {
         super(context, resource, items);
@@ -57,12 +84,25 @@ public class SearchAdapter<T extends Listable> extends ArrayAdapter<T> implement
         ImageView peopleIcon;
     }
 
+    /**
+     * Get the item associated with the list entry at a certain position
+     * @param position Position of list item
+     * @return The object represented at the specified position
+     */
     @Nullable
     @Override
     public T getItem(int position) {
         return items.get(position);
     }
 
+    /**
+     * Get a {@link View} for the list
+     * @param position Position of list element to get the {@link View} for
+     * @param convertView {@link View} inflated from {@link R.layout#network_list_item} that will
+     *                                represent the list entry
+     * @param parent Parent of the created {@link View}
+     * @return Inflated {@link View} for an element of the list
+     */
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -89,12 +129,19 @@ public class SearchAdapter<T extends Listable> extends ArrayAdapter<T> implement
         return convertView;
     }
 
+    /**
+     * Add all items in a {@link Collection} to the list of items the adapter displays in the list
+     * @param collection Items to add to the list
+     */
     @Override
     public void addAll(@NonNull Collection<? extends T> collection) {
         super.addAll(collection);
         items.addAll(collection);
     }
 
+    /**
+     * Clears the list of all items
+     */
     @Override
     public void clear() {
         super.clear();

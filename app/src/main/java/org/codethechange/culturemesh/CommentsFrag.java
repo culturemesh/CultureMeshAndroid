@@ -1,11 +1,9 @@
 package org.codethechange.culturemesh;
 
-import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -29,31 +27,42 @@ import java.util.ArrayList;
 import static android.content.Context.MODE_PRIVATE;
 
 /**
- * Created by Dylan Grosz (dgrosz@stanford.edu) on 3/26/18.
+ * Fragment for displaying comments to posts
  */
-
 public class CommentsFrag extends Fragment {
-
-    private String basePath = "www.culturemesh.com/api/v1";
 
     private RecyclerView mRecyclerView;
     private RVCommentAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+
+    /**
+     * Queue to which asynchronous tasks (mainly network requests) are added
+     */
     private RequestQueue queue;
+
+    /**
+     * The app's shared settings that store user info and preferences
+     */
     SharedPreferences settings;
 
-    public CommentsFrag() {
-        // Required empty public constructor
-    }
-
+    /**
+     * Initialize references to {@link CommentsFrag#queue} and {@link CommentsFrag#settings}.
+     * @param savedInstanceState
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
         queue = Volley.newRequestQueue(getContext());
         super.onCreate(savedInstanceState);
-
     }
 
+    /**
+     * Populate the activity with UI elements
+     * @param inflater Inflates the xml {@link R.layout#fragment_comments} into the displayed UI
+     * @param container TODO: What is this?
+     * @param savedInstanceState Saved state that can be restored. Not used.
+     * @return The inflated view produced by {@code inflater}
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -70,16 +79,6 @@ public class CommentsFrag extends Fragment {
         mLayoutManager = new LinearLayoutManager(activity);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        //get User info, this will be from SavedInstances from login or account
-        String fn = null;
-        String ln = null;
-        String email = null;
-        String un = null;
-        Network[] networks = null;
-
-        SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
-                Context.MODE_PRIVATE);
-
         Intent intent = getActivity().getIntent();
         long postID = intent.getLongExtra("postID", 0);
         API.Get.postReplies(queue, postID, new Response.Listener<NetworkResponse<ArrayList<PostReply>>>() {
@@ -90,7 +89,8 @@ public class CommentsFrag extends Fragment {
                     @Override
                     public void onCommentClick(PostReply comment) {
                         //to add comment click/long click functionality
-                        Toast.makeText(getActivity(), "Comment by " + comment.author + " clicked!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), "Comment by " + comment.author +
+                                " clicked!", Toast.LENGTH_LONG).show();
                     }
                 }, getActivity().getApplicationContext());
                 mRecyclerView.setAdapter(mAdapter);
@@ -100,33 +100,22 @@ public class CommentsFrag extends Fragment {
         return rootView;
     }
 
-
-
+    /**
+     * {@inheritDoc}
+     * @param context {@inheritDoc}
+     */
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onDetach() {
         super.onDetach();
     }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
-
 
     /**
      * This ensures that we are canceling all network requests if the user is leaving this activity.
