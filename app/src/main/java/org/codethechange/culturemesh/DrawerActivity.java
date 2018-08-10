@@ -245,7 +245,6 @@ public class DrawerActivity extends AppCompatActivity implements NavigationView.
             finish();
         }
         mDrawerLayout.closeDrawer(GravityCompat.START);
-        finish();
         return true;
     }
 
