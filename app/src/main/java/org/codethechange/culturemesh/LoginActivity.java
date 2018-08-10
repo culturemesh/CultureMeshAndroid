@@ -8,7 +8,6 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -22,15 +21,49 @@ import com.android.volley.toolbox.Volley;
 
 import org.codethechange.culturemesh.models.User;
 
-
+/**
+ * Login screen that lets a user either sign in with email and password or create a new account
+ */
 public class LoginActivity extends RedirectableAppCompatActivity {
+
+    /**
+     * Whether the user is signing in or creating an account ({@code true} if signing in)
+     */
     private boolean signInToggle = true;
+
+    /**
+     * Reference to the text field for the user's first name
+     */
     EditText firstNameText;
+
+    /**
+     * Reference to the text field for the user's last name
+     */
     EditText lastNameText;
+
+    /**
+     * Reference to the text field for password confirmation
+     */
     EditText confirmPassword;
+
+    /**
+     * Reference to the text field for the user's password
+     */
     EditText passwordText;
+
+    /**
+     * Reference to the text field for the user's username
+     */
     EditText usernameText;
+
+    /**
+     * Text field the user can click to toggle between creating an account and signing in
+     */
     TextView needAccountText;
+
+    /**
+     * Queue for asynchronous tasks
+     */
     private RequestQueue queue;
 
     /**
@@ -47,10 +80,19 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         editor.apply();
     }
 
+    /**
+     * Check whether any user is currently signed in
+     * @param settings The app's shared settings, which store user preferences
+     * @return {@code true} if a user is signed in, {@code false} otherwise
+     */
     public static boolean isLoggedIn(SharedPreferences settings) {
         return settings.contains(API.CURRENT_USER);
     }
 
+    /**
+     * Logout the currently logged-out user. If no user is logged in, nothing happens
+     * @param settings The app's shared settings, which store user preferences
+     */
     public static void setLoggedOut(SharedPreferences settings) {
         if (isLoggedIn(settings)) {
             SharedPreferences.Editor editor = settings.edit();
@@ -59,6 +101,12 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         }
     }
 
+    /**
+     * Helper method that logs the user in using the provided credentials
+     * @param queue Queue to which the asynchronous task will be added
+     * @param email User's account email address
+     * @param password User's password
+     */
     private void login(RequestQueue queue, final String email, String password) {
         API.Get.loginWithCred(queue, email, password,
                 getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
@@ -81,6 +129,16 @@ public class LoginActivity extends RedirectableAppCompatActivity {
         });
     }
 
+    /**
+     * Create the user interface from {@link R.layout#activity_login}. Also setup buttons to perform
+     * the associated actions, including log-ins with
+     * {@link API.Get#loginWithCred(RequestQueue, String, String, SharedPreferences,
+     * Response.Listener)}
+     * and account creation with
+     * {@link API.Post#user(RequestQueue, User, String, String, Response.Listener)}. Also sets up
+     * the animations to convert between signing in and creating an account.
+     * @param savedInstanceState {@inheritDoc}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

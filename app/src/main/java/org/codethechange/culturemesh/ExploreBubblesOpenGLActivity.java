@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import org.codethechange.bubblepicker.BubblePickerListener;
@@ -16,9 +15,9 @@ import org.codethechange.bubblepicker.rendering.BubblePicker;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Created by nathaniel on 12/27/18.
+ * Display moving bubbles which show suggested networks for the user to join
+ * TODO: Document this more fully
  */
-
 public class ExploreBubblesOpenGLActivity extends DrawerActivity {
     BubblePicker picker;
 

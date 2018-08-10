@@ -1,6 +1,5 @@
 package org.codethechange.culturemesh;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -21,16 +20,55 @@ import com.squareup.picasso.Picasso;
 
 import org.codethechange.culturemesh.models.User;
 
+/**
+ * Displays the profile of a user other than the currently-logged-in one
+ */
 public class ViewProfileActivity extends AppCompatActivity {
+
+    /**
+     * Key for extra in {@link android.content.Intent}s that specifies the user whose profile is
+     * to be displayed. This should be included in the intent that launches this activity.
+     */
     public static final String SELECTED_USER = "seluser";
+
+    /**
+     * Manages the variety of lists that could be displayed: networks, posts, and events
+     */
     ViewPager mViewPager;
+
+    /**
+     * Handles the tabs available in the interface and serves as the framework on which the rest
+     * of the UI elements are arranged.
+     */
     TabLayout mTabLayout;
+
+    /**
+     * Text fields for the displayed profile's display name, bio, and name
+     */
     TextView userName, bio, fullName;
+
+    /**
+     * Field for the displayed profile's photo
+     */
     ImageView profilePic;
+
+    /**
+     * ID of the {@link User} whose profile to display
+     */
     long selUser;
+
+    /**
+     * Queue for asynchronous tasks
+     */
     RequestQueue queue;
 
-
+    /**
+     * Setup the user interface using the layout defined in {@link R.layout#activity_view_profile}
+     * and configure the various tabs. Initialize instance fields with the elements of the
+     * {@link android.view.View} created from the layout and fill the UI fields with the content
+     * of the profile using {@link API.Get#user(RequestQueue, long, Response.Listener)}
+     * @param savedInstanceState {@inheritDoc}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,7 +146,7 @@ public class ViewProfileActivity extends AppCompatActivity {
 
     /**
      * This allows the user to hit the back button on the toolbar to go to the previous activity.
-     * @return
+     * @return Always {@code true}
      */
     @Override
     public boolean onSupportNavigateUp() {

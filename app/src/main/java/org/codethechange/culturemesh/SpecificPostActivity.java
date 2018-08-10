@@ -2,7 +2,6 @@ package org.codethechange.culturemesh;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
@@ -53,34 +52,112 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Displays a particular {@link Post} along with its comments ({@link PostReply}). Also allows the
+ * user to add comments.
+ */
 public class SpecificPostActivity extends AppCompatActivity implements FormatManager.IconUpdateListener {
 
+    /**
+     * The {@link View} that holds the UI elements that make up the displayed {@link Post}
+     */
     CardView cv;
+
+    /**
+     * Name of the creator of the {@link Post}
+     */
     TextView personName;
+
+    /**
+     * Unique display name of the creator of the {@link Post}
+     */
     TextView username;
+
+    /**
+     * Body of the {@link Post}
+     */
     TextView content;
+
+    /**
+     * When the {@link Post} was created
+     */
     TextView timestamp;
+
+    /**
+     * Profile photo of the author of the {@link Post}
+     */
     ImageView personPhoto;
+
+    /**
+     * Other photo associated with the {@link Post}
+     */
     ImageView postTypePhoto;
+
+    /**
+     * Array of images associated with the {@link Post}
+     */
     ImageView[] images;
+
+    /**
+     * Field for the user to enter a comment
+     */
     ListenableEditText commentField;
+
+    /**
+     * Button to submit a comment on the {@link Post}
+     */
     Button postButton;
+
+    /**
+     * Layout within which the compose reply UI elements are arranged
+     */
     ConstraintLayout writeReplyView;
+
+    /**
+     * Whether the "window" to write a reply is open. Starts off {@code false}
+     */
     boolean editTextOpened = false;
+
+    /**
+     * Buttons for inline markup of the text of the reply
+     */
     ImageButton boldButton, italicButton, linkButton;
+
+    /**
+     * Manages markup of the text of the reply
+     */
     FormatManager formatManager;
+
+    /**
+     * Tracks whether the inline markup buttons have been toggled to "on"
+     */
     SparseArray<ImageButton> toggleButtons;
+
+    /**
+     * Progress bar for displaying the progress of network operations
+     */
     ProgressBar progressBar;
     /**
-     * IMPORTANT: GUIDE FOR NETWORK REQUESTS
-     * Every activity will have its own RequestQueue that it will pass on to EVERY API method call.
-     * The RequestQueue handles all the dirty work of multithreading and dispatching. neat!
+     * Queue for asynchronous tasks
      */
     RequestQueue queue;
 
+    /**
+     * Scrollable list of comments
+     */
     private RecyclerView commentsRV;
+
+    /**
+     * Manages the currently visible comments
+     */
     private LinearLayoutManager mLayoutManager;
 
+    /**
+     * Create the user interface from the layout defined by {@link R.layout#activity_specific_post}.
+     * Initialize instance fields with the UI elements defined in the layout. Setup listeners to
+     * handle loading more comments, clicks to post replies, and load the {@link Post} to display.
+     * @param savedInstanceState {@inheritDoc}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -187,9 +264,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                     Snackbar.make(v, getResources().getString(R.string.cannot_write_empty),
                             Snackbar.LENGTH_LONG).show();
                 }
-                //TODO: Submit Post Reply to API AsyncTask call.
-                //TODO: Come up with valid id.
-                //TODO: Come up with user id.
                 PostReply pReply = new PostReply(-1, postID, settings.getLong(API.CURRENT_USER, -1), networkID,
                         new Date().toString(), content);
                 progressBar.setVisibility(View.VISIBLE);
@@ -215,9 +289,8 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         //For now, since I believe events cannot take comments, I don't think it is worth the user's
         //time to navigate to this activity with an event.
         //we are loading the post this way!!
-        // Commented out AsyncTask: new loadPostReplies().execute(postID);
         // TODO: Instead of lostPostReplies(), setup API.Get.postReplies() callback method.
-        /**
+        /*
          * IMPORTANT: GUIDE TO NETWORK REQUESTS
          * EXAMPLE NETWORK REQUEST CALL -- IMPORTANT!!
          * The format for API method calls will mimic more of a callback. We are basically
@@ -297,6 +370,14 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         });
     }
 
+    /**
+     * Update whether an icon has been "toggled", or selected
+     * @param formTogState a SparseBooleanArray (HashMap) with int as key and boolean as value
+     *                      key: int id of toggleButton View we are using.
+     *                      value: true if toggled, false if not toggled.
+     * @param toggleIcons a SparseArray (HashMap) with int as key and int[] as value.
+     *                      key: int id of toggleButton View we are using.
+     */
     @Override
     public void updateIconToggles(SparseBooleanArray formTogState, SparseArray<int[]> toggleIcons) {
         //toggleIcons -- Key is menuItem Id, value is array of drawable ids.
@@ -316,7 +397,10 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         }
     }
 
-
+    /**
+     * Fetch the next comments after the bottom of the scrolling list has been reached
+     * @param currItem Current item in the list
+     */
     public void fetchCommentsAtEnd(int currItem) {
         //TODO: @Dylan: this causes nullpointer because
         // this view is no where to be found...
@@ -333,7 +417,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                 //findViewById(R.id.loadingPanel).setVisibility(View.GONE);
             }
         }, 1000);
-
 
     }
 
@@ -372,7 +455,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
     }
 
     /**
-     *
      * This little helper handles the animation involved in changing the size of the write reply view.
      * @param oldSize start height, in pixels.
      * @param newSize final height, in pixels.
@@ -394,7 +476,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
 
 
     /**
-     * IMPORTANT: EXAMPLE GUIDE FOR NETWORK REQUESTS
      * This ensures that we are canceling all network requests if the user is leaving this activity.
      * We use a RequestFilter that accepts all requests (meaning it cancels all requests)
      */

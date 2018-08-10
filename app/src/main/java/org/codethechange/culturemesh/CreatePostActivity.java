@@ -1,10 +1,7 @@
 package org.codethechange.culturemesh;
 
-import android.app.Activity;
-import android.content.DialogInterface;
-import android.os.AsyncTask;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableStringBuilder;
@@ -22,7 +19,6 @@ import android.widget.TextView;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 
 import org.codethechange.culturemesh.models.Network;
@@ -30,15 +26,51 @@ import org.codethechange.culturemesh.models.Post;
 
 import java.util.Date;
 
-public class CreatePostActivity extends AppCompatActivity implements FormatManager.IconUpdateListener {
+/**
+ * Creates screen the user can use to create a new {@link Post}
+ */
+public class CreatePostActivity extends AppCompatActivity implements
+        FormatManager.IconUpdateListener {
+
+    /**
+     * Field the user uses to type the body of their {@link Post}
+     */
     ListenableEditText content;
+
+    /**
+     * All the items in the formatting menu
+     */
     SparseArray<MenuItem> menuItems;
+
+    /**
+     * Displays the {@link Network} the user's {@link Post} will be added to
+     */
     TextView networkLabel;
-    private Activity myActivity = this;
+
+    /**
+     * Queue for asynchronous tasks
+     */
     private RequestQueue queue;
+
+    /**
+     * Displays progress as the post is being sent over the network
+     */
     ProgressBar progressBar;
+
+    /**
+     * Handles markup of the body text
+     */
     FormatManager formatManager;
 
+    /**
+     * Create the screen from {@link R.layout#activity_create_post}, fill
+     * {@link CreatePostActivity#networkLabel} with a description of the {@link Network}
+     * from {@link API.Get#network(RequestQueue, long, Response.Listener)}, setup
+     * {@link CreatePostActivity#formatManager}, and link a listener to the submission button that
+     * sends the {@link Post} using
+     * {@link API.Post#post(RequestQueue, Post, SharedPreferences, Response.Listener)}
+     * @param savedInstanceState {@inheritDoc}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,7 +153,11 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
 
     }
 
-
+    /**
+     * Populate the options menu with controls to make text bold, italic, or a link
+     * @param menu Menu to populate with options
+     * @return Always returns {@code true}
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
