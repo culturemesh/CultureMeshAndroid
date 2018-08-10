@@ -35,6 +35,14 @@ public class OnboardActivity extends AhoyOnboarderActivity {
                 R.drawable.logo_header, 500, 500));
         pages.add(makeCard(getString(R.string.networks), getString(R.string.networks_explain),
                 R.drawable.ic_people_outline_white_24px, 500, 500));
+        pages.add(makeCard("", getString(R.string.find_network_explain_1),
+                R.mipmap.ic_onboard_find_network_1_foreground, 500, 500));
+        pages.add(makeCard("", getString(R.string.find_network_explain_2),
+                R.mipmap.ic_onboard_find_network_2_foreground, 500, 500));
+        pages.add(makeCard("", getString(R.string.find_network_explain_3),
+                R.mipmap.ic_onboard_find_network_3_foreground, 500, 500));
+        pages.add(makeCard("", getString(R.string.find_network_explain_4),
+                R.mipmap.ic_onboard_find_network_4_foreground, 500, 500));
         pages.add(makeCard(getString(R.string.ready_question), getString(R.string.lets_start),
                 R.drawable.ic_public_black_24dp, 500, 500));
 
