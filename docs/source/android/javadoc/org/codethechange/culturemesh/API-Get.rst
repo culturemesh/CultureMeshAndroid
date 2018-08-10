@@ -1,5 +1,3 @@
-.. java:import:: android.arch.persistence.room Room
-
 .. java:import:: android.content Context
 
 .. java:import:: android.content SharedPreferences
@@ -26,25 +24,11 @@
 
 .. java:import:: com.android.volley VolleyError
 
-.. java:import:: com.android.volley VolleyLog
-
 .. java:import:: com.android.volley.toolbox JsonArrayRequest
 
 .. java:import:: com.android.volley.toolbox JsonObjectRequest
 
 .. java:import:: com.android.volley.toolbox StringRequest
-
-.. java:import:: org.codethechange.culturemesh.data CMDatabase
-
-.. java:import:: org.codethechange.culturemesh.data EventDao
-
-.. java:import:: org.codethechange.culturemesh.data EventSubscription
-
-.. java:import:: org.codethechange.culturemesh.data EventSubscriptionDao
-
-.. java:import:: org.codethechange.culturemesh.data NetworkSubscription
-
-.. java:import:: org.codethechange.culturemesh.data NetworkSubscriptionDao
 
 .. java:import:: org.codethechange.culturemesh.models City
 
@@ -82,17 +66,11 @@
 
 .. java:import:: org.json JSONObject
 
-.. java:import:: java.io ByteArrayOutputStream
-
-.. java:import:: java.io IOException
-
 .. java:import:: java.io UnsupportedEncodingException
 
 .. java:import:: java.nio.charset StandardCharsets
 
 .. java:import:: java.util ArrayList
-
-.. java:import:: java.util Calendar
 
 .. java:import:: java.util Date
 
@@ -140,12 +118,6 @@ autocompletePlace
    :param queue: Queue to which the asynchronous task will be added
    :param text: User's query text to get autocomplete results for
    :param listener: Listener whose \ :java:ref:`com.android.volley.Response.Listener.onResponse(Object)`\  is called with the \ :java:ref:`NetworkResponse`\  created by the query.
-
-event
-^^^^^
-
-.. java:method:: static NetworkResponse<Event> event(long id)
-   :outertype: API.Get
 
 instantiatePostReplyUser
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -362,10 +334,12 @@ userEvents
 .. java:method:: static void userEvents(RequestQueue queue, long id, String role, Response.Listener<NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Event>>> listener)
    :outertype: API.Get
 
-   Get the \ :java:ref:`Event`\ s a \ :java:ref:`User`\  is subscribed to. This is done by searching for \ :java:ref:`EventSubscription`\ s with the user's ID (via \ :java:ref:`EventSubscriptionDao.getUserEventSubscriptions(long)`\ ) and then inflating each event from it's ID into a full \ :java:ref:`Event`\  object using \ :java:ref:`API.Get.event(long)`\ .
+   Get the \ :java:ref:`Event`\ s a \ :java:ref:`User`\  is subscribed to.
 
+   :param queue: Queue to which the asynchronous task is added.
    :param id: ID of the \ :java:ref:`User`\  whose events are being searched for
-   :return: List of \ :java:ref:`Event`\ s to which the user is subscribed
+   :param role: Either \ ``hosting``\  or \ ``attending``\
+   :param listener: Listener whose \ ``onResponse``\  method is called with the results of the task
 
 userID
 ^^^^^^

@@ -1,5 +1,3 @@
-.. java:import:: android.arch.persistence.room Room
-
 .. java:import:: android.content Context
 
 .. java:import:: android.content SharedPreferences
@@ -26,25 +24,11 @@
 
 .. java:import:: com.android.volley VolleyError
 
-.. java:import:: com.android.volley VolleyLog
-
 .. java:import:: com.android.volley.toolbox JsonArrayRequest
 
 .. java:import:: com.android.volley.toolbox JsonObjectRequest
 
 .. java:import:: com.android.volley.toolbox StringRequest
-
-.. java:import:: org.codethechange.culturemesh.data CMDatabase
-
-.. java:import:: org.codethechange.culturemesh.data EventDao
-
-.. java:import:: org.codethechange.culturemesh.data EventSubscription
-
-.. java:import:: org.codethechange.culturemesh.data EventSubscriptionDao
-
-.. java:import:: org.codethechange.culturemesh.data NetworkSubscription
-
-.. java:import:: org.codethechange.culturemesh.data NetworkSubscriptionDao
 
 .. java:import:: org.codethechange.culturemesh.models City
 
@@ -82,17 +66,11 @@
 
 .. java:import:: org.json JSONObject
 
-.. java:import:: java.io ByteArrayOutputStream
-
-.. java:import:: java.io IOException
-
 .. java:import:: java.io UnsupportedEncodingException
 
 .. java:import:: java.nio.charset StandardCharsets
 
 .. java:import:: java.util ArrayList
-
-.. java:import:: java.util Calendar
 
 .. java:import:: java.util Date
 
@@ -140,12 +118,6 @@ FEED_ITEM_COUNT_SIZE
 
    The number of items (e.g. \ :java:ref:`org.codethechange.culturemesh.models.Post`\ s or \ :java:ref:`Event`\ s to fetch with each paginated request
 
-FIRST_TIME
-^^^^^^^^^^
-
-.. java:field:: static final String FIRST_TIME
-   :outertype: API
-
 HOSTING
 ^^^^^^^
 
@@ -160,28 +132,10 @@ LOGIN_TOKEN
 
    Settings identifier for the currently cached login token for the user. May be missing or expired. Expiration is tracked using \ :java:ref:`API.TOKEN_REFRESH`\ .
 
-NEW_NETWORK
-^^^^^^^^^^^
-
-.. java:field:: static final long NEW_NETWORK
-   :outertype: API
-
-NO_JOINED_NETWORKS
-^^^^^^^^^^^^^^^^^^
-
-.. java:field:: static final boolean NO_JOINED_NETWORKS
-   :outertype: API
-
 NO_MAX_PAGINATION
 ^^^^^^^^^^^^^^^^^
 
 .. java:field:: static final String NO_MAX_PAGINATION
-   :outertype: API
-
-PERSONAL_NETWORKS
-^^^^^^^^^^^^^^^^^
-
-.. java:field:: static final String PERSONAL_NETWORKS
    :outertype: API
 
 SELECTED_NETWORK
@@ -234,29 +188,30 @@ USER_EMAIL
 
    Identifier for the currently-signed-in user's email. If no user is signed-in, this key should be removed from the preferences Example: \ ``settings.getLong(API.USER_EMAIL, -1)``\ .
 
-mDb
-^^^
-
-.. java:field:: static CMDatabase mDb
-   :outertype: API
-
-   Database to use for data persistence. Not currently used.
-
-reqCounter
-^^^^^^^^^^
-
-.. java:field:: static int reqCounter
-   :outertype: API
-
-   Counter to ensure that we don't close the database while another thread is using it. Counts the number of threads currently using the database. Not currently used.
-
 Methods
 -------
-closeDatabase
-^^^^^^^^^^^^^
+genBasicAuth
+^^^^^^^^^^^^
 
-.. java:method:: static void closeDatabase()
+.. java:method:: static String genBasicAuth(String email, String password)
    :outertype: API
+
+   Generate from a username/email and password the string to put in the header of a request as the value of the \ ``Authorization``\  token in order to perform Basic Authentication. For example: \ ``headers.put("Authorization", genBasicAuth(email, password))``\ . A login token can be used if it is passed as the \ ``email``\ , in which case the \ ``password``\  is ignored by the server.
+
+   :param email: Email or username of account to login as; can also be a login token
+   :param password: Password to login with
+   :return: Value that should be passed in the header as the value of \ ``Authorization``\
+
+genBasicAuth
+^^^^^^^^^^^^
+
+.. java:method:: static String genBasicAuth(String token)
+   :outertype: API
+
+   Generate from a login token the string to put in the header of a request as the value of the \ ``Authorization``\  token in order to perform Basic Authentication. For example: \ ``headers.put("Authorization", genBasicAuth(token))``\ .
+
+   :param token: Login token to authenticate to server
+   :return: Value that should be passed in the header as the value of \ ``Authorization``\
 
 getCredentials
 ^^^^^^^^^^^^^^
@@ -267,10 +222,4 @@ getCredentials
    Use this method to append our credentials to our server requests. For now, we are using a static API key. In the future, we are going to want to pass session tokens.
 
    :return: credentials string to be appended to request url as a param.
-
-loadAppDatabase
-^^^^^^^^^^^^^^^
-
-.. java:method:: public static void loadAppDatabase(Context context)
-   :outertype: API
 

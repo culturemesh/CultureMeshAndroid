@@ -9,7 +9,6 @@ org.codethechange.culturemesh
    API
    API-Get
    API-Get-LoginResponse
-   API-InstantiationListener
    API-Post
    API-Put
    AboutActivity
@@ -21,7 +20,6 @@ org.codethechange.culturemesh
    CreateEventActivity-TimePickerFragment
    CreatePostActivity
    Credentials
-   DatabaseTest
    DrawerActivity
    DrawerActivity-WaitForSubscribedList
    ExploreBubblesOpenGLActivity

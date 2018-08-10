@@ -94,7 +94,7 @@ onCreateView
    Create the displayed fragment.
 
    :param inflater: Creates the user interface from \ :java:ref:`R.layout.fragment_find_location`\
-   :param container: TODO: What is this?
+   :param container: Parent container to attach inflated \ :java:ref:`View`\  to
    :param savedInstanceState: Previous state that is not used.
    :return: The inflated view to display.
 

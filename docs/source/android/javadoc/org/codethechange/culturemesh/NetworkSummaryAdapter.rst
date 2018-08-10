@@ -49,7 +49,7 @@ getItemCount
 .. java:method:: @Override public int getItemCount()
    :outertype: NetworkSummaryAdapter
 
-   Get the number of \ :java:ref:`Network`\ s are stored in the list
+   Get the number of \ :java:ref:`Network`\ s that are stored in the list
 
    :return: Number of items in the list
 

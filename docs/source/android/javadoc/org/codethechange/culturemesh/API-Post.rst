@@ -1,5 +1,3 @@
-.. java:import:: android.arch.persistence.room Room
-
 .. java:import:: android.content Context
 
 .. java:import:: android.content SharedPreferences
@@ -26,25 +24,11 @@
 
 .. java:import:: com.android.volley VolleyError
 
-.. java:import:: com.android.volley VolleyLog
-
 .. java:import:: com.android.volley.toolbox JsonArrayRequest
 
 .. java:import:: com.android.volley.toolbox JsonObjectRequest
 
 .. java:import:: com.android.volley.toolbox StringRequest
-
-.. java:import:: org.codethechange.culturemesh.data CMDatabase
-
-.. java:import:: org.codethechange.culturemesh.data EventDao
-
-.. java:import:: org.codethechange.culturemesh.data EventSubscription
-
-.. java:import:: org.codethechange.culturemesh.data EventSubscriptionDao
-
-.. java:import:: org.codethechange.culturemesh.data NetworkSubscription
-
-.. java:import:: org.codethechange.culturemesh.data NetworkSubscriptionDao
 
 .. java:import:: org.codethechange.culturemesh.models City
 
@@ -82,17 +66,11 @@
 
 .. java:import:: org.json JSONObject
 
-.. java:import:: java.io ByteArrayOutputStream
-
-.. java:import:: java.io IOException
-
 .. java:import:: java.io UnsupportedEncodingException
 
 .. java:import:: java.nio.charset StandardCharsets
 
 .. java:import:: java.util ArrayList
-
-.. java:import:: java.util Calendar
 
 .. java:import:: java.util Date
 

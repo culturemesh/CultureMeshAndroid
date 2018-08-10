@@ -222,12 +222,6 @@ getNearLocation
 
    :return: A \ :java:ref:`NearLocation`\  with the same IDs as the \ :java:ref:`Location`\  object whose method was called
 
-getNumUsers
-^^^^^^^^^^^
-
-.. java:method:: public long getNumUsers()
-   :outertype: Location
-
 getRegionId
 ^^^^^^^^^^^
 
