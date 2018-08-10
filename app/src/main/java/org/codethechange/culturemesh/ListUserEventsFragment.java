@@ -65,11 +65,9 @@ public class ListUserEventsFragment extends Fragment implements RVAdapter.OnItem
             @Override
             public void onResponse(NetworkResponse<ArrayList<Event>> response) {
                 if (response.fail()) {
-                    Log.i("stuff happened here??", "IDK");
                     response.showErrorDialog(getActivity());
                     emptyText.setText(getResources().getString(R.string.no_events));
                 } else {
-                    Log.i("Events", "Got events!" + response.getPayload().toString());
                     adapter.getNetPosts().addAll(response.getPayload());
                     adapter.notifyDataSetChanged();
                     if (rv.getAdapter().getItemCount() > 0) {

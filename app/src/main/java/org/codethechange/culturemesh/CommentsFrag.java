@@ -71,16 +71,6 @@ public class CommentsFrag extends Fragment {
         mLayoutManager = new LinearLayoutManager(activity);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        //get User info, this will be from SavedInstances from login or account
-        String fn = null;
-        String ln = null;
-        String email = null;
-        String un = null;
-        Network[] networks = null;
-
-        SharedPreferences settings = getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER,
-                Context.MODE_PRIVATE);
-
         Intent intent = getActivity().getIntent();
         long postID = intent.getLongExtra("postID", 0);
         API.Get.postReplies(queue, postID, new Response.Listener<NetworkResponse<ArrayList<PostReply>>>() {

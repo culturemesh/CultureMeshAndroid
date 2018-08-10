@@ -65,8 +65,8 @@ public class LoginActivity extends RedirectableAppCompatActivity {
                 new Response.Listener<NetworkResponse<API.Get.LoginResponse>>() {
             @Override
             public void onResponse(NetworkResponse<API.Get.LoginResponse> response) {
-                    if (response.fail()) {
-                        NetworkResponse.genErrorDialog(LoginActivity.this, R.string.authenticationError).show();
+                if (response.fail()) {
+                    NetworkResponse.genErrorDialog(LoginActivity.this, R.string.authenticationError).show();
                 } else {
                     SharedPreferences settings = getSharedPreferences(
                             API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
