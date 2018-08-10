@@ -23,6 +23,7 @@ import android.view.animation.Transformation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -137,6 +138,7 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
      * Progress bar for displaying the progress of network operations
      */
     ProgressBar progressBar;
+    FrameLayout loadingOverlay;
     /**
      * Queue for asynchronous tasks
      */
@@ -162,6 +164,8 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_specific_post);
+        loadingOverlay = findViewById(R.id.loading_overlay);
+        loadingOverlay.bringToFront();
         Intent intent = getIntent();
         final long postID = intent.getLongExtra("postID", 0);
         final long networkID = intent.getLongExtra("networkID", 0);
@@ -182,28 +186,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         images[2] = findViewById(R.id.attachedImage3);
         commentsRV = findViewById(R.id.commentsRV);
         mLayoutManager = (LinearLayoutManager) commentsRV.getLayoutManager();
-        commentsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            private boolean loading = true;
-            int pastVisiblesItems, visibleItemCount, totalItemCount;
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if(dy > 0) {
-                    visibleItemCount = mLayoutManager.getChildCount();
-                    totalItemCount = mLayoutManager.getItemCount();
-                    pastVisiblesItems = mLayoutManager.findFirstVisibleItemPosition();
-                    if (loading)
-                    {
-                        if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
-                        {
-                            loading = false;
-                            Log.v("...", "Last Item");
-                            fetchCommentsAtEnd(pastVisiblesItems);
-                            loading = true;
-                        }
-                    }
-                }
-            }
-        });
         commentField = findViewById(R.id.write_comment_text);
         boldButton = findViewById(R.id.comment_bold);
         italicButton = findViewById(R.id.comment_italic);
@@ -258,7 +240,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
         postButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: Check if valid string (nonempty)
                 String content = formatManager.toString();
                 if (content.length() <= 0) {
                     Snackbar.make(v, getResources().getString(R.string.cannot_write_empty),
@@ -343,8 +324,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                     timestamp.setText(post.getDatePosted());
                     username.setText(post.getAuthor().getUsername());
                     if (post.getImageLink() != null || post.getVideoLink() != null ) {
-                        //TODO: Figure out how to display videos
-                        //TODO: Figure out format for multiple pictures. Assuming separated by commas.
                         String[] links = post.getImageLink().split(",");
                         for (int j = 0;  j < links.length; j++) {
                             if (links[j] != null && links[j].length() > 0)
@@ -365,6 +344,9 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
                     personPhoto.setOnClickListener(viewUserProfile);
                     username.setOnClickListener(viewUserProfile);
                     personName.setOnClickListener(viewUserProfile);
+                    AnimationUtils.animateLoadingOverlay(loadingOverlay, View.GONE, 0, 300);
+                } else {
+                    response.showErrorDialog(SpecificPostActivity.this);
                 }
             }
         });
