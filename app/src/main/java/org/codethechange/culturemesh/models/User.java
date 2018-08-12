@@ -248,6 +248,7 @@ public class User implements Serializable {
                "username": "string",
                "first_name": "string",
                "last_name": "string",
+               "email": "string",
                "role": 0,
                "gender": "string",
                "about_me": "string",
@@ -268,6 +269,7 @@ public class User implements Serializable {
         json.put("username", username);
         json.put("first_name", firstName);
         json.put("last_name", lastName);
+        json.put("email", email);
         json.put("role", role);
         json.put("gender", gender);
         json.put("about_me", aboutMe);
