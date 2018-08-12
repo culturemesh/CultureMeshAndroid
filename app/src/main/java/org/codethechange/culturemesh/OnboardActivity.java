@@ -19,6 +19,8 @@ import java.util.List;
  */
 public class OnboardActivity extends AhoyOnboarderActivity {
 
+    private static final double ICON_SCALE = 0.7;
+
     /**
      * Generate onboarding pages and display them
      * @param savedInstanceState Previous state to restore from
@@ -27,13 +29,27 @@ public class OnboardActivity extends AhoyOnboarderActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Point size = new Point();
+        Display disp = getWindowManager().getDefaultDisplay();
+        disp.getSize(size);
+
+        int icon_dim = (int) Math.round(Math.min(size.x, size.y) * ICON_SCALE);
+
         List<AhoyOnboarderCard> pages = new ArrayList<>();
         pages.add(makeCard(getString(R.string.welcome), getString(R.string.cultureMesh_description),
-                R.drawable.logo_header, 500, 500));
+                R.drawable.logo_header, icon_dim, icon_dim));
         pages.add(makeCard(getString(R.string.networks), getString(R.string.networks_explain),
-                R.drawable.ic_people_outline_white_24px, 500, 500));
+                R.drawable.ic_people_outline_white_24px, icon_dim, icon_dim));
+        pages.add(makeCard("", getString(R.string.find_network_explain_1),
+                R.mipmap.ic_onboard_find_network_1_foreground, icon_dim, icon_dim));
+        pages.add(makeCard("", getString(R.string.find_network_explain_2),
+                R.mipmap.ic_onboard_find_network_2_foreground, icon_dim, icon_dim));
+        pages.add(makeCard("", getString(R.string.find_network_explain_3),
+                R.mipmap.ic_onboard_find_network_3_foreground, icon_dim, icon_dim));
+        pages.add(makeCard("", getString(R.string.find_network_explain_4),
+                R.mipmap.ic_onboard_find_network_4_foreground, icon_dim, icon_dim));
         pages.add(makeCard(getString(R.string.ready_question), getString(R.string.lets_start),
-                R.drawable.ic_public_black_24dp, 500, 500));
+                R.drawable.ic_public_black_24dp, icon_dim, icon_dim));
 
         setGradientBackground();
 
