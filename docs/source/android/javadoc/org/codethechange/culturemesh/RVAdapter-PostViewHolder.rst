@@ -34,6 +34,8 @@
 
 .. java:import:: java.util List
 
+.. java:import:: java.util Set
+
 RVAdapter.PostViewHolder
 ========================
 

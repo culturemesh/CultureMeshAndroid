@@ -24,6 +24,8 @@
 
 .. java:import:: android.os Handler
 
+.. java:import:: android.support.constraint ConstraintLayout
+
 .. java:import:: android.support.design.widget BottomSheetDialogFragment
 
 .. java:import:: android.support.design.widget FloatingActionButton
@@ -35,6 +37,8 @@
 .. java:import:: android.support.v7.widget LinearLayoutManager
 
 .. java:import:: android.support.v7.widget RecyclerView
+
+.. java:import:: android.util Log
 
 .. java:import:: android.view View
 
@@ -54,7 +58,13 @@
 
 .. java:import:: android.widget Button
 
+.. java:import:: android.widget FrameLayout
+
 .. java:import:: android.widget ImageButton
+
+.. java:import:: android.widget ProgressBar
+
+.. java:import:: android.widget RelativeLayout
 
 .. java:import:: android.widget TextView
 
@@ -102,6 +112,12 @@ FILTER_LABEL
 ^^^^^^^^^^^^
 
 .. java:field:: final String FILTER_LABEL
+   :outertype: TimelineActivity
+
+joinNetwork
+^^^^^^^^^^^
+
+.. java:field::  Button joinNetwork
    :outertype: TimelineActivity
 
 settings
@@ -211,14 +227,4 @@ onSwipeRefresh
    :outertype: TimelineActivity
 
    Restart activity to refresh the feed
-
-refreshPosts
-^^^^^^^^^^^^
-
-.. java:method:: public boolean refreshPosts()
-   :outertype: TimelineActivity
-
-   Returns true upon successful retrieval, returns false if issue/no connection. Not used or complete.
-
-   :return: Always returns \ ``true``\
 

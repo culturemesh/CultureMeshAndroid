@@ -44,6 +44,8 @@
 
 .. java:import:: android.widget Button
 
+.. java:import:: android.widget FrameLayout
+
 .. java:import:: android.widget ImageButton
 
 .. java:import:: android.widget ImageView
@@ -161,6 +163,12 @@ images
    :outertype: SpecificPostActivity
 
    Array of images associated with the \ :java:ref:`Post`\
+
+loadingOverlay
+^^^^^^^^^^^^^^
+
+.. java:field::  FrameLayout loadingOverlay
+   :outertype: SpecificPostActivity
 
 personName
 ^^^^^^^^^^

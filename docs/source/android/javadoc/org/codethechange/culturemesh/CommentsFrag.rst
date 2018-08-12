@@ -34,6 +34,8 @@
 
 .. java:import:: org.codethechange.culturemesh.models Network
 
+.. java:import:: org.codethechange.culturemesh.models Post
+
 .. java:import:: org.codethechange.culturemesh.models PostReply
 
 .. java:import:: java.util ArrayList

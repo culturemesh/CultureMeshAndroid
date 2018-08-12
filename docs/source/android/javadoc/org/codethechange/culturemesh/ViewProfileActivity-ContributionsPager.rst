@@ -16,6 +16,10 @@
 
 .. java:import:: android.support.v7.widget Toolbar
 
+.. java:import:: android.view View
+
+.. java:import:: android.widget FrameLayout
+
 .. java:import:: android.widget ImageView
 
 .. java:import:: android.widget TextView

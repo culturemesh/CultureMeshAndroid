@@ -26,6 +26,8 @@
 
 .. java:import:: com.android.volley.toolbox Volley
 
+.. java:import:: com.squareup.picasso Picasso
+
 .. java:import:: org.codethechange.culturemesh.models FeedItem
 
 .. java:import:: org.codethechange.culturemesh.models Post

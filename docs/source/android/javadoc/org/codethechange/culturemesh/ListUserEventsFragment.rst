@@ -8,6 +8,8 @@
 
 .. java:import:: android.support.v7.widget RecyclerView
 
+.. java:import:: android.util Log
+
 .. java:import:: android.view LayoutInflater
 
 .. java:import:: android.view View

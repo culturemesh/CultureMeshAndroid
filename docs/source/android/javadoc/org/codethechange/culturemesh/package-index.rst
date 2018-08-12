@@ -12,6 +12,7 @@ org.codethechange.culturemesh
    API-Post
    API-Put
    AboutActivity
+   AnimationUtils
    ApplicationStart
    ChooseNearLocationActivity
    CommentsFrag
@@ -55,6 +56,7 @@ org.codethechange.culturemesh
    SearchAdapter-HolderItem
    SettingsActivity
    SpecificPostActivity
+   StartActivity
    TimelineActivity
    TimelineActivity-FilterDialogFragment
    UsersListAdapter
