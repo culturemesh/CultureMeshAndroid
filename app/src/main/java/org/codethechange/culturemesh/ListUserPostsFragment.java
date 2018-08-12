@@ -16,6 +16,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
+import com.squareup.picasso.Picasso;
 
 import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Post;
@@ -80,26 +81,28 @@ public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemC
         //Say it's empty.
         ArrayList<FeedItem> posts = new ArrayList<>();
         queue = Volley.newRequestQueue(getActivity());
-        RVAdapter adapter = new RVAdapter(posts, this, getActivity());
+        final RVAdapter adapter = new RVAdapter(posts, this, getActivity());
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
         emptyText = root.findViewById(R.id.empty_text);
-        emptyText.setText(getResources().getString(R.string.no_posts));
+        emptyText.setText(getResources().getString(R.string.loading));
         API.Get.userPosts(queue, getArguments().getLong(SELECTED_USER, -1), new Response.Listener<NetworkResponse<ArrayList<Post>>>() {
 
             @Override
             public void onResponse(NetworkResponse<ArrayList<Post>> response) {
-                RVAdapter adapter = (RVAdapter) rv.getAdapter();
-                //Add the posts to the feed.
-                adapter.getNetPosts().addAll(response.getPayload());
-                //However, they don't have their comments yet. Let's add their comments.
-                for (FeedItem post : adapter.getNetPosts()) {
-                    //TODO: Fetch comments for this post.
-                }
-                rv.getAdapter().notifyDataSetChanged();
-                if (rv.getAdapter().getItemCount() > 0) {
-                    //Hide empty text.
-                    emptyText.setVisibility(View.GONE);
+                if (!response.fail()) {
+                    //Add the posts to the feed.
+                    adapter.getNetPosts().addAll(response.getPayload());
+                    //However, they don't have their comments yet. Let's add their comments.
+                    rv.getAdapter().notifyDataSetChanged();
+                    if (rv.getAdapter().getItemCount() > 0) {
+                        //Hide empty text.
+                        emptyText.setVisibility(View.GONE);
+                    } else {
+                        emptyText.setText(getResources().getString(R.string.no_posts));
+                    }
+                } else {
+                    response.showErrorDialog(getActivity());
                 }
             }
         });

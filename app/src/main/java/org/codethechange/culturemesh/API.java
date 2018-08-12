@@ -315,7 +315,6 @@ class API {
                             return;
                         }
                     }
-                    listener.onResponse(new NetworkResponse<>(nets));
                 }
             }, new Response.ErrorListener() {
                 @Override

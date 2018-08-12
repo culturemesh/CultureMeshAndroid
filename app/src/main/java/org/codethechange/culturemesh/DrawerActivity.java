@@ -82,6 +82,7 @@ public class DrawerActivity extends AppCompatActivity
      * ID of the current {@link User}
      */
     protected long currentUser;
+    protected Toolbar mToolbar;
 
     /**
      * Reference to the current activity
@@ -116,7 +117,7 @@ public class DrawerActivity extends AppCompatActivity
         super.setContentView(fullLayout);
         queue = Volley.newRequestQueue(getApplicationContext());
         //All drawer activities must have a toolbar with id "action_bar!"
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.action_bar);
+        mToolbar = (Toolbar) findViewById(R.id.action_bar);
         setSupportActionBar(mToolbar);
         //Set Up Navigation Drawer
         //Setup Navigation Drawer Layout
@@ -237,6 +238,7 @@ public class DrawerActivity extends AppCompatActivity
                         }
                         navView.setNavigationItemSelectedListener(DrawerActivity.this);
                         if (thisActivity instanceof WaitForSubscribedList) {
+                            Log.i("DrawerActivity", "calling onSubscribeListFinish");
                             ((WaitForSubscribedList) thisActivity).onSubscribeListFinish();
                         }
                     }

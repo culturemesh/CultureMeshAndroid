@@ -6,11 +6,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
+        <include
+            android:id="@+id/loading_overlay"
+            layout="@layout/loading_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toTopOf="parent" />
         <Button
             android:id="@+id/join_network_button"
             android:layout_width="0dp"
