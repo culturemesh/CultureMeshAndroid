@@ -295,18 +295,23 @@ public class DrawerActivity extends AppCompatActivity
         if (id == R.id.nav_explore) {
             Intent startExplore = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
             startActivity(startExplore);
+            finish();
         } else if (id == R.id.nav_join_network) {
             Intent startFindNet = new Intent(getApplicationContext(), FindNetworkActivity.class);
             startActivity(startFindNet);
+            finish();
         } else if (id == R.id.nav_about) {
             Intent startAbout = new Intent(getApplicationContext(), AboutActivity.class);
             startActivity(startAbout);
+            finish();
         } else if (id == R.id.nav_help) {
             Intent startHelp = new Intent(getApplicationContext(), HelpActivity.class);
             startActivity(startHelp);
+            // At the end, user is returned to here, so no finish()
         } else if (id == R.id.nav_settings) {
             Intent startHelp = new Intent(getApplicationContext(), SettingsActivity.class);
             startActivity(startHelp);
+            finish();
         } else if (id == R.id.nav_logout) {
             SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
             LoginActivity.setLoggedOut(settings);
