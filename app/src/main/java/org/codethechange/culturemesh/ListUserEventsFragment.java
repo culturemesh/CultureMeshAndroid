@@ -118,7 +118,7 @@ public class ListUserEventsFragment extends Fragment implements RVAdapter.OnItem
         } catch(ClassCastException e) {
             //I don't think we have commenting support for events??
         } catch (NullPointerException e) {
-            Toast.makeText(getActivity(), "Cannot open post", Toast.LENGTH_LONG).show();
+            NetworkResponse.genErrorDialog(getActivity(), R.string.error_opening_post);
         }
     }
 
