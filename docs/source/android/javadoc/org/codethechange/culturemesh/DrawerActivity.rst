@@ -116,6 +116,12 @@ mDrawerToggle
 
    Toggles whether the drawer is visible
 
+mToolbar
+^^^^^^^^
+
+.. java:field:: protected Toolbar mToolbar
+   :outertype: DrawerActivity
+
 navView
 ^^^^^^^
 
