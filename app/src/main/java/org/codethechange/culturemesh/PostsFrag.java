@@ -1,10 +1,13 @@
 package org.codethechange.culturemesh;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -79,7 +82,6 @@ public class PostsFrag extends Fragment {
         //Get network id
         selectedNetwork = settings.getLong(API.SELECTED_NETWORK, 1);
         //We generalize posts/events to be feed items for polymorphism.
-        //TODO: Consider error checking for when getPayload is null.
         final ArrayList<FeedItem> feedItems = new ArrayList<FeedItem>();
         mAdapter = new RVAdapter(feedItems, new RVAdapter.OnItemClickListener() {
             @Override
@@ -95,11 +97,87 @@ public class PostsFrag extends Fragment {
                         NetworkResponse.genErrorDialog(getActivity(), R.string.error_opening_post);
                     }
                 } else if (item instanceof Event) {
+                    // If they aren't currently attending the event, we'll ask them if they want to attend.
+                    // If are currently attending, we'll ask if they want to leave.
+                    final Event event = (Event) item;
+                    boolean attending = mAdapter.getUserAttendingEvents().contains(event.id);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    final Resources resources = getResources();
+                    String titleMessage, message,
+                            posButtonMessage = resources.getString(R.string.ok),
+                            negButtonMessage = resources.getString(R.string.cancel);
+                    DialogInterface.OnClickListener posButtonListener,
+                            negButtonListener = new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
+                                }
+                            };
+                    if (attending) {
+                        titleMessage = resources.getString(R.string.leave_event);
+                        message = resources.getString(R.string.would_you_like_to_leave_this_event);
+                        posButtonListener = new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                API.Post.leaveEvent(queue, event.id, settings, new Response.Listener<NetworkResponse<String>>() {
+                                    @Override
+                                    public void onResponse(NetworkResponse<String> response) {
+                                        if (response.fail()) {
+                                            response.showErrorDialog(getActivity());
+                                        } else {
+                                            NetworkResponse.genSuccessDialog(getActivity(),
+                                                    R.string.left_event).show();
+                                        }
 
+                                    }
+                                });
+                            }
+                        };
+                    } else {
+                        titleMessage = resources.getString(R.string.join_event);
+                        message = resources.getString(R.string.would_you_like_to_join_this_event);
+                        posButtonListener = new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                API.Post.joinEvent(queue, event.id, settings, new Response.Listener<NetworkResponse<String>>() {
+                                    @Override
+                                    public void onResponse(NetworkResponse<String> response) {
+                                        if (response.fail()) {
+                                            response.showErrorDialog(getActivity());
+                                        } else {
+                                            NetworkResponse.genSuccessDialog(getActivity(),
+                                                    R.string.joined_event).show();
+                                        }
+                                    }
+                                });
+                            }
+                        };
+                    }
+                    builder.setTitle(titleMessage)
+                    .setMessage(message)
+                    .setPositiveButton(posButtonMessage, posButtonListener)
+                    .setNegativeButton(negButtonMessage, negButtonListener)
+                    .create().show();
                 }
-
             }
         }, getActivity().getApplicationContext());
+        // We will want to know which of these events the user is attending, which affects how
+        // the view is displayed.
+        API.Get.userEventsForNetwork(queue,
+                getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
+                selectedNetwork, new Response.Listener<NetworkResponse<ArrayList<Event>>>() {
+                    @Override
+                    public void onResponse(NetworkResponse<ArrayList<Event>> response) {
+                        if (response.fail()){
+                            response.showErrorDialog(getActivity());
+                        } else {
+                            for (Event event: response.getPayload()){
+                                mAdapter.getUserAttendingEvents().add(event.id);
+                            }
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    }
+        });
         mRecyclerView.setAdapter(mAdapter);
         fetchNewPage(new Response.Listener<Void>() {
             @Override
@@ -107,6 +185,7 @@ public class PostsFrag extends Fragment {
                 //This is really meant for TimelineActivity. We don't do anything here.
             }
         });
+
         return rootView;
     }
 
@@ -138,23 +217,6 @@ public class PostsFrag extends Fragment {
                     listener.onResponse(null);
                 }
             });
-            // We will want to which of these events the user is attending, which affects how
-            // the view is displayed.
-            API.Get.userEventsForNetwork(queue,
-                    getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
-                    selectedNetwork, new Response.Listener<NetworkResponse<ArrayList<Event>>>() {
-                        @Override
-                        public void onResponse(NetworkResponse<ArrayList<Event>> response) {
-                            if (response.fail()){
-                                response.showErrorDialog(getActivity());
-                            } else {
-                                for (Event event: response.getPayload()){
-                                    mAdapter.getUserAttendingEvents().add(event.id);
-                                }
-                                mAdapter.notifyDataSetChanged();
-                            }
-                        }
-                    });
         }
         if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_NATIVE, true)) {
             // If posts aren't filtered out, add them to array list.

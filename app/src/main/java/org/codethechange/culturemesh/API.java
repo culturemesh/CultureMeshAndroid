@@ -439,7 +439,7 @@ class API {
                     } else {
                         final String token = response.getPayload();
                         JsonArrayRequest req = new JsonArrayRequest(API_URL_BASE
-                                + "event/userEventsForNetwork/" + networkId + "?" + getCredentials(), new Response.Listener<JSONArray>() {
+                                + "event/currentUserEventsByNetwork/" + networkId + "?" + getCredentials(), new Response.Listener<JSONArray>() {
                             @Override
                             public void onResponse(JSONArray response) {
                                 ArrayList<Event> events = new ArrayList<>();
@@ -1251,14 +1251,14 @@ class API {
          * Add a user to an existing event. This operation requires authentication, so the user must
          * be logged in.
          * @param queue Queue to which the asynchronous task will be added
-         * @param userId ID of the user to add to the event
+         * @param settings {@link SharedPreferences} instance so we can get the token.
          * @param eventId ID of the event to add the user to
          * @param listener Listener whose onResponse method will be called when the operation completes
          */
-        static void addUserToEvent(final RequestQueue queue, final long userId, final long eventId,
+        static void joinEvent(final RequestQueue queue, final long eventId,
                               SharedPreferences settings,
                               final Response.Listener<NetworkResponse<String>> listener) {
-            emptyModel(queue, API_URL_BASE + "user/" + userId + "/addToEvent/" + eventId + "?" +
+            emptyModel(queue, API_URL_BASE + "user/joinEvent/" + eventId + "?role=guest&" +
                     getCredentials(), "API.Post.addUserToEvent", Request.Method.POST, settings,
                     listener);
         }
@@ -1276,6 +1276,19 @@ class API {
             emptyModel(queue, API_URL_BASE + "user/joinNetwork/" + networkId +
                     "?" + getCredentials(), "API.Post.joinNetwork", Request.Method.POST,
                     settings, listener);
+        }
+
+        /**
+         * Removes user from event subscription listing.
+         * @param queue Queue to which network request will be added.
+         * @param eventId id of event to remove user from.
+         * @param settings {@link SharedPreferences} instance that stores token.
+         * @param listener Listener whose onResponse will be called when the operation completes.
+         */
+        static void leaveEvent(final RequestQueue queue, final long eventId, SharedPreferences settings,
+                               final Response.Listener<NetworkResponse<String>> listener) {
+            emptyModel(queue, API_URL_BASE+"user/leaveEvent/"+ eventId + "?" + getCredentials(),
+                    "API.Post.leaveEvent", Request.Method.POST, settings, listener);
         }
 
         /**

@@ -261,7 +261,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
             }
         });
     }
-    
+
     /**
      * Restart activity to refresh the feed
      */
