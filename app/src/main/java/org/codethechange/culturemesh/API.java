@@ -418,6 +418,43 @@ class API {
             queue.add(req);
         }
 
+        static void userEventsForNetwork(final RequestQueue queue, SharedPreferences settings, final long networkId,
+                                         final Response.Listener<NetworkResponse<ArrayList<Event>>> listener) {
+            Get.loginToken(queue, settings, new Response.Listener<NetworkResponse<String>>() {
+                @Override
+                public void onResponse(NetworkResponse<String> response) {
+                    if (response.fail()) {
+                        NetworkResponse<ArrayList<Event>> errorResponse =
+                                new NetworkResponse<>(true, response.getMessageID());
+                        errorResponse.setAuthFailed(response.isAuthFailed());
+                        listener.onResponse(errorResponse);
+                    } else {
+                        final String token = response.getPayload();
+                        JsonArrayRequest req = new JsonArrayRequest(API_URL_BASE
+                                + "event/userEventsForNetwork/" + networkId + "?" + getCredentials(), new Response.Listener<JSONArray>() {
+                            @Override
+                            public void onResponse(JSONArray response) {
+                                //TODO
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                //TODO
+                            }
+                        }){
+                            @Override
+                            public Map<String, String> getHeaders() {
+                                Map<String,String> headers = new HashMap<>();
+                                headers.put("Authorization", genBasicAuth(token));
+                                return headers;
+                            }
+                        };
+                        queue.add(req);
+                    }
+                }
+            });
+        }
+
         /**
          * Get the {@link Network} corresponding to the provided ID
          * @param queue Queue to which the asynchronous task to get the {@link Network} will be added

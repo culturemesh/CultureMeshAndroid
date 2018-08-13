@@ -347,6 +347,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             if (pvh.isPost()) {
                 //Let's make all post-related stuff gone.
                 pvh.hidePostViews();
+                // Check if user joined event.
                 pvh.personPhoto.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_event_white_24px));
             }
             pvh.eventTitle.setText(event.getTitle());

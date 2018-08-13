@@ -13,14 +13,12 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -32,7 +30,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -233,7 +230,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         LinearLayoutManager mLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
         //check if at end of posts
         postsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            int pastVisiblesItems, visibleItemCount, totalItemCount;
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 // Required to override, but nothing here.
@@ -371,7 +367,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
      */
     @Override
     public void onSubscribeListFinish() {
-        Log.i("onSubscribeListFinish", "onSubscribe called");
         //Check if the user is subscribed or not this network.
         if (subscribedNetworkIds.contains(selectedNetwork)) {
             //We are subscribed! Thus, the user can write posts an events. Let's make sure they have
