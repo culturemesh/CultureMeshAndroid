@@ -20,6 +20,7 @@ import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +37,15 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
      */
     public List<FeedItem> getNetPosts() {
         return netPosts;
+    }
+
+    /**
+     * Get the events in this network that the user is attending, which affects
+     * some aspects of the event UI.
+     * @return a set of the ids of the events.
+     */
+    public Set<Long> getUserAttendingEvents() {
+        return userAttendingEvents;
     }
 
     /**
@@ -256,6 +266,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
         this.netPosts = netPosts;
         this.context = context;
         this.listener = listener;
+        userAttendingEvents = new HashSet<Long>();
     }
 
     /**
@@ -348,7 +359,13 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
                 //Let's make all post-related stuff gone.
                 pvh.hidePostViews();
                 // Check if user joined event.
-                pvh.personPhoto.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_event_white_24px));
+                boolean attending = userAttendingEvents.contains(event.id);
+                if (attending) {
+                    pvh.personPhoto.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star));
+                } else {
+                    pvh.personPhoto.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_event_white_24px));
+                }
+
             }
             pvh.eventTitle.setText(event.getTitle());
             pvh.eventLocation.setText(event.getAddress());

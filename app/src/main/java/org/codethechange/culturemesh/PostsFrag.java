@@ -138,6 +138,23 @@ public class PostsFrag extends Fragment {
                     listener.onResponse(null);
                 }
             });
+            // We will want to which of these events the user is attending, which affects how
+            // the view is displayed.
+            API.Get.userEventsForNetwork(queue,
+                    getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
+                    selectedNetwork, new Response.Listener<NetworkResponse<ArrayList<Event>>>() {
+                        @Override
+                        public void onResponse(NetworkResponse<ArrayList<Event>> response) {
+                            if (response.fail()){
+                                response.showErrorDialog(getActivity());
+                            } else {
+                                for (Event event: response.getPayload()){
+                                    mAdapter.getUserAttendingEvents().add(event.id);
+                                }
+                                mAdapter.notifyDataSetChanged();
+                            }
+                        }
+                    });
         }
         if (settings.getBoolean(TimelineActivity.FILTER_CHOICE_NATIVE, true)) {
             // If posts aren't filtered out, add them to array list.

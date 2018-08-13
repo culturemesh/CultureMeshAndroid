@@ -418,6 +418,14 @@ class API {
             queue.add(req);
         }
 
+
+        /**
+         * Get the {@link Event}s a {@link User} is subscribed to for a given {@link Network}.
+         * @param queue Queue to which the asynchronous task is added.
+         * @param settings SharedPreferences instance storing the token.
+         * @param networkId the id of the {@link} Network of interest.
+         * @param listener The response listener to be called when the request completes.
+         */
         static void userEventsForNetwork(final RequestQueue queue, SharedPreferences settings, final long networkId,
                                          final Response.Listener<NetworkResponse<ArrayList<Event>>> listener) {
             Get.loginToken(queue, settings, new Response.Listener<NetworkResponse<String>>() {
@@ -434,12 +442,22 @@ class API {
                                 + "event/userEventsForNetwork/" + networkId + "?" + getCredentials(), new Response.Listener<JSONArray>() {
                             @Override
                             public void onResponse(JSONArray response) {
-                                //TODO
+                                ArrayList<Event> events = new ArrayList<>();
+                                for (int i = 0; i < response.length(); i++) {
+                                    try {
+                                        events.add(new Event(response.getJSONObject(i)));
+                                    } catch (JSONException e) {
+                                        listener.onResponse(new NetworkResponse<ArrayList<Event>>(true, R.string.network_error));
+                                        e.printStackTrace();
+                                        return;
+                                    }
+                                }
+                                listener.onResponse(new NetworkResponse<ArrayList<Event>>(events));
                             }
                         }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                //TODO
+                                listener.onResponse(new NetworkResponse<ArrayList<Event>>(true, R.string.network_error));
                             }
                         }){
                             @Override

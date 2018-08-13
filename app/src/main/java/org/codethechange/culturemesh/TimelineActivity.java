@@ -50,16 +50,24 @@ import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
  */
 public class TimelineActivity extends DrawerActivity implements DrawerActivity.WaitForSubscribedList{
 
-    // TODO: Document this
+    /**
+     * The tag for FragmentManager to know we're opening the filter dialog.
+     */
     final String FILTER_LABEL = "fl";
 
-    // TODO: Document this
+    /**
+     * The ey in SharedPreferences for determining whether to dispaly posts in the feed.
+     */
     final static String FILTER_CHOICE_NATIVE = "fcn";
 
-    // TODO: Document this
+    /**
+     * The key in SharedPreferences for determining whether to display events in the feed.
+     */
     final static String FILTER_CHOICE_EVENTS = "fce";
 
-    // TODO: Document this
+    /**
+     * The tag for showing that we're passing in the network to a new activity.
+     */
     final static String BUNDLE_NETWORK = "bunnet";
 
     /**
@@ -253,25 +261,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
             }
         });
     }
-
-    /**
-     * Load more posts. Not currently used or finished.
-     * @param currItem Not used.
-     */
-    public void fetchPostsAtEnd(int currItem) {
-        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
-
-        //TODO: load extra posts by loadSize amount
-
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-            }
-        }, 1000);
-    }
-
+    
     /**
      * Restart activity to refresh the feed
      */

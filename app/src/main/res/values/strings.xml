@@ -24,9 +24,9 @@
     <string name="near_location_text">Near:</string>
     <string name="title_activity_choose_near_location">Choose Near Location</string>
     <string name="join_prompt">JOIN</string>
-    <string name="filter_posts">Filter Posts</string>
+    <string name="filter_posts">Display in Feed</string>
     <string-array name="filter_choices">
-        <item>Native Posts</item>
+        <item>Native</item>
         <item>Events</item>
     </string-array>
     <string name="ok">OK</string>
