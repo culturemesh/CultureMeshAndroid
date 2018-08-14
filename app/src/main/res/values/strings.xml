@@ -126,28 +126,27 @@
     <string name="leave_network_question">Are you sure you want to leave this network?</string>
     <string name="update_profile">Update Profile</string>
     <string name="updated_profile">Updated Profile!</string>
-    <string name="culturemesh_mission">
-
-        "CultureMesh's Mission\n\n"
-
-        "CultureMesh is building networks to match the real-world dynamics of people living, working "
-        and traveling outside of their home countries to knit the diverse fabrics of our world together."
-
-    </string>
     <string name="about_body" tools:ignore="TypographyOther">
 
-        "Copyright (c) 2017-2018 CultureMesh\n"
-        "https://culturemesh.com\n\n"
-        <!-- TODO: The cultureMesh website link should be clickable -->
+        "<b>About Culturemesh\n\n</b>"
 
-        "This app was written by Stanford Code the Change, a student group that partners with "
-        "non-profits to work on year-long software projects for social good.\n"
-        "https://codethechange.stanford.edu\n\n"
+        "CultureMesh is building networks to match the real-world dynamics of people living, working "
+        "and traveling outside of their home countries to knit the diverse fabrics of our world together."
+        "See https://culturemesh.com for more information.\n\n"
 
-        "Attributions for Third-Party Libraries:\n"
-        "=======================================\n\n"
+        "<b>About Code the Change at Stanford\n\n</b>"
 
-        "BubblePicker Copyright (c) 2017 Irina Galata\n\n"
+        "This app was written on behalf of CultureMesh by Code the Change at Stanford, a student "
+        "group that partners with non-profits to work on software projects for social good.\n"
+        "See https://codethechange.stanford.edu for details.\n\n"
+
+        "Copyright (c) 2017-2018 CultureMesh\n\n"
+
+        "<b>Acknowledgements:\n\n</b>"
+
+        "This app relies on free and open source work in the following projects:\n\n"
+
+        "<b>BubblePicker</b> Copyright (c) 2017 Irina Galata\n\n"
 
         "Permission is hereby granted, free of charge, to any person obtaining a copy of this "
         "software and associated documentation files (the "Software"), to deal in the Software without "
@@ -165,9 +164,7 @@
         "OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER "
         "DEALINGS IN THE SOFTWARE.\n\n"
 
-        "--------------------------------------\n\n"
-
-        "Ahoy Onboarder Copyright (C) 2016 Code My Brains Out\n\n"
+        "<b>Ahoy Onboarder</b> Copyright (C) 2016 Code My Brains Out\n\n"
 
         "Licensed under the Apache License, Version 2.0 (the "License"); "
         "you may not use this file except in compliance with the License. "
@@ -181,7 +178,7 @@
         "See the License for the specific language governing permissions and "
         "limitations under the License.\n\n"
 
-        "This code was used by importing it and using its API. Its source code was not altered.\n\n"
+        "<i>This code was used by importing it and using its API without altering its source code.</i>\n\n"
 
     </string>
     <string name="title_activity_settings">Edit Profile</string>
