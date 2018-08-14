@@ -111,7 +111,6 @@ public class ViewUsersModalSheetFragment extends BottomSheetDialogFragment{
         API.Get.networkUsers(queue, Long.parseLong(getArguments().getString(NETWORK_ID)), new Response.Listener<NetworkResponse<ArrayList<User>>>() {
             @Override
             public void onResponse(NetworkResponse<ArrayList<User>> response) {
-                Log.i("ViewUsers", "in onResponse" + response.getPayload().size());
                 if (response.fail()) {
                     response.showErrorDialog(getActivity());
                 } else {

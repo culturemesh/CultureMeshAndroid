@@ -13,14 +13,12 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -32,7 +30,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -53,16 +50,24 @@ import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
  */
 public class TimelineActivity extends DrawerActivity implements DrawerActivity.WaitForSubscribedList{
 
-    // TODO: Document this
+    /**
+     * The tag for FragmentManager to know we're opening the filter dialog.
+     */
     final String FILTER_LABEL = "fl";
 
-    // TODO: Document this
+    /**
+     * The key in SharedPreferences for determining whether to display posts in the feed.
+     */
     final static String FILTER_CHOICE_NATIVE = "fcn";
 
-    // TODO: Document this
+    /**
+     * The key in SharedPreferences for determining whether to display events in the feed.
+     */
     final static String FILTER_CHOICE_EVENTS = "fce";
 
-    // TODO: Document this
+    /**
+     * The tag for showing that we're passing in the network to a new activity.
+     */
     final static String BUNDLE_NETWORK = "bunnet";
 
     /**
@@ -233,7 +238,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         LinearLayoutManager mLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
         //check if at end of posts
         postsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            int pastVisiblesItems, visibleItemCount, totalItemCount;
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 // Required to override, but nothing here.
@@ -256,24 +260,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                 }
             }
         });
-    }
-
-    /**
-     * Load more posts. Not currently used or finished.
-     * @param currItem Not used.
-     */
-    public void fetchPostsAtEnd(int currItem) {
-        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
-
-        //TODO: load extra posts by loadSize amount
-
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-            }
-        }, 1000);
     }
 
     /**
@@ -371,7 +357,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
      */
     @Override
     public void onSubscribeListFinish() {
-        Log.i("onSubscribeListFinish", "onSubscribe called");
         //Check if the user is subscribed or not this network.
         if (subscribedNetworkIds.contains(selectedNetwork)) {
             //We are subscribed! Thus, the user can write posts an events. Let's make sure they have

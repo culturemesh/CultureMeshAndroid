@@ -20,6 +20,7 @@ import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Post;
 import org.codethechange.culturemesh.models.PostReply;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +37,15 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
      */
     public List<FeedItem> getNetPosts() {
         return netPosts;
+    }
+
+    /**
+     * Get the events in this network that the user is attending, which affects
+     * some aspects of the event UI.
+     * @return a set of the ids of the events.
+     */
+    public Set<Long> getUserAttendingEvents() {
+        return userAttendingEvents;
     }
 
     /**
@@ -87,7 +97,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
          * Text fields for both {@link Post} and {@link Event} information
          */
         TextView personName, username, content, timestamp, eventTitle, comment1Name,
-                 comment1Text, comment2Name, comment2Text, viewMoreComments;
+                 comment1Text, comment2Name, comment2Text, viewMoreComments, attending;
 
         /**
          * Display images with the displayed list item
@@ -164,6 +174,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             comment2Text = itemView.findViewById(R.id.comment2_text);
             comment2Name = itemView.findViewById(R.id.comment2_name);
             viewMoreComments = itemView.findViewById(R.id.view_more_comments);
+            attending = itemView.findViewById(R.id.attending_string);
         }
 
         /**
@@ -220,6 +231,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             timestamp.setVisibility(View.VISIBLE);
             postTypePhoto.setVisibility(View.VISIBLE);
             viewMoreComments.setVisibility(View.VISIBLE);
+            attending.setVisibility(View.GONE);
         }
 
         /**
@@ -256,6 +268,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
         this.netPosts = netPosts;
         this.context = context;
         this.listener = listener;
+        userAttendingEvents = new HashSet<Long>();
     }
 
     /**
@@ -347,7 +360,15 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder> {
             if (pvh.isPost()) {
                 //Let's make all post-related stuff gone.
                 pvh.hidePostViews();
+                // Check if user joined event.
+                boolean isAttending = userAttendingEvents.contains(event.id);
                 pvh.personPhoto.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_event_white_24px));
+                if (isAttending) {
+                    //Show attending text.
+                    pvh.attending.setVisibility(View.VISIBLE);
+                } else {
+                    pvh.attending.setVisibility(View.GONE);
+                }
             }
             pvh.eventTitle.setText(event.getTitle());
             pvh.eventLocation.setText(event.getAddress());
