@@ -380,29 +380,6 @@ public class SpecificPostActivity extends AppCompatActivity implements FormatMan
     }
 
     /**
-     * Fetch the next comments after the bottom of the scrolling list has been reached
-     * @param currItem Current item in the list
-     */
-    public void fetchCommentsAtEnd(int currItem) {
-        //TODO: @Dylan: this causes nullpointer because
-        // this view is no where to be found...
-        // findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
-
-        //TODO: load extra posts by loadSize amount
-
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //TODO: @Dylan: this causes nullpointer because
-                // this view is no where to be found...
-                //findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-            }
-        }, 1000);
-
-    }
-
-    /**
      * This function animates the bottom view to expand up, allowing for a greater text field
      * as well as toggle buttons.
      */
