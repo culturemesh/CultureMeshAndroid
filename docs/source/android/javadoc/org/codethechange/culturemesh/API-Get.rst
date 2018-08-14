@@ -341,6 +341,19 @@ userEvents
    :param role: Either \ ``hosting``\  or \ ``attending``\
    :param listener: Listener whose \ ``onResponse``\  method is called with the results of the task
 
+userEventsForNetwork
+^^^^^^^^^^^^^^^^^^^^
+
+.. java:method:: static void userEventsForNetwork(RequestQueue queue, SharedPreferences settings, long networkId, Response.Listener<NetworkResponse<ArrayList<Event>>> listener)
+   :outertype: API.Get
+
+   Get the \ :java:ref:`Event`\ s a \ :java:ref:`User`\  is subscribed to for a given \ :java:ref:`Network`\ .
+
+   :param queue: Queue to which the asynchronous task is added.
+   :param settings: SharedPreferences instance storing the token.
+   :param networkId: the id of the \ :java:ref:`Network`\  of interest.
+   :param listener: The response listener to be called when the request completes.
+
 userID
 ^^^^^^
 

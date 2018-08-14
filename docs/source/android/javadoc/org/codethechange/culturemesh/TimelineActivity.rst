@@ -24,8 +24,6 @@
 
 .. java:import:: android.os Handler
 
-.. java:import:: android.support.constraint ConstraintLayout
-
 .. java:import:: android.support.design.widget BottomSheetDialogFragment
 
 .. java:import:: android.support.design.widget FloatingActionButton
@@ -37,8 +35,6 @@
 .. java:import:: android.support.v7.widget LinearLayoutManager
 
 .. java:import:: android.support.v7.widget RecyclerView
-
-.. java:import:: android.util Log
 
 .. java:import:: android.view View
 
@@ -61,8 +57,6 @@
 .. java:import:: android.widget FrameLayout
 
 .. java:import:: android.widget ImageButton
-
-.. java:import:: android.widget ProgressBar
 
 .. java:import:: android.widget RelativeLayout
 
@@ -96,11 +90,15 @@ BUNDLE_NETWORK
 .. java:field:: static final String BUNDLE_NETWORK
    :outertype: TimelineActivity
 
+   The tag for showing that we're passing in the network to a new activity.
+
 FILTER_CHOICE_EVENTS
 ^^^^^^^^^^^^^^^^^^^^
 
 .. java:field:: static final String FILTER_CHOICE_EVENTS
    :outertype: TimelineActivity
+
+   The key in SharedPreferences for determining whether to display events in the feed.
 
 FILTER_CHOICE_NATIVE
 ^^^^^^^^^^^^^^^^^^^^
@@ -108,11 +106,15 @@ FILTER_CHOICE_NATIVE
 .. java:field:: static final String FILTER_CHOICE_NATIVE
    :outertype: TimelineActivity
 
+   The key in SharedPreferences for determining whether to display posts in the feed.
+
 FILTER_LABEL
 ^^^^^^^^^^^^
 
 .. java:field:: final String FILTER_LABEL
    :outertype: TimelineActivity
+
+   The tag for FragmentManager to know we're opening the filter dialog.
 
 joinNetwork
 ^^^^^^^^^^^
@@ -153,16 +155,6 @@ createNoNetwork
    :outertype: TimelineActivity
 
    If the user has no selected network, direct them to \ :java:ref:`ExploreBubblesOpenGLActivity`\
-
-fetchPostsAtEnd
-^^^^^^^^^^^^^^^
-
-.. java:method:: public void fetchPostsAtEnd(int currItem)
-   :outertype: TimelineActivity
-
-   Load more posts. Not currently used or finished.
-
-   :param currItem: Not used.
 
 onBackPressed
 ^^^^^^^^^^^^^

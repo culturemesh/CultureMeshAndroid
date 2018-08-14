@@ -260,16 +260,6 @@ closeEditTextView
 
    When the user selects out of the text field, the view will shrink back to its original position.
 
-fetchCommentsAtEnd
-^^^^^^^^^^^^^^^^^^
-
-.. java:method:: public void fetchCommentsAtEnd(int currItem)
-   :outertype: SpecificPostActivity
-
-   Fetch the next comments after the bottom of the scrolling list has been reached
-
-   :param currItem: Current item in the list
-
 genResizeAnimation
 ^^^^^^^^^^^^^^^^^^
 
