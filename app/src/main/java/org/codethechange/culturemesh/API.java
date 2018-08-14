@@ -67,7 +67,9 @@ class API {
      */
     static final String SELECTED_NETWORK = "selnet";
 
-    // TODO: Document SELECTED_USER constant
+    /**
+     * The SharedPreferences key for communicating to ViewProfileActivity which user we are viewing.
+     */
     final static String SELECTED_USER="seluser";
 
     /**
@@ -423,7 +425,7 @@ class API {
          * Get the {@link Event}s a {@link User} is subscribed to for a given {@link Network}.
          * @param queue Queue to which the asynchronous task is added.
          * @param settings SharedPreferences instance storing the token.
-         * @param networkId the id of the {@link} Network of interest.
+         * @param networkId the id of the {@link Network} of interest.
          * @param listener The response listener to be called when the request completes.
          */
         static void userEventsForNetwork(final RequestQueue queue, SharedPreferences settings, final long networkId,
@@ -433,8 +435,7 @@ class API {
                 public void onResponse(NetworkResponse<String> response) {
                     if (response.fail()) {
                         NetworkResponse<ArrayList<Event>> errorResponse =
-                                new NetworkResponse<>(true, response.getMessageID());
-                        errorResponse.setAuthFailed(response.isAuthFailed());
+                                new NetworkResponse<>(response);
                         listener.onResponse(errorResponse);
                     } else {
                         final String token = response.getPayload();
@@ -457,7 +458,9 @@ class API {
                         }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                listener.onResponse(new NetworkResponse<ArrayList<Event>>(true, R.string.network_error));
+                                int messageID = processNetworkError("API.Get.userEventsForNetwork",
+                                        "ErrorListener for networkId=" + networkId, error);
+                                listener.onResponse(new NetworkResponse<ArrayList<Event>>(true, messageID));
                             }
                         }){
                             @Override

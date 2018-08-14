@@ -56,7 +56,7 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     final String FILTER_LABEL = "fl";
 
     /**
-     * The ey in SharedPreferences for determining whether to dispaly posts in the feed.
+     * The key in SharedPreferences for determining whether to display posts in the feed.
      */
     final static String FILTER_CHOICE_NATIVE = "fcn";
 
