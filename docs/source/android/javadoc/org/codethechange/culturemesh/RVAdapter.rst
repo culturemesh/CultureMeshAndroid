@@ -32,6 +32,8 @@
 
 .. java:import:: org.codethechange.culturemesh.models PostReply
 
+.. java:import:: java.util HashSet
+
 .. java:import:: java.util List
 
 .. java:import:: java.util Set
@@ -81,6 +83,16 @@ getNetPosts
    Get the items being represented as elements of the displayed list (not just the ones currently visible).
 
    :return: Items represented as elements in the displayed list
+
+getUserAttendingEvents
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. java:method:: public Set<Long> getUserAttendingEvents()
+   :outertype: RVAdapter
+
+   Get the events in this network that the user is attending, which affects some aspects of the event UI.
+
+   :return: a set of the ids of the events.
 
 onBindViewHolder
 ^^^^^^^^^^^^^^^^

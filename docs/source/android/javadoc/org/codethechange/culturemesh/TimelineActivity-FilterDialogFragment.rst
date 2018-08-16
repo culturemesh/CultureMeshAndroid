@@ -24,8 +24,6 @@
 
 .. java:import:: android.os Handler
 
-.. java:import:: android.support.constraint ConstraintLayout
-
 .. java:import:: android.support.design.widget BottomSheetDialogFragment
 
 .. java:import:: android.support.design.widget FloatingActionButton
@@ -37,8 +35,6 @@
 .. java:import:: android.support.v7.widget LinearLayoutManager
 
 .. java:import:: android.support.v7.widget RecyclerView
-
-.. java:import:: android.util Log
 
 .. java:import:: android.view View
 
@@ -61,8 +57,6 @@
 .. java:import:: android.widget FrameLayout
 
 .. java:import:: android.widget ImageButton
-
-.. java:import:: android.widget ProgressBar
 
 .. java:import:: android.widget RelativeLayout
 
