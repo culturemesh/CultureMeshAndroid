@@ -26,7 +26,7 @@
     <string name="join_prompt">JOIN</string>
     <string name="filter_posts">Display in Feed</string>
     <string-array name="filter_choices">
-        <item>Native</item>
+        <item>Posts</item>
         <item>Events</item>
     </string-array>
     <string name="ok">OK</string>

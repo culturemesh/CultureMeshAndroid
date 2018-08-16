@@ -190,7 +190,12 @@ public class DrawerActivity extends AppCompatActivity
                             emailString = getString(R.string.missingEmail);
                             email.setText(emailString);
                             NetworkResponse.genErrorDialog(DrawerActivity.this,
-                                    R.string.authenticationError);
+                                    R.string.authenticationError, new NetworkResponse.DialogTapListener() {
+                                        @Override
+                                        public void onDismiss() {
+                                            // The authentication error should handle itself.
+                                        }
+                                    });
                         } else {
                             email.setText(emailString);
                         }
@@ -200,50 +205,7 @@ public class DrawerActivity extends AppCompatActivity
                 }
             });
             //Now, load user subscriptions (networks) to display in the navigation drawer.
-            API.Get.userNetworks(queue, currentUser, new Response.Listener<NetworkResponse<ArrayList<Network>>>() {
-                @Override
-                public void onResponse(NetworkResponse<ArrayList<Network>> res) {
-                    if (res.fail()) {
-                        res.showErrorDialog(DrawerActivity.this);
-                    } else {
-                        subscribedNetworks = new SparseArray<Network>();
-                        //Instantiate map with key -> menu view id, value -> network.
-                        for (Network net : res.getPayload()) {
-                            Log.i("DrawerActivity", "Found that User with ID " + currentUser
-                                    + " is subscribed to network: " + net);
-                            subscribedNetworkIds.add(net.id);
-                            int viewId = View.generateViewId();
-                            subscribedNetworks.put(viewId, net);
-                        }
-                        Menu navMenu = navView.getMenu();
-                        MenuItem item = navMenu.getItem(2); //Your Networks subItem
-                        SubMenu netMenu = item.getSubMenu();
-                        for (int i = 0; i < subscribedNetworks.size(); i++) {
-                            int id = subscribedNetworks.keyAt(i);
-                            Network net = subscribedNetworks.get(id);
-                            String name = "";
-                            if (net.isLocationBased()) {
-                                name = getResources().getString(R.string.from) + " " +
-                                        net.fromLocation.getShortName() + " " +
-                                        getResources().getString(R.string.near) + " " +
-                                        net.nearLocation.getShortName();
-                            } else {
-                                name = net.language.toString() + " " +
-                                        getResources().getString(R.string.speakers_in) + " " +
-                                        net.nearLocation.getListableName();
-                            }
-                            SpannableStringBuilder sb = new SpannableStringBuilder(name);
-                            sb.setSpan(new RelativeSizeSpan(.8f), 0, sb.length(), 0);
-                            netMenu.add(Menu.NONE, id, 0, sb);
-                        }
-                        navView.setNavigationItemSelectedListener(DrawerActivity.this);
-                        if (thisActivity instanceof WaitForSubscribedList) {
-                            Log.i("DrawerActivity", "calling onSubscribeListFinish");
-                            ((WaitForSubscribedList) thisActivity).onSubscribeListFinish();
-                        }
-                    }
-                }
-            });
+            fetchNetworks();
         }
     }
 
@@ -341,5 +303,60 @@ public class DrawerActivity extends AppCompatActivity
     }
 
 
+    /**
+     * This fetches the users subscribed networks and displays them in the navigation drawer.
+     */
+    public void fetchNetworks() {
+        API.Get.userNetworks(queue, currentUser, new Response.Listener<NetworkResponse<ArrayList<Network>>>() {
+            @Override
+            public void onResponse(NetworkResponse<ArrayList<Network>> res) {
+                if (res.fail()) {
+                    res.showErrorDialog(DrawerActivity.this, new NetworkResponse.DialogTapListener() {
+                        @Override
+                        public void onDismiss() {
+                            //Retry fetching networks.
+                            fetchNetworks();
+                        }
+                    });
+                } else {
+                    subscribedNetworks = new SparseArray<Network>();
+                    //Instantiate map with key -> menu view id, value -> network.
+                    for (Network net : res.getPayload()) {
+                        Log.i("DrawerActivity", "Found that User with ID " + currentUser
+                                + " is subscribed to network: " + net);
+                        subscribedNetworkIds.add(net.id);
+                        int viewId = View.generateViewId();
+                        subscribedNetworks.put(viewId, net);
+                    }
+                    Menu navMenu = navView.getMenu();
+                    MenuItem item = navMenu.getItem(2); //Your Networks subItem
+                    SubMenu netMenu = item.getSubMenu();
+                    for (int i = 0; i < subscribedNetworks.size(); i++) {
+                        int id = subscribedNetworks.keyAt(i);
+                        Network net = subscribedNetworks.get(id);
+                        String name = "";
+                        if (net.isLocationBased()) {
+                            name = getResources().getString(R.string.from) + " " +
+                                    net.fromLocation.getShortName() + " " +
+                                    getResources().getString(R.string.near) + " " +
+                                    net.nearLocation.getShortName();
+                        } else {
+                            name = net.language.toString() + " " +
+                                    getResources().getString(R.string.speakers_in) + " " +
+                                    net.nearLocation.getListableName();
+                        }
+                        SpannableStringBuilder sb = new SpannableStringBuilder(name);
+                        sb.setSpan(new RelativeSizeSpan(.8f), 0, sb.length(), 0);
+                        netMenu.add(Menu.NONE, id, 0, sb);
+                    }
+                    navView.setNavigationItemSelectedListener(DrawerActivity.this);
+                    if (thisActivity instanceof WaitForSubscribedList) {
+                        Log.i("DrawerActivity", "calling onSubscribeListFinish");
+                        ((WaitForSubscribedList) thisActivity).onSubscribeListFinish();
+                    }
+                }
+            }
+        });
+    }
 
 }
