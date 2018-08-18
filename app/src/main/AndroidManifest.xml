@@ -9,10 +9,10 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:largeHeap = "true"
         android:windowSoftInputMode="adjustNothing">
         <activity
             android:name=".TimelineActivity"
@@ -80,6 +80,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -96,7 +97,6 @@
             android:name=".HelpActivity"
             android:label="@string/help"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity
             android:name=".AboutActivity"
             android:label="@string/about"
@@ -108,7 +108,16 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Acknowledgements"
+            android:label="@string/title_activity_acknowledgements"
+            android:parentActivityName=".AboutActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.codethechange.culturemesh.AboutActivity" />
+        </activity>
     </application>
 
 </manifest>
