@@ -12,6 +12,7 @@ org.codethechange.culturemesh
    API-Post
    API-Put
    AboutActivity
+   Acknowledgements
    AnimationUtils
    ApplicationStart
    ChooseNearLocationActivity
