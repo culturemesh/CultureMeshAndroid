@@ -22,6 +22,11 @@ public class AboutActivity extends DrawerActivity {
         setContentView(R.layout.activity_about);
     }
 
+    /**
+     * Open {@link Acknowledgements} activity to display legally required attributions for the
+     * open-source libraries we use
+     * @param v The {@link View} of the button clicked on to run this method. Not used.
+     */
     public void openLegal(View v) {
         Intent openLegal = new Intent(AboutActivity.this, Acknowledgements.class);
         startActivity(openLegal);
