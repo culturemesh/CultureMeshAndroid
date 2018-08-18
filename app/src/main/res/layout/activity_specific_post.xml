@@ -7,6 +7,12 @@
     android:layout_height="match_parent"
     android:id="@+id/specific_post_scene_root"
     tools:context="org.codethechange.culturemesh.SpecificPostActivity">
+    <include
+        android:id="@+id/loading_overlay"
+        layout="@layout/loading_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"/>
 
     <ProgressBar
         android:id="@+id/post_reply_progress"

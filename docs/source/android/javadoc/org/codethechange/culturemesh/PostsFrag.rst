@@ -1,12 +1,18 @@
 .. java:import:: android.content Context
 
+.. java:import:: android.content DialogInterface
+
 .. java:import:: android.content Intent
 
 .. java:import:: android.content SharedPreferences
 
+.. java:import:: android.content.res Resources
+
 .. java:import:: android.os Bundle
 
 .. java:import:: android.support.v4.app Fragment
+
+.. java:import:: android.support.v7.app AlertDialog
 
 .. java:import:: android.support.v7.app AppCompatActivity
 

@@ -28,7 +28,7 @@ FormatManager
 
 .. java:type:: public class FormatManager implements ListenableEditText.onSelectionChangedListener
 
-   Created by Drew Gregory on 3/26/18. This class provides a little decomposition from CreatePost/SpeciticPostActivity in that it handles all the formatting involved in writinf posts/post replies. The supported formatting is: - bold - italic - links This formatting is embedded in the SpannableStrings that EditTexts can produce and maintain. This manager will also handle the tedious tasks of updating the toggle icons and maintaining state. When the user is done formatting and wants to publish their post/post reply, call the toString(), which will convert the spannable to a string with the proper tags as specified by Ian Nottage: \ **Bold text**\  \ *Italic text*\  Link text
+   Created by Drew Gregory on 3/26/18. This class provides a little decomposition from CreatePost/SpeciticPostActivity in that it handles all the formatting involved in writing posts/post replies. The supported formatting is: - bold - italic - links This formatting is embedded in the SpannableStrings that EditTexts can produce and maintain. This manager will also handle the tedious tasks of updating the toggle icons and maintaining state. When the user is done formatting and wants to publish their post/post reply, call the toString(), which will convert the spannable to a string with the proper tags as specified by Ian Nottage: \ **Bold text**\  \ *Italic text*\  Link text
 
 Fields
 ------

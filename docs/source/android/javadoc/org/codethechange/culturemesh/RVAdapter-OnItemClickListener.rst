@@ -32,7 +32,11 @@
 
 .. java:import:: org.codethechange.culturemesh.models PostReply
 
+.. java:import:: java.util HashSet
+
 .. java:import:: java.util List
+
+.. java:import:: java.util Set
 
 RVAdapter.OnItemClickListener
 =============================

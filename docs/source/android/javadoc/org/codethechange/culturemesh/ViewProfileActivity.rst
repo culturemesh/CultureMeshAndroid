@@ -16,6 +16,10 @@
 
 .. java:import:: android.support.v7.widget Toolbar
 
+.. java:import:: android.view View
+
+.. java:import:: android.widget FrameLayout
+
 .. java:import:: android.widget ImageView
 
 .. java:import:: android.widget TextView
@@ -51,6 +55,12 @@ SELECTED_USER
    :outertype: ViewProfileActivity
 
    Key for extra in \ :java:ref:`android.content.Intent`\ s that specifies the user whose profile is to be displayed. This should be included in the intent that launches this activity.
+
+loadingOverlay
+^^^^^^^^^^^^^^
+
+.. java:field::  FrameLayout loadingOverlay
+   :outertype: ViewProfileActivity
 
 mTabLayout
 ^^^^^^^^^^

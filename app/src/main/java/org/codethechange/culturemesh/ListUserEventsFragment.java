@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,18 +78,21 @@ public class ListUserEventsFragment extends Fragment implements RVAdapter.OnItem
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
         emptyText = root.findViewById(R.id.empty_text);
-        emptyText.setText(getResources().getString(R.string.no_events));
+        emptyText.setText(getResources().getString(R.string.loading));
         API.Get.userEvents(queue, getArguments().getLong(SELECTED_USER, -1), API.HOSTING, new Response.Listener<NetworkResponse<ArrayList<Event>>>() {
             @Override
             public void onResponse(NetworkResponse<ArrayList<Event>> response) {
                 if (response.fail()) {
-                    response.showErrorDialog(getContext());
+                    response.showErrorDialog(getActivity());
+                    emptyText.setText(getResources().getString(R.string.no_events));
                 } else {
                     adapter.getNetPosts().addAll(response.getPayload());
-                    rv.getAdapter().notifyDataSetChanged();
+                    adapter.notifyDataSetChanged();
                     if (rv.getAdapter().getItemCount() > 0) {
                         //Hide empty text.
                         emptyText.setVisibility(View.GONE);
+                    } else {
+                        emptyText.setText(getResources().getString(R.string.no_events));
                     }
                 }
             }
@@ -114,7 +118,7 @@ public class ListUserEventsFragment extends Fragment implements RVAdapter.OnItem
         } catch(ClassCastException e) {
             //I don't think we have commenting support for events??
         } catch (NullPointerException e) {
-            Toast.makeText(getActivity(), "Cannot open post", Toast.LENGTH_LONG).show();
+            NetworkResponse.genErrorDialog(getActivity(), R.string.error_opening_post);
         }
     }
 

@@ -67,7 +67,9 @@ class API {
      */
     static final String SELECTED_NETWORK = "selnet";
 
-    // TODO: Document SELECTED_USER constant
+    /**
+     * The SharedPreferences key for communicating to ViewProfileActivity which user we are viewing.
+     */
     final static String SELECTED_USER="seluser";
 
     /**
@@ -315,7 +317,6 @@ class API {
                             return;
                         }
                     }
-                    listener.onResponse(new NetworkResponse<>(nets));
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -417,6 +418,62 @@ class API {
                 }
             });
             queue.add(req);
+        }
+
+
+        /**
+         * Get the {@link Event}s a {@link User} is subscribed to for a given {@link Network}.
+         * @param queue Queue to which the asynchronous task is added.
+         * @param settings SharedPreferences instance storing the token.
+         * @param networkId the id of the {@link Network} of interest.
+         * @param listener The response listener to be called when the request completes.
+         */
+        static void userEventsForNetwork(final RequestQueue queue, SharedPreferences settings, final long networkId,
+                                         final Response.Listener<NetworkResponse<ArrayList<Event>>> listener) {
+            Get.loginToken(queue, settings, new Response.Listener<NetworkResponse<String>>() {
+                @Override
+                public void onResponse(NetworkResponse<String> response) {
+                    if (response.fail()) {
+                        NetworkResponse<ArrayList<Event>> errorResponse =
+                                new NetworkResponse<>(response);
+                        listener.onResponse(errorResponse);
+                    } else {
+                        final String token = response.getPayload();
+                        JsonArrayRequest req = new JsonArrayRequest(API_URL_BASE
+                                + "event/currentUserEventsByNetwork/" + networkId + "?" + getCredentials(), new Response.Listener<JSONArray>() {
+                            @Override
+                            public void onResponse(JSONArray response) {
+                                ArrayList<Event> events = new ArrayList<>();
+                                for (int i = 0; i < response.length(); i++) {
+                                    try {
+                                        events.add(new Event(response.getJSONObject(i)));
+                                    } catch (JSONException e) {
+                                        listener.onResponse(new NetworkResponse<ArrayList<Event>>(true, R.string.network_error));
+                                        e.printStackTrace();
+                                        return;
+                                    }
+                                }
+                                listener.onResponse(new NetworkResponse<ArrayList<Event>>(events));
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                int messageID = processNetworkError("API.Get.userEventsForNetwork",
+                                        "ErrorListener for networkId=" + networkId, error);
+                                listener.onResponse(new NetworkResponse<ArrayList<Event>>(true, messageID));
+                            }
+                        }){
+                            @Override
+                            public Map<String, String> getHeaders() {
+                                Map<String,String> headers = new HashMap<>();
+                                headers.put("Authorization", genBasicAuth(token));
+                                return headers;
+                            }
+                        };
+                        queue.add(req);
+                    }
+                }
+            });
         }
 
         /**
@@ -1197,14 +1254,14 @@ class API {
          * Add a user to an existing event. This operation requires authentication, so the user must
          * be logged in.
          * @param queue Queue to which the asynchronous task will be added
-         * @param userId ID of the user to add to the event
+         * @param settings {@link SharedPreferences} instance so we can get the token.
          * @param eventId ID of the event to add the user to
          * @param listener Listener whose onResponse method will be called when the operation completes
          */
-        static void addUserToEvent(final RequestQueue queue, final long userId, final long eventId,
+        static void joinEvent(final RequestQueue queue, final long eventId,
                               SharedPreferences settings,
                               final Response.Listener<NetworkResponse<String>> listener) {
-            emptyModel(queue, API_URL_BASE + "user/" + userId + "/addToEvent/" + eventId + "?" +
+            emptyModel(queue, API_URL_BASE + "user/joinEvent/" + eventId + "?role=guest&" +
                     getCredentials(), "API.Post.addUserToEvent", Request.Method.POST, settings,
                     listener);
         }
@@ -1222,6 +1279,19 @@ class API {
             emptyModel(queue, API_URL_BASE + "user/joinNetwork/" + networkId +
                     "?" + getCredentials(), "API.Post.joinNetwork", Request.Method.POST,
                     settings, listener);
+        }
+
+        /**
+         * Removes user from event subscription listing.
+         * @param queue Queue to which network request will be added.
+         * @param eventId id of event to remove user from.
+         * @param settings {@link SharedPreferences} instance that stores token.
+         * @param listener Listener whose onResponse will be called when the operation completes.
+         */
+        static void leaveEvent(final RequestQueue queue, final long eventId, SharedPreferences settings,
+                               final Response.Listener<NetworkResponse<String>> listener) {
+            emptyModel(queue, API_URL_BASE+"user/leaveEvent/"+ eventId + "?" + getCredentials(),
+                    "API.Post.leaveEvent", Request.Method.POST, settings, listener);
         }
 
         /**

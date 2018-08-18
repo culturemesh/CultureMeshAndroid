@@ -54,7 +54,11 @@
 
 .. java:import:: android.widget Button
 
+.. java:import:: android.widget FrameLayout
+
 .. java:import:: android.widget ImageButton
+
+.. java:import:: android.widget RelativeLayout
 
 .. java:import:: android.widget TextView
 

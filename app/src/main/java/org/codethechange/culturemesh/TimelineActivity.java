@@ -28,7 +28,9 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
@@ -48,16 +50,24 @@ import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
  */
 public class TimelineActivity extends DrawerActivity implements DrawerActivity.WaitForSubscribedList{
 
-    // TODO: Document this
+    /**
+     * The tag for FragmentManager to know we're opening the filter dialog.
+     */
     final String FILTER_LABEL = "fl";
 
-    // TODO: Document this
+    /**
+     * The key in SharedPreferences for determining whether to display posts in the feed.
+     */
     final static String FILTER_CHOICE_NATIVE = "fcn";
 
-    // TODO: Document this
+    /**
+     * The key in SharedPreferences for determining whether to display events in the feed.
+     */
     final static String FILTER_CHOICE_EVENTS = "fce";
 
-    // TODO: Document this
+    /**
+     * The tag for showing that we're passing in the network to a new activity.
+     */
     final static String BUNDLE_NETWORK = "bunnet";
 
     /**
@@ -104,10 +114,15 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
      */
     private RequestQueue queue;
 
+    Button joinNetwork;
+
     /**
      * ID of the selected {@link Network}
      */
     private long selectedNetwork;
+
+    private RelativeLayout loadingPanel; // For paginating posts.
+    private FrameLayout loadingOverlay; // For loading network information.
 
     /**
      * Setup user interface using layout defined in {@link R.layout#activity_timeline} and
@@ -127,8 +142,16 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         create = findViewById(R.id.create);
         createPost = findViewById(R.id.create_post);
         createEvent = findViewById(R.id.create_event);
+        joinNetwork = findViewById(R.id.join_network_button);
         queue = Volley.newRequestQueue(getApplicationContext());
-        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+        loadingOverlay = findViewById(R.id.loading_overlay);
+        loadingOverlay.bringToFront();
+        //But we also want the toolbar to be present too.
+        mToolbar.bringToFront();
+        org.codethechange.culturemesh.AnimationUtils.animateLoadingOverlay(loadingOverlay,
+                View.VISIBLE, 1, 200);
+        loadingPanel = findViewById(R.id.loadingPanel);
+        loadingPanel.setVisibility(View.GONE);
     }
 
     /**
@@ -159,6 +182,8 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                     }
                     //Update near location
                     nearLocation.setText(network.nearLocation.getShortName());
+                    org.codethechange.culturemesh.AnimationUtils.animateLoadingOverlay(loadingOverlay,
+                            View.GONE, 0, 1000);
                 } else {
                     response.showErrorDialog(TimelineActivity.this);
                 }
@@ -213,7 +238,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         LinearLayoutManager mLayoutManager = (LinearLayoutManager) postsRV.getLayoutManager();
         //check if at end of posts
         postsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            int pastVisiblesItems, visibleItemCount, totalItemCount;
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 // Required to override, but nothing here.
@@ -239,24 +263,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
     }
 
     /**
-     * Load more posts. Not currently used or finished.
-     * @param currItem Not used.
-     */
-    public void fetchPostsAtEnd(int currItem) {
-        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
-
-        //TODO: load extra posts by loadSize amount
-
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-            }
-        }, 1000);
-    }
-
-    /**
      * Restart activity to refresh the feed
      */
     public void onSwipeRefresh() {
@@ -265,21 +271,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         startActivity(intent);
     }
 
-    /**
-     * Returns true upon successful retrieval, returns false if issue/no connection. Not used or
-     * complete.
-     * @return Always returns {@code true}
-     */
-    public boolean refreshPosts() { //probably public? if we want to refresh from outside, if that's possible/needed
-        boolean success = true;
-        //TODO: re-call loading posts. this must be done asynchronously.
-
-        swipeRefreshLayout.setRefreshing(false);
-        //TODO: if server/connection error, success = false;
-
-        //TODO: when done, animate old posts fading away and new posts then fading in
-        return success;
-    }
 
     /**
      * Check if user has selected a network to view, regardless of whether the user is subscribed
@@ -389,8 +380,6 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                     Intent cPA = new Intent(getApplicationContext(), CreatePostActivity.class);
                     cPA.putExtra(BUNDLE_NETWORK, selectedNetwork);
                     startActivity(cPA);
-                    //TODO: Have fragment post feed loading stuff be in start() method so feed updates
-                    //when createPostActivity finishes.
                 }
             });
             createEvent.setOnClickListener(new View.OnClickListener() {
@@ -400,12 +389,11 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                     startActivity(cEA);
                 }
             });
-            Button joinNetwork = findViewById(R.id.join_network_button);
+
             joinNetwork.setVisibility(View.GONE);
         } else {
             //The user has not joined this network yet. We should hide the write post/events buttons
             //and show the join network button.
-            Button joinNetwork = findViewById(R.id.join_network_button);
             joinNetwork.setVisibility(View.VISIBLE);
             joinNetwork.setOnClickListener(new View.OnClickListener() {
                 @Override

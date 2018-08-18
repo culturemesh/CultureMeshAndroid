@@ -24,9 +24,9 @@
     <string name="near_location_text">Near:</string>
     <string name="title_activity_choose_near_location">Choose Near Location</string>
     <string name="join_prompt">JOIN</string>
-    <string name="filter_posts">Filter Posts</string>
+    <string name="filter_posts">Display in Feed</string>
     <string-array name="filter_choices">
-        <item>Native Posts</item>
+        <item>Native</item>
         <item>Events</item>
     </string-array>
     <string name="ok">OK</string>
@@ -99,6 +99,10 @@
     <string name="cultureMesh_description">CultureMesh helps you connect with nearby people who
         speak your language or come from where you do."</string>
     <string name="networks_explain">Join networks to learn about events and people near you.</string>
+    <string name="find_network_explain_1">Use the sidebar to find a network.</string>
+    <string name="find_network_explain_2">Select a nearby location.</string>
+    <string name="find_network_explain_3">Filter by what you speak or where you are from.</string>
+    <string name="find_network_explain_4">Search for a location or language.</string>
     <string name="ready_question">Ready?</string>
     <string name="lets_start">Let\'s get Started!</string>
     <string name="logIn_signUp">Log In or Sign Up</string>
@@ -200,5 +204,15 @@
     <string name="change_picture">Change Profile Picture?</string>
     <string name="change_picture_prompt">Would you like to upload a new profile picture?</string>
     <string name="title_activity_acknowledgements">Acknowledgements</string>
+    <string name="loading_text">Looking all over the world for your content &#8230;</string>
+    <string name="retry">Retry</string>
+    <string name="loading">Loading</string>
+    <string name="join_event">Join Event?</string>
+    <string name="would_you_like_to_join_this_event">Would you like to join this event?</string>
+    <string name="leave_event">Leave Event?</string>
+    <string name="would_you_like_to_leave_this_event">Would you like to leave this event?</string>
+    <string name="left_event">You have left the event.</string>
+    <string name="joined_event">You are now attending the event!</string>
+    <string name="attending">You are attending this event.</string>
     <!-- See the ellipses constant in Listable -->
 </resources>

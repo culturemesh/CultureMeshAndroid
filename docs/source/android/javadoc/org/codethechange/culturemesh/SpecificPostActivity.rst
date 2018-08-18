@@ -44,6 +44,8 @@
 
 .. java:import:: android.widget Button
 
+.. java:import:: android.widget FrameLayout
+
 .. java:import:: android.widget ImageButton
 
 .. java:import:: android.widget ImageView
@@ -162,6 +164,12 @@ images
 
    Array of images associated with the \ :java:ref:`Post`\
 
+loadingOverlay
+^^^^^^^^^^^^^^
+
+.. java:field::  FrameLayout loadingOverlay
+   :outertype: SpecificPostActivity
+
 personName
 ^^^^^^^^^^
 
@@ -251,16 +259,6 @@ closeEditTextView
    :outertype: SpecificPostActivity
 
    When the user selects out of the text field, the view will shrink back to its original position.
-
-fetchCommentsAtEnd
-^^^^^^^^^^^^^^^^^^
-
-.. java:method:: public void fetchCommentsAtEnd(int currItem)
-   :outertype: SpecificPostActivity
-
-   Fetch the next comments after the bottom of the scrolling list has been reached
-
-   :param currItem: Current item in the list
 
 genResizeAnimation
 ^^^^^^^^^^^^^^^^^^

@@ -16,6 +16,8 @@
 
 .. java:import:: android.provider MediaStore
 
+.. java:import:: android.provider Settings
+
 .. java:import:: android.support.v7.widget LinearLayoutManager
 
 .. java:import:: android.support.v7.widget RecyclerView
@@ -30,7 +32,11 @@
 
 .. java:import:: android.widget EditText
 
+.. java:import:: android.widget FrameLayout
+
 .. java:import:: android.widget ImageView
+
+.. java:import:: android.widget ScrollView
 
 .. java:import:: android.widget TextView
 
@@ -138,6 +144,14 @@ rv
 .. java:field::  RecyclerView rv
    :outertype: SettingsActivity
 
+scrollView
+^^^^^^^^^^
+
+.. java:field::  ScrollView scrollView
+   :outertype: SettingsActivity
+
+   The user whose profile is displayed and being edited
+
 updateProfile
 ^^^^^^^^^^^^^
 
@@ -152,20 +166,8 @@ user
 .. java:field::  User user
    :outertype: SettingsActivity
 
-   The user whose profile is displayed and being edited
-
 Methods
 -------
-getPath
-^^^^^^^
-
-.. java:method:: public String getPath(Uri uri)
-   :outertype: SettingsActivity
-
-   Converts Uri into file path Sourced from https://stackoverflow.com/questions/14054307/java-io-filenotfoundexception-in-android
-
-   :param uri: uri taken from
-
 onActivityResult
 ^^^^^^^^^^^^^^^^
 

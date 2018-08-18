@@ -93,19 +93,6 @@ API.Post
 
 Methods
 -------
-addUserToEvent
-^^^^^^^^^^^^^^
-
-.. java:method:: static void addUserToEvent(RequestQueue queue, long userId, long eventId, SharedPreferences settings, Response.Listener<NetworkResponse<String>> listener)
-   :outertype: API.Post
-
-   Add a user to an existing event. This operation requires authentication, so the user must be logged in.
-
-   :param queue: Queue to which the asynchronous task will be added
-   :param userId: ID of the user to add to the event
-   :param eventId: ID of the event to add the user to
-   :param listener: Listener whose onResponse method will be called when the operation completes
-
 event
 ^^^^^
 
@@ -118,6 +105,19 @@ event
    :param event: \ :java:ref:`Event`\  to create.
    :param listener: Listener whose onResponse method will be called when task completes
 
+joinEvent
+^^^^^^^^^
+
+.. java:method:: static void joinEvent(RequestQueue queue, long eventId, SharedPreferences settings, Response.Listener<NetworkResponse<String>> listener)
+   :outertype: API.Post
+
+   Add a user to an existing event. This operation requires authentication, so the user must be logged in.
+
+   :param queue: Queue to which the asynchronous task will be added
+   :param settings: \ :java:ref:`SharedPreferences`\  instance so we can get the token.
+   :param eventId: ID of the event to add the user to
+   :param listener: Listener whose onResponse method will be called when the operation completes
+
 joinNetwork
 ^^^^^^^^^^^
 
@@ -129,6 +129,19 @@ joinNetwork
    :param queue: Queue to which the asynchronous task will be added
    :param networkId: ID of the network to add the user to
    :param listener: Listener whose onResponse method will be called when the operation completes
+
+leaveEvent
+^^^^^^^^^^
+
+.. java:method:: static void leaveEvent(RequestQueue queue, long eventId, SharedPreferences settings, Response.Listener<NetworkResponse<String>> listener)
+   :outertype: API.Post
+
+   Removes user from event subscription listing.
+
+   :param queue: Queue to which network request will be added.
+   :param eventId: id of event to remove user from.
+   :param settings: \ :java:ref:`SharedPreferences`\  instance that stores token.
+   :param listener: Listener whose onResponse will be called when the operation completes.
 
 leaveNetwork
 ^^^^^^^^^^^^

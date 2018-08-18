@@ -259,6 +259,7 @@ getPutJson
                 "username": "string",
                 "first_name": "string",
                 "last_name": "string",
+                "email": "string",
                 "role": 0,
                 "gender": "string",
                 "about_me": "string",

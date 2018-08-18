@@ -9,6 +9,8 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -51,6 +53,7 @@ public class ViewProfileActivity extends AppCompatActivity {
      * Field for the displayed profile's photo
      */
     ImageView profilePic;
+    FrameLayout loadingOverlay;
 
     /**
      * ID of the {@link User} whose profile to display
@@ -74,6 +77,8 @@ public class ViewProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_profile);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        loadingOverlay = findViewById(R.id.loading_overlay);
+        loadingOverlay.bringToFront();
         selUser = getIntent().getLongExtra(SELECTED_USER, -1);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -99,6 +104,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                     fullName.setText(user.firstName + " " + user.lastName);
                     userName.setText(user.username);
                     Picasso.with(getApplicationContext()).load(user.imgURL).into(profilePic);
+                    AnimationUtils.animateLoadingOverlay(loadingOverlay, View.GONE, 0, 300);
                 }
             }
         });

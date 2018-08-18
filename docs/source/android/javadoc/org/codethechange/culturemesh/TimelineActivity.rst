@@ -54,7 +54,11 @@
 
 .. java:import:: android.widget Button
 
+.. java:import:: android.widget FrameLayout
+
 .. java:import:: android.widget ImageButton
+
+.. java:import:: android.widget RelativeLayout
 
 .. java:import:: android.widget TextView
 
@@ -86,11 +90,15 @@ BUNDLE_NETWORK
 .. java:field:: static final String BUNDLE_NETWORK
    :outertype: TimelineActivity
 
+   The tag for showing that we're passing in the network to a new activity.
+
 FILTER_CHOICE_EVENTS
 ^^^^^^^^^^^^^^^^^^^^
 
 .. java:field:: static final String FILTER_CHOICE_EVENTS
    :outertype: TimelineActivity
+
+   The key in SharedPreferences for determining whether to display events in the feed.
 
 FILTER_CHOICE_NATIVE
 ^^^^^^^^^^^^^^^^^^^^
@@ -98,10 +106,20 @@ FILTER_CHOICE_NATIVE
 .. java:field:: static final String FILTER_CHOICE_NATIVE
    :outertype: TimelineActivity
 
+   The key in SharedPreferences for determining whether to display posts in the feed.
+
 FILTER_LABEL
 ^^^^^^^^^^^^
 
 .. java:field:: final String FILTER_LABEL
+   :outertype: TimelineActivity
+
+   The tag for FragmentManager to know we're opening the filter dialog.
+
+joinNetwork
+^^^^^^^^^^^
+
+.. java:field::  Button joinNetwork
    :outertype: TimelineActivity
 
 settings
@@ -137,16 +155,6 @@ createNoNetwork
    :outertype: TimelineActivity
 
    If the user has no selected network, direct them to \ :java:ref:`ExploreBubblesOpenGLActivity`\
-
-fetchPostsAtEnd
-^^^^^^^^^^^^^^^
-
-.. java:method:: public void fetchPostsAtEnd(int currItem)
-   :outertype: TimelineActivity
-
-   Load more posts. Not currently used or finished.
-
-   :param currItem: Not used.
 
 onBackPressed
 ^^^^^^^^^^^^^
@@ -211,14 +219,4 @@ onSwipeRefresh
    :outertype: TimelineActivity
 
    Restart activity to refresh the feed
-
-refreshPosts
-^^^^^^^^^^^^
-
-.. java:method:: public boolean refreshPosts()
-   :outertype: TimelineActivity
-
-   Returns true upon successful retrieval, returns false if issue/no connection. Not used or complete.
-
-   :return: Always returns \ ``true``\
 

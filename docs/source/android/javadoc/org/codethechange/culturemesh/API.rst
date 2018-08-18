@@ -152,6 +152,8 @@ SELECTED_USER
 .. java:field:: static final String SELECTED_USER
    :outertype: API
 
+   The SharedPreferences key for communicating to ViewProfileActivity which user we are viewing.
+
 SETTINGS_IDENTIFIER
 ^^^^^^^^^^^^^^^^^^^
 
