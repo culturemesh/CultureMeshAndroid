@@ -1,6 +1,8 @@
 package org.codethechange.culturemesh;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 /**
  * Activity for displaying author attributions, copyright notices, and version information on an
@@ -18,5 +20,15 @@ public class AboutActivity extends DrawerActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
+    }
+
+    /**
+     * Open {@link Acknowledgements} activity to display legally required attributions for the
+     * open-source libraries we use
+     * @param v The {@link View} of the button clicked on to run this method. Not used.
+     */
+    public void openLegal(View v) {
+        Intent openLegal = new Intent(AboutActivity.this, Acknowledgements.class);
+        startActivity(openLegal);
     }
 }
