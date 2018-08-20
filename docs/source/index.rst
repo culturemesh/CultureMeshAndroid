@@ -25,13 +25,34 @@ University's Code the Change for CultureMesh.
    userFlow
    codeStructure
    codeRef
+   contributing
 
 ---------------
 Getting Started
 ---------------
 
+Getting the Latest Code
+=======================
+
+1. Clone the
+   `GitHub repository <https://github.com/DrewGregory/CultureMeshAndroid>`_
+   to your local machine:
+
+   .. code-block:: console
+
+     $ git clone https://github.com/DrewGregory/CultureMeshAndroid
+
+2. Switch to your desired branch. This will probably be either
+   ``master``, which holds the most recent release, or ``develop``,
+   which holds the current development version. For example:
+
+   .. code-block:: console
+
+     $ git checkout master
+
 Missing Information
 ===================
+
 For security reasons, some information is missing from the code repository:
 
 * CultureMesh API Key: Stored in :java:ref:`Credentials`. The
@@ -49,10 +70,14 @@ For security reasons, some information is missing from the code repository:
 
 Running the App
 ===============
+
 Open the root of the repository in
 `Android Studio <https://developer.android.com/studio/install>`_. Let
-Android Studio index the repository. Then run the app by clicking the play
-button in the upper right.
+Android Studio index the repository, and let Gradle install dependencies.
+Then run the app by clicking the play
+button in the upper right. You may have to disable ``Instant Run``
+in order to successfully use ``Fabric`` with the API key in
+``app/fabric.properties``.
 
 ------------------
 Indices and Tables
