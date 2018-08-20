@@ -17,12 +17,12 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:ems="10"
-        android:labelFor="@id/create_post_button"
         android:inputType="textNoSuggestions|textMultiLine"
+        android:labelFor="@id/create_post_button"
         app:layout_constraintBottom_toTopOf="@+id/create_post_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/network_label_text" />
+        app:layout_constraintTop_toBottomOf="@+id/network_label" />
 
     <TextView
         android:id="@+id/network_label_text"
@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
-        android:text="Network:"
+        android:text="@string/network_colon"
         android:textAppearance="@android:style/TextAppearance.Large"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -39,11 +39,18 @@
         android:id="@+id/network_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="34dp"
-        android:text="From Indonesia in San Francisco"
-        app:layout_constraintStart_toEndOf="@+id/network_label_text"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_marginEnd="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginStart="@dimen/ui_element_horizontal_spacing"
+        android:layout_marginTop="@dimen/ui_element_vertical_spacing"
+        android:layout_weight="1"
+        android:ellipsize="none"
+        android:maxLines="100"
+        android:scrollHorizontally="false"
+        android:singleLine="false"
+        android:text=""
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/network_label_text" />
 
     <Button
         android:id="@+id/create_post_button"
