@@ -40,6 +40,7 @@ org.codethechange.culturemesh
    ListenableEditText-onSelectionChangedListener
    LoginActivity
    NetworkResponse
+   NetworkResponse-DialogTapListener
    NetworkSummaryAdapter
    NetworkSummaryAdapter-OnNetworkTapListener
    NetworkSummaryAdapter-PostViewHolder
