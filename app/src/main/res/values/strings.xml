@@ -10,8 +10,8 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_explore_list">ExploreListActivity</string>
-    <string name="explore">Explore</string>
+    <string name="explore">Choose Near Location</string>
+
     <string name="join_network">Join Network</string>
     <string name="settings">Settings</string>
     <string name="your_communities">Your Communities</string>
@@ -48,7 +48,7 @@
     <string name="title_activity_drawer">DrawerActivity</string>
     <string name="title_activity_specific_post">View Post</string>
     <string name="title_activity_explore_bubbles">ExploreBubblesActivity</string>
-    <string name="title_activity_explore_bubbles_open_gl">ExploreBubblesOpenGLActivity</string>
+    <string name="title_activity_explore_bubbles_open_gl">Explore New Networks</string>
     <string name="title_activity_main">MainActivity</string>
 
     <!-- Strings for Event Information; Currently matches Website mostly -->
@@ -199,5 +199,10 @@
     <string name="left_event">You have left the event.</string>
     <string name="joined_event">You are now attending the event!</string>
     <string name="attending">You are attending this event.</string>
+    <string name="near_location_clarify">Choose a location near you.</string>
+    <string name="from_location">Choose a From Location or Language</string>
+    <string name="from_location_clarify">Choose a location you are from or a language that you speak.</string>
+    <string name="you_have_chosen">Your near location:</string>
+
     <!-- See the ellipses constant in Listable -->
 </resources>

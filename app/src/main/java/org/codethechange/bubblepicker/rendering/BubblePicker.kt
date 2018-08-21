@@ -60,7 +60,7 @@ class BubblePicker : GLSurfaceView {
             renderer.centerImmediately = value
         }
 
-    private val renderer = PickerRenderer(this)
+    var renderer = PickerRenderer(this)
     private var startX = 0f
     private var startY = 0f
     private var previousX = 0f
