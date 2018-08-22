@@ -218,6 +218,7 @@ public class PostsFrag extends Fragment {
                                 maxEventId = newMaxEventId + "";
                             }
                             mAdapter.notifyDataSetChanged();
+                            noPosts.setVisibility(View.GONE);
                         } else if (mAdapter.getNetPosts().size() == 0) {
                             noPosts.setVisibility(View.VISIBLE);
                         }
@@ -258,9 +259,9 @@ public class PostsFrag extends Fragment {
                                         }
                                     }
                                 });
-
                             }
                             mAdapter.notifyDataSetChanged();
+                            noPosts.setVisibility(View.GONE);
                         } else if (mAdapter.getNetPosts().size() == 0) {
                             noPosts.setVisibility(View.VISIBLE);
                         }
