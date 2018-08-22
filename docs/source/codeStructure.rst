@@ -5,6 +5,7 @@ Structure of Code
 --------------
 User Interface
 --------------
+
 The screens displayed to users are called activities. Each one has an associated
 ``*Activity.java`` file that defines a ``*Activity`` class. For example, the
 timeline for a network has an associated :java:ref:`TimelineActivity` that
@@ -17,6 +18,7 @@ as ``activity_*.xml`` and ``content_*.xml``.
 
 Adapters
 ========
+
 In some activities, large scrollable lists need to be displayed. Generating the
 displayable list elements (``View`` s) for all the items is inefficient, so
 ``RecyclerView`` s are used, which efficiently handle generating the list using
@@ -26,6 +28,7 @@ adapters. These classes (e.g. :java:ref:`RVAdapter`) provide the functionality
 -----------
 Data Models
 -----------
+
 Conceptually, the data stored with CultureMesh, including :java:ref:`Place` s,
 :java:ref:`User` s, :java:ref:`Network` s, and :java:ref:`Event` s are represented
 as models. These models are represented in JSON when in transit between the app
@@ -36,6 +39,7 @@ within the model's class (e.g. :java:ref:`Post.getPostJSON`).
 
 Places and Locations
 ====================
+
 :java:ref:`Place` s and/or :java:ref:`Location` s are part of the definition of a
 :java:ref:`Network`, and they are used by themselves when displaying lists from
 which the user can choose parameters to narrow their search for networks.
@@ -88,6 +92,7 @@ functionality that is common to both subclasses.
 
 Networks, Languages, Events, and Posts
 ======================================
+
 A :java:ref:`Network` is defined in one of two ways:
 
 * Location-based: The network is defined by a :java:ref:`NearLocation` and a
@@ -118,6 +123,7 @@ to both be displayed via polymorphism within a feed like
 
 Interfaces for Sending Objects
 ==============================
+
 To reduce code redundancy, the :java:ref:`API` class uses a series of ``model``
 methods that can send ``PUT`` and ``POST`` requests (separate ``model`` methods)
 with any object so long as that object can generate a JSON representation of
@@ -127,6 +133,7 @@ of these methods is enforced by the interfaces :java:ref:`Postable` and
 
 Other
 =====
+
 A :java:ref:`Point` describes a particular spot on the globe in terms of its
 latitude and longitude. It is really just a holder for the two values.
 
@@ -137,6 +144,7 @@ like passwords or email addresses take those values as parameters.
 ------------------------------------
 Connections to CultureMesh's Servers
 ------------------------------------
+
 Networking operations are performed by making calls to methods in the
 :java:ref:`API` class. Since networking operations suffer from any inherent
 latency in the user's internet connection, they are performed in a separate
@@ -160,6 +168,7 @@ API Authentication
 
 API Key
 -------
+
 The API key must be passed as a parameter with key ``key`` in the URL of all
 authenticated API endpoints. The key is stored in :java:ref:`Credentials`, which
 is not stored in version control or published publicly. The API method
@@ -168,6 +177,7 @@ is not stored in version control or published publicly. The API method
 
 User Credentials
 ----------------
+
 When the user logs in to the app the first time, their email and password
 are used to authenticate a request for a login token using
 :java:ref:`API.Get.loginWithCred`. This token is stored in the app's
@@ -186,6 +196,7 @@ inconvenience.
 
 Conveying Network Responses
 ===========================
+
 This object simplifies error reporting by storing whether or not the operation
 failed using :java:ref:`NetworkResponse.fail`. It also stores the results
 of successful operations, which are available through
@@ -195,6 +206,7 @@ users using :java:ref:`NetworkResponse.showErrorDialog`.
 
 Authentication Failures
 -----------------------
+
 In the special case of
 authentication errors, the :java:ref:`NetworkResponse.setAuthFailed` method can
 be used to specify that the failure was authentication-related. When the
@@ -203,6 +215,7 @@ redirected to the sign-in screen.
 
 Recommended Usage
 =================
+
 * Specify the network operation to be performed in a method in the
   :java:ref:`API` class. The method should take a ``RequestQueue`` and a
   ``Response.Listener``.
