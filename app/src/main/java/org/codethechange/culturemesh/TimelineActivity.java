@@ -114,6 +114,10 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
      */
     private RequestQueue queue;
 
+    /**
+     * The button that is shown if the user isn't subscribed to thus network. If they tap it,
+     * they join the network!
+     */
     Button joinNetwork;
 
     /**

@@ -14,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -30,7 +31,6 @@ import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 
-//TODO: If no posts, show text view saying add a post!
 /**
  * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
  */
@@ -45,6 +45,12 @@ public class PostsFrag extends Fragment {
     String maxEventId = API.NO_MAX_PAGINATION;
     //The post with the lowest id that we have fetched. We use this for paginating future posts.
     String maxPostId = API.NO_MAX_PAGINATION;
+
+    /**
+     * The textview that is shown if no feed items have been created for this network.
+     */
+    TextView noPosts;
+
 
     /**
      * {@inheritDoc}
@@ -73,6 +79,8 @@ public class PostsFrag extends Fragment {
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         View rootView = inflater.inflate(R.layout.fragment_posts, container, false);
         mRecyclerView = rootView.findViewById(R.id.postsRV);
+        noPosts = rootView.findViewById(R.id.no_feed_items);
+
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
@@ -210,6 +218,8 @@ public class PostsFrag extends Fragment {
                                 maxEventId = newMaxEventId + "";
                             }
                             mAdapter.notifyDataSetChanged();
+                        } else if (mAdapter.getNetPosts().size() == 0) {
+                            noPosts.setVisibility(View.VISIBLE);
                         }
                     } else {
                         response.showErrorDialog(getActivity());
@@ -251,6 +261,8 @@ public class PostsFrag extends Fragment {
 
                             }
                             mAdapter.notifyDataSetChanged();
+                        } else if (mAdapter.getNetPosts().size() == 0) {
+                            noPosts.setVisibility(View.VISIBLE);
                         }
                     }
                     listener.onResponse(null);

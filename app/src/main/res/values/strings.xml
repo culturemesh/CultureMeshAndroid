@@ -221,6 +221,7 @@
     <string name="from_location_clarify">Choose a location near where you are from or a language that you speak.</string>
     <string name="you_have_chosen">Your near location:</string>
     <string name="invalid_near_location">You must choose a location, not a language.</string>
+    <string name="no_posts_make_ur_own">No Posts Yet. Create One!</string>
 
     <!-- See the ellipses constant in Listable -->
 </resources>
