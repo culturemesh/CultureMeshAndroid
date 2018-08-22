@@ -1285,7 +1285,7 @@ class API {
                             });
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            Log.e("API.Get.userNetworks", "Error parsing " + i + "th network of user ");
+                            Log.e("API.Get.topTen", "Error parsing " + i + "th network of user ");
                             /*
                             Right now, this takes a "hard-fail" approach and returns a failed
                             NetworkResponse object whenever any JSON parsing error occurs. This may
