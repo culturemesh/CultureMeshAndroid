@@ -100,7 +100,6 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
 
     private void showBubbles(ArrayList<Network> payload) {
         for (Network net: payload) {
-            Log.i("showBubbles", "adding " + net.fromLocation.getShortName() + " " + net.nearLocation.getShortName());
             if (net.isLocationBased()) {
                 locations.put(net.fromLocation.getShortName(), net.fromLocation);
             } else {
@@ -169,12 +168,11 @@ public class ExploreBubblesOpenGLActivity extends DrawerActivity {
                        // They selected a language instead, which is invalid as a near location.
                        // Let's notify them of their error via a snack bar.
                        item.setSelected(false);
-                       Snackbar.make(picker, getResources().getString(R.string.cannot_write_empty),
+                       Snackbar.make(picker, getResources().getString(R.string.invalid_near_location),
                                 Snackbar.LENGTH_LONG).show();
                     }
                 } else {
                     // They have selected their second component! Let's create this network.
-                    long selectedNetwork = -1;
                     if (locations.containsKey(item.getTitle())) {
                         // From location.
                         FromLocation fromLoc = locations.get(item.getTitle()).getFromLocation();

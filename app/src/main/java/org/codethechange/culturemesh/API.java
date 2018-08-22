@@ -284,6 +284,11 @@ class API {
                     final AtomicInteger counter = new AtomicInteger();
                     counter.set(0);
                     final int numNets = res.length();
+                    if (numNets == 0) {
+                        // There are no networks to fetch.
+                        listener.onResponse(new NetworkResponse<ArrayList<Network>>(nets));
+                        return;
+                    }
                     for (int i = 0; i < res.length(); i ++) {
                         try {
                             final DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(i));
