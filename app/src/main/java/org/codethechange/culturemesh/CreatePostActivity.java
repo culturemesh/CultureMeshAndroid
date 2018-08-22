@@ -95,13 +95,13 @@ public class CreatePostActivity extends AppCompatActivity implements
                     Network network = response.getPayload();
                     if (network.isLocationBased()) {
                         networkLabel.setText(getResources().getString(R.string.from) + " " +
-                                network.fromLocation.getListableName() + " " +
+                                network.fromLocation.getFullName() + " " +
                                 getResources().getString(R.string.near) + " " +
-                                network.nearLocation.getListableName());
+                                network.nearLocation.getFullName());
                     } else {
                         networkLabel.setText(network.language.toString() + " " +
                                 getResources().getString(R.string.speakers_in).toString() + " " +
-                                network.nearLocation.getListableName());
+                                network.nearLocation.getFullName());
                     }
                 } else {
                     response.showErrorDialog(CreatePostActivity.this);

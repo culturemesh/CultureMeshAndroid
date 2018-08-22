@@ -164,6 +164,14 @@ thisActivity
 
 Methods
 -------
+fetchNetworks
+^^^^^^^^^^^^^
+
+.. java:method:: public void fetchNetworks()
+   :outertype: DrawerActivity
+
+   This fetches the users subscribed networks and displays them in the navigation drawer.
+
 onConfigurationChanged
 ^^^^^^^^^^^^^^^^^^^^^^
 

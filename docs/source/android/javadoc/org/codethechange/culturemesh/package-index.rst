@@ -12,6 +12,7 @@ org.codethechange.culturemesh
    API-Post
    API-Put
    AboutActivity
+   Acknowledgements
    AnimationUtils
    ApplicationStart
    ChooseNearLocationActivity
@@ -39,6 +40,7 @@ org.codethechange.culturemesh
    ListenableEditText-onSelectionChangedListener
    LoginActivity
    NetworkResponse
+   NetworkResponse-DialogTapListener
    NetworkSummaryAdapter
    NetworkSummaryAdapter-OnNetworkTapListener
    NetworkSummaryAdapter-PostViewHolder
