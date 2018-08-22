@@ -10,8 +10,8 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="explore">Choose Near Location</string>
-
+    <string name="explore">Explore</string>
+    <string name="explore_header">Near Location</string>
     <string name="join_network">Join Network</string>
     <string name="settings">Settings</string>
     <string name="your_communities">Your Communities</string>
@@ -25,6 +25,7 @@
     <string name="title_activity_choose_near_location">Choose Near Location</string>
     <string name="join_prompt">JOIN</string>
     <string name="filter_posts">Display in Feed</string>
+    <string name="tap_discover">Tap to discover the most popular networks!</string>
     <string-array name="filter_choices">
         <item>Posts</item>
         <item>Events</item>
@@ -200,9 +201,10 @@
     <string name="joined_event">You are now attending the event!</string>
     <string name="attending">You are attending this event.</string>
     <string name="near_location_clarify">Choose a location near you.</string>
-    <string name="from_location">Choose a From Location or Language</string>
-    <string name="from_location_clarify">Choose a location you are from or a language that you speak.</string>
+    <string name="from_location">From Location/Language</string>
+    <string name="from_location_clarify">Choose a location near where you are from or a language that you speak.</string>
     <string name="you_have_chosen">Your near location:</string>
+    <string name="invalid_near_location">You must choose a location, not a language.</string>
 
     <!-- See the ellipses constant in Listable -->
 </resources>
