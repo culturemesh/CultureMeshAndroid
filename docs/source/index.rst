@@ -11,12 +11,14 @@ Documentation for CultureMesh Android
 Introduction
 ------------
 
-This is the developer documentation for the Android app for CultureMesh. This
-app remains in development, so this documentation is geared toward developers,
-not end users.
+This is the developer documentation for the Android app for
+`CultureMesh <https://culturemesh.com/>`_. This app remains in
+development, so this documentation is geared toward developers, not
+end users.
 
-This documentation and the source code for the app were created by Stanford
-University's Code the Change for CultureMesh.
+This documentation and the source code for the app were created by
+`Stanford University's Code the Change <https://codethechange.stanford.edu/>`_
+for CultureMesh.
 
 .. toctree::
    :maxdepth: 2
