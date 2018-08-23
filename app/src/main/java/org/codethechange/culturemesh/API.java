@@ -284,6 +284,11 @@ class API {
                     final AtomicInteger counter = new AtomicInteger();
                     counter.set(0);
                     final int numNets = res.length();
+                    if (numNets == 0) {
+                        // There are no networks to fetch.
+                        listener.onResponse(new NetworkResponse<ArrayList<Network>>(nets));
+                        return;
+                    }
                     for (int i = 0; i < res.length(); i ++) {
                         try {
                             final DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) res.get(i));
@@ -1083,7 +1088,7 @@ class API {
          * is made to login with the token to get a new one. If this fails, the token has expired,
          * and the user is directed to sign in again by the error dialog. If it succeeds, the new
          * token is stored in place of the old one.
-         * @see NetworkResponse#genErrorDialog(Context, int, boolean)
+         * @see NetworkResponse#genErrorDialog(Context, int, boolean, NetworkResponse.DialogTapListener)
          * @see API#LOGIN_TOKEN
          * @see API#TOKEN_RETRIEVED
          * @param queue Queue to which the asynchronous task will be added
@@ -1135,7 +1140,7 @@ class API {
          * {@link NetworkResponse} will be in a failed state with an error message communicating
          * the occurrence of an authentication failure and instructing the user to sign in again.
          * After dismissing the error dialog, the {@link LoginActivity} will be launched.
-         * @see NetworkResponse#genErrorDialog(Context, int, boolean)
+         * @see NetworkResponse#genErrorDialog(Context, int, boolean, NetworkResponse.DialogTapListener)
          * @param queue Queue to which the asynchronous task will be added
          * @param email Email address that will serve as the username in the attempted login
          * @param password Password to use in the login attempt
@@ -1246,6 +1251,66 @@ class API {
              */
             Log.v(TAG, "Get.loginWithToken: Logging in with token=" + token);
             loginWithCred(queue, token, "", settings, listener);
+        }
+
+        /**
+         * Fetches the ten {@link Network}s with the most subscribers.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param listener Will be called with the {@link NetworkResponse} when the operation
+         *                 completes
+         */
+        static void topTen(final RequestQueue queue, final Response.Listener<NetworkResponse<ArrayList<Network>>> listener) {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/topTen",
+                    null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    final ArrayList<Network> nets = new ArrayList<>();
+                    final AtomicInteger counter = new AtomicInteger();
+                    counter.set(0);
+                    final int numNets = response.length();
+                    for (int i = 0; i < response.length(); i ++) {
+                        try {
+                            final DatabaseNetwork dnet = new DatabaseNetwork((JSONObject) response.get(i));
+                            expandDatabaseNetwork(queue, dnet, new Response.Listener<NetworkResponse<Network>>() {
+                                @Override
+                                public void onResponse(NetworkResponse<Network> res) {
+                                    if (!res.fail()) {
+                                        Network net = res.getPayload();
+                                        nets.add(net);
+                                        counter.incrementAndGet();
+                                        if (counter.get() == numNets) {
+                                            listener.onResponse(new NetworkResponse<>(nets));
+                                        }
+                                    } else {
+                                        Log.e("API.Get.topTen", "Error expanding " +
+                                                dnet);
+                                        listener.onResponse(new NetworkResponse<ArrayList<Network>>(
+                                                true, res.getMessageID()));
+                                    }
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.e("API.Get.topTen", "Error parsing " + i + "th network of user ");
+                            /*
+                            h and returns a failed
+                            NetworkResponse object whenever any JSON parsing error occurs. This may
+                            not be the best approach.
+                             */
+                            listener.onResponse(new NetworkResponse<ArrayList<Network>>(true));
+                            return;
+                        }
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    int messageID = processNetworkError("API.Get.topTen",
+                            "ErrorListener", error);
+                    listener.onResponse(new NetworkResponse<ArrayList<Network>>(true, messageID));
+                }
+            });
+            queue.add(req);
         }
     }
 

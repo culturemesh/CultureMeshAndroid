@@ -12,12 +12,13 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@android:color/white"
-        android:backgroundTint="@color/colorPrimary"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
 
         <TextView
             android:id="@+id/titleTextView"
@@ -26,7 +27,7 @@
             android:layout_gravity="center"
             android:layout_marginTop="26dp"
             android:gravity="center"
-            android:text="Explore"
+            android:text="@string/explore_header"
             android:textAllCaps="true"
             android:textColor="@color/blue"
             android:textSize="49sp" />
@@ -38,7 +39,7 @@
             android:layout_gravity="center"
             android:layout_marginTop="-7dp"
             android:gravity="center"
-            android:text="Nearby Networks"
+            android:text="@string/near_location_clarify"
             android:textColor="@color/blue"
             android:textSize="16sp" />
 
@@ -50,7 +51,7 @@
             android:layout_margin="14dp"
             android:gravity="center"
             android:lineSpacingMultiplier="1"
-            android:text="Tap to discover new networks in your area!"
+            android:text="@string/tap_discover"
             android:textColor="@android:color/black"
             android:textSize="14sp" />
 

@@ -123,6 +123,7 @@ public class DrawerActivity extends AppCompatActivity
         //Setup Navigation Drawer Layout
         mDrawerLayout= findViewById(R.id.drawer_layout);
         navView = findViewById(R.id.nav_view);
+        subscribedNetworks = new SparseArray<Network>();
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar,
                 R.string.app_name, R.string.app_name) {
 
@@ -206,6 +207,7 @@ public class DrawerActivity extends AppCompatActivity
             });
             //Now, load user subscriptions (networks) to display in the navigation drawer.
             fetchNetworks();
+            navView.setNavigationItemSelectedListener(DrawerActivity.this);
         }
     }
 
@@ -243,9 +245,9 @@ public class DrawerActivity extends AppCompatActivity
      */
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        //TODO: Handle navigation view item clicks here.
         int id = item.getItemId();
         Network subNet  = subscribedNetworks.get(id, null);
+
         if (subNet != null) {
             //The user tapped a subscribed network. We will now restart TimeLineActivity for that
             //network.
@@ -319,7 +321,6 @@ public class DrawerActivity extends AppCompatActivity
                         }
                     });
                 } else {
-                    subscribedNetworks = new SparseArray<Network>();
                     //Instantiate map with key -> menu view id, value -> network.
                     for (Network net : res.getPayload()) {
                         Log.i("DrawerActivity", "Found that User with ID " + currentUser
@@ -349,7 +350,6 @@ public class DrawerActivity extends AppCompatActivity
                         sb.setSpan(new RelativeSizeSpan(.8f), 0, sb.length(), 0);
                         netMenu.add(Menu.NONE, id, 0, sb);
                     }
-                    navView.setNavigationItemSelectedListener(DrawerActivity.this);
                     if (thisActivity instanceof WaitForSubscribedList) {
                         Log.i("DrawerActivity", "calling onSubscribeListFinish");
                         ((WaitForSubscribedList) thisActivity).onSubscribeListFinish();
