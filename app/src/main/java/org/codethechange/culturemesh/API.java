@@ -1253,6 +1253,12 @@ class API {
             loginWithCred(queue, token, "", settings, listener);
         }
 
+        /**
+         * Fetches the ten {@link Network}s with the most subscribers.
+         * @param queue Queue to which the asynchronous task will be added
+         * @param listener Will be called with the {@link NetworkResponse} when the operation
+         *                 completes
+         */
         static void topTen(final RequestQueue queue, final Response.Listener<NetworkResponse<ArrayList<Network>>> listener) {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/topTen",
                     null, new Response.Listener<JSONArray>() {
@@ -1276,7 +1282,7 @@ class API {
                                             listener.onResponse(new NetworkResponse<>(nets));
                                         }
                                     } else {
-                                        Log.e("API.Get.userNetworks", "Error expanding " +
+                                        Log.e("API.Get.topTen", "Error expanding " +
                                                 dnet);
                                         listener.onResponse(new NetworkResponse<ArrayList<Network>>(
                                                 true, res.getMessageID()));
@@ -1287,7 +1293,7 @@ class API {
                             e.printStackTrace();
                             Log.e("API.Get.topTen", "Error parsing " + i + "th network of user ");
                             /*
-                            Right now, this takes a "hard-fail" approach and returns a failed
+                            h and returns a failed
                             NetworkResponse object whenever any JSON parsing error occurs. This may
                             not be the best approach.
                              */
@@ -1299,7 +1305,7 @@ class API {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    int messageID = processNetworkError("API.Get.userNetworks",
+                    int messageID = processNetworkError("API.Get.topTen",
                             "ErrorListener", error);
                     listener.onResponse(new NetworkResponse<ArrayList<Network>>(true, messageID));
                 }
