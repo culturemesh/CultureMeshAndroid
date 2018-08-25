@@ -18,9 +18,4 @@
         android:icon="@drawable/ic_insert_link_white_24px"
         android:orderInCategory="3"
         app:showAsAction="ifRoom"/>
-    <item android:title="@string/attach_image"
-        android:id="@+id/attach_image"
-        android:icon="@drawable/ic_attach_file_white_24px"
-        android:orderInCategory="4"
-        app:showAsAction="ifRoom"/>
 </menu>
