@@ -125,9 +125,9 @@ public class OnboardActivity extends AhoyOnboarderActivity {
             // User is coming from the login activity
             if (response == Activity.RESULT_OK) {
                 Intent launchNext;
-                SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
                 launchNext = new Intent(getApplicationContext(), TimelineActivity.class);
                 startActivity(launchNext);
+                finish();
             }
             // else do nothing, as login failed or they did not log in
         }

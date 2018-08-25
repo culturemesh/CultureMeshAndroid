@@ -7,20 +7,15 @@
         android:id="@+id/bold"
         android:icon="@drawable/ic_format_bold_white_24px"
         android:orderInCategory="1"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
     <item android:title="@string/italic"
         android:id="@+id/italic"
         android:icon="@drawable/ic_format_italic_white_24px"
         android:orderInCategory="2"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
     <item android:title="@string/insert_link"
         android:id="@+id/insert_link"
         android:icon="@drawable/ic_insert_link_white_24px"
         android:orderInCategory="3"
-        app:showAsAction="always"/>
-    <item android:title="@string/attach_image"
-        android:id="@+id/attach_image"
-        android:icon="@drawable/ic_attach_file_white_24px"
-        android:orderInCategory="4"
         app:showAsAction="ifRoom"/>
 </menu>
