@@ -1,68 +1,80 @@
 package org.codethechange.culturemesh;
 
-import android.app.Activity;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.res.ColorStateList;
-import android.graphics.Typeface;
-import android.os.AsyncTask;
-import android.os.Build;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.Html;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.text.style.StyleSpan;
-import android.text.style.URLSpan;
-import android.text.style.UnderlineSpan;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.SparseIntArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.codethechange.culturemesh.models.Event;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
+
 import org.codethechange.culturemesh.models.Network;
 import org.codethechange.culturemesh.models.Post;
-import org.codethechange.culturemesh.models.User;
 
-import java.io.Serializable;
-import java.lang.reflect.Type;
-import java.math.BigInteger;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 
-import static android.support.v4.os.LocaleListCompat.create;
+/**
+ * Creates screen the user can use to create a new {@link Post}
+ */
+public class CreatePostActivity extends AppCompatActivity implements
+        FormatManager.IconUpdateListener {
 
-public class CreatePostActivity extends AppCompatActivity implements FormatManager.IconUpdateListener {
+    /**
+     * Field the user uses to type the body of their {@link Post}
+     */
     ListenableEditText content;
+
+    /**
+     * All the items in the formatting menu
+     */
     SparseArray<MenuItem> menuItems;
+
+    /**
+     * Displays the {@link Network} the user's {@link Post} will be added to
+     */
     TextView networkLabel;
-    private Activity myActivity = this;
+
+    /**
+     * Queue for asynchronous tasks
+     */
+    private RequestQueue queue;
+
+    /**
+     * Displays progress as the post is being sent over the network
+     */
+    ProgressBar progressBar;
+
+    /**
+     * Handles markup of the body text
+     */
     FormatManager formatManager;
 
+    /**
+     * Create the screen from {@link R.layout#activity_create_post}, fill
+     * {@link CreatePostActivity#networkLabel} with a description of the {@link Network}
+     * from {@link API.Get#network(RequestQueue, long, Response.Listener)}, setup
+     * {@link CreatePostActivity#formatManager}, and link a listener to the submission button that
+     * sends the {@link Post} using
+     * {@link API.Post#post(RequestQueue, Post, SharedPreferences, Response.Listener)}
+     * @param savedInstanceState {@inheritDoc}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        queue = Volley.newRequestQueue(getApplicationContext());
         setContentView(R.layout.activity_create_post);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -70,36 +82,82 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
         //This hashmap-like object helps us keep track of the settings of the format buttons.
         content = findViewById(R.id.postContent);
         networkLabel= findViewById(R.id.network_label);
+        progressBar = findViewById(R.id.postPostProgressBar);
         //Allow links to redirect to browser.
         content.setMovementMethod(LinkMovementMethod.getInstance());
-        new LoadNetworkData().execute(Long.valueOf(1));
+
+        final long networkId = getIntent().getLongExtra(TimelineActivity.BUNDLE_NETWORK, -1);
+        //Load Network Data to update header text.
+        API.Get.network(queue, networkId, new Response.Listener<NetworkResponse<Network>>() {
+            @Override
+            public void onResponse(NetworkResponse<Network> response) {
+                if (!response.fail() && response.getPayload() != null) {
+                    Network network = response.getPayload();
+                    if (network.isLocationBased()) {
+                        networkLabel.setText(getResources().getString(R.string.from) + " " +
+                                network.fromLocation.getFullName() + " " +
+                                getResources().getString(R.string.near) + " " +
+                                network.nearLocation.getFullName());
+                    } else {
+                        networkLabel.setText(network.language.toString() + " " +
+                                getResources().getString(R.string.speakers_in).toString() + " " +
+                                network.nearLocation.getFullName());
+                    }
+                } else {
+                    response.showErrorDialog(CreatePostActivity.this);
+                }
+            }
+        });
         //Set up a hashmap-like object that makes updating the toggle settings concise.
         //Check out ListenableEditText.java for more info
-        int[] boldIcons = {R.drawable.ic_format_bold_white_24px,
-                R.drawable.ic_format_bold_black_24px};
         //Instantiate a hash-map like object that is also used for updating toggle settings.
         //This sparseArray will be updated with views during onCreateOptionsMenu.
         menuItems = new SparseArray<MenuItem>();
         formatManager = new FormatManager(content, this, R.id.comment_bold, R.id.comment_italic,
                 R.id.comment_link);
+
+
         //Set onClick for Post button.
         Button postButton = findViewById(R.id.create_post_button);
         postButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: Replace user with logged in user
+                //Get the HTML content!
                 String contentHTML = formatManager.toString();
                 String datePosted = new Date().toString();
-                //TODO: Replace random with user id.
-                Post newPost = new Post((int) (Math.random() * 100000), 1, 1, contentHTML, "", "", datePosted );
-                new PostPost().execute(newPost);
+                progressBar.setIndeterminate(true); // Only because cannot get status from API
+
+                //TODO: Allow for attaching images/videos.
+                // Note: id field doesn't matter.
+                long userId = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).getLong(API.CURRENT_USER, -1);
+                Post newPost = new Post(-1, userId, networkId, contentHTML, "", "", datePosted );
+                //Now let's send it off to the CultureMesh site!!
+                API.Post.post(queue, newPost,
+                        getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
+                        new Response.Listener<NetworkResponse<String>>() {
+                    @Override
+                    public void onResponse(NetworkResponse<String> response) {
+                        if (response.fail()) {
+                            //Some error happened with the network request. We will need to alert the user.
+                            response.showErrorDialog(CreatePostActivity.this);
+                            progressBar.setVisibility(View.GONE);
+                        } else {
+                            // Everything went well, so the activity will close.
+                            finish();
+                        }
+                    }
+                });
             }
         });
 
 
     }
 
-
+    /**
+     * Populate the options menu with controls to make text bold, italic, or a link
+     * @param menu Menu to populate with options
+     * @return Always returns {@code true}
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -161,79 +219,20 @@ public class CreatePostActivity extends AppCompatActivity implements FormatManag
         }
     }
 
+
     /**
-     * AsyncTask class to handle network latency when POSTing post
+     * This ensures that we are canceling all network requests if the user is leaving this activity.
+     * We use a RequestFilter that accepts all requests (meaning it cancels all requests)
      */
-    private class PostPost extends AsyncTask<Post, Integer, NetworkResponse> {
-
-        private ProgressBar progressBar;
-
-        /**
-         * In the background, POST the provided post
-         * @param posts List of posts, the first of which will be POSTed
-         * @return Result from network operation
-         */
-        @Override
-        protected NetworkResponse doInBackground(Post... posts) {
-            API.loadAppDatabase(getApplicationContext());
-            NetworkResponse res =  API.Post.post(posts[0]);
-            API.closeDatabase();
-            return res;
-        }
-
-        /**
-         * Makes the progress bar indeterminate
-         */
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressBar = findViewById(R.id.postPostProgressBar);
-            progressBar.setIndeterminate(true); // Only because cannot get status from API
-        }
-
-        /**
-         * If POSTing succeeded: Closes the activity and returns the user to the previous screen
-         * If POSTing failed: Displays error message and returns uer to composition screen
-         * @param response Status of doInBackground method that represents whether POSTing succeeded
-         */
-        @Override
-        protected void onPostExecute(NetworkResponse response) {
-            super.onPostExecute(response);
-            if (response.fail()) {
-                response.showErrorDialog(myActivity);
-                progressBar.setIndeterminate(false);
-            } else {
-
-                finish();
-            }
-        }
-    }
-
-    private class LoadNetworkData extends AsyncTask<Long, Void, Network>{
-
-        @Override
-        protected Network doInBackground(Long... longs) {
-            API.loadAppDatabase(getApplicationContext());
-            return API.Get.network(longs[0]).getPayload();
-        }
-
-        @Override
-        protected void onPostExecute(Network network) {
-            //Update text with network name.
-            if (network != null) {
-                if (network.networkClass) {
-                    networkLabel.setText(getResources().getString(R.string.from) + " " +
-                            network.fromLocation.shortName() + " " +
-                            getResources().getString(R.string.near) + " " +
-                            network.nearLocation.shortName());
-                } else {
-                    networkLabel.setText(network.language.toString() + " " +
-                            getResources().getString(R.string.speakers_in).toString() + " " +
-                            network.nearLocation.shortName());
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (queue != null)
+            queue.cancelAll(new RequestQueue.RequestFilter() {
+                @Override
+                public boolean apply(Request<?> request) {
+                    return true;
                 }
-            }
-            API.closeDatabase();
-        }
+            });
     }
-
 }

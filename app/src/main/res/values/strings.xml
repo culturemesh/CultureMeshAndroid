@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">Culture Mesh</string>
+    <string name="app_name">CultureMesh</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -10,9 +10,10 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_explore_list">ExploreListActivity</string>
     <string name="explore">Explore</string>
+    <string name="explore_header">Near Location</string>
     <string name="join_network">Join Network</string>
+    <string name="network_colon">Network:</string>
     <string name="settings">Settings</string>
     <string name="your_communities">Your Communities</string>
     <string name="help_and_feedback">Help and Feedback</string>
@@ -24,10 +25,10 @@
     <string name="near_location_text">Near:</string>
     <string name="title_activity_choose_near_location">Choose Near Location</string>
     <string name="join_prompt">JOIN</string>
-    <string name="filter_posts">Filter Posts</string>
+    <string name="filter_posts">Display in Feed</string>
+    <string name="tap_discover">Tap to discover the most popular networks!</string>
     <string-array name="filter_choices">
-        <item>Native Posts</item>
-        <item>Twitter Posts</item>
+        <item>Posts</item>
         <item>Events</item>
     </string-array>
     <string name="ok">OK</string>
@@ -49,14 +50,18 @@
     <string name="title_activity_drawer">DrawerActivity</string>
     <string name="title_activity_specific_post">View Post</string>
     <string name="title_activity_explore_bubbles">ExploreBubblesActivity</string>
-    <string name="title_activity_explore_bubbles_open_gl">ExploreBubblesOpenGLActivity</string>
+    <string name="title_activity_explore_bubbles_open_gl">Explore New Networks</string>
     <string name="title_activity_main">MainActivity</string>
 
     <!-- Strings for Event Information; Currently matches Website mostly -->
     <string name="eventProperty_name">Name of Event</string>
     <string name="eventProperty_date">Event Date</string>
     <!-- Address handles the following website fields: Address 1, Address 2, City, Region -->
-    <string name="eventProperty_address">Address</string>
+    <string name="eventProperty_address1">Address Line 1</string>
+    <string name="eventProperty_address2">Address Line 2</string>
+    <string name="eventProperty_city">City</string>
+    <string name="eventProperty_region">Region</string>
+    <string name="eventProperty_country">Country</string>
     <string name="eventProperty_description">What\'s Happening</string>
     <string name="eventProperty_time">Event Start Time</string>
     <string name="createEvent_setTime">Set Start Time</string>
@@ -70,7 +75,7 @@
     <string name="noErrors">noerr</string>
     <!-- Strings for Login and New Account UI -->
     <string name="title_activity_login">Sign In</string>
-    <string name="username">Email</string>
+    <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="sign_in">Sign In</string>
     <string name="need_account">Need Account?</string>
@@ -80,10 +85,14 @@
     <string name="last_name">Last Name</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="loginFailed">Login Failed</string>
+    <string name="authenticationError">There was an authentication error. Please login.</string>
 
     <string name="error">Error</string>
     <string name="genericFail">Oops, something went wrong.</string>
+    <string name="noConnection">There was a problem connecting to Culturemesh. There may be a problem with your internet connection.</string>
+    <string name="timeout">The network request timed out. There may be a problem with your internet connection.</string>
     <string name="genericSuccess">Operation Succeeded!</string>
+    <string name="noNetworkExist">It looks like that network does not exist. You can create one at culturemesh.com.</string>
     <string name="logout">Log Out</string>
     <!-- Strings for onboarding -->
     <string name="title_activity_pick_onboarding_status">Status Picker (For Testing)</string>
@@ -92,6 +101,10 @@
     <string name="cultureMesh_description">CultureMesh helps you connect with nearby people who
         speak your language or come from where you do."</string>
     <string name="networks_explain">Join networks to learn about events and people near you.</string>
+    <string name="find_network_explain_1">Use the sidebar to find a network.</string>
+    <string name="find_network_explain_2">Select a nearby location.</string>
+    <string name="find_network_explain_3">Filter by what you speak or where you are from.</string>
+    <string name="find_network_explain_4">Search for a location or language.</string>
     <string name="ready_question">Ready?</string>
     <string name="lets_start">Let\'s get Started!</string>
     <string name="logIn_signUp">Log In or Sign Up</string>
@@ -100,6 +113,8 @@
     <string name="view_more_comments">View More Comments &#8230;</string>
     <string name="write_comments">Write a Comment &#8230; </string>
     <string name="post">Post</string>
+    <string name="error_writing_post">Error Submitting Post.</string>
+    <string name="error_opening_post">An error occurred when attempting to open the post.</string>
     <string name="cannot_write_empty">Cannot write an empty comment.</string>
     <string name="title_activity_view_profile">View Profile</string>
     <string name="posts">Posts</string>
@@ -112,34 +127,44 @@
     <!-- Strings for help and about pages -->
     <string name="about">About</string>
     <string name="join_success">You successfully joined the network!</string>
+    <string name="success">Success</string>
     <string name="are_you_sure">Are You Sure?</string>
     <string name="leave_network_question">Are you sure you want to leave this network?</string>
     <string name="update_profile">Update Profile</string>
     <string name="updated_profile">Updated Profile!</string>
-    <string name="culturemesh_mission">
-
-        "CultureMesh's Mission\n\n"
-
-        "CultureMesh is building networks to match the real-world dynamics of people living, working "
-        and traveling outside of their home countries to knit the diverse fabrics of our world together."
-
-    </string>
     <string name="about_body" tools:ignore="TypographyOther">
 
-        "Copyright (c) 2017-2018 CultureMesh\n"
-        "https://culturemesh.com\n\n"
-        <!-- TODO: The cultureMesh website link should be clickable -->
+        "<b>About CultureMesh\n\n</b>"
 
-        "Attributions for Third-Party Libraries:\n\n"
+        "CultureMesh is building networks to match the real-world dynamics of people living, working "
+        "and traveling outside of their home countries to knit the diverse fabrics of our world together."
+        "See https://culturemesh.com for more information.\n\n"
 
-        "BubblePicker Copyright (c) 2017 Irina Galata\n\n"
+        "<b>About Code the Change at Stanford\n\n</b>"
+
+        "This app was written on behalf of CultureMesh by Code the Change at Stanford, a student "
+        "group that partners with non-profits to work on software projects for social good.\n"
+        "See https://codethechange.stanford.edu for details.\n\n"
+
+        "Copyright (c) 2017-2018 CultureMesh\n\n"
+
+    </string>
+    <string name="acknowledgements">Acknowledgements</string>
+    <string name="acknowledgements_body" tools:ignore="TypographyOther">
+
+        "This app relies on free and open source work in the following projects:\n\n"
+
+        "<b>BubblePicker</b> Copyright (c) 2017 Irina Galata\n\n"
+
         "Permission is hereby granted, free of charge, to any person obtaining a copy of this "
         "software and associated documentation files (the "Software"), to deal in the Software without "
         "restriction, including without limitation the rights to use, copy, modify, merge, publish, "
         "distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom "
         "the Software is furnished to do so, subject to the following conditions:\n\n"
+
         "The above copyright notice and this permission notice shall be included in all copies or "
         "substantial portions of the Software.\n\n"
+
         "THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, "
         "INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR "
         "PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE "
@@ -147,17 +172,56 @@
         "OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER "
         "DEALINGS IN THE SOFTWARE.\n\n"
 
-        "Ahoy Onboarder Copyright (C) 2016 Code My Brains Out\n\n"
+        "<b>Ahoy Onboarder</b> Copyright (C) 2016 Code My Brains Out\n\n"
+
         "Licensed under the Apache License, Version 2.0 (the "License"); "
         "you may not use this file except in compliance with the License. "
         "You may obtain a copy of the License at\n\n"
+
         "http://www.apache.org/licenses/LICENSE-2.0\n\n"
+
         "Unless required by applicable law or agreed to in writing, software "
         "distributed under the License is distributed on an "AS IS" BASIS, "
         "WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. "
         "See the License for the specific language governing permissions and "
         "limitations under the License.\n\n"
 
+        "<i>This code was used by importing it and using its API without altering its source code.</i>\n\n"
+
     </string>
     <string name="title_activity_settings">Edit Profile</string>
+    <string name="network_error">Network Error. Please try again.</string>
+    <string name="error_joining_network">Error joining network. Please try again.</string>
+    <string name="network_not_found">Network not found.</string>
+    <string name="invalid_format">Invalid Response Format.</string>
+    <string name="no_near_loc">No near location selected. Please choose a near location.</string>
+    <string name="no_account_with_email">No account was found with the provided email address.</string>
+    <string name="passwords_dont_match">Passwords Do Not Match.</string>
+    <string name="display_name">Display Name</string>
+    <string name="about_me">About Me</string>
+    <string name="missingEmail">Missing Email</string>
+    <string name="selectPicture">Select Picture</string>
+    <string name="upload_failure">Upload Failure</string>
+    <string name="upload_sucess">Your profile picture has been updated!</string>
+    <string name="change_picture">Change Profile Picture?</string>
+    <string name="change_picture_prompt">Would you like to upload a new profile picture?</string>
+    <string name="title_activity_acknowledgements">Acknowledgements</string>
+    <string name="loading_text">Looking all over the world for your content &#8230;</string>
+    <string name="retry">Retry</string>
+    <string name="loading">Loading</string>
+    <string name="join_event">Join Event?</string>
+    <string name="would_you_like_to_join_this_event">Would you like to join this event?</string>
+    <string name="leave_event">Leave Event?</string>
+    <string name="would_you_like_to_leave_this_event">Would you like to leave this event?</string>
+    <string name="left_event">You have left the event.</string>
+    <string name="joined_event">You are now attending the event!</string>
+    <string name="attending">You are attending this event.</string>
+    <string name="near_location_clarify">Choose a location near you.</string>
+    <string name="from_location">From Location/Language</string>
+    <string name="from_location_clarify">Choose a location near where you are from or a language that you speak.</string>
+    <string name="you_have_chosen">Your near location:</string>
+    <string name="invalid_near_location">You must choose a location, not a language.</string>
+    <string name="no_posts_make_ur_own">No Posts Yet. Create One!</string>
+
+    <!-- See the ellipses constant in Listable -->
 </resources>

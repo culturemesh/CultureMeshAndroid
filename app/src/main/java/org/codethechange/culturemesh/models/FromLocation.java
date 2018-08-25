@@ -1,74 +1,107 @@
 package org.codethechange.culturemesh.models;
 
-import android.arch.persistence.room.Ignore;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
- * Created by Drew Gregory on 2/19/18.
- * Exact copy of Location, but used as Embedded Entity in SQLite Database.
+ * Wrapper for {@link DatabaseLocation} that is for From locations. See the documentation for
+ * {@link DatabaseLocation} for information as to why this redundancy is necessary. All of these
+ * instance fields will be stored in the local cached database.
  */
+public class FromLocation extends DatabaseLocation {
 
-public class FromLocation {
     /**
-     * When stored in the Database, we will store just the id's. The object returned from the API
-     * will have the country, region, and city updated.
-     * The default value for country, region, city is 0.
+     * Mirrors the {@link Location#countryId} in {@link Location} to avoid collisions in the
+     * database
+     * @see DatabaseLocation
      */
     public long from_country_id;
+
+    /**
+     * Mirrors the {@link Location#regionId} in {@link Location} to avoid collisions in the
+     * database
+     * @see DatabaseLocation
+     */
     public long from_region_id;
+
+    /**
+     * Mirrors the {@link Location#cityId} in {@link Location} to avoid collisions in the
+     * database
+     * @see DatabaseLocation
+     */
     public long from_city_id;
 
-    @Ignore
-    public String from_country;
-    @Ignore
-    public String from_region;
-    @Ignore
-    public String from_city;
+    /**
+     * Constant that holds the JSON key whose value will be the ID of the city ({@link City#cityId})
+     * in communications with the server.
+     * @see Location#Location(JSONObject, String, String, String)
+     */
+    public static final String CITY_ID_KEY = "id_city_origin";
 
-    //TODO: private Point[] points;
+    /**
+     * Constant that holds the JSON key whose value will be the ID of the region
+     * ({@link Region#regionId}) in communications with the server.
+     * @see Location#Location(JSONObject, String, String, String)
+     */
+    public static final String REGION_ID_KEY = "id_region_origin";
 
-    public FromLocation(){
+    /**
+     * Constant that holds the JSON key whose value will be the ID of the country
+     * ({@link Country#countryId}) in communications with the server.
+     * @see Location#Location(JSONObject, String, String, String)
+     */
+    public static final String COUNTRY_ID_KEY = "id_country_origin";
 
-    }
-
-    public FromLocation(String from_country, String from_region, String from_city, Point[] points) {
-        this.from_country = from_country;
-        this.from_region = from_region;
-        this.from_city = from_city;
-        //TODO: this.points = points
-    }
-
+    // TODO: Add constructors for undefined geographical areas (e.g. no region defined)
+    /**
+     * Initialize instance fields with provided parameters
+     * @param cityId ID of city
+     * @param regionId ID of region
+     * @param countryId ID of country
+     */
     public FromLocation(long cityId, long regionId,long countryId) {
-        this.from_country = "";
-        this.from_region = "";
-        this.from_city = "";
-        this.from_city_id = cityId;
-        this.from_country_id = countryId;
-        this.from_region_id = regionId;
+        super(countryId, regionId, cityId);
+        initialize();
     }
 
-
-    public String toString() {
-        String string = "";
-        string += from_country;
-        String region = this.from_region;
-        if (region != null) {
-            string += ", " + region;
-        }
-        if (from_city != null) {
-            string += ", " + from_city;
-        }
-        return string;
+    /**
+     * Initializes instance fields by passing JSON to {@link Location#Location(JSONObject, String, String, String)}
+     * and then initializing instance fields using {@link FromLocation#initialize()}
+     * @param json JSON object describing the location
+     * @throws JSONException May be thrown in response to improperly formatted JSON
+     */
+    public FromLocation(JSONObject json) throws JSONException {
+        super(json, CITY_ID_KEY, REGION_ID_KEY, COUNTRY_ID_KEY);
+        initialize();
     }
 
-    public String shortName() {
-        //We'll return the lowest level location.
-        String city = this.from_city;
-        if (city != null) return city;
-        String region = this.from_region;
-        if (region != null) return region;
-        return this.from_country;
+    /**
+     * Initializes instance fields by passing JSON to {@link Location#Location(JSONObject)} )}
+     * and then initializing instance fields using {@link FromLocation#initialize()}
+     * @param json JSON object describing the location
+     * @throws JSONException May be thrown in response to improperly formatted JSON
+     * @deprecated This is for the old JSON format. Use {@link FromLocation#FromLocation(JSONObject)} instead
+     */
+    @Deprecated
+    public FromLocation(JSONObject json, boolean distinguisher) throws JSONException {
+        super(json);
+        initialize();
+    }
 
+    /**
+     * Empty constructor for database use only. This should never be called by our code.
+     */
+    public FromLocation() {
 
     }
 
+    /**
+     * Initialize this class's instance fields based on those provided and those from superclass
+     * methods. This is what keeps the instance fields in sync with those of Location.
+     */
+    private void initialize() {
+        from_country_id = getCountryId();
+        from_region_id = getRegionId();
+        from_city_id = getCityId();
+    }
 }

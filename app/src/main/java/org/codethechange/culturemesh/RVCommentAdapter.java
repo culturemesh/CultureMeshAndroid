@@ -25,12 +25,23 @@ import org.codethechange.culturemesh.models.PostReply;
 import java.util.List;
 
 /**
- * Created by Dylan Grosz (dgrosz@stanford.edu) on 11/10/17.
+ * Adapter that populates a UI list with comments
  */
 public class RVCommentAdapter extends RecyclerView.Adapter<RVCommentAdapter.PostReplyViewHolder> {
+
+    /**
+     * Comments to show in the list
+     */
     private List<PostReply> comments;
+
+    /**
+     * {@link Context} of the list where the comments are displayed
+     */
     private Context context;
 
+    /**
+     * Holder for the parts of each {@link View} in the list
+     */
     static class PostReplyViewHolder extends RecyclerView.ViewHolder {
         boolean reply = true;
 
@@ -38,16 +49,38 @@ public class RVCommentAdapter extends RecyclerView.Adapter<RVCommentAdapter.Post
             return reply;
         }
 
+        /**
+         * The {@link View} to display a single list item
+         */
         CardView cv;
+
+        /**
+         * Textual components of the display for a single list item
+         */
         TextView personName, username, content, timestamp;
+
+        /**
+         * Image components of the display for a single list item
+         */
         ImageView personPhoto, postTypePhoto;
+
+        /**
+         * Array of image components associated with a list item
+         */
         ImageView[] images;
 
+        /**
+         * Layout within which the list item components are arranged
+         */
         ConstraintLayout layout;
 
         //TODO: Add support for onClick by adding viewholder ConstraintLayout items for
         //TODO: event time and event place.
 
+        /**
+         * Instantiate instance fields with {@link View}s using {@link View#findViewById(int)}
+         * @param itemView Item display whose fields are stored in instance fields
+         */
         PostReplyViewHolder(View itemView) {
             super(itemView);
             cv = itemView.findViewById(R.id.cv_comment);
@@ -64,7 +97,11 @@ public class RVCommentAdapter extends RecyclerView.Adapter<RVCommentAdapter.Post
             layout = itemView.findViewById(R.id.layout_comment);
         }
 
-
+        /**
+         * Attach a listener to an item in the displayed list
+         * @param item Item in the list to bind the listener to
+         * @param listener Listener to bind to the list item
+         */
         public void bind(final PostReply item, final OnItemClickListener listener) {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -73,25 +110,44 @@ public class RVCommentAdapter extends RecyclerView.Adapter<RVCommentAdapter.Post
                 }
             });
         }
-
     }
 
+    /**
+     * Listener to handle clicks on list items
+     */
     private final OnItemClickListener listener;
 
+    /**
+     * Store parameters in instance fields
+     * @param comments List of comments to display in scrollable list to user
+     * @param listener Will be called whenever an item is clicked
+     * @param context {@link Context} within which the list will be displayed
+     */
     public RVCommentAdapter(List<PostReply> comments, OnItemClickListener listener, Context context) {
         this.comments = comments;
-        this.context = context;
         this.listener = listener;
-
     }
 
+    /**
+     * Create a {@link PostReplyViewHolder} for {@code parent} with a {@link View} inflated
+     * from {@link R.layout#comment_view}
+     * @param parent {@link ViewGroup} within which to create the {@link PostReplyViewHolder}
+     * @param viewType Not used
+     * @return The {@link PostReplyViewHolder} associated with the inflated {@link View}
+     */
     @Override
     public PostReplyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.comment_view, parent, false);
         return new PostReplyViewHolder(v);
     }
 
-
+    /**
+     * Fill in the fields of {@code pvh} with the information stored in the {@link PostReply} at
+     * position {@code i} in the list of comments
+     * @param pvh {@link View} in the list whose fields will be filled-in
+     * @param i Index of {@link PostReply} in {@link RVCommentAdapter#comments} to use as the source
+     *          of information to fill with
+     */
     @Override
     public void onBindViewHolder(PostReplyViewHolder pvh, int i) {
         final PostReply comment = comments.get(i);
@@ -99,29 +155,36 @@ public class RVCommentAdapter extends RecyclerView.Adapter<RVCommentAdapter.Post
         try{
             String name = comment.author.getFirstName() + " " + comment.author.getLastName();
             pvh.personName.setText(name);
-            pvh.content.setText(FormatManager.parseText(comment.replyText));
+            pvh.content.setText(FormatManager.parseText(comment.replyText, "#FFFFFF"));
             pvh.postTypePhoto.setImageDrawable(null /* logic flow depending on post source */);
             pvh.timestamp.setText(comment.replyDate);
             pvh.username.setText(comment.author.getUsername());
             pvh.bind(comment, listener);
-
-            //TODO: Picasso isn't loading all the images. Figure that out.
             Picasso.with(pvh.personPhoto.getContext()).load(comment.author.getImgURL()).
                     into(pvh.personPhoto);
             Log.i("Image Link", comment.author.getImgURL());
         } catch(ClassCastException e) {
             //error oh no
         }
-
     }
 
-
-
+    /**
+     * Interface implemented by any listener for item clicks
+     */
     public interface OnItemClickListener {
+
+        /**
+         * Handles clicks on a list item
+         * @param item Item in the list that was clicked
+         */
         void onCommentClick(PostReply item);
         //add more custom click functions here e.g. long click
     }
 
+    /**
+     * Get the number of comments in the list
+     * @return Number of comments in list
+     */
     @Override
     public int getItemCount() {
         return comments.size();

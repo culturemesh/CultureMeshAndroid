@@ -13,13 +13,19 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
+
 import org.codethechange.culturemesh.models.User;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,29 +39,59 @@ import java.util.Objects;
  */
 public class ViewUsersModalSheetFragment extends BottomSheetDialogFragment{
 
-    public static final String USER_NAMES = "usernames", IMAGE_URLS = "imgurls", USER_IDS ="userids";
+    /**
+     * Keys for values passed as arguments to the fragment
+     */
+    public static final String NETWORK_ID = "id";
 
-    private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback = new BottomSheetBehavior.BottomSheetCallback() {
+    /**
+     * Queue for asynchronous tasks
+     */
+    RequestQueue queue;
 
+    /**
+     * Handles interactions with the list of subscribed users
+     */
+    private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback =
+            new BottomSheetBehavior.BottomSheetCallback() {
+
+                /**
+                 * If the {@code newState} is equal to {@link BottomSheetBehavior#STATE_HIDDEN},
+                 * dismiss.
+                 * @param bottomSheet
+                 * @param newState
+                 */
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
             if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                 dismiss();
             }
-
         }
 
+                /**
+                 * Does nothing
+                 * @param bottomSheet {@inheritDoc}
+                 * @param slideOffset {@inheritDoc}
+                 */
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
         }
     };
 
-
+    /**
+     * Create and configure {@link View} from {@link R.layout#rv_container}. Populate the fields
+     * in that {@link View} with the result of
+     * {@link API.Get#networkUsers(RequestQueue, long, Response.Listener)}
+     * @param dialog {@link Dialog} whose contents will be set using the {@link View} inflated from
+     *                             {@link R.layout#rv_container}
+     * @param style Not used
+     */
     @Override
     public void setupDialog(Dialog dialog, int style) {
         View contentView = View.inflate(getContext(), R.layout.rv_container, null);
         dialog.setContentView(contentView);
-        contentView.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        contentView.setBackgroundColor(getResources().getColor(R.color.white));
+        queue = Volley.newRequestQueue(getActivity());
         //This view originally has it's width and height to match_parent... let's programmatically
         //set its height.
         FrameLayout.LayoutParams fragParams = (FrameLayout.LayoutParams) contentView.getLayoutParams();
@@ -64,20 +100,31 @@ public class ViewUsersModalSheetFragment extends BottomSheetDialogFragment{
         fragParams.height = (int) (screenDimens.y * .7);
         contentView.setLayoutParams(fragParams);
         RecyclerView rv = contentView.findViewById(R.id.rv);
-        long[] userIDs = getArguments().getLongArray(USER_IDS);
-        RecyclerView.Adapter adapter = new UsersListAdapter(getActivity(),
-                Objects.requireNonNull(getArguments().getStringArrayList(USER_NAMES)),
-                Objects.requireNonNull(getArguments().getStringArrayList(IMAGE_URLS)),
-                userIDs);
+        rv.setNestedScrollingEnabled(false);
+        final UsersListAdapter adapter = new UsersListAdapter(getActivity(),new ArrayList<User>());
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
-        TextView emptyText = contentView.findViewById(R.id.empty_text);
-        if (userIDs.length == 0) {
-            emptyText.setText(getResources().getString(R.string.no_users));
-        } else {
-            emptyText.setVisibility(View.GONE);
-        }
+        final TextView emptyText = contentView.findViewById(R.id.empty_text);
+        emptyText.setText(getResources().getString(R.string.loading));
+        Log.i("ViewUsers", "in Fragment on Create View");
+        Log.i("SEL NETWORK", Long.parseLong(getArguments().getString(NETWORK_ID)) + "");
+        API.Get.networkUsers(queue, Long.parseLong(getArguments().getString(NETWORK_ID)), new Response.Listener<NetworkResponse<ArrayList<User>>>() {
+            @Override
+            public void onResponse(NetworkResponse<ArrayList<User>> response) {
+                if (response.fail()) {
+                    response.showErrorDialog(getActivity());
+                } else {
+                    if (response.getPayload().size() == 0) {
+                        emptyText.setText(getResources().getString(R.string.no_users));
+                    } else {
+                        adapter.getUsers().addAll(response.getPayload());
+                        adapter.notifyDataSetChanged();
+                        emptyText.setVisibility(View.GONE);
+                    }
 
+                }
+            }
+        });
         CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams)
                 ((View) contentView.getParent()).getLayoutParams();
         CoordinatorLayout.Behavior behavior = params.getBehavior();
@@ -85,6 +132,5 @@ public class ViewUsersModalSheetFragment extends BottomSheetDialogFragment{
         if( behavior != null && behavior instanceof BottomSheetBehavior ) {
             ((BottomSheetBehavior) behavior).setBottomSheetCallback(mBottomSheetBehaviorCallback);
         }
-
     }
 }

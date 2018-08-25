@@ -5,55 +5,46 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.media.Image;
-import android.os.AsyncTask;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 
 import static android.view.View.GONE;
+import java.util.List;
 
-
-import org.codethechange.culturemesh.models.User;
-
-import java.util.ArrayList;
+import org.codethechange.culturemesh.models.Language;
+import org.codethechange.culturemesh.models.Location;
+import org.codethechange.culturemesh.models.Network;
 
 public class FindNetworkActivity extends DrawerActivity {
 
-    //TODO: Replace these with Location Objects.
-    static String nearLocation = "Stanford";
-    static String fromLocation;
-
+    /**
+     * The user's chosen {@link Location} they are near
+     */
+    static Location near;
     public final int REQUEST_NEW_NEAR_LOCATION = 1;
 
-    //TODO: Replace dummy data with real data
-    private static ArrayList<String> dummy = new ArrayList<String>();
+    /**
+     * Queue to hold asynchronous tasks
+     */
+    static RequestQueue queue;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -70,18 +61,26 @@ public class FindNetworkActivity extends DrawerActivity {
      */
     private ViewPager mViewPager;
 
-    /*
+    /**
      * The {@link SearchManager} that will associate the SearchView with our search config.
      */
     private static SearchManager mSearchManager;
 
+    /**
+     * Button that leads to the {@link ChooseNearLocationActivity}
+     */
     private Button nearButton;
 
+    /**
+     * Setup the activity based on content specified in {@link R.layout#activity_find_network}. See
+     * code comments for details on implementation.
+     * @param savedInstanceState Previous state that is passed to superclass.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_network);
-
+        queue = Volley.newRequestQueue(this);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -109,31 +108,55 @@ public class FindNetworkActivity extends DrawerActivity {
                 startActivityForResult(chooseNewNear, REQUEST_NEW_NEAR_LOCATION);
             }
         });
-
-
     }
 
+    /**
+     * When the user has chosen a near location using {@link ChooseNearLocationActivity}, this
+     * method is called by the {@link Intent} that launched the near location chooser with the
+     * result of the user's selection. If they did indeed choose a location, that location is saved
+     * and the button text is updated to reflect the location's name.
+     * @param requestCode Status code that indicates a location was chosen if it equals
+     *                    {@link ChooseNearLocationActivity#RESULT_OK}
+     * @param resultCode {@inheritDoc}
+     * @param data Passed to superclass, but the value associated with
+     *             {@link ChooseNearLocationActivity#CHOSEN_PLACE}, which should be the location
+     *             the user chose, is extracted if {@code requestCode} indicates they made a choice
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //TODO: Implement how I receive data. Replace dummy stuff with legit stuff.
-        nearLocation = data.getStringExtra(ChooseNearLocationActivity.CHOSEN_LOCATION);
-        nearButton.setText(nearLocation);
+        if (resultCode == ChooseNearLocationActivity.RESULT_OK) {
+            near = (Location) data.getSerializableExtra(ChooseNearLocationActivity.CHOSEN_PLACE);
+            nearButton.setText(near.getListableName());
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onResume() {
         //TODO: Implement when change nearby location: also consider onResumeFragments()
         super.onResume();
     }
 
+    /**
+     * Inflate the menu; this adds items to the action bar if it is present.
+     * @param menu Menu to create
+     * @return Always returns {@code true}
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_find_network, menu);
         return true;
     }
 
+    /**
+     * Handles clicks to the action bar.
+     * @param item {@inheritDoc}
+     * @return {@code true} if the item ID is that of {@link R.id#action_settings}. Otherwise,
+     * superclass {@code onOptionsItemSelected} is called and the resulting value is returned.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -155,9 +178,20 @@ public class FindNetworkActivity extends DrawerActivity {
     public static class FindLocationFragment extends Fragment implements
             SearchView.OnQueryTextListener {
 
-
+        /**
+         * The displayed list of search results
+         */
         private ListView searchList;
-        private ArrayAdapter<String> adapter;
+
+        /**
+         * The adapter that populates {@link FindLocationFragment#searchList} with results
+         */
+        private SearchAdapter<Location> adapter;
+
+        /**
+         * The field into which user enters search queries
+         */
+        private SearchView searchView;
 
         /**
          * The fragment argument representing the section number for this
@@ -165,6 +199,9 @@ public class FindNetworkActivity extends DrawerActivity {
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
+        /**
+         * Empty constructor that does nothing.
+         */
         public FindLocationFragment() {
         }
 
@@ -180,73 +217,113 @@ public class FindNetworkActivity extends DrawerActivity {
             return fragment;
         }
 
+        /**
+         * Create the displayed fragment.
+         * @param inflater Creates the user interface from {@link R.layout#fragment_find_location}
+         * @param container Parent container to attach inflated {@link View} to
+         * @param savedInstanceState Previous state that is not used.
+         * @return The inflated view to display.
+         */
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             // Get the intent, verify the action and get the query
             View rootView = inflater.inflate(R.layout.fragment_find_location, container,
                     false);
-            SearchView searchView = rootView.findViewById(R.id.from_location_search_view);
+
+            searchView = rootView.findViewById(R.id.from_location_search_view);
             searchView.setOnQueryTextListener(this);
             searchView.setSearchableInfo(mSearchManager.
                     getSearchableInfo(getActivity().getComponentName()));
             searchList = rootView.findViewById(R.id.search_suggestions_list_view);
-            //TODO: Remove dummy data
-            //TODO: Use abstracted API interface.
 
-            dummy.add("Sample Location Network 1");
-            adapter = new LocationSearchAdapter(getActivity(),
-                    android.R.layout.simple_list_item_1, dummy);
+            adapter = new SearchAdapter<>(getActivity(),
+                    android.R.layout.simple_list_item_1, R.id.location_language_name_list_view);
             searchList.setTextFilterEnabled(true);
             searchList.setAdapter(adapter);
             searchList.setOnItemClickListener(new ListView.OnItemClickListener() {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    //TODO: Replace this lame thing.
-                    getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
-                            .putLong(API.SELECTED_NETWORK, 0).apply();
-                    startActivity(new Intent(getActivity(), TimelineActivity.class));
-                    /*TODO: Do a prompt.
-                    final ConstraintLayout promptView = (ConstraintLayout)
-                            getActivity().findViewById(R.id.prompt_join_network_view);
-                    fromLocation = (String) parent.getItemAtPosition(position);
-                    TextView fromTV = (TextView)
-                            promptView.findViewById(R.id.prompt_from_location_text_view);
-                    fromTV.setText(fromLocation.split(",")[0]);
-                    TextView nearTV = (TextView)
-                            promptView.findViewById(R.id.prompt_near_location_text_view);
-                    nearTV.setText(nearLocation.split(",")[0]);
-                    promptView.setVisibility(View.VISIBLE);
-                    ImageButton cancel = (ImageButton)
-                            promptView.findViewById(R.id.cancel_prompt_button);
-                    cancel.setOnClickListener(new View.OnClickListener() {
+                    final Location from = adapter.getItem(position);
+                    if (near == null) {
+                        final AlertDialog dialog = new AlertDialog.Builder(getContext()).create();
+                        dialog.setTitle(getContext().getString(R.string.error));
+                        dialog.setMessage(getContext().getString(R.string.no_near_loc));
+                        dialog.setButton(AlertDialog.BUTTON_NEUTRAL, getContext().getString(R.string.ok), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialog.dismiss()
+;                            }
+                        });
+                        dialog.show();
+                        return;
+                    }
+                    API.Get.netFromFromAndNear(queue, from.getFromLocation(), near.getNearLocation(),
+                            new Response.Listener<NetworkResponse<Network>>() {
                         @Override
-                        public void onClick(View v) {
-                            promptView.setVisibility(GONE);
+                        public void onResponse(NetworkResponse<Network> response) {
+                            if (response.fail()) {
+                                response.showErrorDialog(getContext());
+                            } else {
+                                getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
+                                        .putLong(API.SELECTED_NETWORK, response.getPayload().id).apply();
+                                startActivity(new Intent(getActivity(), TimelineActivity.class));
+                            }
                         }
-                    });*/
+                    });
                 }
             });
             return rootView;
-
         }
 
+        /**
+         * When the user submits a query, call {@link FindLocationFragment#search()}
+         * @param query Query text that is discarded.
+         * @return Always returns {@code true}
+         */
         @Override
         public boolean onQueryTextSubmit(String query) {
-            return false;
-        }
-
-        @Override
-        public boolean onQueryTextChange(String newText) {
-            Toast.makeText(getActivity(), "Changing text", Toast.LENGTH_LONG).show();
-            adapter.getFilter().filter(newText);
-            if (searchList.getVisibility() == GONE) {
-                searchList.setVisibility(View.VISIBLE);
-            }
-            //searchList.setAdapter(adapter);
+            search();
             return true;
         }
+
+        /**
+         * Use {@link API.Get#autocompletePlace(RequestQueue, String, Response.Listener)} to get
+         * autocomplete results for the user's query. Pass those results to
+         * {@link FindLocationFragment#adapter}, which will then populate
+         * {@link FindLocationFragment#searchList}
+         */
+        public void search() {
+            String query = searchView.getQuery().toString();
+            API.Get.autocompletePlace(queue, query, new Response.Listener<NetworkResponse<List<Location>>>() {
+                @Override
+                public void onResponse(NetworkResponse<List<Location>> response) {
+                    if (response.fail()) {
+                        response.showErrorDialog(getContext());
+                    } else {
+                        adapter.clear();
+                        adapter.addAll(response.getPayload());
+                        if (searchList.getVisibility() == GONE) {
+                            searchList.setVisibility(View.VISIBLE);
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            });
+        }
+
+        /**
+         * When the query text changes, do nothing to avoid expensive API calls.
+         * @param newText The updated query text.
+         * @return Always returns {@code true}.
+         */
+        @Override
+        public boolean onQueryTextChange(String newText) {
+            return true;
+        }
+
+
     }
 
 
@@ -256,9 +333,20 @@ public class FindNetworkActivity extends DrawerActivity {
     public static class FindLanguageFragment extends Fragment implements
             SearchView.OnQueryTextListener {
 
-
+        /**
+         * The displayed list of search results
+         */
         private ListView searchList;
-        private ArrayAdapter<String> adapter;
+
+        /**
+         * The adapter that populates {@link FindLanguageFragment#searchList} with results
+         */
+        private SearchAdapter<Language> adapter;
+
+        /**
+         * The field into which user enters search queries
+         */
+        private SearchView searchView;
 
         /**
          * The fragment argument representing the section number for this
@@ -266,6 +354,9 @@ public class FindNetworkActivity extends DrawerActivity {
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
+        /**
+         * Empty constructor that does nothing.
+         */
         public FindLanguageFragment() {
         }
 
@@ -281,92 +372,137 @@ public class FindNetworkActivity extends DrawerActivity {
             return fragment;
         }
 
+        /**
+         * Create the displayed fragment.
+         * @param inflater Creates the user interface from {@link R.layout#fragment_find_language}
+         * @param container Parent container to attach inflated {@link View} to
+         * @param savedInstanceState Previous state that is not used.
+         * @return The inflated view to display.
+         */
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             // Get the intent, verify the action and get the query
             View rootView = inflater.inflate(R.layout.fragment_find_language, container,
                     false);
-            ArrayList<String> dummyLanguages = new ArrayList<String>();
-            SearchView searchView = rootView.findViewById(R.id.from_language_search_view);
+            searchView = rootView.findViewById(R.id.from_language_search_view);
             searchView.setOnQueryTextListener(this);
             searchView.setSearchableInfo(mSearchManager.
                     getSearchableInfo(getActivity().getComponentName()));
             searchList = rootView.findViewById(R.id.search_suggestions_list_view);
-            //TODO: Remove dummy data
-            //TODO: Use abstracted API interface.
 
-            dummyLanguages.add("Sample Language 1");
+            adapter = new SearchAdapter<>(getActivity(), android.R.layout.simple_list_item_1,
+                    R.id.location_language_name_list_view);
 
-            adapter = new LocationSearchAdapter(getActivity(),
-                    android.R.layout.simple_list_item_1, dummyLanguages);
             searchList.setTextFilterEnabled(true);
             searchList.setAdapter(adapter);
             searchList.setOnItemClickListener(new ListView.OnItemClickListener() {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
-                            .putLong(API.SELECTED_NETWORK, 1).apply();
-                    startActivity(new Intent(getActivity(), TimelineActivity.class));
-                    /**TODO: Possibly use this prompt code.
-                    final ConstraintLayout promptView = (ConstraintLayout)
-                            getActivity().findViewById(R.id.prompt_join_language_network_view);
-                    String fromLanguage = (String) parent.getItemAtPosition(position);
-                    TextView fromTV = (TextView)
-                            promptView.findViewById(R.id.prompt_from_language_text_view);
-                    fromTV.setText(fromLanguage.split(",")[0]);
-                    TextView nearTV = (TextView)
-                            promptView.findViewById(R.id.prompt_language_near_location_text_view);
-                    nearTV.setText(nearLocation.split(",")[0]);
-                    promptView.setVisibility(View.VISIBLE);
-                    ImageButton cancel = (ImageButton)
-                            promptView.findViewById(R.id.cancel_prompt_button);
-                    cancel.setOnClickListener(new View.OnClickListener() {
+                    if (near == null) {
+                        final AlertDialog dialog = new AlertDialog.Builder(getContext()).create();
+                        dialog.setTitle(getContext().getString(R.string.error));
+                        dialog.setMessage(getContext().getString(R.string.no_near_loc));
+                        dialog.setButton(AlertDialog.BUTTON_NEUTRAL, getContext().getString(R.string.ok), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.show();
+                        return;
+                    }
+                    Language l = adapter.getItem(position);
+                    API.Get.netFromLangAndNear(queue, l, near.getNearLocation(), new Response.Listener<NetworkResponse<Network>>() {
                         @Override
-                        public void onClick(View v) {
-                            promptView.setVisibility(GONE);
+                        public void onResponse(NetworkResponse<Network> response) {
+                            if (response.fail()) {
+                                response.showErrorDialog(getContext());
+                            } else {
+                                getActivity().getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE).edit()
+                                        .putLong(API.SELECTED_NETWORK, response.getPayload().id).apply();
+                                startActivity(new Intent(getActivity(), TimelineActivity.class));
+                            }
                         }
-                    });**/
+                    });
                 }
             });
             return rootView;
-
         }
 
+        /**
+         * Use {@link API.Get#autocompleteLanguage(RequestQueue, String, Response.Listener)} to get
+         * autocomplete results for the user's query. Pass those results to
+         * {@link FindLanguageFragment#adapter}, which will then populate
+         * {@link FindLanguageFragment#searchList}
+         */
+        public void search() {
+            String query = searchView.getQuery().toString();
+            API.Get.autocompleteLanguage(queue, query, new Response.Listener<NetworkResponse<List<Language>>>() {
+                @Override
+                public void onResponse(NetworkResponse<List<Language>> response) {
+                    if (response.fail()) {
+                        response.showErrorDialog(getActivity());
+                    } else {
+                        adapter.clear();
+                        adapter.addAll(response.getPayload());
+                        if (searchList.getVisibility() == GONE) {
+                            searchList.setVisibility(View.VISIBLE);
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            });
+        }
+
+        /**
+         * When the user submits a query, call {@link FindLanguageFragment#search()}
+         * @param query Query text that is discarded.
+         * @return Always returns {@code true}
+         */
         @Override
         public boolean onQueryTextSubmit(String query) {
-            return false;
-        }
-
-        @Override
-        public boolean onQueryTextChange(String newText) {
-            Toast.makeText(getActivity(), "Changing text", Toast.LENGTH_LONG).show();
-            adapter.getFilter().filter(newText);
-            if (searchList.getVisibility() == GONE) {
-                searchList.setVisibility(View.VISIBLE);
-            }
-            //searchList.setAdapter(adapter);
+            search();
             return true;
         }
 
+        /**
+         * When the query text changes, do nothing to avoid expensive API calls.
+         * @param newText The updated query text.
+         * @return Always returns {@code true}.
+         */
+        @Override
+        public boolean onQueryTextChange(String newText) {
+            return true;
+        }
     }
 
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
+     * one of the two available tabs: {@code From}, for location-based networks, and {@code Speaks},
+     * for language-based networks.
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+        /**
+         * {@inheritDoc}
+         * @param fm {@inheritDoc}
+         */
         SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
+        /**
+         * Get the appropriate fragment depending on which tab is selected
+         * @param position Either {@code 0}, for {@code near} or {@code 1}, for {@code speaks}
+         * @return {@link FindLocationFragment} for {@code position=1}, {@link FindLanguageFragment}
+         * otherwise.
+         */
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
             switch (position) {
                 case 0:
                     return FindLocationFragment.newInstance(0);
@@ -374,12 +510,21 @@ public class FindNetworkActivity extends DrawerActivity {
             return FindLanguageFragment.newInstance(1);
         }
 
+        /**
+         * Always returns {@code 2} because there are 2 tabs
+         * @return Always {@code 2}
+         */
         @Override
         public int getCount() {
             // Show 2 total pages.
             return 2;
         }
 
+        /**
+         * Get the titles for each tab
+         * @param position Position of tab to get name of ({@code 0} or {@code 1})
+         * @return Reference to name of tab
+         */
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
@@ -390,6 +535,22 @@ public class FindNetworkActivity extends DrawerActivity {
             }
             return null;
         }
+    }
+
+    /**
+     * This ensures that we are canceling all network requests if the user is leaving this activity.
+     * We use a RequestFilter that accepts all requests (meaning it cancels all requests)
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (queue != null)
+            queue.cancelAll(new RequestQueue.RequestFilter() {
+                @Override
+                public boolean apply(Request<?> request) {
+                    return true;
+                }
+            });
     }
 
 }

@@ -8,3 +8,11 @@
 /captures
 .externalNativeBuild
 .idea
+# Hide CultureMesh API Key
+app/src/main/java/org/codethechange/culturemesh/Credentials.java
+# Hide Fabirc API Key and Secret
+app/fabric.properties
+# Cache files are for local use only
+docs/cache
+# Designed to be built using readthedocs.org, so built HTML not needed
+docs/build

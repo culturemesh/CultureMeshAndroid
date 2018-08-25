@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp">
 
     <ImageView
         android:id="@+id/profile_picture"
@@ -23,7 +23,8 @@
         android:layout_marginBottom="8dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:textColor="@color/white"
+        android:textColor="@color/colorPrimaryDark"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/profile_picture"
         app:layout_constraintStart_toEndOf="@+id/profile_picture"
         app:layout_constraintTop_toTopOf="@+id/profile_picture" />
@@ -31,5 +32,8 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/darkBackground"/>
+        android:background="@color/colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </android.support.constraint.ConstraintLayout>

@@ -4,26 +4,22 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Display;
 
 import com.codemybrainsout.onboarder.AhoyOnboarderActivity;
 import com.codemybrainsout.onboarder.AhoyOnboarderCard;
 
-import org.codethechange.bubblepicker.rendering.BubblePicker;
-import org.codethechange.culturemesh.models.Network;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Introduce user to the app through a series of informational screens that end with a button
  * that redirects the user to a login page
  */
 public class OnboardActivity extends AhoyOnboarderActivity {
+
+    private static final double ICON_SCALE = 0.7;
 
     /**
      * Generate onboarding pages and display them
@@ -33,13 +29,27 @@ public class OnboardActivity extends AhoyOnboarderActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Point size = new Point();
+        Display disp = getWindowManager().getDefaultDisplay();
+        disp.getSize(size);
+
+        int icon_dim = (int) Math.round(Math.min(size.x, size.y) * ICON_SCALE);
+
         List<AhoyOnboarderCard> pages = new ArrayList<>();
         pages.add(makeCard(getString(R.string.welcome), getString(R.string.cultureMesh_description),
-                R.drawable.logo_header, 500, 500));
+                R.drawable.logo_header, icon_dim, icon_dim));
         pages.add(makeCard(getString(R.string.networks), getString(R.string.networks_explain),
-                R.drawable.ic_people_outline_white_24px, 500, 500));
+                R.drawable.ic_people_outline_white_24px, icon_dim, icon_dim));
+        pages.add(makeCard("", getString(R.string.find_network_explain_1),
+                R.mipmap.ic_onboard_find_network_1_foreground, icon_dim, icon_dim));
+        pages.add(makeCard("", getString(R.string.find_network_explain_2),
+                R.mipmap.ic_onboard_find_network_2_foreground, icon_dim, icon_dim));
+        pages.add(makeCard("", getString(R.string.find_network_explain_3),
+                R.mipmap.ic_onboard_find_network_3_foreground, icon_dim, icon_dim));
+        pages.add(makeCard("", getString(R.string.find_network_explain_4),
+                R.mipmap.ic_onboard_find_network_4_foreground, icon_dim, icon_dim));
         pages.add(makeCard(getString(R.string.ready_question), getString(R.string.lets_start),
-                R.drawable.ic_public_black_24dp, 500, 500));
+                R.drawable.ic_public_black_24dp, icon_dim, icon_dim));
 
         setGradientBackground();
 
@@ -115,34 +125,12 @@ public class OnboardActivity extends AhoyOnboarderActivity {
             // User is coming from the login activity
             if (response == Activity.RESULT_OK) {
                 Intent launchNext;
-
-                SharedPreferences settings = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
-                // TODO: What does the "1" here do?
-                long currUser = settings.getLong(API.CURRENT_USER, 1);
-                if (ApiUtils.hasJoinedNetwork(currUser, new checkJoinedNetworks())) {
-                    launchNext = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
-                } else {
-                    launchNext = new Intent(getApplicationContext(), TimelineActivity.class);
-                }
+                launchNext = new Intent(getApplicationContext(), TimelineActivity.class);
                 startActivity(launchNext);
+                finish();
             }
             // else do nothing, as login failed or they did not log in
         }
     }
 
-    private class checkJoinedNetworks extends AsyncTask<Long, Void, NetworkResponse<ArrayList<Network>>> {
-        @Override
-        protected NetworkResponse<ArrayList<Network>> doInBackground(Long... longs) {
-            API.loadAppDatabase(getApplicationContext());
-            long currUser = longs[0];
-            NetworkResponse<ArrayList<Network>> responseNetworks = API.Get.userNetworks(currUser);
-            return responseNetworks;
-        }
-
-        @Override
-        protected void onPostExecute(NetworkResponse<ArrayList<Network>> arrayListNetworkResponse) {
-            super.onPostExecute(arrayListNetworkResponse);
-            API.closeDatabase();
-        }
-    }
 }

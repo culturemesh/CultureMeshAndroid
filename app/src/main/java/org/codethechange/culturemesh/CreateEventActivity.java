@@ -3,7 +3,7 @@ package org.codethechange.culturemesh;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.os.AsyncTask;
+import android.content.SharedPreferences;
 import android.support.v4.app.DialogFragment;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
@@ -17,23 +17,87 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import org.codethechange.culturemesh.models.Event;
-import org.codethechange.culturemesh.models.Language;
-import org.codethechange.culturemesh.models.User;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 
+import org.codethechange.culturemesh.models.Event;
+
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * Screen through which users can create an event in their currently selected network
+ */
 public class CreateEventActivity extends AppCompatActivity {
 // TODO: Have address search in google maps (Requires API Key?)
+
+    /**
+     * System-generated pop-up window that allows for selection of a date for the event.
+     * @see CreateEventActivity.DatePickerFragment
+     */
     private DatePickerFragment dateFrag;
+
+    /**
+     * System-generated pop-up window that allows for selection of a time for the event
+     * @see CreateEventActivity.TimePickerFragment
+     */
     private TimePickerFragment timeFrag;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
     private TextView dateRef;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
     private TextView timeRef;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
     private EditText nameRef;
-    private EditText addressRef;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
+    private EditText address1Ref;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
+    private EditText address2Ref;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
+    private EditText cityRef;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
+    private EditText regionRef;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
+    private EditText countryRef;
+
+    /**
+     * Reference to the similarly-named UI element
+     */
     private EditText descriptionRef;
 
+    /**
+     * Queue for asynchronous processes
+     */
+    private RequestQueue queue;
+
+    /**
+     * Reference to this activity ({@link CreateEventActivity})
+     */
     private Activity myActivity = this;
 
     /**
@@ -43,13 +107,20 @@ public class CreateEventActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        queue = Volley.newRequestQueue(getApplicationContext());
         setContentView(R.layout.activity_create_event);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        queue = Volley.newRequestQueue(CreateEventActivity.this);
+
         nameRef = findViewById(R.id.eventName);
-        addressRef = findViewById(R.id.eventAddress);
+        address1Ref = findViewById(R.id.eventAddress1);
+        address2Ref = findViewById(R.id.eventAddress2);
+        cityRef = findViewById(R.id.eventCity);
+        regionRef = findViewById(R.id.eventRegion);
+        countryRef = findViewById(R.id.eventCountry);
         descriptionRef = findViewById(R.id.eventDescription);
         dateRef = findViewById(R.id.eventDate);
         timeRef = findViewById(R.id.eventTime);
@@ -92,20 +163,53 @@ public class CreateEventActivity extends AppCompatActivity {
 
             // Declare variables for Event() arguments
             Date date = c.getTime();
+            String timeOfEvent = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(date);
             String name = nameRef.getText().toString();
-            String address = addressRef.getText().toString();
+            String address1 = address1Ref.getText().toString();
+            String address2 = address2Ref.getText().toString();
+            String city = cityRef.getText().toString();
+            String region = regionRef.getText().toString();
+            String country = countryRef.getText().toString();
             String description = descriptionRef.getText().toString();
-            // TODO: Let the user select a language (from a menu? arbitrarily?)
-            Language lang = new Language(12, "TempLanguage", 21);
-            // TODO: Get the User object for the current user
-            User author = null;
-            // Create Event TODO: deal with arbitrary id. Perhaps it doesn't matter cuz API.Post(event)
-            // should take care of it?
-            long networkId = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE)
-                    .getLong(API.SELECTED_NETWORK, 1);
-            Event event = new Event((long)(Math.random() * 10000), networkId, name, description, date.toString(), 1, address);
+
+            SharedPreferences prefs = getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE);
+            long networkId = prefs.getLong(API.SELECTED_NETWORK, -1);
+            long authorId = prefs.getLong(API.CURRENT_USER, -1);
+
+            if (address1.isEmpty()) {
+                address1 = Event.NOWHERE;
+            }
+            if (address2.isEmpty()) {
+                address2 = Event.NOWHERE;
+            }
+            if (city.isEmpty()) {
+                city = Event.NOWHERE;
+            }
+            if (region.isEmpty()) {
+                region = Event.NOWHERE;
+            }
+            if (country.isEmpty()) {
+                country = Event.NOWHERE;
+            }
+
+            Event event = new Event(-1, networkId, name, description,
+                    timeOfEvent, authorId, address1, address2, city, region, country);
             // POST Event with AsyncTask
-            new PostEvent().execute(event);
+            final ProgressBar progressBar = findViewById(R.id.eventPostProgressBar);
+            progressBar.setIndeterminate(true);
+            API.Post.event(queue, event,
+                    getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
+                    new Response.Listener<NetworkResponse<String>>() {
+                @Override
+                public void onResponse(NetworkResponse<String> response) {
+                    if (response.fail()) {
+                        response.showErrorDialog(myActivity);
+                        progressBar.setIndeterminate(false);
+                    } else {
+                        finish();
+                    }
+                }
+            });
         }
     }
 
@@ -137,9 +241,6 @@ public class CreateEventActivity extends AppCompatActivity {
             return false;
         } else if (descriptionRef.getText().toString().isEmpty()) {
             descriptionRef.setError(getString(R.string.createEvent_missingDescription));
-            return false;
-        } else if (addressRef.getText().toString().isEmpty()) {
-            addressRef.setError(getString(R.string.createEvent_missingAddress));
             return false;
         } else
             return true;
@@ -200,7 +301,7 @@ public class CreateEventActivity extends AppCompatActivity {
                     amPm = " AM";
                 }
             }
-            String time = inHour + ":" + inMin + amPm;
+            String time = String.format("%02d:%02d %s", inHour, minute, amPm);
             // SOURCE: https://stackoverflow.com/questions/26917564/set-textview-to-time-from-timepicker-android?rq=1
             // Get eventTime from the activity
             TextView textView = getActivity().findViewById(R.id.eventTime);
@@ -347,63 +448,4 @@ public class CreateEventActivity extends AppCompatActivity {
             return isSet;
         }
     }
-
-    /**
-     * AsyncTask class to handle network latency when POSTing event
-     */
-    private class PostEvent extends AsyncTask<Event, Integer, NetworkResponse> {
-
-        ProgressBar progressBar;
-
-        /**
-         * In the background, POST an event
-         * @param events Arbitrary number of events, the first of which will be POSTed
-         * @return NetworkResponse containing the results of the network operation
-         */
-        @Override
-        protected NetworkResponse doInBackground(Event... events) {
-            API.loadAppDatabase(getApplicationContext());
-            return API.Post.event(events[0]);
-        }
-
-        /**
-         * Over the course of the POST operation, provided progress updates (nonfunctional)
-         * @param values Values indicating progress
-         */
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-            // Uncomment when getting status of API
-            // progressBar.setProgress(values[0]);
-        }
-
-        /**
-         * Makes the progress bar indeterminate
-         */
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressBar = findViewById(R.id.eventPostProgressBar);
-            progressBar.setIndeterminate(true); // Only because cannot get status from API
-        }
-
-        /**
-         * If POSTing succeeded: Closes the activity and returns the user to the previous screen
-         * If POSTing failed: Displays error dialog and returns user to composing screen
-         * @param response Status of doInBackground method that represents whether POSTing succeeded
-         */
-        @Override
-        protected void onPostExecute(NetworkResponse response) {
-            super.onPostExecute(response);
-            // SOURCE: https://stackoverflow.com/questions/4038479/android-go-back-to-previous-activity
-            API.closeDatabase();
-            if (response.fail()) {
-                response.showErrorDialog(myActivity);
-                progressBar.setIndeterminate(false);
-            } else {
-                finish();
-            }
-        }
-    }
-
 }
