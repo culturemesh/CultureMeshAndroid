@@ -42,8 +42,7 @@ public class ViewUsersModalSheetFragment extends BottomSheetDialogFragment{
     /**
      * Keys for values passed as arguments to the fragment
      */
-    public static final String USER_NAMES = "usernames", IMAGE_URLS = "imgurls", USER_IDS ="userids",
-                                NETWORK_ID = "id";
+    public static final String NETWORK_ID = "id";
 
     /**
      * Queue for asynchronous tasks
@@ -101,6 +100,7 @@ public class ViewUsersModalSheetFragment extends BottomSheetDialogFragment{
         fragParams.height = (int) (screenDimens.y * .7);
         contentView.setLayoutParams(fragParams);
         RecyclerView rv = contentView.findViewById(R.id.rv);
+        rv.setNestedScrollingEnabled(false);
         final UsersListAdapter adapter = new UsersListAdapter(getActivity(),new ArrayList<User>());
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
