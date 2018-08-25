@@ -283,21 +283,29 @@ Other
 
 First Activity
 ==============
+
 When the application starts from scratch (i.e. is not being launched by
 restoring a previous state), the :java:ref:`ApplicationStart` activity is
-loaded. This performs initialization for the app (e.g. Crashlytics) and
-redirects the user to either :java:ref:`TimelineActivity`,
-:java:ref:`OnboardActivity`, or :java:ref:`ExploreBubblesOpenGLActivity` based
-on whether they have logged in and whether they have a selected network.
+loaded. This performs initialization for the app (e.g. Crashlytics).
+Then :java:ref:`StartActivity` loads, which is the parent activity at
+the root of the app. It doesn't display anything; all it does is
+redirect the user to either :java:ref:`TimelineActivity`,
+:java:ref:`OnboardActivity`, or :java:ref:`ExploreBubblesOpenGLActivity`
+based on whether they have logged in and whether they have a selected
+network. When tapping the ``Back`` button, the user eventually ends up at
+:java:ref:`StartActivity`, which then redirects them. This prevents a user from
+returning to :java:ref:`OnboardActivity` using the ``Back`` button.
 
 Managing Formatted Text
 =======================
+
 In cases where the user can create formatted text using inline markup (i.e.
 bold, italics, and hyperlinks), :java:ref:`FormatManager` handles the
 markup.
 
 Handling Redirections
 =====================
+
 In a few cases, a parent activity needs to launch a child activity while also
 directing the child to launch a particular grand-child activity. For example,
 when :java:ref:`SettingsActivity` launches :java:ref:`OnboardActivity`, the user
