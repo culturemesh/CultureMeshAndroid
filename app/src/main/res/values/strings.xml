@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">Culture Mesh</string>
+    <string name="app_name">CultureMesh</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -134,7 +134,7 @@
     <string name="updated_profile">Updated Profile!</string>
     <string name="about_body" tools:ignore="TypographyOther">
 
-        "<b>About Culturemesh\n\n</b>"
+        "<b>About CultureMesh\n\n</b>"
 
         "CultureMesh is building networks to match the real-world dynamics of people living, working "
         "and traveling outside of their home countries to knit the diverse fabrics of our world together."
