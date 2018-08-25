@@ -122,6 +122,8 @@ joinNetwork
 .. java:field::  Button joinNetwork
    :outertype: TimelineActivity
 
+   The button that is shown if the user isn't subscribed to thus network. If they tap it, they join the network!
+
 settings
 ^^^^^^^^
 

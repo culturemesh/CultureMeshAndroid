@@ -26,6 +26,8 @@
 
 .. java:import:: android.view ViewGroup
 
+.. java:import:: android.widget TextView
+
 .. java:import:: com.android.volley Request
 
 .. java:import:: com.android.volley RequestQueue
@@ -69,6 +71,14 @@ maxPostId
 
 .. java:field::  String maxPostId
    :outertype: PostsFrag
+
+noPosts
+^^^^^^^
+
+.. java:field::  TextView noPosts
+   :outertype: PostsFrag
+
+   The textview that is shown if no feed items have been created for this network.
 
 queue
 ^^^^^

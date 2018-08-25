@@ -166,7 +166,7 @@ loginToken
    :param queue: Queue to which the asynchronous task will be added
    :param listener: Listener whose onResponse method will be called when task completes
 
-   **See also:** :java:ref:`NetworkResponse.genErrorDialog(Context,int,boolean)`, :java:ref:`API.LOGIN_TOKEN`, :java:ref:`API.TOKEN_RETRIEVED`
+   **See also:** :java:ref:`NetworkResponse.genErrorDialog(Context,int,boolean,NetworkResponse.DialogTapListener)`, :java:ref:`API.LOGIN_TOKEN`, :java:ref:`API.TOKEN_RETRIEVED`
 
 loginWithCred
 ^^^^^^^^^^^^^
@@ -181,7 +181,7 @@ loginWithCred
    :param password: Password to use in the login attempt
    :param listener: Will be called with the \ :java:ref:`NetworkResponse`\  when the operation completes
 
-   **See also:** :java:ref:`NetworkResponse.genErrorDialog(Context,int,boolean)`
+   **See also:** :java:ref:`NetworkResponse.genErrorDialog(Context,int,boolean,NetworkResponse.DialogTapListener)`
 
 loginWithToken
 ^^^^^^^^^^^^^^
@@ -316,6 +316,17 @@ postReplies
    :param queue: The \ :java:ref:`RequestQueue`\  to house the network requests.
    :param id: the id of the post that we want comments for.
    :param listener: the listener that we will call when the request is finished.
+
+topTen
+^^^^^^
+
+.. java:method:: static void topTen(RequestQueue queue, Response.Listener<NetworkResponse<ArrayList<Network>>> listener)
+   :outertype: API.Get
+
+   Fetches the ten \ :java:ref:`Network`\ s with the most subscribers.
+
+   :param queue: Queue to which the asynchronous task will be added
+   :param listener: Will be called with the \ :java:ref:`NetworkResponse`\  when the operation completes
 
 user
 ^^^^
