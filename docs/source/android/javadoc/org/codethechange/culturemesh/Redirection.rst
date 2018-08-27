@@ -3,7 +3,7 @@
 Redirection
 ===========
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: public class Redirection

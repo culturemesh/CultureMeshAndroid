@@ -11,7 +11,7 @@
 Event
 =====
 
-.. java:package:: org.codethechange.culturemesh.models
+.. java:package:: com.culturemesh.models
    :noindex:
 
 .. java:type:: @Entity public class Event extends FeedItem implements Serializable, Putable, Postable
@@ -74,9 +74,9 @@ description
 .. java:field:: public String description
    :outertype: Event
 
-   User-generated description of the event. May contain formatting from \ :java:ref:`org.codethechange.culturemesh.FormatManager`\ .
+   User-generated description of the event. May contain formatting from \ :java:ref:`com.culturemesh.FormatManager`\ .
 
-   **See also:** :java:ref:`org.codethechange.culturemesh.CreateEventActivity`
+   **See also:** :java:ref:`com.culturemesh.CreateEventActivity`
 
 id
 ^^

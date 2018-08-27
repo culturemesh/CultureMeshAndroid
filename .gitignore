@@ -9,8 +9,8 @@
 .externalNativeBuild
 .idea
 # Hide CultureMesh API Key
-app/src/main/java/org/codethechange/culturemesh/Credentials.java
-# Hide Fabirc API Key and Secret
+app/src/main/java/com/culturemesh/Credentials.java
+# Hide Fabric API Key and Secret
 app/fabric.properties
 # Cache files are for local use only
 docs/cache

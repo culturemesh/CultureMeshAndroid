@@ -10,7 +10,7 @@
 
 .. java:import:: android.widget TextView
 
-.. java:import:: org.codethechange.culturemesh.models Network
+.. java:import:: com.culturemesh.models Network
 
 .. java:import:: java.util ArrayList
 
@@ -19,7 +19,7 @@
 NetworkSummaryAdapter.OnNetworkTapListener
 ==========================================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type::  interface OnNetworkTapListener

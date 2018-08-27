@@ -24,9 +24,9 @@
 
 .. java:import:: android.widget TextView
 
-.. java:import:: org.codethechange.culturemesh.models Language
+.. java:import:: com.culturemesh.models Language
 
-.. java:import:: org.codethechange.culturemesh.models Location
+.. java:import:: com.culturemesh.models Location
 
 .. java:import:: java.util ArrayList
 
@@ -37,7 +37,7 @@
 SearchAdapter.HolderItem
 ========================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type::  class HolderItem

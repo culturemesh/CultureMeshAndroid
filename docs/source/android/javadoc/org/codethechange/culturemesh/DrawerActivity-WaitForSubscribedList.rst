@@ -54,9 +54,9 @@
 
 .. java:import:: com.squareup.picasso Picasso
 
-.. java:import:: org.codethechange.culturemesh.models Network
+.. java:import:: com.culturemesh.models Network
 
-.. java:import:: org.codethechange.culturemesh.models User
+.. java:import:: com.culturemesh.models User
 
 .. java:import:: java.util ArrayList
 
@@ -67,7 +67,7 @@
 DrawerActivity.WaitForSubscribedList
 ====================================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: public interface WaitForSubscribedList

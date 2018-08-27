@@ -7,7 +7,7 @@
 Region
 ======
 
-.. java:package:: org.codethechange.culturemesh.models
+.. java:package:: com.culturemesh.models
    :noindex:
 
 .. java:type:: @Entity public class Region extends Place

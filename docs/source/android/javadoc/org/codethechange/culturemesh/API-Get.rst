@@ -30,35 +30,35 @@
 
 .. java:import:: com.android.volley.toolbox StringRequest
 
-.. java:import:: org.codethechange.culturemesh.models City
+.. java:import:: com.culturemesh.models City
 
-.. java:import:: org.codethechange.culturemesh.models Country
+.. java:import:: com.culturemesh.models Country
 
-.. java:import:: org.codethechange.culturemesh.models DatabaseNetwork
+.. java:import:: com.culturemesh.models DatabaseNetwork
 
-.. java:import:: org.codethechange.culturemesh.models Event
+.. java:import:: com.culturemesh.models Event
 
-.. java:import:: org.codethechange.culturemesh.models FromLocation
+.. java:import:: com.culturemesh.models FromLocation
 
-.. java:import:: org.codethechange.culturemesh.models Language
+.. java:import:: com.culturemesh.models Language
 
-.. java:import:: org.codethechange.culturemesh.models Location
+.. java:import:: com.culturemesh.models Location
 
-.. java:import:: org.codethechange.culturemesh.models NearLocation
+.. java:import:: com.culturemesh.models NearLocation
 
-.. java:import:: org.codethechange.culturemesh.models Network
+.. java:import:: com.culturemesh.models Network
 
-.. java:import:: org.codethechange.culturemesh.models Place
+.. java:import:: com.culturemesh.models Place
 
-.. java:import:: org.codethechange.culturemesh.models PostReply
+.. java:import:: com.culturemesh.models PostReply
 
-.. java:import:: org.codethechange.culturemesh.models Postable
+.. java:import:: com.culturemesh.models Postable
 
-.. java:import:: org.codethechange.culturemesh.models Putable
+.. java:import:: com.culturemesh.models Putable
 
-.. java:import:: org.codethechange.culturemesh.models Region
+.. java:import:: com.culturemesh.models Region
 
-.. java:import:: org.codethechange.culturemesh.models User
+.. java:import:: com.culturemesh.models User
 
 .. java:import:: org.json JSONArray
 
@@ -85,7 +85,7 @@
 API.Get
 =======
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: static class Get
@@ -134,7 +134,7 @@ instantiatePostReplyUser
 instantiatePostUser
 ^^^^^^^^^^^^^^^^^^^
 
-.. java:method:: static void instantiatePostUser(RequestQueue queue, org.codethechange.culturemesh.models.Post post, Response.Listener<org.codethechange.culturemesh.models.Post> listener)
+.. java:method:: static void instantiatePostUser(RequestQueue queue, com.culturemesh.models.Post post, Response.Listener<com.culturemesh.models.Post> listener)
    :outertype: API.Get
 
    The API will return Post JSON Objects with id's for the user. Often, we will want to get the user information associated with a post, such as the name and profile picture. This method allows us to instantiate this user information for each post.
@@ -251,22 +251,22 @@ networkPostCount
 .. java:method:: static void networkPostCount(RequestQueue queue, long id, Response.Listener<NetworkResponse<Long>> listener)
    :outertype: API.Get
 
-   Get the number of \ :java:ref:`org.codethechange.culturemesh.models.Post`\ s that are currently on a \ :java:ref:`Network`\
+   Get the number of \ :java:ref:`com.culturemesh.models.Post`\ s that are currently on a \ :java:ref:`Network`\
 
    :param queue: Queue to which the asynchronous task will be added
-   :param id: ID of the \ :java:ref:`Network`\  whose \ :java:ref:`org.codethechange.culturemesh.models.Post`\  count will be retrieved
+   :param id: ID of the \ :java:ref:`Network`\  whose \ :java:ref:`com.culturemesh.models.Post`\  count will be retrieved
    :param listener: Listener whose \ :java:ref:`Response.Listener.onResponse(Object)`\  is called with a \ :java:ref:`NetworkResponse`\  that stores the result of the network request
 
 networkPosts
 ^^^^^^^^^^^^
 
-.. java:method:: static void networkPosts(RequestQueue queue, long id, String maxId, Response.Listener<NetworkResponse<List<org.codethechange.culturemesh.models.Post>>> listener)
+.. java:method:: static void networkPosts(RequestQueue queue, long id, String maxId, Response.Listener<NetworkResponse<List<com.culturemesh.models.Post>>> listener)
    :outertype: API.Get
 
-   Get the \ :java:ref:`org.codethechange.culturemesh.models.Post`\ s of a \ :java:ref:`Network`\
+   Get the \ :java:ref:`com.culturemesh.models.Post`\ s of a \ :java:ref:`Network`\
 
    :param queue: Queue to which the asynchronous task will be added
-   :param id: ID of the \ :java:ref:`Network`\  whose \ :java:ref:`org.codethechange.culturemesh.models.Post`\ s will be returned
+   :param id: ID of the \ :java:ref:`Network`\  whose \ :java:ref:`com.culturemesh.models.Post`\ s will be returned
    :param listener: Listener whose \ :java:ref:`com.android.volley.Response.Listener.onResponse(Object)`\  is called with the \ :java:ref:`NetworkResponse`\  created by the query.
 
 networkUserCount
@@ -296,13 +296,13 @@ networkUsers
 post
 ^^^^
 
-.. java:method:: static void post(RequestQueue queue, long id, Response.Listener<NetworkResponse<org.codethechange.culturemesh.models.Post>> callback)
+.. java:method:: static void post(RequestQueue queue, long id, Response.Listener<NetworkResponse<com.culturemesh.models.Post>> callback)
    :outertype: API.Get
 
-   Get a \ :java:ref:`org.codethechange.culturemesh.models.Post`\  from it's ID
+   Get a \ :java:ref:`com.culturemesh.models.Post`\  from it's ID
 
    :param queue: Queue to which the asynchronous task will be added
-   :param id: ID of the \ :java:ref:`org.codethechange.culturemesh.models.Post`\  to retrieve
+   :param id: ID of the \ :java:ref:`com.culturemesh.models.Post`\  to retrieve
    :param callback: Listener whose \ :java:ref:`com.android.volley.Response.Listener.onResponse(Object)`\  is called with the \ :java:ref:`NetworkResponse`\  created by the query.
 
 postReplies
@@ -342,7 +342,7 @@ user
 userEvents
 ^^^^^^^^^^
 
-.. java:method:: static void userEvents(RequestQueue queue, long id, String role, Response.Listener<NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Event>>> listener)
+.. java:method:: static void userEvents(RequestQueue queue, long id, String role, Response.Listener<NetworkResponse<ArrayList<com.culturemesh.models.Event>>> listener)
    :outertype: API.Get
 
    Get the \ :java:ref:`Event`\ s a \ :java:ref:`User`\  is subscribed to.
@@ -392,10 +392,10 @@ userNetworks
 userPosts
 ^^^^^^^^^
 
-.. java:method:: static void userPosts(RequestQueue queue, long id, Response.Listener<NetworkResponse<ArrayList<org.codethechange.culturemesh.models.Post>>> listener)
+.. java:method:: static void userPosts(RequestQueue queue, long id, Response.Listener<NetworkResponse<ArrayList<com.culturemesh.models.Post>>> listener)
    :outertype: API.Get
 
-   Get the \ :java:ref:`org.codethechange.culturemesh.models.Post`\ s a \ :java:ref:`User`\  has made.
+   Get the \ :java:ref:`com.culturemesh.models.Post`\ s a \ :java:ref:`User`\  has made.
 
    :param queue: The \ :java:ref:`RequestQueue`\  that will house the network requests.
    :param id: The id of the \ :java:ref:`User`\ .

@@ -68,14 +68,14 @@
 
 .. java:import:: com.android.volley.toolbox Volley
 
-.. java:import:: org.codethechange.culturemesh.models Network
+.. java:import:: com.culturemesh.models Network
 
 .. java:import:: java.util.concurrent.atomic AtomicBoolean
 
 TimelineActivity.FilterDialogFragment
 =====================================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: public static class FilterDialogFragment extends DialogFragment

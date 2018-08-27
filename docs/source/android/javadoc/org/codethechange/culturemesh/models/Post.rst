@@ -25,7 +25,7 @@
 Post
 ====
 
-.. java:package:: org.codethechange.culturemesh.models
+.. java:package:: com.culturemesh.models
    :noindex:
 
 .. java:type:: @Entity public class Post extends FeedItem implements Serializable, Postable, Putable
@@ -40,7 +40,7 @@ author
 .. java:field:: @Ignore public User author
    :outertype: Post
 
-   The \ :java:ref:`User`\  who created the post. This may not be present and have to be instantiated from \ :java:ref:`Post.userId`\ . Currently, this is handled by \ :java:ref:`org.codethechange.culturemesh.API`\
+   The \ :java:ref:`User`\  who created the post. This may not be present and have to be instantiated from \ :java:ref:`Post.userId`\ . Currently, this is handled by \ :java:ref:`com.culturemesh.API`\
 
 content
 ^^^^^^^
@@ -50,7 +50,7 @@ content
 
    The body of the post. May be formatted.
 
-   **See also:** :java:ref:`org.codethechange.culturemesh.FormatManager`
+   **See also:** :java:ref:`com.culturemesh.FormatManager`
 
 datePosted
 ^^^^^^^^^^
@@ -82,7 +82,7 @@ network
 .. java:field:: @Ignore public Network network
    :outertype: Post
 
-   The \ :java:ref:`Network`\  who created the post. This may not be present and have to be instantiated from \ :java:ref:`Post.networkId`\ . Currently, this is handled by \ :java:ref:`org.codethechange.culturemesh.API`\
+   The \ :java:ref:`Network`\  who created the post. This may not be present and have to be instantiated from \ :java:ref:`Post.networkId`\ . Currently, this is handled by \ :java:ref:`com.culturemesh.API`\
 
 networkId
 ^^^^^^^^^
@@ -126,7 +126,7 @@ Post
    :param vidLink: Link to a video associated with the post. \ ``null``\  if none associated
    :param datePosted: When the post was created. Must conform to \ ``EEE, dd MMM yyyy kk:mm:ss z``\
 
-   **See also:** :java:ref:`org.codethechange.culturemesh.FormatManager`
+   **See also:** :java:ref:`com.culturemesh.FormatManager`
 
 Post
 ^^^^
@@ -184,7 +184,7 @@ getContent
 
    :return: Body of the post, which may be formatted.
 
-   **See also:** :java:ref:`org.codethechange.culturemesh.FormatManager`
+   **See also:** :java:ref:`com.culturemesh.FormatManager`
 
 getDatePosted
 ^^^^^^^^^^^^^
@@ -263,7 +263,7 @@ setContent
 
    :param content: Formatted body of the post.
 
-   **See also:** :java:ref:`org.codethechange.culturemesh.FormatManager`
+   **See also:** :java:ref:`com.culturemesh.FormatManager`
 
 setDatePosted
 ^^^^^^^^^^^^^

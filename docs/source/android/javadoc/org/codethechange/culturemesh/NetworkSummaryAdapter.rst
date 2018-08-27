@@ -10,7 +10,7 @@
 
 .. java:import:: android.widget TextView
 
-.. java:import:: org.codethechange.culturemesh.models Network
+.. java:import:: com.culturemesh.models Network
 
 .. java:import:: java.util ArrayList
 
@@ -19,7 +19,7 @@
 NetworkSummaryAdapter
 =====================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: public class NetworkSummaryAdapter extends RecyclerView.Adapter<NetworkSummaryAdapter.PostViewHolder>
@@ -37,8 +37,8 @@ NetworkSummaryAdapter
    Initialize instance fields with parameters
 
    :param networks: List of \ :java:ref:`Network`\ s to display
-   :param postCounts: Mapping from the ID of each \ :java:ref:`Network`\  to the number of \ :java:ref:`org.codethechange.culturemesh.models.Post`\ s it contains
-   :param userCounts: Mapping from the ID of each \ :java:ref:`Network`\  to the number of \ :java:ref:`org.codethechange.culturemesh.models.User`\ s it contains
+   :param postCounts: Mapping from the ID of each \ :java:ref:`Network`\  to the number of \ :java:ref:`com.culturemesh.models.Post`\ s it contains
+   :param userCounts: Mapping from the ID of each \ :java:ref:`Network`\  to the number of \ :java:ref:`com.culturemesh.models.User`\ s it contains
    :param listener: Listener to handle clicks on list items
 
 Methods
@@ -69,9 +69,9 @@ getPostCounts
 .. java:method:: public HashMap<String, Integer> getPostCounts()
    :outertype: NetworkSummaryAdapter
 
-   Get the mappings between \ :java:ref:`Network.id`\  (as a \ :java:ref:`String`\ ) and the number of \ :java:ref:`org.codethechange.culturemesh.models.Post`\ s in that network.
+   Get the mappings between \ :java:ref:`Network.id`\  (as a \ :java:ref:`String`\ ) and the number of \ :java:ref:`com.culturemesh.models.Post`\ s in that network.
 
-   :return: Mappings that relate \ :java:ref:`Network`\  ID to the number of \ :java:ref:`org.codethechange.culturemesh.models.Post`\ s in the network
+   :return: Mappings that relate \ :java:ref:`Network`\  ID to the number of \ :java:ref:`com.culturemesh.models.Post`\ s in the network
 
 getUserCounts
 ^^^^^^^^^^^^^
@@ -79,9 +79,9 @@ getUserCounts
 .. java:method:: public HashMap<String, Integer> getUserCounts()
    :outertype: NetworkSummaryAdapter
 
-   Get the mappings between \ :java:ref:`Network.id`\  (as a \ :java:ref:`String`\ ) and the number of \ :java:ref:`org.codethechange.culturemesh.models.User`\ s in that network.
+   Get the mappings between \ :java:ref:`Network.id`\  (as a \ :java:ref:`String`\ ) and the number of \ :java:ref:`com.culturemesh.models.User`\ s in that network.
 
-   :return: Mappings that relate \ :java:ref:`Network`\  ID to the number of \ :java:ref:`org.codethechange.culturemesh.models.User`\ s in the network
+   :return: Mappings that relate \ :java:ref:`Network`\  ID to the number of \ :java:ref:`com.culturemesh.models.User`\ s in the network
 
 onBindViewHolder
 ^^^^^^^^^^^^^^^^

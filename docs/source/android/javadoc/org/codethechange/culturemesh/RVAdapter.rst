@@ -24,13 +24,13 @@
 
 .. java:import:: com.squareup.picasso Picasso
 
-.. java:import:: org.codethechange.culturemesh.models Event
+.. java:import:: com.culturemesh.models Event
 
-.. java:import:: org.codethechange.culturemesh.models FeedItem
+.. java:import:: com.culturemesh.models FeedItem
 
-.. java:import:: org.codethechange.culturemesh.models Post
+.. java:import:: com.culturemesh.models Post
 
-.. java:import:: org.codethechange.culturemesh.models PostReply
+.. java:import:: com.culturemesh.models PostReply
 
 .. java:import:: java.util HashSet
 
@@ -41,12 +41,12 @@
 RVAdapter
 =========
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PostViewHolder>
 
-   Adapter that provides the \ :java:ref:`Post`\ s and/or \ :java:ref:`Event`\ s of a \ :java:ref:`org.codethechange.culturemesh.models.Network`\  to displayed, scrollable lists
+   Adapter that provides the \ :java:ref:`Post`\ s and/or \ :java:ref:`Event`\ s of a \ :java:ref:`com.culturemesh.models.Network`\  to displayed, scrollable lists
 
 Constructors
 ------------

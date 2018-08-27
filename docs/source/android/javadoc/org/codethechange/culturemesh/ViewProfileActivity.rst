@@ -34,12 +34,12 @@
 
 .. java:import:: com.squareup.picasso Picasso
 
-.. java:import:: org.codethechange.culturemesh.models User
+.. java:import:: com.culturemesh.models User
 
 ViewProfileActivity
 ===================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: public class ViewProfileActivity extends AppCompatActivity

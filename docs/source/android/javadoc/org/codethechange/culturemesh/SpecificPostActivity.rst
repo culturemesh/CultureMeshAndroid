@@ -76,11 +76,11 @@
 
 .. java:import:: com.squareup.picasso Picasso
 
-.. java:import:: org.codethechange.culturemesh.models Post
+.. java:import:: com.culturemesh.models Post
 
-.. java:import:: org.codethechange.culturemesh.models PostReply
+.. java:import:: com.culturemesh.models PostReply
 
-.. java:import:: org.codethechange.culturemesh.models User
+.. java:import:: com.culturemesh.models User
 
 .. java:import:: org.json JSONArray
 
@@ -99,7 +99,7 @@
 SpecificPostActivity
 ====================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: public class SpecificPostActivity extends AppCompatActivity implements FormatManager.IconUpdateListener

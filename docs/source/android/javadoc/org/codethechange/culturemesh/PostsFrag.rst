@@ -36,13 +36,13 @@
 
 .. java:import:: com.android.volley.toolbox Volley
 
-.. java:import:: org.codethechange.culturemesh.models Event
+.. java:import:: com.culturemesh.models Event
 
-.. java:import:: org.codethechange.culturemesh.models FeedItem
+.. java:import:: com.culturemesh.models FeedItem
 
-.. java:import:: org.codethechange.culturemesh.models Post
+.. java:import:: com.culturemesh.models Post
 
-.. java:import:: org.codethechange.culturemesh.models PostReply
+.. java:import:: com.culturemesh.models PostReply
 
 .. java:import:: java.util ArrayList
 
@@ -51,7 +51,7 @@
 PostsFrag
 =========
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: public class PostsFrag extends Fragment

@@ -30,35 +30,35 @@
 
 .. java:import:: com.android.volley.toolbox StringRequest
 
-.. java:import:: org.codethechange.culturemesh.models City
+.. java:import:: com.culturemesh.models City
 
-.. java:import:: org.codethechange.culturemesh.models Country
+.. java:import:: com.culturemesh.models Country
 
-.. java:import:: org.codethechange.culturemesh.models DatabaseNetwork
+.. java:import:: com.culturemesh.models DatabaseNetwork
 
-.. java:import:: org.codethechange.culturemesh.models Event
+.. java:import:: com.culturemesh.models Event
 
-.. java:import:: org.codethechange.culturemesh.models FromLocation
+.. java:import:: com.culturemesh.models FromLocation
 
-.. java:import:: org.codethechange.culturemesh.models Language
+.. java:import:: com.culturemesh.models Language
 
-.. java:import:: org.codethechange.culturemesh.models Location
+.. java:import:: com.culturemesh.models Location
 
-.. java:import:: org.codethechange.culturemesh.models NearLocation
+.. java:import:: com.culturemesh.models NearLocation
 
-.. java:import:: org.codethechange.culturemesh.models Network
+.. java:import:: com.culturemesh.models Network
 
-.. java:import:: org.codethechange.culturemesh.models Place
+.. java:import:: com.culturemesh.models Place
 
-.. java:import:: org.codethechange.culturemesh.models PostReply
+.. java:import:: com.culturemesh.models PostReply
 
-.. java:import:: org.codethechange.culturemesh.models Postable
+.. java:import:: com.culturemesh.models Postable
 
-.. java:import:: org.codethechange.culturemesh.models Putable
+.. java:import:: com.culturemesh.models Putable
 
-.. java:import:: org.codethechange.culturemesh.models Region
+.. java:import:: com.culturemesh.models Region
 
-.. java:import:: org.codethechange.culturemesh.models User
+.. java:import:: com.culturemesh.models User
 
 .. java:import:: org.json JSONArray
 
@@ -85,7 +85,7 @@
 API.Post
 ========
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: static class Post
@@ -159,13 +159,13 @@ leaveNetwork
 post
 ^^^^
 
-.. java:method:: static void post(RequestQueue queue, org.codethechange.culturemesh.models.Post post, SharedPreferences settings, Response.Listener<NetworkResponse<String>> listener)
+.. java:method:: static void post(RequestQueue queue, com.culturemesh.models.Post post, SharedPreferences settings, Response.Listener<NetworkResponse<String>> listener)
    :outertype: API.Post
 
-   POST to the server a request, via \ ``/post/new``\ , to create a new \ :java:ref:`org.codethechange.culturemesh.models.Post`\ . Success or failure status will be passed via a \ :java:ref:`NetworkResponse`\  to the listener.
+   POST to the server a request, via \ ``/post/new``\ , to create a new \ :java:ref:`com.culturemesh.models.Post`\ . Success or failure status will be passed via a \ :java:ref:`NetworkResponse`\  to the listener.
 
    :param queue: Queue to which the asynchronous task will be added
-   :param post: \ :java:ref:`org.codethechange.culturemesh.models.Post`\  to create.
+   :param post: \ :java:ref:`com.culturemesh.models.Post`\  to create.
    :param listener: Listener whose onResponse method will be called when task completes
 
 reply

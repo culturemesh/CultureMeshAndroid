@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/specific_post_scene_root"
-    tools:context="org.codethechange.culturemesh.SpecificPostActivity">
+    tools:context="com.culturemesh.SpecificPostActivity">
     <include
         android:id="@+id/loading_overlay"
         layout="@layout/loading_overlay"
@@ -261,7 +261,7 @@
         />-->
     <fragment
         android:id="@+id/commentFrag"
-        android:name="org.codethechange.culturemesh.CommentsFrag"
+        android:name="com.culturemesh.CommentsFrag"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout="@layout/fragment_comments"
@@ -276,7 +276,7 @@
     <!-- app:rippleColor="@color/colorPrimaryDark"-->
     <!--    <fragment
             android:id="@+id/commentFrag"
-            android:name="org.codethechange.culturemesh.PostsFrag"
+            android:name="com.culturemesh.PostsFrag"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout="@layout/fragment_posts"
@@ -296,7 +296,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <org.codethechange.culturemesh.ListenableEditText
+        <com.culturemesh.ListenableEditText
             android:id="@+id/write_comment_text"
             android:layout_width="0dp"
             android:layout_height="0dp"

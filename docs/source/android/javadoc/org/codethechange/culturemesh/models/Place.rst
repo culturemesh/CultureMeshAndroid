@@ -4,7 +4,7 @@
 
 .. java:import:: android.arch.persistence.room PrimaryKey
 
-.. java:import:: org.codethechange.culturemesh Listable
+.. java:import:: com.culturemesh Listable
 
 .. java:import:: org.json JSONException
 
@@ -15,7 +15,7 @@
 Place
 =====
 
-.. java:package:: org.codethechange.culturemesh.models
+.. java:package:: com.culturemesh.models
    :noindex:
 
 .. java:type:: @Entity public abstract class Place extends Location implements Listable, Serializable
@@ -87,7 +87,7 @@ Place
 .. java:constructor:: public Place(JSONObject json) throws JSONException
    :outertype: Place
 
-   Initializes ID instance fields using the provided JSON object The following keys must be present and are used to fill the relevant instance fields: \ ``latitude``\ , \ ``longitude``\ , \ ``population``\ , \ ``feature_code``\ . In addition, the JSON object is passed to \ :java:ref:`Location.Location(JSONObject)`\ . See its documentation for details on its requirements. \ :java:ref:`Place.id`\  is initialized using \ :java:ref:`Place.getDatabaseId()`\ . Precondition: The JSON must be validly formatted, with examples in \ :java:ref:`org.codethechange.culturemesh.API`\
+   Initializes ID instance fields using the provided JSON object The following keys must be present and are used to fill the relevant instance fields: \ ``latitude``\ , \ ``longitude``\ , \ ``population``\ , \ ``feature_code``\ . In addition, the JSON object is passed to \ :java:ref:`Location.Location(JSONObject)`\ . See its documentation for details on its requirements. \ :java:ref:`Place.id`\  is initialized using \ :java:ref:`Place.getDatabaseId()`\ . Precondition: The JSON must be validly formatted, with examples in \ :java:ref:`com.culturemesh.API`\
 
    :param json: JSON object to extract initializing information from
    :throws JSONException: May be thrown for invalidly formatted JSON object

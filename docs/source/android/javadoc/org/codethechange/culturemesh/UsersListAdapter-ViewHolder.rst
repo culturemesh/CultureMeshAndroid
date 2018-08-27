@@ -18,14 +18,14 @@
 
 .. java:import:: com.squareup.picasso Picasso
 
-.. java:import:: org.codethechange.culturemesh.models User
+.. java:import:: com.culturemesh.models User
 
 .. java:import:: java.util ArrayList
 
 UsersListAdapter.ViewHolder
 ===========================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type::  class ViewHolder extends RecyclerView.ViewHolder

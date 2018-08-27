@@ -24,14 +24,14 @@
 
 .. java:import:: com.android.volley.toolbox Volley
 
-.. java:import:: org.codethechange.culturemesh.models Location
+.. java:import:: com.culturemesh.models Location
 
 .. java:import:: java.util List
 
 ChooseNearLocationActivity
 ==========================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: public class ChooseNearLocationActivity extends AppCompatActivity implements SearchView.OnQueryTextListener

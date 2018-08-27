@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="org.codethechange.culturemesh.ExploreBubblesOpenGLActivity"
+    tools:context="com.culturemesh.ExploreBubblesOpenGLActivity"
     tools:showIn="@layout/activity_explore_bubbles_open_gl">
 
     <LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -55,7 +55,7 @@
             android:textColor="@android:color/black"
             android:textSize="14sp" />
 
-        <org.codethechange.bubblepicker.rendering.BubblePicker
+        <com.culturemesh.bubblepicker.rendering.BubblePicker
             android:id="@+id/picker"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
