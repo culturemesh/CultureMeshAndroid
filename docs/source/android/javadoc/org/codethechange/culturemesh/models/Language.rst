@@ -4,7 +4,7 @@
 
 .. java:import:: android.net Uri
 
-.. java:import:: org.codethechange.culturemesh Listable
+.. java:import:: com.culturemesh Listable
 
 .. java:import:: org.json JSONException
 
@@ -15,7 +15,7 @@
 Language
 ========
 
-.. java:package:: org.codethechange.culturemesh.models
+.. java:package:: com.culturemesh.models
    :noindex:
 
 .. java:type:: @Entity public class Language implements Serializable, Listable

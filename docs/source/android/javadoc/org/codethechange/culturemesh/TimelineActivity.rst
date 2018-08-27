@@ -68,19 +68,19 @@
 
 .. java:import:: com.android.volley.toolbox Volley
 
-.. java:import:: org.codethechange.culturemesh.models Network
+.. java:import:: com.culturemesh.models Network
 
 .. java:import:: java.util.concurrent.atomic AtomicBoolean
 
 TimelineActivity
 ================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: public class TimelineActivity extends DrawerActivity implements DrawerActivity.WaitForSubscribedList
 
-   Show a feed of \ :java:ref:`org.codethechange.culturemesh.models.Post`\ s and \ :java:ref:`org.codethechange.culturemesh.models.Event`\ s for the currently selected \ :java:ref:`Network`\
+   Show a feed of \ :java:ref:`com.culturemesh.models.Post`\ s and \ :java:ref:`com.culturemesh.models.Event`\ s for the currently selected \ :java:ref:`Network`\
 
 Fields
 ------

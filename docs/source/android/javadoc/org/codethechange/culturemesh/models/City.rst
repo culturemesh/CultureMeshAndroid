@@ -7,7 +7,7 @@
 City
 ====
 
-.. java:package:: org.codethechange.culturemesh.models
+.. java:package:: com.culturemesh.models
    :noindex:
 
 .. java:type:: @Entity public class City extends Place

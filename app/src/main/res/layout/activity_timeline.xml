@@ -166,7 +166,7 @@
         <!-- app:rippleColor="@color/colorPrimaryDark"-->
         <fragment
             android:id="@+id/posts_fragment"
-            android:name="org.codethechange.culturemesh.PostsFrag"
+            android:name="com.culturemesh.PostsFrag"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout="@layout/fragment_posts"

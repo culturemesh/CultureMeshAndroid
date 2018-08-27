@@ -28,20 +28,20 @@
 
 .. java:import:: com.squareup.picasso Picasso
 
-.. java:import:: org.codethechange.culturemesh.models Event
+.. java:import:: com.culturemesh.models Event
 
-.. java:import:: org.codethechange.culturemesh.models FeedItem
+.. java:import:: com.culturemesh.models FeedItem
 
-.. java:import:: org.codethechange.culturemesh.models Post
+.. java:import:: com.culturemesh.models Post
 
-.. java:import:: org.codethechange.culturemesh.models PostReply
+.. java:import:: com.culturemesh.models PostReply
 
 .. java:import:: java.util List
 
 RVCommentAdapter.PostReplyViewHolder
 ====================================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: static class PostReplyViewHolder extends RecyclerView.ViewHolder

@@ -9,12 +9,12 @@
 Putable
 =======
 
-.. java:package:: org.codethechange.culturemesh.models
+.. java:package:: com.culturemesh.models
    :noindex:
 
 .. java:type:: public interface Putable
 
-   Classes that implement this interface can be sent in the bodies of requests sent using \ :java:ref:`org.codethechange.culturemesh.API.Put.model(RequestQueue,Putable,String,String,Response.Listener)`\ .
+   Classes that implement this interface can be sent in the bodies of requests sent using \ :java:ref:`com.culturemesh.API.Put.model(RequestQueue,Putable,String,String,Response.Listener)`\ .
 
 Methods
 -------

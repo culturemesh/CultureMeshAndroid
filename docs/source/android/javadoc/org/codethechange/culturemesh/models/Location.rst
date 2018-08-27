@@ -4,7 +4,7 @@
 
 .. java:import:: android.util Log
 
-.. java:import:: org.codethechange.culturemesh Listable
+.. java:import:: com.culturemesh Listable
 
 .. java:import:: org.json JSONException
 
@@ -15,7 +15,7 @@
 Location
 ========
 
-.. java:package:: org.codethechange.culturemesh.models
+.. java:package:: com.culturemesh.models
    :noindex:
 
 .. java:type:: public class Location implements Serializable, Listable
@@ -105,7 +105,7 @@ locationName
 .. java:field:: @Ignore public String locationName
    :outertype: Location
 
-   This is is only used for other searching in \ :java:ref:`org.codethechange.culturemesh.FindNetworkActivity`\ . Do not use this field anywhere else.
+   This is is only used for other searching in \ :java:ref:`com.culturemesh.FindNetworkActivity`\ . Do not use this field anywhere else.
 
 regionId
 ^^^^^^^^

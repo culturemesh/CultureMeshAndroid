@@ -28,18 +28,18 @@
 
 .. java:import:: com.android.volley.toolbox Volley
 
-.. java:import:: org.codethechange.culturemesh.models Event
+.. java:import:: com.culturemesh.models Event
 
-.. java:import:: org.codethechange.culturemesh.models FeedItem
+.. java:import:: com.culturemesh.models FeedItem
 
-.. java:import:: org.codethechange.culturemesh.models Post
+.. java:import:: com.culturemesh.models Post
 
 .. java:import:: java.util ArrayList
 
 ListUserEventsFragment
 ======================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: public class ListUserEventsFragment extends Fragment implements RVAdapter.OnItemClickListener

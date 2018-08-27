@@ -1,4 +1,4 @@
-package org.codethechange.culturemesh;
+package com.culturemesh;
 
 import org.junit.Test;
 

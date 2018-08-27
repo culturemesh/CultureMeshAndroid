@@ -1,4 +1,4 @@
-.. java:import:: org.codethechange.culturemesh Listable
+.. java:import:: com.culturemesh Listable
 
 .. java:import:: android.arch.persistence.room Entity
 
@@ -9,7 +9,7 @@
 Country
 =======
 
-.. java:package:: org.codethechange.culturemesh.models
+.. java:package:: com.culturemesh.models
    :noindex:
 
 .. java:type:: @Entity public class Country extends Place
@@ -80,9 +80,9 @@ getFullName
 
    Get name of country, which is suitable for display in UI.
 
-   :return: Name of country, abbreviated if necessary to have a maximum length of \ :java:ref:`org.codethechange.culturemesh.Listable.MAX_CHARS`\ .
+   :return: Name of country, abbreviated if necessary to have a maximum length of \ :java:ref:`com.culturemesh.Listable.MAX_CHARS`\ .
 
-   **See also:** :java:ref:`org.codethechange.culturemesh.Listable`
+   **See also:** :java:ref:`com.culturemesh.Listable`
 
 getName
 ^^^^^^^

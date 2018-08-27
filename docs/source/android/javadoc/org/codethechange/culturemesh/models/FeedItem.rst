@@ -5,7 +5,7 @@
 FeedItem
 ========
 
-.. java:package:: org.codethechange.culturemesh.models
+.. java:package:: com.culturemesh.models
    :noindex:
 
 .. java:type:: public class FeedItem

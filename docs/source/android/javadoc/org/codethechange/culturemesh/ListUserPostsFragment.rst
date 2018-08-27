@@ -28,21 +28,21 @@
 
 .. java:import:: com.squareup.picasso Picasso
 
-.. java:import:: org.codethechange.culturemesh.models FeedItem
+.. java:import:: com.culturemesh.models FeedItem
 
-.. java:import:: org.codethechange.culturemesh.models Post
+.. java:import:: com.culturemesh.models Post
 
 .. java:import:: java.util ArrayList
 
 ListUserPostsFragment
 =====================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: public class ListUserPostsFragment extends Fragment implements RVAdapter.OnItemClickListener
 
-   Creates screen that displays the \ :java:ref:`Post`\ s a \ :java:ref:`org.codethechange.culturemesh.models.User`\  has made.
+   Creates screen that displays the \ :java:ref:`Post`\ s a \ :java:ref:`com.culturemesh.models.User`\  has made.
 
 Fields
 ------

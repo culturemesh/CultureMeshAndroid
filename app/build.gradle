@@ -15,7 +15,7 @@ android {
     compileSdkVersion 27
     buildToolsVersion '27.0.3'
     defaultConfig {
-        applicationId "org.codethechange.culturemesh"
+        applicationId "com.culturemesh"
         minSdkVersion 19
         targetSdkVersion 27
         versionCode 1

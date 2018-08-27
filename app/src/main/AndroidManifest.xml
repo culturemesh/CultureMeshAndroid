@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.codethechange.culturemesh">
+    package="com.culturemesh">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".ApplicationStart"
+        android:name="com.culturemesh.ApplicationStart"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -13,22 +13,22 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:windowSoftInputMode="adjustNothing">
-        <activity android:name=".StartActivity">
+        <activity android:name="com.culturemesh.StartActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".TimelineActivity"
+            android:name="com.culturemesh.TimelineActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
-            android:name=".ExploreBubblesOpenGLActivity"
+            android:name="com.culturemesh.ExploreBubblesOpenGLActivity"
             android:label="@string/title_activity_explore_bubbles_open_gl"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".FindNetworkActivity"
+            android:name="com.culturemesh.FindNetworkActivity"
             android:label="@string/title_activity_find_network"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -40,9 +40,9 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".ChooseNearLocationActivity"
+            android:name="com.culturemesh.ChooseNearLocationActivity"
             android:label="@string/title_activity_choose_near_location"
-            android:parentActivityName=".FindNetworkActivity"
+            android:parentActivityName="com.culturemesh.FindNetworkActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -50,73 +50,73 @@
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.codethechange.culturemesh.FindNetworkActivity" />
+                android:value="com.culturemesh.FindNetworkActivity" />
         </activity>
         <activity
-            android:name=".CreatePostActivity"
+            android:name="com.culturemesh.CreatePostActivity"
             android:label="@string/title_activity_create_post"
-            android:parentActivityName=".TimelineActivity"
+            android:parentActivityName="com.culturemesh.TimelineActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.codethechange.culturemesh.TimelineActivity" />
+                android:value="com.culturemesh.TimelineActivity" />
         </activity>
         <activity
-            android:name=".CreateEventActivity"
+            android:name="com.culturemesh.CreateEventActivity"
             android:label="@string/title_activity_create_event"
-            android:parentActivityName=".TimelineActivity"
+            android:parentActivityName="com.culturemesh.TimelineActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.codethechange.culturemesh.TimelineActivity" />
+                android:value="com.culturemesh.TimelineActivity" />
         </activity>
         <activity
-            android:name=".DrawerActivity"
+            android:name="com.culturemesh.DrawerActivity"
             android:label="@string/title_activity_drawer"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".LoginActivity"
+            android:name="com.culturemesh.LoginActivity"
             android:label="@string/title_activity_login"
-            android:parentActivityName=".TimelineActivity"
+            android:parentActivityName="com.culturemesh.TimelineActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".OnboardActivity"
+            android:name="com.culturemesh.OnboardActivity"
             android:label="@string/title_activity_onboard"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name=".SpecificPostActivity"
+            android:name="com.culturemesh.SpecificPostActivity"
             android:label="@string/title_activity_specific_post"
-            android:parentActivityName=".TimelineActivity"
+            android:parentActivityName="com.culturemesh.TimelineActivity"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.codethechange.culturemesh.TimelineActivity" />
+                android:value="com.culturemesh.TimelineActivity" />
         </activity>
         <activity
-            android:name=".HelpActivity"
+            android:name="com.culturemesh.HelpActivity"
             android:label="@string/help"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".AboutActivity"
+            android:name="com.culturemesh.AboutActivity"
             android:label="@string/about"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ViewProfileActivity"
+            android:name="com.culturemesh.ViewProfileActivity"
             android:label="@string/title_activity_view_profile"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.culturemesh.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".Acknowledgements"
+            android:name="com.culturemesh.Acknowledgements"
             android:label="@string/title_activity_acknowledgements"
-            android:parentActivityName=".AboutActivity"
+            android:parentActivityName="com.culturemesh.AboutActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.codethechange.culturemesh.AboutActivity" />
+                android:value="com.culturemesh.AboutActivity" />
         </activity>
     </application>
 

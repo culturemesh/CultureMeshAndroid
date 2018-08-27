@@ -36,7 +36,7 @@
 
 .. java:import:: com.android.volley.toolbox Volley
 
-.. java:import:: org.codethechange.culturemesh.models Event
+.. java:import:: com.culturemesh.models Event
 
 .. java:import:: java.text SimpleDateFormat
 
@@ -47,7 +47,7 @@
 CreateEventActivity.DatePickerFragment
 ======================================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: public static class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener

@@ -1,7 +1,7 @@
-org.codethechange.culturemesh.models
+com.culturemesh.models
 ====================================
 
-.. java:package:: org.codethechange.culturemesh.models
+.. java:package:: com.culturemesh.models
 
 .. toctree::
    :maxdepth: 1

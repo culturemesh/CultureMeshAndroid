@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/darkBackground"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="org.codethechange.culturemesh.LoginActivity"
+    tools:context="com.culturemesh.LoginActivity"
     tools:showIn="@layout/activity_login"
     android:id="@+id/login_layout">
 

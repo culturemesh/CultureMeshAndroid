@@ -9,12 +9,12 @@
 Postable
 ========
 
-.. java:package:: org.codethechange.culturemesh.models
+.. java:package:: com.culturemesh.models
    :noindex:
 
 .. java:type:: public interface Postable
 
-   Classes that implement this interface can be sent in the bodies of requests sent using \ :java:ref:`org.codethechange.culturemesh.API.Post.model(RequestQueue,Postable,String,String,Response.Listener)`\ .
+   Classes that implement this interface can be sent in the bodies of requests sent using \ :java:ref:`com.culturemesh.API.Post.model(RequestQueue,Postable,String,String,Response.Listener)`\ .
 
 Methods
 -------

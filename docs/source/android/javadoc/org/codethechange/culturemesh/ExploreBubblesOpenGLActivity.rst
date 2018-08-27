@@ -22,27 +22,27 @@
 
 .. java:import:: com.android.volley.toolbox Volley
 
-.. java:import:: org.codethechange.bubblepicker BubblePickerListener
+.. java:import:: com.culturemesh.bubblepicker.bubblepicker BubblePickerListener
 
-.. java:import:: org.codethechange.bubblepicker.adapter BubblePickerAdapter
+.. java:import:: com.culturemesh.bubblepicker.adapter BubblePickerAdapter
 
-.. java:import:: org.codethechange.bubblepicker.model BubbleGradient
+.. java:import:: com.culturemesh.bubblepicker.model BubbleGradient
 
-.. java:import:: org.codethechange.bubblepicker.model PickerItem
+.. java:import:: com.culturemesh.bubblepicker.model PickerItem
 
-.. java:import:: org.codethechange.bubblepicker.model PickerItemSize
+.. java:import:: com.culturemesh.bubblepicker.model PickerItemSize
 
-.. java:import:: org.codethechange.bubblepicker.rendering BubblePicker
+.. java:import:: com.culturemesh.bubblepicker.rendering BubblePicker
 
-.. java:import:: org.codethechange.culturemesh.models FromLocation
+.. java:import:: com.culturemesh.models FromLocation
 
-.. java:import:: org.codethechange.culturemesh.models Language
+.. java:import:: com.culturemesh.models Language
 
-.. java:import:: org.codethechange.culturemesh.models Location
+.. java:import:: com.culturemesh.models Location
 
-.. java:import:: org.codethechange.culturemesh.models NearLocation
+.. java:import:: com.culturemesh.models NearLocation
 
-.. java:import:: org.codethechange.culturemesh.models Network
+.. java:import:: com.culturemesh.models Network
 
 .. java:import:: org.jetbrains.annotations NotNull
 
@@ -53,7 +53,7 @@
 ExploreBubblesOpenGLActivity
 ============================
 
-.. java:package:: org.codethechange.culturemesh
+.. java:package:: com.culturemesh
    :noindex:
 
 .. java:type:: public class ExploreBubblesOpenGLActivity extends DrawerActivity

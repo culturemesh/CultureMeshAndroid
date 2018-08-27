@@ -22,7 +22,7 @@ help:
 javadoc-traditional:
 	@echo "Generating Traditional Javadoc"
 	@rm -rf source/_static/API-JavaDoc/*
-	@"/Applications/Android Studio.app/Contents/jre/jdk/Contents/Home/bin/javadoc" -private -quiet -splitindex -d source/_static/API-JavaDoc -sourcepath $(ANDROID_PATH)/app/src/main/java/ -bootclasspath /Users/cs/Library/Android/sdk/platforms/android-27/android.jar -Xdoclint:none org.codethechange.culturemesh
+	@"/Applications/Android Studio.app/Contents/jre/jdk/Contents/Home/bin/javadoc" -private -quiet -splitindex -d source/_static/API-JavaDoc -sourcepath $(ANDROID_PATH)/app/src/main/java/ -bootclasspath /Users/cs/Library/Android/sdk/platforms/android-27/android.jar -Xdoclint:none com.culturemesh
 
 # Use javasphinx-apidoc to create javadoc .rst files in the docs directory
 javadoc-sphinx:
