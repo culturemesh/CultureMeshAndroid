@@ -1452,8 +1452,8 @@ class API {
          */
         static void reply(RequestQueue queue, final PostReply comment, SharedPreferences settings,
                           final Response.Listener<NetworkResponse<String>> listener) {
-            model(queue, comment, API_URL_BASE + "post/" + comment.parentId + "/reply",
-                    "API.Post.reply", settings, listener);
+            model(queue, comment, API_URL_BASE + "post/" + comment.parentId + "/reply?" +
+                            getCredentials(), "API.Post.reply", settings, listener);
         }
 
         /**
