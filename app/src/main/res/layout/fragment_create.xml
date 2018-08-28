@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.codethechange.culturemesh.CreateActivityFragment"
+    tools:context="com.culturemesh.android.CreateActivityFragment"
     tools:showIn="@layout/activity_create">
 
 </android.support.constraint.ConstraintLayout>

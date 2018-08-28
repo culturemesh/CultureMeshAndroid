@@ -22,14 +22,14 @@ help:
 javadoc-traditional:
 	@echo "Generating Traditional Javadoc"
 	@rm -rf source/_static/API-JavaDoc/*
-	@"/Applications/Android Studio.app/Contents/jre/jdk/Contents/Home/bin/javadoc" -private -quiet -splitindex -d source/_static/API-JavaDoc -sourcepath $(ANDROID_PATH)/app/src/main/java/ -bootclasspath /Users/cs/Library/Android/sdk/platforms/android-27/android.jar -Xdoclint:none org.codethechange.culturemesh
+	@"/Applications/Android Studio.app/Contents/jre/jdk/Contents/Home/bin/javadoc" -private -quiet -splitindex -d source/_static/API-JavaDoc -sourcepath $(ANDROID_PATH)/app/src/main/java/ -bootclasspath /Users/cs/Library/Android/sdk/platforms/android-27/android.jar -Xdoclint:none com.culturemesh.android
 
 # Use javasphinx-apidoc to create javadoc .rst files in the docs directory
 javadoc-sphinx:
 	@echo "Generating Sphinx Form of Javadoc"
 	@rm -rf $(ANDROID_DOCS_PATH)/javadoc/org
 	@rm -f $(ANDROID_DOCS_PATH)/javadoc/packages.rst
-	@javasphinx-apidoc -c cache/javasphinx -u -p html5lib -o $(ANDROID_DOCS_PATH)/javadoc/ $(ANDROID_PATH)/app/src/main/java/org/codethechange/culturemesh/
+	@javasphinx-apidoc -c cache/javasphinx -u -p html5lib -o $(ANDROID_DOCS_PATH)/javadoc/ $(ANDROID_PATH)/app/src/main/java/com/culturemesh/android/
 
 # Generate Javadoc via: Android Studio's javadoc tool and javasphinx-apidoc
 javadoc: javadoc-traditional javadoc-sphinx

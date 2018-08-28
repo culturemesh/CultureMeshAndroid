@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.codethechange.culturemesh">
+    package="com.culturemesh.android">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -50,7 +50,7 @@
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.codethechange.culturemesh.FindNetworkActivity" />
+                android:value="com.culturemesh.android.FindNetworkActivity" />
         </activity>
         <activity
             android:name=".CreatePostActivity"
@@ -59,7 +59,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.codethechange.culturemesh.TimelineActivity" />
+                android:value="com.culturemesh.android.TimelineActivity" />
         </activity>
         <activity
             android:name=".CreateEventActivity"
@@ -68,7 +68,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.codethechange.culturemesh.TimelineActivity" />
+                android:value="com.culturemesh.android.TimelineActivity" />
         </activity>
         <activity
             android:name=".DrawerActivity"
@@ -91,7 +91,7 @@
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.codethechange.culturemesh.TimelineActivity" />
+                android:value="com.culturemesh.android.TimelineActivity" />
         </activity>
         <activity
             android:name=".HelpActivity"
@@ -116,7 +116,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.codethechange.culturemesh.AboutActivity" />
+                android:value="com.culturemesh.android.AboutActivity" />
         </activity>
     </application>
 

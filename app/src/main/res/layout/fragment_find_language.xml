@@ -10,7 +10,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:animateLayoutChanges="true"
-    tools:context="org.codethechange.culturemesh.FindNetworkActivity$FindLocationFragment">
+    tools:context="com.culturemesh.android.FindNetworkActivity$FindLocationFragment">
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/prompt_join_language_network_view"
