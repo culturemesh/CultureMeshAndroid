@@ -1,12 +1,9 @@
 package com.culturemesh.android.models;
 
-import android.arch.persistence.room.Ignore;
 import android.net.Uri;
 import android.util.Log;
 
 import com.culturemesh.android.FindNetworkActivity;
-import com.culturemesh.android.Listable;
-
 import com.culturemesh.android.Listable;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,11 +75,8 @@ public class Location implements Serializable, Listable {
      * They can be {@code private} because a plain {@code Location} object should not need to be
      * stored in the database.
      */
-    @Ignore
     public long countryId;
-    @Ignore
     public long regionId;
-    @Ignore
     public long cityId;
 
     /**
@@ -90,7 +84,6 @@ public class Location implements Serializable, Listable {
      * {@link FindNetworkActivity}. Do not use this field
      * anywhere else.
      */
-    @Ignore
     public String locationName;
 
     /**

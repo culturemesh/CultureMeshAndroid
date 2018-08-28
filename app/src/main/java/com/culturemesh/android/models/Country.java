@@ -2,10 +2,6 @@ package com.culturemesh.android.models;
 
 import com.culturemesh.android.Listable;
 
-import android.arch.persistence.room.Entity;
-
-import com.culturemesh.android.Listable;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,7 +9,6 @@ import org.json.JSONObject;
  * A {@link Country} is a specific kind of {@link Place} that stores the ID and name of a country.
  * No instance field should ever be set to {@link Place#NOWHERE}.
  */
-@Entity
 public class Country extends Place {
     // TODO: How does the isoA2 long get turned into 2-letter country codes?
 

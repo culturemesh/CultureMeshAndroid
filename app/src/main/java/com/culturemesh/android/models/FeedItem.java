@@ -1,7 +1,5 @@
 package com.culturemesh.android.models;
 
-import android.arch.persistence.room.Ignore;
-
 import java.util.List;
 
 /**
@@ -13,7 +11,6 @@ public class FeedItem {
     /**
      * This list of PostReplies will be where we store the comments for each post.
      */
-    @Ignore
     public List<PostReply> comments;
 
 }

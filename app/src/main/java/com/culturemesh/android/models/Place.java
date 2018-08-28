@@ -1,11 +1,5 @@
 package com.culturemesh.android.models;
 
-import android.arch.persistence.room.Embedded;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
-
-import com.culturemesh.android.Listable;
-
 import com.culturemesh.android.Listable;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,7 +14,6 @@ import java.io.Serializable;
  * Created by Drew Gregory on 2/23/18.
  * This is the superclass for cities, regions, and countries.
  */
-@Entity
 public abstract class Place extends Location implements Listable, Serializable {
 
     /**
@@ -37,13 +30,11 @@ public abstract class Place extends Location implements Listable, Serializable {
      * {@link Place#getDatabaseId()}. See that method's documentation for more information.
      * Crucially <strong>it is NOT guaranteed to be unique.</strong>
      */
-    @PrimaryKey
     public long id;
 
     /**
      * Latitude and longitude
      */
-    @Embedded
     public Point latLng;
 
     /**

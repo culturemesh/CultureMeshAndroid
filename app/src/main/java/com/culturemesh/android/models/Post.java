@@ -1,16 +1,10 @@
 package com.culturemesh.android.models;
 
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.PrimaryKey;
-
 import com.culturemesh.android.FormatManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,12 +15,10 @@ import java.util.Locale;
  * Represents a post made by a user in a network. A post is arbitrary, formatted text of the user's
  * choosing.
  */
-@Entity
 public class Post extends FeedItem implements Serializable, Postable, Putable {
     /**
      * Uniquely identifies the post across all of CultureMesh
      */
-    @PrimaryKey
     public long id;
 
     /**
@@ -71,7 +63,6 @@ public class Post extends FeedItem implements Serializable, Postable, Putable {
      * from {@link Post#userId}. Currently, this is handled by
      * {@link com.culturemesh.android.API}
      */
-    @Ignore
     public User author;
 
     /**
@@ -79,7 +70,6 @@ public class Post extends FeedItem implements Serializable, Postable, Putable {
      * from {@link Post#networkId}. Currently, this is handled by
      * {@link com.culturemesh.android.API}
      */
-    @Ignore
     public Network network;
 
     /**

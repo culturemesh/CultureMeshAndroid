@@ -1,9 +1,5 @@
 package com.culturemesh.android.models;
 
-
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
-
 import com.culturemesh.android.CreateEventActivity;
 import com.culturemesh.android.FormatManager;
 
@@ -15,12 +11,10 @@ import java.io.Serializable;
 /**
  * Describes an event like those shared in {@link Network}s
  */
-@Entity
 public class Event extends FeedItem implements Serializable, Putable, Postable {
     /**
      * A unique identifier for the event. This should be generated server-side.
      */
-    @PrimaryKey
     public long id;
 
     /**

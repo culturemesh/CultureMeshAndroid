@@ -1,7 +1,5 @@
 package com.culturemesh.android.models;
 
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -14,7 +12,6 @@ import java.io.Serializable;
  * email or password) take that information in as parameters and do not store it after the method
  * completes.
  */
-@Entity
 public class User implements Serializable {
 
     public static final String CM_LOGO_URL = "https://www.culturemesh.com/images/cm_logo_blank_profile_lrg.png";
@@ -28,7 +25,6 @@ public class User implements Serializable {
      * The user's unique identifier, which identifies them across all of CultureMesh and is constant.
      * Not editable by user.
      */
-    @PrimaryKey
     public long id;
 
     /**

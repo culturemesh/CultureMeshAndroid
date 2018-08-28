@@ -1,9 +1,5 @@
 package com.culturemesh.android.models;
 
-import android.arch.persistence.room.Embedded;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,18 +12,15 @@ import org.json.JSONObject;
  * to database entries with more information. This reduces the risk of conflicting information
  * and reduces the overhead of updating data in more than one spot in the database.
  */
-@Entity
 public class DatabaseNetwork {
     /**
      * The network's ID. This is used as its unique identifier in the database.
      */
-    @PrimaryKey
     public long id;
 
     /**
      * The location where the users of this network currently reside. It must not be null.
      */
-    @Embedded
     public NearLocation nearLocation;
 
     /**
@@ -35,7 +28,6 @@ public class DatabaseNetwork {
      * that no location is specified only if {@link DatabaseNetwork#isLanguageBased} is
      * {@code false}
      */
-    @Embedded
     public FromLocation fromLocation;
 
     /**

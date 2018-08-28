@@ -1,10 +1,6 @@
 package com.culturemesh.android.models;
 
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
 import android.net.Uri;
-
-import com.culturemesh.android.Listable;
 
 import com.culturemesh.android.Listable;
 import org.json.JSONException;
@@ -17,13 +13,11 @@ import java.io.Serializable;
  * Represents a language that may be spoken by users. It may be included as part of the definition
  * of a {@link Network} or as an attribute of a {@link User}, for example.
  */
-@Entity
 public class Language implements Serializable, Listable {
 
     /**
      * Unique identifier for the language and the {@code PrimaryKey} for databases
      */
-    @PrimaryKey
     public long language_id;
 
     /**

@@ -1,7 +1,5 @@
 package com.culturemesh.android.models;
 
-import android.arch.persistence.room.Entity;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,7 +10,6 @@ import org.json.JSONObject;
  * as {@link Place#NOWHERE}, but this constant should not be used by clients. Note that the
  * {@code city} descriptor is mandatory.
  */
-@Entity
 public class City extends Place {
 
     /**
