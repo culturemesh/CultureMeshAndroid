@@ -1261,7 +1261,7 @@ class API {
          *                 completes
          */
         static void topTen(final RequestQueue queue, final Response.Listener<NetworkResponse<ArrayList<Network>>> listener) {
-            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/topTen",
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, API_URL_BASE + "network/popular?count=10",
                     null, new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray response) {
@@ -1357,7 +1357,7 @@ class API {
         static void leaveEvent(final RequestQueue queue, final long eventId, SharedPreferences settings,
                                final Response.Listener<NetworkResponse<String>> listener) {
             emptyModel(queue, API_URL_BASE+"user/leaveEvent/"+ eventId + "?" + getCredentials(),
-                    "API.Post.leaveEvent", Request.Method.POST, settings, listener);
+                    "API.Post.leaveEvent", Request.Method.DELETE, settings, listener);
         }
 
         /**
