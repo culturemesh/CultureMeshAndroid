@@ -1557,7 +1557,7 @@ class API {
                     } else {
                         final String token = response.getPayload();
                         StringRequest req = new StringRequest(Request.Method.PUT, API_URL_BASE +
-                                "user/users?" + getCredentials(),
+                                "user/update_user?" + getCredentials(),
                                 new Response.Listener<String>() {
                                     @Override
                                     public void onResponse(String response) {
