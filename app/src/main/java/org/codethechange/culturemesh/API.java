@@ -1926,7 +1926,7 @@ class API {
      * @return credentials string to be appended to request url as a param.
      */
     static String getCredentials(){
-        return "&key=" + Credentials.APIKey;
+        return "&key=" + org.culturemesh.android.Credentials.APIKey;
     }
 
     /**

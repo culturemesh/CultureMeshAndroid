@@ -37,8 +37,10 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
 
+import org.codethechange.culturemesh.models.FeedItem;
 import org.codethechange.culturemesh.models.Network;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
@@ -74,6 +76,8 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
      * The app's preferences
      */
     static SharedPreferences settings;
+
+    private ArrayList<FeedItem> tempCache;
 
     /**
      * Floating buttons that allow users to create posts and events
@@ -294,6 +298,12 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // TODO: write tempCache to internal storage
+    }
+
     /**
      * Handle the back button being pressed. If the drawer is open, close it. If the user has
      * scrolled down the feed, return it to the start. Otherwise, go back to the previous activity.
@@ -406,29 +416,29 @@ public class TimelineActivity extends DrawerActivity implements DrawerActivity.W
                     API.Post.joinNetwork(queue, selectedNetwork,
                             getSharedPreferences(API.SETTINGS_IDENTIFIER, MODE_PRIVATE),
                             new Response.Listener<NetworkResponse<String>>() {
-                        @Override
-                        public void onResponse(NetworkResponse<String> response) {
-                            if (response.fail()) {
-                                response.showErrorDialog(TimelineActivity.this);
-                            } else {
-                                AlertDialog success = new AlertDialog.Builder(TimelineActivity.this)
-                                        .setTitle(R.string.genericSuccess)
-                                        .setMessage(R.string.join_success)
-                                        .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                            @Override
-                                            public void onDismiss(DialogInterface dialog) {
-                                                subscribedNetworkIds.add(selectedNetwork);
-                                                //Restart the activity.
-                                                Intent restart = new Intent(getApplicationContext(), TimelineActivity.class);
-                                                startActivity(restart);
-                                                finish();
-                                            }
-                                        })
-                                        .create();
-                                success.show();
-                            }
-                        }
-                    });
+                                @Override
+                                public void onResponse(NetworkResponse<String> response) {
+                                    if (response.fail()) {
+                                        response.showErrorDialog(TimelineActivity.this);
+                                    } else {
+                                        AlertDialog success = new AlertDialog.Builder(TimelineActivity.this)
+                                                .setTitle(R.string.genericSuccess)
+                                                .setMessage(R.string.join_success)
+                                                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                                    @Override
+                                                    public void onDismiss(DialogInterface dialog) {
+                                                        subscribedNetworkIds.add(selectedNetwork);
+                                                        //Restart the activity.
+                                                        Intent restart = new Intent(getApplicationContext(), TimelineActivity.class);
+                                                        startActivity(restart);
+                                                        finish();
+                                                    }
+                                                })
+                                                .create();
+                                        success.show();
+                                    }
+                                }
+                            });
                 }
             });
         }

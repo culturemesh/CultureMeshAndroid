@@ -7,6 +7,17 @@
     android:background="@color/white"
     tools:context="org.codethechange.culturemesh.FindNewNetwork">
 
+    <android.support.v4.view.ViewPager
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="694dp"
+        android:layout_marginBottom="130dp"
+        android:layout_marginTop="3dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:layout_editor_absoluteY="127dp">
+
+    </android.support.v4.view.ViewPager>
+
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"

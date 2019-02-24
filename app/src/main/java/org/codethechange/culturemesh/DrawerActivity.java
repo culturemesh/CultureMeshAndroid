@@ -263,7 +263,7 @@ public class DrawerActivity extends AppCompatActivity
             startActivity(startExplore);
             finish();
         } else if (id == R.id.nav_join_network) {
-            Intent startFindNet = new Intent(getApplicationContext(), FindNetworkActivity.class);
+            Intent startFindNet = new Intent(getApplicationContext(), FindNewNetwork.class);
             startActivity(startFindNet);
             finish();
         } else if (id == R.id.nav_about) {

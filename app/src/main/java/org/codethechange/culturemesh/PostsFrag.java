@@ -222,6 +222,7 @@ public class PostsFrag extends Fragment {
                         } else if (mAdapter.getNetPosts().size() == 0) {
                             noPosts.setVisibility(View.VISIBLE);
                         }
+                        //TODO: CACHE - add to cache, pass feedItems
                     } else {
                         response.showErrorDialog(getActivity());
                     }
