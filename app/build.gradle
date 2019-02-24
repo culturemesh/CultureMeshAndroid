@@ -64,7 +64,7 @@ dependencies {
         transitive = true;
     }
 
-    implementation ('org.apache.httpcomponents:httpmime:4.3.6') {
+    implementation('org.apache.httpcomponents:httpmime:4.3.6') {
         exclude module: 'httpclient'
     }
 
