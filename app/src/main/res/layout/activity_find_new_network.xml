@@ -24,11 +24,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:background="@drawable/rectangle_border"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Name"
-        android:background="@drawable/rectangle_border"
         android:padding="5dp"
+        android:text="Name"
         app:layout_constraintStart_toStartOf="@+id/textView2"
         app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
@@ -72,13 +72,12 @@
         android:id="@+id/editText2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
         android:layout_marginTop="8dp"
+        android:background="@drawable/rectangle_border"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Name"
-        android:background="@drawable/rectangle_border"
         android:padding="5dp"
+        android:text="Name"
         app:layout_constraintStart_toStartOf="@+id/textView4"
         app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
@@ -97,13 +96,12 @@
         android:id="@+id/editText3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
         android:layout_marginTop="8dp"
+        android:background="@drawable/rectangle_border"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Name"
-        android:background="@drawable/rectangle_border"
         android:padding="5dp"
+        android:text="Name"
         app:layout_constraintStart_toStartOf="@+id/speak_view"
         app:layout_constraintTop_toBottomOf="@+id/speak_view" />
 
@@ -120,4 +118,24 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editText2" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="15dp"
+        android:background="@drawable/ic_right_arrow"
+        app:layout_constraintBottom_toBottomOf="@+id/editText2"
+        app:layout_constraintStart_toEndOf="@+id/editText2"
+        app:layout_constraintTop_toTopOf="@+id/editText2" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="15dp"
+        android:background="@drawable/ic_right_arrow"
+        app:layout_constraintBottom_toBottomOf="@+id/editText3"
+        app:layout_constraintStart_toEndOf="@+id/editText3"
+        app:layout_constraintTop_toTopOf="@+id/editText3" />
 </android.support.constraint.ConstraintLayout>
