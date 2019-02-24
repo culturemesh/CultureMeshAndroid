@@ -260,6 +260,7 @@ public class DrawerActivity extends AppCompatActivity
         }
         if (id == R.id.nav_explore) {
             Intent startExplore = new Intent(getApplicationContext(), ExploreBubblesOpenGLActivity.class);
+            startExplore.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(startExplore);
             finish();
         } else if (id == R.id.nav_join_network) {
@@ -272,10 +273,12 @@ public class DrawerActivity extends AppCompatActivity
             finish();
         } else if (id == R.id.nav_help) {
             Intent startHelp = new Intent(getApplicationContext(), HelpActivity.class);
+            startHelp.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(startHelp);
             // At the end, user is returned to here, so no finish()
         } else if (id == R.id.nav_settings) {
             Intent startHelp = new Intent(getApplicationContext(), SettingsActivity.class);
+            startHelp.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(startHelp);
             finish();
         } else if (id == R.id.nav_logout) {
