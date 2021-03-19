@@ -19,7 +19,7 @@ imagesize==1.0.0
 itsdangerous==0.24
 javalang==0.11.0
 javasphinx==0.9.15
-Jinja2==2.10
+Jinja2==2.11.3
 jsonschema==2.6.0
 lxml==4.2.3
 MarkupSafe==1.0
